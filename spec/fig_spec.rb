@@ -12,8 +12,11 @@ FileUtils.mkdir_p(FIG_REMOTE_DIR)
 ENV['FIG_REMOTE_URL'] = "ssh://localhost#{FIG_REMOTE_DIR}"
 puts ENV['FIG_REMOTE_URL']
 
+FIG_EXE = File.expand_path(File.dirname(__FILE__) + '/../bin/fig')
+
 def fig(args, input=nil)
-  stdin, stdout, stderr = Open3.popen3("fig #{args}")
+  args = "--input - #{args}" if input
+  stdin, stdout, stderr = Open3.popen3("#{FIG_EXE} #{args}")
   if input
     stdin.puts input
     stdin.close
@@ -33,7 +36,7 @@ describe "Fig" do
         set FOO=BAR
       end
     END
-    fig('--input - -g FOO', input)[0].should == 'BAR'
+    fig('-g FOO', input)[0].should == 'BAR'
   end
 
   it "append environment variable from command line" do
@@ -46,7 +49,7 @@ describe "Fig" do
         append PATH=foo
       end
     END
-    fig('--input - -g PATH', input).should == ["#{ENV['PATH']}#{File::PATH_SEPARATOR}foo",""]
+    fig('-g PATH', input).should == ["#{ENV['PATH']}#{File::PATH_SEPARATOR}foo",""]
   end
 
   it "append empty environment variable" do
@@ -61,7 +64,7 @@ describe "Fig" do
         end
       end
     END
-    puts fig('--input - --publish foo/1.2.3', input)
+    puts fig('--publish foo/1.2.3', input)
     fig('-i foo/1.2.3 -g FOO').should == ['BAR','']
   end
 end
