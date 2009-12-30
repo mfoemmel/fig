@@ -22,7 +22,7 @@ Then you can install fig:
 Usage
 =====
 
-Fig recognizes the following options:
+Fig recognizes the following options (not all are implemented yet):
 
 ### Flags ###
 
@@ -59,6 +59,13 @@ Fig also supports the following options, which don't require a fig environment. 
     --publish        Upload package to the remote repository (also installs in local repository)
     --publish-local  Install package in local repository only
     --list           List the packages installed in local repository   
+
+Community
+=========
+
+\#fig on irc.freenode.net
+
+[Fig Mailing List](http://groups.google.com/group/fig-user)
 
 Copyright
 =========
