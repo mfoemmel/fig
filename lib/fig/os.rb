@@ -85,7 +85,6 @@ module Fig
      if uri.scheme == "ssh"
        dir = uri.path[0, uri.path.rindex('/')]
        cmd = "mkdir -p #{dir} && cat > #{uri.path}"
-       puts local_file
        fail unless system "cat #{local_file} | ssh #{uri.user + '@' if uri.user}#{uri.host} '#{cmd}'"
      else
        fail unless system "curl -p -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
