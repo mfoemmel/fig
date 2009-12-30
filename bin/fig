@@ -1,0 +1,129 @@
+#!/usr/bin/env ruby
+
+$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+
+require 'rubygems'
+require 'net/ftp'
+
+require 'fig/options'
+require 'fig/environment'
+require 'fig/repository'
+require 'fig/os'
+require 'fig/parser'
+
+include Fig
+
+def parse_descriptor(descriptor)
+  # todo should use treetop for these:
+  package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
+  config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
+  version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil  
+  return package_name, config_name, version_name
+end
+
+ARGV.each_with_index do |arg, i|
+  if arg == "-"
+#    $stderr.puts "Use of single dash (-) is deprecated. Use double dash (--) instead"
+#    exit 1 
+  elsif arg == "--"
+    ARGV[i] = "-"
+  end
+end
+
+options, argv = parse_options(ARGV)
+
+vars = {}
+ENV.each {|key,value| vars[key]=value }
+
+remote_url = nil
+if options[:update] || options[:publish]
+  remote_url = ENV['FIG_REMOTE_URL']
+  if remote_url.nil?
+    $stderr.puts "Please define the FIG_REMOTE_URL environment variable" 
+    exit 1
+  end
+end
+
+remote_user = nil
+if options[:publish]
+#  remote_user = ENV['FIG_REMOTE_USER']
+#  if remote_user.nil?
+#    $stderr.puts "Please define the FIG_REMOTE_USER environment variable" 
+#    exit 1
+#  end
+end
+
+os = OS.new
+repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user)
+env = Environment.new(os, repos, vars)
+
+options[:includes].each do |descriptor|
+  package_name, config_name, version_name = parse_descriptor(descriptor)
+  env.include_config(nil, package_name, config_name, version_name)
+end
+
+options[:sets].each do |name_val|
+  env.set_variable(nil, name_val[0], name_val[1]) 
+end
+
+options[:appends].each do |name_val|
+  env.append_variable(nil, name_val[0], name_val[1]) 
+end
+
+DEFAULT_FIG_FILE = '.fig'
+
+input = nil
+if options[:input] == '-'
+  input = $stdin.read
+elsif options[:input].nil?
+  input = os.read(DEFAULT_FIG_FILE) if os.exist?(DEFAULT_FIG_FILE)
+else
+  if os.exist?(options[:input])
+    input = os.read(options[:input])
+  else
+    $stderr.puts "File not found: #{options[:input]}"
+    exit 1
+  end
+end
+
+if input
+  package = Parser.new.parse_package(nil, nil, ".", input)
+  if options[:retrieve]
+    package.retrieves.each do |var, path|
+      env.add_retrieve(var, path)
+    end
+  end
+  unless options[:publish] || options[:list]
+    env.register_package(package)
+    env.apply_config(package, options[:config])
+  end
+else
+  package = Package.new(nil, nil, ".", [])
+end
+
+if options[:list]
+  repos.list_packages.sort.each do |item|
+    puts item
+  end
+end
+
+if options[:publish]
+  raise "Unexpected arguments: #{argv.join(' ')}" if !argv.empty?
+  package_name, config_name, version_name = parse_descriptor(options[:publish])
+  if package_name.nil? || version_name.nil?
+    raise "Please specify a package name and a version name"
+  end
+  fail if package.publish_statements.empty?
+  repos.publish_package(package.publish_statements, package_name, version_name)
+elsif options[:echo]
+  puts env[options[:echo]]
+elsif argv[0] == "-"
+  argv.shift
+  env.execute_shell(argv) { |cmd| exec cmd.join(' ') }
+elsif argv[0]
+  package_name, config_name, version_name = parse_descriptor(argv.shift)
+  env.include_config(package, package_name, config_name, version_name)
+  env.execute_config(package, package_name, config_name, nil) { |cmd| exec((cmd + argv).join(' ')) }
+else
+  env.execute_config(package, nil, options[:config], nil) { |cmd| exec((cmd + argv).join(' ')) }
+end
