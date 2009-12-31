@@ -60,6 +60,76 @@ Fig also supports the following options, which don't require a fig environment. 
     --publish-local  Install package in local repository only
     --list           List the packages installed in local repository   
 
+Examples
+========
+
+Fig lets you modify environment variables three ways:
+
+* From the command line
+* From a ".fig" file in the current directory
+* From packages loaded via one of the previous two methods
+
+### Command Line ###
+
+So to get started, let's trying defining an environment variable via the command line and executing a command in the newly created environment. We'll set the "PLANET" variable to "NEPTUNE", then run "echo $PLANET" to ensure that the variable was updated:
+
+    $ fig -s GREETING=Hello -- echo "\$GREETING, World"
+    Hello, World
+
+(Note that you need to put a slash before the dollar sign, otherwise the shell will evaluate the environment variable before it ever gets to fig.)
+
+Also note that when running fig, the original environment is never affected:
+
+     $ echo $GREETING
+     <nothing>
+
+Fig also lets you append environment variables, using the system-specified path separator (e.g. colon on unix, semicolon on windows). This is useful for adding directories to the PATH, LD_LIBRARY_PATH, etc. For example, let's create a "bin" directory, add a shell script to it, then include it in the PATH:
+
+    $ mkdir bin
+    $ echo "echo \$GREETING, World" > bin/hello
+    $ chmod +x bin/hello
+    $ fig -s GREETING=Hello -p bin -- hello
+    Hello, World
+
+### Fig Files ###
+
+You can also specify environment modifiers in files. Fig looks for a file called ".fig" in the current directory, and automatically processes it. So we can implement the previous example by creating a ".fig" file that looks like:
+        
+    config default
+      set GREETING=Hello
+      append PATH=bin
+    end
+    
+Then we can just run:
+
+    $ fig -- hello
+    Hello, World
+
+A single fig file can have multiple configurations:
+
+    config default 
+      set GREETING=Hello
+      append PATH=bin
+    end
+
+    config french
+      set GREETING=Bonjour
+      append PATH=bin
+    end
+
+Configurations other than "default" can be specified using the "-c" option:
+
+    $ fig -c french -- hello
+    Bonjour, World
+     
+### Packages ###
+
+Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing you'll need to do is specify the location of your remote repository by defining the FIG_REMOTE_URL environment variable. If you just want to play around with fig, you can have it point to localhost:
+
+   $ export FIG_REMOTE_URL=ssh://localhost/<path to home dir>/figremote
+
+...TODO...
+
 Community
 =========
 
