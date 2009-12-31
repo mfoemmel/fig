@@ -57,11 +57,11 @@ describe "Fig" do
   end
 
   it "publish to remote repository" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
     input = <<-END
-      publish
-        config default
-          set FOO=BAR
-        end
+      config default
+        set FOO=BAR
       end
     END
     puts fig('--publish foo/1.2.3', input)

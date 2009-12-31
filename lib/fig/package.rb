@@ -30,9 +30,10 @@ module Fig
     end
     
     def publish_statements
-      statements = []
-      @statements.each{ |s| statements += s.statements if s.is_a?(Publish) }
       statements
+#      statements = []
+#      @statements.each{ |s| statements += s.statements if s.is_a?(Publish) }
+#      statements
     end
     
     def unparse
