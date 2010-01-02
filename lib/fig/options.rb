@@ -41,6 +41,7 @@ module Fig
 
       options[:input] = nil
       opts.on('--input FILE', 'fig file to read (use - for stdin)') { |path| options[:input] = path }
+      opts.on('--no-file', 'fig file to read (use - for stdin)') { |path| options[:input] = :none }
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path("~/.fighome")
     end

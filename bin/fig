@@ -73,7 +73,9 @@ end
 DEFAULT_FIG_FILE = '.fig'
 
 input = nil
-if options[:input] == '-'
+if options[:input] == :none
+  # ignore
+elsif options[:input] == '-'
   input = $stdin.read
 elsif options[:input].nil?
   input = os.read(DEFAULT_FIG_FILE) if os.exist?(DEFAULT_FIG_FILE)

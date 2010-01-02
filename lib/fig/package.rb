@@ -65,7 +65,7 @@ module Fig
     end
     
     def unparse(indent)
-      "#{indent}resource \"#{url}\""
+      "#{indent}resource #{url}"
     end
   end
   

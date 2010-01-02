@@ -67,4 +67,20 @@ describe "Fig" do
     puts fig('--publish foo/1.2.3', input)
     fig('-i foo/1.2.3 -g FOO').should == ['BAR','']
   end
+
+  it "publish resource to remote repository" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.mkdir_p("bin")
+    File.open("bin/hello", "w") { |f| f << "echo bar" }
+    fail unless system "chmod +x bin/hello"
+    input = <<-END
+      resource bin/hello
+      config default
+        append PATH=@/bin
+      end
+    END
+    puts fig('--publish foo/1.2.3', input)
+    fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+  end
 end

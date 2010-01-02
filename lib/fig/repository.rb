@@ -24,10 +24,15 @@ module Fig
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       fig_file = File.join(temp_dir, ".fig")
-      content = package_statements.map do |statement| 
+      content = bundle_resources(package_statements).map do |statement| 
         if statement.is_a?(Archive) || statement.is_a?(Resource)
-          archive_name = statement.url.split("/").last
-          archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
+          if statement.is_a?(Resource) && !is_url?(statement.url)
+            archive_name = statement.url
+            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
+          else
+            archive_name = statement.url.split("/").last
+            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
+          end
           if is_url?(statement.url)
             archive_local = File.join(temp_dir, archive_name)
             @os.download(statement.url, archive_local)
@@ -43,6 +48,24 @@ module Fig
       @os.write(fig_file, content.join("\n"))
       @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user)
       update_package(package_name, version_name)
+    end
+
+    def bundle_resources(package_statements)
+      resources = []
+      new_package_statements = package_statements.reject do |statement|
+        if statement.is_a?(Resource) && !is_url?(statement.url)
+          resources << statement.url
+          true
+        else
+          false
+        end
+      end
+      if resources.size > 0
+        file = "resources.tar.gz"
+        file unless system "tar -zcf #{file} #{resources.join(' ')}"
+        new_package_statements.unshift(Archive.new(file))
+      end
+      new_package_statements
     end
 
     def load_package(package_name, version_name)

@@ -48,8 +48,10 @@ module Fig
          end
        end
      when "ssh"
-       puts "downloading #{url}"
+       $stderr.puts "downloading #{url}"
+       # TODO need conditional download
        fail unless system "ssh #{uri.user + '@' if uri.user}#{uri.host} cat #{uri.path} > #{path}"
+       return true
      else
        raise "Unknown protocol: #{url}"
      end
