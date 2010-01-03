@@ -71,7 +71,7 @@ Fig lets you modify environment variables three ways:
 
 ### Command Line ###
 
-So to get started, let's trying defining an environment variable via the command line and executing a command in the newly created environment. We'll set the "PLANET" variable to "NEPTUNE", then run "echo $PLANET" to ensure that the variable was updated:
+So to get started, let's trying defining an environment variable via the command line and executing a command in the newly created environment. We'll set the "GREETING" variable to "Hello", then run "echo $GREETING, World" to ensure that the variable was updated:
 
     $ fig -s GREETING=Hello -- echo "\$GREETING, World"
     Hello, World
@@ -126,9 +126,21 @@ Configurations other than "default" can be specified using the "-c" option:
 
 Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing you'll need to do is specify the location of your remote repository by defining the FIG_REMOTE_URL environment variable. If you just want to play around with fig, you can have it point to localhost:
 
-   $ export FIG_REMOTE_URL=ssh://localhost/<path to home dir>/figremote
+   $ export FIG_REMOTE_URL=ssh://localhost`pwd`/remote
 
-...TODO...
+Before we publish our package, we'll need to tell fig which files we want to include. We do this by using the "resource" statement in our ".fig" file:
+
+    resource bin/hello
+
+    config default...
+
+Now we can share the package with the rest of the team by using the "--publish" option:
+
+    $ fig --publish hello/1.0.0
+
+The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" option (we'll use the "--no-file" option here, to tell fig not to parse the ".fig" file in the current directory):
+
+    $ fig --no-file -i hello/1.0.0 -- hello
 
 Community
 =========
