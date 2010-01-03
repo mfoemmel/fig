@@ -155,6 +155,37 @@ Also, when including a package, you can specify a particular configuration by ap
     $ fig -i hello/1.0.0:french -- hello
     Hello, World
 
+### Retrieves ###
+
+By default, the resources associated with a package live in the fig home directory, which defaults to "~/.fighome". This doesn't always play nicely with IDE's however, so fig gives you a way to copy resources from the repository to the current directory. To do this you add "retrieve" statements to your ".fig" file.
+
+For example, let's create a package that contains a library for the "foo" programming language. First we'll define a ".fig" file:
+
+    config default
+      append FOOPATH=lib/hello.foo
+    end
+
+Then:
+
+    $ mkdir lib
+    $ echo "print 'hello'" > lib/hello.foo
+    $ fig --publish hello-lib/3.2.1    
+
+Now we'll move to a different directory (or replace the current ".fig" file) and create a new ".fig" file:
+
+    retrieve FOOPATH->lib/[package]
+    config default
+      include hello-lib/3.2.1
+    end
+
+When we do an update, all resources in the FOOPATH will be copied into the lib directory, into a subdirectory that matches the package name:
+
+     $ fig -u
+     ...downloading...
+     ...retrieving...
+     $ cat lib/hello-lib/hello.foo
+     print 'hello'
+
 Community
 =========
 
