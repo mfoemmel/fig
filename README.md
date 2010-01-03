@@ -97,10 +97,10 @@ You can also specify environment modifiers in files. Fig looks for a file called
         
     config default
       set GREETING=Hello
-      append PATH=bin
+      append PATH=@/bin
     end
     
-Then we can just run:
+The '@' symbol represents the directory that the ".fig" file is in (this doesn't matter now, but will become important later when we publish our project to the shared repository). Then we can just run:
 
     $ fig -- hello
     Hello, World
@@ -109,12 +109,12 @@ A single fig file can have multiple configurations:
 
     config default 
       set GREETING=Hello
-      append PATH=bin
+      append PATH=@/bin
     end
 
     config french
       set GREETING=Bonjour
-      append PATH=bin
+      append PATH=@/bin
     end
 
 Configurations other than "default" can be specified using the "-c" option:
