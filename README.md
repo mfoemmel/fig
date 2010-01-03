@@ -138,9 +138,22 @@ Now we can share the package with the rest of the team by using the "--publish" 
 
     $ fig --publish hello/1.0.0
 
-The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" option (we'll use the "--no-file" option here, to tell fig not to parse the ".fig" file in the current directory):
+The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" option (I'm going to move the ".fig" file out of the way first, so that fig doesn't automatically process it. We could also use the "--no-file" option):
 
-    $ fig --no-file -i hello/1.0.0 -- hello
+    $ mv .fig .fig.bak
+    $ fig -u -i hello/1.0.0 -- hello
+    ...downloading files...
+    Hello, World
+		
+The "-u" (or "--update") option tells fig to check the remote repository for packages if they aren't already installed locally (fig will never make any network connections unless this option is specified). Once the packages are downloaded, we can run the same command without the "-u" option:
+
+    $ fig -i hello/1.0.0 -- hello
+    Hello, World
+
+Also, when including a package, you can specify a particular configuration by appending it to the package name using a colon:
+
+    $ fig -i hello/1.0.0:french -- hello
+    Hello, World
 
 Community
 =========

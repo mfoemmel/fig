@@ -47,7 +47,7 @@ module Fig
       end
       @os.write(fig_file, content.join("\n"))
       @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user)
-      update_package(package_name, version_name)
+#      update_package(package_name, version_name)
     end
 
     def bundle_resources(package_statements)
@@ -97,7 +97,10 @@ module Fig
     end
 
     def read_package_from_file(file_name, package_name, version_name)
-      raise "Package not found: #{file_name}" unless @os.exist?(file_name)
+      if not @os.exist?(file_name)
+        $stderr.puts "Package not found: #{package_name}/#{version_name}" 
+        exit 1
+      end
       modified_time = @os.mtime(file_name)
       content = @os.read(file_name)
       @parser.parse_package(package_name, version_name, File.dirname(file_name), content)

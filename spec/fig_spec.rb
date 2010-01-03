@@ -65,7 +65,7 @@ describe "Fig" do
       end
     END
     puts fig('--publish foo/1.2.3', input)
-    fig('-i foo/1.2.3 -g FOO').should == ['BAR','']
+    fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
   it "publish resource to remote repository" do
