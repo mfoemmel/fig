@@ -48,10 +48,15 @@ module Fig
          end
        end
      when "ssh"
-       $stderr.puts "downloading #{url}"
-       # TODO need conditional download
-       fail unless system "ssh #{uri.user + '@' if uri.user}#{uri.host} cat #{uri.path} > #{path}"
-       return true
+       # TODO need better way to do conditional download
+       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
+       if File.exist?(path) && File.mtime(path).to_i > timestamp
+         return false
+       else
+         $stderr.puts "downloading #{url}"
+         fail unless system "ssh #{uri.user + '@' if uri.user}#{uri.host} cat #{uri.path} > #{path}"
+         return true
+       end
      else
        raise "Unknown protocol: #{url}"
      end
