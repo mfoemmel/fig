@@ -71,16 +71,38 @@ describe "Fig" do
   it "publish resource to remote repository" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.mkdir_p("bin")
-    File.open("bin/hello", "w") { |f| f << "echo bar" }
-    fail unless system "chmod +x bin/hello"
+    FileUtils.mkdir_p("tmp/bin")
+    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
+    fail unless system "chmod +x tmp/bin/hello"
     input = <<-END
-      resource bin/hello
+      resource tmp/bin/hello
       config default
-        append PATH=@/bin
+        append PATH=@/tmp/bin
       end
     END
     puts fig('--publish foo/1.2.3', input)
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+  end
+
+  it "retrieve resource" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.mkdir_p("tmp/lib")
+    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
+    input = <<-END
+      resource lib/hello
+      config default
+        append FOOPATH=@/tmp/lib/hello
+      end
+    END
+    puts fig('--publish foo/1.2.3', input)
+    input = <<-END
+      retrieve FOOPATH->tmp/lib/[package]"
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('-u')
+    File.read("tmp/lib/hello").should == "some library"
   end
 end
