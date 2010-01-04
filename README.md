@@ -1,11 +1,15 @@
 Description
 ===========
 
-Fig is a utility for dynamically assembling an environment from a set of packages. Shell commands can then be executed in that package, after which the environment goes away. The caller's environment is never affected.
+Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected). 
 
-If fig, an "environment" is just a set of environment variables. A "package" is a collection of files, plus some metadata describing how the environment should be modified when the package is included. For example, a package containing an executable might specify that its "bin" directory be appended to the PATH environment variable. A package containing a Java library might specify that its jar files should be added to the CLASSPATH. Etc.
+An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing what environment variables should be modified when the package is included. 
 
-Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository that is shared by a team. Fig will automatically download packages from the remote repository and install them in the local repository, when needed. In this sense, fig is a lot like other dependency management tools such as Apache Ivy and Debian APT. Unlike those tools, however, fig is meant to be lightweight, platform agnostic, and language agnostic.
+Developers can create "fig files" to specify the list of packages to use for different tasks. These files will typically be versioned along with the rest of the source files. This ensures that all developers on a team are using the same environemnts. 
+
+Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a server somewhere that is shared by a team. Fig will automatically download packages from the remote repository and install them in the local repository, when needed. 
+
+Fig is similar to a lot of other package/dependnency managment tools. In particular, it steals a lot of ideas from Apache Ivy and Debian APT. However, unlike Ivy, fig is meant to be lightweight (no XML, no JVM startup time), language agnostic (Java doesn't get preferential treatment), and work with executables as well as libraries. And unlike APT, fig is meant to be cross platform (Windows support is coming) and project-oriented.
 
 Installation
 ============
@@ -63,7 +67,7 @@ Fig also supports the following options, which don't require a fig environment. 
 Examples
 ========
 
-Fig lets you modify environment variables three ways:
+Fig lets you configure environments three different ways:
 
 * From the command line
 * From a ".fig" file in the current directory
@@ -71,19 +75,19 @@ Fig lets you modify environment variables three ways:
 
 ### Command Line ###
 
-So to get started, let's trying defining an environment variable via the command line and executing a command in the newly created environment. We'll set the "GREETING" variable to "Hello", then run "echo $GREETING, World" to ensure that the variable was updated:
+So to get started, let's trying defining an environment variable via the command line and executing a command in the newenvironment. We'll set the "GREETING" variable to "Hello", then run a command that uses that variable:
 
     $ fig -s GREETING=Hello -- echo "\$GREETING, World"
     Hello, World
 
-(Note that you need to put a slash before the dollar sign, otherwise the shell will evaluate the environment variable before it ever gets to fig.)
+Note that you need to put a slash before the dollar sign, otherwise the shell will evaluate the environment variable before it ever gets to fig.
 
-Also note that when running fig, the original environment is never affected:
+Also note that when running fig, the original environment isn't affected:
 
      $ echo $GREETING
      <nothing>
 
-Fig also lets you append environment variables, using the system-specified path separator (e.g. colon on unix, semicolon on windows). This is useful for adding directories to the PATH, LD_LIBRARY_PATH, etc. For example, let's create a "bin" directory, add a shell script to it, then include it in the PATH:
+Fig also lets you append environment variables, using the system-specified path separator (e.g. colon on unix, semicolon on windows). This is useful for adding directories to the PATH, LD_LIBRARY_PATH, CLASSPATH, etc. For example, let's create a "bin" directory, add a shell script to it, then include it in the PATH:
 
     $ mkdir bin
     $ echo "echo \$GREETING, World" > bin/hello
@@ -100,7 +104,7 @@ You can also specify environment modifiers in files. Fig looks for a file called
       append PATH=@/bin
     end
     
-The '@' symbol represents the directory that the ".fig" file is in (this doesn't matter now, but will become important later when we publish our project to the shared repository). Then we can just run:
+The '@' symbol represents the directory that the ".fig" file is in (this example would still work if we just used "bin", but later on when we publish our project to the shared repository we'll definitely need the '@'). Then we can just run:
 
     $ fig -- hello
     Hello, World
@@ -124,7 +128,7 @@ Configurations other than "default" can be specified using the "-c" option:
      
 ### Packages ###
 
-Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing you'll need to do is specify the location of your remote repository by defining the FIG_REMOTE_URL environment variable. If you just want to play around with fig, you can have it point to localhost:
+Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing we need to do is specify the location of the remote repository by defining the FIG_REMOTE_URL environment variable. If you just want to play around with fig, you can have it point to localhost:
 
    $ export FIG_REMOTE_URL=ssh://localhost`pwd`/remote
 
@@ -138,7 +142,7 @@ Now we can share the package with the rest of the team by using the "--publish" 
 
     $ fig --publish hello/1.0.0
 
-The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" option (I'm going to move the ".fig" file out of the way first, so that fig doesn't automatically process it. We could also use the "--no-file" option):
+The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" or "--include" option (I'm going to move the ".fig" file out of the way first, so that fig doesn't automatically process it.):
 
     $ mv .fig .fig.bak
     $ fig -u -i hello/1.0.0 -- hello
@@ -171,7 +175,7 @@ Then:
     $ echo "print 'hello'" > lib/hello.foo
     $ fig --publish hello-lib/3.2.1    
 
-Now we'll move to a different directory (or replace the current ".fig" file) and create a new ".fig" file:
+Now we'll move to a different directory (or delete the current ".fig" file) and create a new ".fig" file:
 
     retrieve FOOPATH->lib/[package]
     config default

@@ -5,11 +5,8 @@ begin
   require 'jeweler'
   Jeweler::Tasks.new do |gem|
     gem.name = "fig"
-    gem.summary = %Q{Fig is a utility for dynamically assembling an environment from a set of packages.}
-    gem.description = %Q{Fig is a utility for dynamically assembling an
-      environment from a set of packages. Shell commands can then be 
-      executed in that environment, after which the environment
-      is thrown away. The caller's environment is never affected.}
+    gem.summary = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers..}
+    gem.description = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected).}
     gem.email = "git@foemmel.com"
     gem.homepage = "http://github.com/mfoemmel/fig"
     gem.authors = ["Matthew Foemmel"]
