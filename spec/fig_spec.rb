@@ -15,7 +15,7 @@ puts ENV['FIG_REMOTE_URL']
 FIG_EXE = File.expand_path(File.dirname(__FILE__) + '/../bin/fig')
 
 def fig(args, input=nil)
-  args = "--input - #{args}" if input
+  args = "--file - #{args}" if input
   stdin, stdout, stderr = Open3.popen3("#{FIG_EXE} #{args}")
   if input
     stdin.puts input
@@ -87,10 +87,11 @@ describe "Fig" do
   it "retrieve resource" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.rm_rf("tmp")
     FileUtils.mkdir_p("tmp/lib")
     File.open("tmp/lib/hello", "w") { |f| f << "some library" }
     input = <<-END
-      resource lib/hello
+      resource tmp/lib/hello
       config default
         append FOOPATH=@/tmp/lib/hello
       end

@@ -130,6 +130,10 @@ elsif argv[0]
   package_name, config_name, version_name = parse_descriptor(argv.shift)
   env.include_config(package, package_name, config_name, version_name)
   env.execute_config(package, package_name, config_name, nil) { |cmd| shell_exec cmd }
-else
+elsif input
   env.execute_config(package, nil, options[:config], nil) { |cmd| shell_exec cmd }
+else
+  $stderr.puts "No commands specified. Type 'fig --help' for more information."
+  exit 1
 end
+

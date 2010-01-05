@@ -22,7 +22,7 @@ module Fig
       opts.on('-c', '--config CFG', 'name of configuration to apply') { |config| options[:config] = config }
 
       options[:echo] = nil
-      opts.on('-g', '--echo VAR', 'print value of environment variable') { |echo| options[:echo] = echo }
+      opts.on('-g', '--get VAR', 'print value of environment variable') { |echo| options[:echo] = echo }
 
       options[:publish] = nil
       opts.on('--publish PKG', 'install package in local and remote repositories') { |publish| options[:publish] = publish }
@@ -40,8 +40,8 @@ module Fig
       opts.on('-p', '--append VAR=VAL', 'append environment variable') { |var_val| options[:appends] << var_val.split('=') }
 
       options[:input] = nil
-      opts.on('--input FILE', 'fig file to read (use - for stdin)') { |path| options[:input] = path }
-      opts.on('--no-file', 'fig file to read (use - for stdin)') { |path| options[:input] = :none }
+      opts.on('--file FILE', 'fig file to read (use - for stdin)') { |path| options[:input] = path }
+      opts.on('--no-file', 'ignore .fig file in current directory') { |path| options[:input] = :none }
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path("~/.fighome")
     end
