@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'open3'
+require 'rubygems'
+require 'open4'
 require 'fileutils'
 
 FIG_HOME = File.expand_path(File.dirname(__FILE__) + '/../tmp/fighome')
@@ -16,12 +17,23 @@ FIG_EXE = File.expand_path(File.dirname(__FILE__) + '/../bin/fig')
 
 def fig(args, input=nil)
   args = "--file - #{args}" if input
-  stdin, stdout, stderr = Open3.popen3("#{FIG_EXE} #{args}")
-  if input
-    stdin.puts input
-    stdin.close
+  out = nil
+  err = nil
+  status = Open4::popen4("#{FIG_EXE} #{args}") do |pid, stdin, stdout, stderr|
+    if input
+      stdin.puts input
+      stdin.close
+    end
+    err = stderr.read.strip
+    out = stdout.read.strip
+    if err != ""
+      $stderr.puts err
+    end
   end
-  return stdout.read.strip, stderr.read.strip
+  if $?.exitstatus != 0
+    raise "Command failed: #{$?.exitstatus}"
+  end
+  return out, err
 end
 
 describe "Fig" do

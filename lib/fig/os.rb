@@ -2,6 +2,8 @@ require 'fileutils'
 require 'ftools'
 require 'uri'
 require 'net/http'
+require 'open4'
+require 'tempfile'
 
 module Fig
  class OS
@@ -24,6 +26,10 @@ module Fig
    def write(path, content)
      File.open(path, "w") { |f| f << content }
    end
+
+   SUCCESS = 0
+   NOT_MODIFIED = 3
+   NOT_FOUND = 4
 
    def download(url, path)
      FileUtils.mkdir_p(File.dirname(path))
@@ -49,13 +55,33 @@ module Fig
        end
      when "ssh"
        # TODO need better way to do conditional download
-       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
-       if File.exist?(path) && File.mtime(path).to_i > timestamp
+#       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
+       out = nil
+       timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
+       tempfile = Tempfile.new("tmp")
+       status = Open4::popen4("ssh #{uri.user + '@' if uri.user}#{uri.host} \"fig-download #{timestamp} #{uri.path}\"") do |pid, stdin, stdout, stderr|
+          $stderr.puts "downloading #{url}"
+          err = stderr.read
+          while bytes = stdout.read(4096) do
+            tempfile.write(bytes)
+          end
+          $stderr.print err
+       end
+       tempfile.close
+       case $?.exitstatus
+       when NOT_MODIFIED
+         tempfile.delete
          return false
-       else
-         $stderr.puts "downloading #{url}"
-         fail unless system "ssh #{uri.user + '@' if uri.user}#{uri.host} cat #{uri.path} > #{path}"
+       when NOT_FOUND
+         tempfile.delete
+         raise "File not found: #{uri}"
+       when SUCCESS
+         FileUtils.mv(tempfile.path, path)
          return true
+       else
+         tempfile.delete
+         $stderr.puts "Unable to download file: #{$?.exitstatus}"
+         exit 1
        end
      else
        raise "Unknown protocol: #{url}"
