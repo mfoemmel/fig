@@ -110,12 +110,12 @@ describe "Fig" do
     END
     puts fig('--publish foo/1.2.3', input)
     input = <<-END
-      retrieve FOOPATH->tmp/lib/[package]"
+      retrieve FOOPATH->tmp/lib2/[package]
       config default
         include foo/1.2.3
       end
     END
-    fig('-u')
-    File.read("tmp/lib/hello").should == "some library"
+    fig('-u', input)
+    File.read("tmp/lib2/foo/hello").should == "some library"
   end
 end
