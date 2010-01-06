@@ -12,6 +12,10 @@ tmtags
 
 ## VIM
 *.swp
+*~
+
+## NetBeans
+nbproject
 
 ## PROJECT::GENERAL
 coverage
@@ -20,3 +24,5 @@ pkg
 
 ## PROJECT::SPECIFIC
 /tmp
+spec/tmp
+resources.tar.gz
