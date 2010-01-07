@@ -57,17 +57,8 @@ os = OS.new
 repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user)
 env = Environment.new(os, repos, vars)
 
-options[:includes].each do |descriptor|
-  package_name, config_name, version_name = parse_descriptor(descriptor)
-  env.include_config(nil, package_name, config_name, version_name)
-end
-
-options[:sets].each do |name_val|
-  env.set_variable(nil, name_val[0], name_val[1]) 
-end
-
-options[:appends].each do |name_val|
-  env.append_variable(nil, name_val[0], name_val[1]) 
+options[:modifiers].each do |modifier|
+  env.apply_config_statement(nil, modifier)
 end
 
 DEFAULT_FIG_FILE = '.fig'

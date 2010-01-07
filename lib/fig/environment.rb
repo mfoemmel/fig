@@ -54,6 +54,23 @@ module Fig
       result
     end
 
+    def apply_config_statement(base_package, statement)
+      case statement
+      when Path
+        append_variable(base_package, statement.name, statement.value)
+      when Set
+        set_variable(base_package, statement.name, statement.value)
+      when Include
+        include_config(base_package, statement.package_name, statement.config_name, statement.version_name)
+      when Command
+        # ignore
+      else
+        fail "Unexpected statement: #{statement}"
+      end
+    end
+
+    private 
+
     def include_config(base_package, package_name, config_name, version_name)
       package = lookup_package(package_name || base_package.package_name, version_name)
       apply_config(package, config_name || "default")
@@ -73,8 +90,6 @@ module Fig
       end
     end
 
-    private 
-
     def with_environment
       old_env = {}
       begin
@@ -85,20 +100,6 @@ module Fig
       end
     end
 
-    def apply_config_statement(base_package, statement)
-      case statement
-      when Path
-        append_variable(base_package, statement.name, statement.value)
-      when Set
-        set_variable(base_package, statement.name, statement.value)
-      when Include
-        include_config(base_package, statement.package_name, statement.config_name, statement.version_name)
-      when Command
-        # ignore
-      else
-        fail "Unexpected statement: #{statement}"
-      end
-    end
 
     def lookup_package(package_name, version_name)
       package = @packages[package_name]

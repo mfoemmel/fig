@@ -1,6 +1,15 @@
 require 'optparse'
+require 'fig/package'
 
 module Fig
+  def parse_descriptor(descriptor)
+    # todo should use treetop for these:
+    package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
+    config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
+    version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil  
+    return package_name, config_name, version_name
+  end
+
   def parse_options(argv)
     options = {}
 
@@ -30,14 +39,22 @@ module Fig
       options[:list] = false
       opts.on('--list', 'list packages in local repository') { options[:list] = true }
 
-      options[:includes] = []
-      opts.on('-i', '--include PKG', 'include package in environment') { |descriptor| options[:includes] << descriptor }
+      options[:modifiers] = []
 
-      options[:sets] = []
-      opts.on('-s', '--set VAR=VAL', 'set environment variable') { |var_val| options[:sets] << var_val.split('=') }
+      opts.on('-i', '--include PKG', 'include package in environment') do |descriptor| 
+        package_name, config_name, version_name = parse_descriptor(descriptor)
+        options[:modifiers] << Include.new(package_name, config_name, version_name) 
+      end
 
-      options[:appends] = []
-      opts.on('-p', '--append VAR=VAL', 'append environment variable') { |var_val| options[:appends] << var_val.split('=') }
+      opts.on('-s', '--set VAR=VAL', 'set environment variable') do |var_val| 
+        var, val = var_val.split('=')
+        options[:modifiers] << Set.new(var, val) 
+      end
+
+      opts.on('-p', '--append VAR=VAL', 'append environment variable') do |var_val| 
+        var, val = var_val.split('=')
+        options[:modifiers] << Path.new(var, val)
+      end
 
       options[:input] = nil
       opts.on('--file FILE', 'fig file to read (use - for stdin)') { |path| options[:input] = path }
