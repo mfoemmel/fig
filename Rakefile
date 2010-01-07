@@ -14,8 +14,8 @@ begin
     gem.add_dependency "treetop", ">= 1.4.2"
     gem.add_development_dependency "rspec", ">= 1.2.9"
     gem.add_dependency "open4", ">= 1.0.1"
-    gem.files = ["bin/fig"] + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]
-    gem.executables = ["fig"]
+    gem.files = ["bin/fig", "bin/fig-download"] + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]
+    gem.executables = ["fig", "fig-download"]
   end
   Jeweler::GemcutterTasks.new
 rescue LoadError
@@ -46,4 +46,9 @@ Rake::RDocTask.new do |rdoc|
   rdoc.title = "fig #{version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
+end
+
+task :clean do
+    rm_rf "./tmp"
+    rm "./resources.tar.gz"
 end
