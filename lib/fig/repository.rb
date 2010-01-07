@@ -10,6 +10,12 @@ module Fig
       @parser = Parser.new
     end
 
+    def clean(package_name, version_name) 
+      dir = File.join(@local_repository_dir, package_name)
+      dir = File.join(dir, version_name) if version_name
+      FileUtils.rm_rf(dir)
+    end
+
     def list_packages
       results = []
       @os.list(@local_repository_dir).each do |package_name|

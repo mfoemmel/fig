@@ -49,6 +49,9 @@ module Fig
       options[:list] = false
       opts.on('--list', 'list packages in local repository') { options[:list] = true }
 
+      options[:cleans] = []
+      opts.on('--clean PKG', 'remove  package from local repository') { |descriptor| options[:cleans] <<  descriptor }
+
       options[:modifiers] = []
 
       opts.on('-i', '--include PKG', 'include package in environment') do |descriptor| 

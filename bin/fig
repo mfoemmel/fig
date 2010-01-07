@@ -79,6 +79,11 @@ else
   end
 end
 
+options[:cleans].each do |descriptor|
+  package_name, version_name = descriptor.split('/')
+  repos.clean(package_name, version_name)    
+end
+
 if input
   package = Parser.new.parse_package(nil, nil, ".", input)
   if options[:retrieve]
