@@ -36,6 +36,16 @@ module Fig
       options[:publish] = nil
       opts.on('--publish PKG', 'install package in local and remote repositories') { |publish| options[:publish] = publish }
 
+      options[:resources] =[]
+      opts.on('--resource PATH', 'resource to include in package (when using --publish)') do |path| 
+        options[:resources] << Resource.new(path) 
+      end
+
+      options[:archives] =[]
+      opts.on('--archive PATH', 'archive to include in package (when using --publish)') do |path| 
+        options[:archives] << Archive.new(path)
+      end
+
       options[:list] = false
       opts.on('--list', 'list packages in local repository') { options[:list] = true }
 

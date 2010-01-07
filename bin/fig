@@ -110,8 +110,14 @@ if options[:publish]
   if package_name.nil? || version_name.nil?
     raise "Please specify a package name and a version name"
   end
-  fail if package.publish_statements.empty?
-  repos.publish_package(package.publish_statements, package_name, version_name)
+  if not options[:modifiers].empty?
+    publish_statements = options[:resources] + options[:archives] + [Configuration.new("default", options[:modifiers])]
+  elsif not package.publish_statements.empty?
+    publish_statements = package.publish_statements
+  else
+    fail "Nothing to publish"
+  end
+  repos.publish_package(publish_statements, package_name, version_name)
 elsif options[:echo]
   puts env[options[:echo]]
 elsif argv[0] == "-"

@@ -96,6 +96,16 @@ describe "Fig" do
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
+  it "publish resource to remote repository using command line" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.mkdir_p("tmp/bin")
+    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
+    fail unless system "chmod +x tmp/bin/hello"
+    puts fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+  end
+
   it "retrieve resource" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
