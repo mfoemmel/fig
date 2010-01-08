@@ -2,7 +2,6 @@ require 'fileutils'
 require 'ftools'
 require 'uri'
 require 'net/http'
-require 'open4'
 require 'tempfile'
 
 module Fig
