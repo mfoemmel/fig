@@ -5,7 +5,7 @@ Fig is a utility for configuring environments and managing dependencies across a
 
 An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing what environment variables should be modified when the package is included. 
 
-Developers can create "fig files" to specify the list of packages to use for different tasks. These files will typically be versioned along with the rest of the source files. This ensures that all developers on a team are using the same environemnts. 
+Developers can a use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files. This ensures that all developers on a team are using the same environemnts. 
 
 Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a server somewhere that is shared by a team. Fig will automatically download packages from the remote repository and install them in the local repository, when needed. 
 
@@ -70,8 +70,8 @@ Examples
 Fig lets you configure environments three different ways:
 
 * From the command line
-* From a ".fig" file in the current directory
-* From packages loaded via one of the previous two methods
+* From a "package.fig" file in the current directory
+* From packages included indirectly via one of the previous two methods
 
 ### Command Line ###
 
@@ -97,14 +97,14 @@ Fig also lets you append environment variables, using the system-specified path 
 
 ### Fig Files ###
 
-You can also specify environment modifiers in files. Fig looks for a file called ".fig" in the current directory, and automatically processes it. So we can implement the previous example by creating a ".fig" file that looks like:
+You can also specify environment modifiers in files. Fig looks for a file called "package.fig" in the current directory, and automatically processes it. So we can implement the previous example by creating a "package.fig" file that looks like:
         
     config default
       set GREETING=Hello
       append PATH=@/bin
     end
     
-The '@' symbol represents the directory that the ".fig" file is in (this example would still work if we just used "bin", but later on when we publish our project to the shared repository we'll definitely need the '@'). Then we can just run:
+The '@' symbol represents the directory that the "package.fig" file is in (this example would still work if we just used "bin", but later on when we publish our project to the shared repository we'll definitely need the '@'). Then we can just run:
 
     $ fig -- hello
     Hello, World
@@ -132,7 +132,7 @@ Now let's say we want to share our little script with the rest of the team by bu
 
    $ export FIG_REMOTE_URL=ssh://localhost`pwd`/remote
 
-Before we publish our package, we'll need to tell fig which files we want to include. We do this by using the "resource" statement in our ".fig" file:
+Before we publish our package, we'll need to tell fig which files we want to include. We do this by using the "resource" statement in our "package.fig" file:
 
     resource bin/hello
 
@@ -142,9 +142,9 @@ Now we can share the package with the rest of the team by using the "--publish" 
 
     $ fig --publish hello/1.0.0
 
-The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" or "--include" option (I'm going to move the ".fig" file out of the way first, so that fig doesn't automatically process it.):
+The "hello/1.0.0" string represents the name of the package and the version number. Once the package has been published, we can include it in other environments by using the "-i" or "--include" option (I'm going to move the "package.fig" file out of the way first, so that fig doesn't automatically process it.):
 
-    $ mv .fig .fig.bak
+    $ mv package.fig package.bak
     $ fig -u -i hello/1.0.0 -- hello
     ...downloading files...
     Hello, World
@@ -161,9 +161,9 @@ Also, when including a package, you can specify a particular configuration by ap
 
 ### Retrieves ###
 
-By default, the resources associated with a package live in the fig home directory, which defaults to "~/.fighome". This doesn't always play nicely with IDE's however, so fig gives you a way to copy resources from the repository to the current directory. To do this you add "retrieve" statements to your ".fig" file.
+By default, the resources associated with a package live in the fig home directory, which defaults to "~/.fighome". This doesn't always play nicely with IDE's however, so fig gives you a way to copy resources from the repository to the current directory. To do this you add "retrieve" statements to your "package.fig" file.
 
-For example, let's create a package that contains a library for the "foo" programming language. First we'll define a ".fig" file:
+For example, let's create a package that contains a library for the "foo" programming language. First we'll define a "package.fig" file:
 
     config default
       append FOOPATH=lib/hello.foo
@@ -175,7 +175,7 @@ Then:
     $ echo "print 'hello'" > lib/hello.foo
     $ fig --publish hello-lib/3.2.1    
 
-Now we'll move to a different directory (or delete the current ".fig" file) and create a new ".fig" file:
+Now we'll move to a different directory (or delete the current "package.fig" file) and create a new "package.fig" file:
 
     retrieve FOOPATH->lib/[package]
     config default

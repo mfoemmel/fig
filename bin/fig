@@ -61,7 +61,12 @@ options[:modifiers].each do |modifier|
   env.apply_config_statement(nil, modifier)
 end
 
-DEFAULT_FIG_FILE = '.fig'
+if File.exist?(".fig")
+  $stderr.puts "The '.fig' file is deprecated. Please rename to 'package.fig'"
+  exit 1
+end
+
+DEFAULT_FIG_FILE = 'package.fig'
 
 input = nil
 if options[:input] == :none
