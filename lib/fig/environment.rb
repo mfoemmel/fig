@@ -69,12 +69,12 @@ module Fig
       end
     end
 
-    private 
-
     def include_config(base_package, package_name, config_name, version_name)
       package = lookup_package(package_name || base_package.package_name, version_name)
       apply_config(package, config_name || "default")
     end
+
+    private 
 
     def set_variable(base_package, name, value)
       @variables[name] = expand_value(base_package, name, value)
