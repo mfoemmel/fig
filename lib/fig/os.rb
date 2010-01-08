@@ -1,5 +1,4 @@
 require 'fileutils'
-require 'ftools'
 require 'uri'
 require 'net/http'
 require 'tempfile'
@@ -136,7 +135,7 @@ module Fig
 
    def copy(source, target)
      FileUtils.mkdir_p(File.dirname(target))
-     File.copy(source, target)
+     FileUtils.copy_file(source, target)
      target
    end
 
