@@ -59,13 +59,15 @@ module Fig
        out = nil
        timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
        tempfile = Tempfile.new("tmp")
-       status = Open4::popen4("ssh #{uri.user + '@' if uri.user}#{uri.host} \"fig-download #{timestamp} #{uri.path}\"") do |pid, stdin, stdout, stderr|
-          $stderr.puts "downloading #{url}"
-          err = stderr.read
-          while bytes = stdout.read(4096) do
-            tempfile.write(bytes)
-          end
-          $stderr.print err
+       IO.popen("ssh #{uri.user + '@' if uri.user}#{uri.host} \"fig-download #{timestamp} #{uri.path}\"") do |io|
+         first = true 
+         while bytes = io.read(4096)
+           if first
+             $stderr.puts "downloading #{url}"
+             first = false
+           end
+           tempfile << bytes
+         end
        end
        tempfile.close
        case $?.exitstatus
