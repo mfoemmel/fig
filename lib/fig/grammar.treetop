@@ -40,9 +40,9 @@ grammar Fig
   end
 
   rule publish
-    "publish" ws statements:(package_statement / install)* "end" ws {
+    "publish" ws local_name:config_name "->" remote_name:config_name ws {
       def to_package_statement
-        Publish.new(statements.elements.map { |statement| statement.to_package_statement })
+        Publish.new(local_name.text_value, remote_name.text_value)
       end
     }
   end
@@ -130,7 +130,7 @@ grammar Fig
   end
 
   rule config_name
-    [a-zA-Z0-9\\-]+
+    [a-zA-Z0-9_]+
   end
 
   rule name

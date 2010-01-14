@@ -29,13 +29,6 @@ module Fig
       @statements.select{|s| s.is_a?(Resource)}.map{|s|s.url}
     end
     
-    def publish_statements
-      statements
-#      statements = []
-#      @statements.each{ |s| statements += s.statements if s.is_a?(Publish) }
-#      statements
-    end
-    
     def unparse
       @statements.map { |statement| statement.unparse('') }.join("\n")
     end
@@ -83,17 +76,15 @@ module Fig
   end
 
   class Publish
-    attr_reader :statements
+    attr_reader :local_name, :remote_name
 
-    def initialize(statements)
-      @statements = statements
+    def initialize(local_name, remote_name)
+      @local_name = local_name
+      @remote_name = remote_name
     end
     
     def unparse(indent)
-      prefix = "\n#{indent}publish"
-      body = @statements.map { |statement| statement.unparse(indent+'  ') }.join("\n")
-      suffix = "#{indent}end"
-      return [prefix, body, suffix].join("\n")
+      "#{indent}publish #{@local_name}->#{@remote_name}"
     end
   end
 
@@ -116,6 +107,10 @@ module Fig
     def initialize(name, statements)
       @name = name
       @statements = statements
+    end
+
+    def with_name(name)
+      Configuration.new(name, statements)
     end
 
     def commands

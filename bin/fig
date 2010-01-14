@@ -122,8 +122,9 @@ if options[:publish]
   end
   if not options[:modifiers].empty?
     publish_statements = options[:resources] + options[:archives] + [Configuration.new("default", options[:modifiers])]
-  elsif not package.publish_statements.empty?
-    publish_statements = package.publish_statements
+    publish_statements << Publish.new("default","default")
+  elsif not package.statements.empty?
+    publish_statements = package.statements
   else
     fail "Nothing to publish"
   end

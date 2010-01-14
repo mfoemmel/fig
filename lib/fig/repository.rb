@@ -30,8 +30,11 @@ module Fig
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       fig_file = File.join(temp_dir, ".fig")
+      config_mapping = get_config_mapping(package_statements)
       content = bundle_resources(package_statements).map do |statement| 
-        if statement.is_a?(Archive) || statement.is_a?(Resource)
+        if statement.is_a?(Publish)
+          nil
+        elsif statement.is_a?(Archive) || statement.is_a?(Resource)
           if statement.is_a?(Resource) && !is_url?(statement.url)
             archive_name = statement.url
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
@@ -47,14 +50,28 @@ module Fig
           end
           @os.upload(archive_local, archive_remote, @remote_repository_user)
           statement.class.new(archive_name).unparse('')
+        elsif statement.is_a?(Configuration)
+          remote_name = config_mapping[statement.name]
+          if remote_name
+            statement.with_name(remote_name).unparse('')
+          else
+            nil
+          end
         else
           statement.unparse('')
         end
-      end
-      @os.write(fig_file, content.join("\n"))
+      end.select {|s|not s.nil?}
+      @os.write(fig_file, content.join("\n").strip)
       @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user)
 #      update_package(package_name, version_name)
     end
+
+    def get_config_mapping(package_statements)
+      publish_mappings = {}
+      package_statements.each{|s| publish_mappings[s.local_name] = s.remote_name if s.is_a?(Publish) }
+      publish_mappings
+    end
+    
 
     def bundle_resources(package_statements)
       resources = []

@@ -72,6 +72,7 @@ describe "Fig" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     input = <<-END
+      publish default->default
       config default
         set FOO=BAR
       end
@@ -87,8 +88,9 @@ describe "Fig" do
     File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
     fail unless system "chmod +x tmp/bin/hello"
     input = <<-END
+      publish test->default
       resource tmp/bin/hello
-      config default
+      config test
         append PATH=@/tmp/bin
       end
     END
@@ -113,6 +115,7 @@ describe "Fig" do
     FileUtils.mkdir_p("tmp/lib")
     File.open("tmp/lib/hello", "w") { |f| f << "some library" }
     input = <<-END
+      publish default->default
       resource tmp/lib/hello
       config default
         append FOOPATH=@/tmp/lib/hello
