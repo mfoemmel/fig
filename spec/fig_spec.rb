@@ -72,7 +72,7 @@ describe "Fig" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     input = <<-END
-      publish default->default
+      publish default
       config default
         set FOO=BAR
       end
@@ -115,7 +115,7 @@ describe "Fig" do
     FileUtils.mkdir_p("tmp/lib")
     File.open("tmp/lib/hello", "w") { |f| f << "some library" }
     input = <<-END
-      publish default->default
+      publish default
       resource tmp/lib/hello
       config default
         append FOOPATH=@/tmp/lib/hello

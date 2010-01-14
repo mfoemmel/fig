@@ -40,9 +40,18 @@ grammar Fig
   end
 
   rule publish
-    "publish" ws local_name:config_name "->" remote_name:config_name ws {
+    "publish" ws local_name:config_name ("->" remote_name:config_name)? ws {
       def to_package_statement
-        Publish.new(local_name.text_value, remote_name.text_value)
+        Publish.new(local_name.text_value, get_remote_name)
+      end
+
+      def get_remote_name
+        elements.each do |element|
+          if element.respond_to?(:remote_name) 
+            return element.remote_name.text_value
+          end
+        end
+        local_name.text_value
       end
     }
   end
