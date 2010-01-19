@@ -14,7 +14,7 @@ module Fig
     options = {}
 
     parser = OptionParser.new do |opts|
-      opts.banner = "Usage: fig [--debug] [--update] [--config <config>] [-echo <var> | --list | <package> | - <command>]"
+      opts.banner = "Usage: fig [--debug] [--update] [--config <config>] [--get <var> | --list | <package> | - <command>]"
 
       opts.on('-?', '-h','--help','display this help text') do
         puts opts
