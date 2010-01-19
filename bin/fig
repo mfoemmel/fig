@@ -21,12 +21,15 @@ def parse_descriptor(descriptor)
   return package_name, config_name, version_name
 end
 
+shell_command = nil
 ARGV.each_with_index do |arg, i|
   if arg == "-"
 #    $stderr.puts "Use of single dash (-) is deprecated. Use double dash (--) instead"
 #    exit 1 
   elsif arg == "--"
-    ARGV[i] = "-"
+    shell_command = ARGV[(i+1)..-1]
+    ARGV.slice!(i..-1)
+    break
   end
 end
 
@@ -131,9 +134,9 @@ if options[:publish]
   repos.publish_package(publish_statements, package_name, version_name)
 elsif options[:echo]
   puts env[options[:echo]]
-elsif argv[0] == "-"
+elsif shell_command
   argv.shift
-  env.execute_shell(argv) { |cmd| shell_exec cmd }
+  env.execute_shell(shell_command) { |cmd| shell_exec cmd }
 elsif argv[0]
   package_name, config_name, version_name = parse_descriptor(argv.shift)
   env.include_config(package, package_name, config_name, version_name)
