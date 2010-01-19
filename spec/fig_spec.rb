@@ -68,6 +68,18 @@ describe "Fig" do
     fig('-p XYZZY=foo -g XYZZY').should == ["foo",""]
   end
 
+  it "should ignore comments" do
+    input = <<-END
+      #/usr/bin/env fig
+
+      # Some comment
+      config default
+        set FOO=BAR # Another comment
+      end
+    END
+    fig('-g FOO', input)[0].should == 'BAR'
+  end
+
   it "publish to remote repository" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
