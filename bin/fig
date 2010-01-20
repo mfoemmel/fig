@@ -111,6 +111,7 @@ if options[:list]
   repos.list_packages.sort.each do |item|
     puts item
   end
+  exit 0
 end
 
 def shell_exec(cmd)
