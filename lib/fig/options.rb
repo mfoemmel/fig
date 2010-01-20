@@ -27,6 +27,9 @@ module Fig
       options[:update] = false
       opts.on('-u', '--update', 'check remote repository for updates') { options[:update] = true; options[:retrieve] = true }
 
+      options[:update_if_missing] = false
+      opts.on('-m', '--update-if-missing', 'check for updates only if package is missing locally') { options[:update_if_missing] = true; options[:retrieve] = true }
+
       options[:config] = "default"
       opts.on('-c', '--config CFG', 'name of configuration to apply') { |config| options[:config] = config }
 
@@ -71,7 +74,7 @@ module Fig
 
       options[:input] = nil
       opts.on('--file FILE', 'fig file to read (use - for stdin)') { |path| options[:input] = path }
-      opts.on('--no-file', 'ignore .fig file in current directory') { |path| options[:input] = :none }
+      opts.on('--no-file', 'ignore package.fig file in current directory') { |path| options[:input] = :none }
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path("~/.fighome")
     end

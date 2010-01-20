@@ -2,11 +2,13 @@ require 'fig/parser'
 
 module Fig
   class Repository
-    def initialize(os, local_repository_dir, remote_repository_url, remote_repository_user=nil)
+    def initialize(os, local_repository_dir, remote_repository_url, remote_repository_user=nil, update=false, update_if_missing=true)
       @os = os
       @local_repository_dir = local_repository_dir
       @remote_repository_url = remote_repository_url
       @remote_repository_user = remote_repository_user
+      @update = update
+      @update_if_missing = update_if_missing
       @parser = Parser.new
     end
 
@@ -92,7 +94,9 @@ module Fig
     end
 
     def load_package(package_name, version_name)
-      update_package(package_name, version_name) if @remote_repository_url
+      if @update || (@update_if_missing && package_missing?(package_name, version_name))
+        update_package(package_name, version_name)
+      end
       read_local_package(package_name, version_name)
     end
 
@@ -193,6 +197,10 @@ module Fig
 
     def temp_dir_for_package(package_name, version_name)
       File.join(@local_repository_dir, "tmp")
+    end
+
+    def package_missing?(package_name, version_name)
+      not File.exist?(local_fig_file_for_package(package_name, version_name))
     end
   end
 end

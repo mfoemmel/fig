@@ -140,7 +140,7 @@ describe "Fig" do
         include foo/1.2.3
       end
     END
-    fig('-u', input)
+    fig('-m', input)
     File.read("tmp/lib2/foo/hello").should == "some library"
   end
 end
