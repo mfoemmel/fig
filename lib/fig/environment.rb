@@ -84,7 +84,7 @@ module Fig
       value = expand_value(base_package, name, value)
       prev = @variables[name]
       if prev
-        @variables[name] = prev + File::PATH_SEPARATOR + value
+        @variables[name] = value + File::PATH_SEPARATOR + prev
       else
         @variables[name] = value
       end

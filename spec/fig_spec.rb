@@ -52,16 +52,16 @@ describe "Fig" do
   end
 
   it "append environment variable from command line" do
-    fig('-p PATH=foo -g PATH').should == ["#{ENV['PATH']}#{File::PATH_SEPARATOR}foo",""]
+    fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}",""]
   end
 
   it "append environment variable from fig file" do
     input = <<-END
       config default
-        append PATH=foo
+        add PATH=foo
       end
     END
-    fig('-g PATH', input).should == ["#{ENV['PATH']}#{File::PATH_SEPARATOR}foo",""]
+    fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}",""]
   end
 
   it "append empty environment variable" do
