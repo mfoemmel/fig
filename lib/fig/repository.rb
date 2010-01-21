@@ -32,7 +32,6 @@ module Fig
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       fig_file = File.join(temp_dir, ".fig")
-      config_mapping = get_config_mapping(package_statements)
       content = bundle_resources(package_statements).map do |statement| 
         if statement.is_a?(Publish)
           nil
@@ -52,13 +51,6 @@ module Fig
           end
           @os.upload(archive_local, archive_remote, @remote_repository_user)
           statement.class.new(archive_name).unparse('')
-        elsif statement.is_a?(Configuration)
-          remote_name = config_mapping[statement.name]
-          if remote_name
-            statement.with_name(remote_name).unparse('')
-          else
-            nil
-          end
         else
           statement.unparse('')
         end
