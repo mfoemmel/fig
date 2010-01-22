@@ -20,9 +20,11 @@ module Fig
 
     def list_packages
       results = []
-      @os.list(@local_repository_dir).each do |package_name|
-        @os.list(File.join(@local_repository_dir, package_name)).each do |version_name|
-          results << "#{package_name}/#{version_name}"
+      if File.exist?(@local_repository_dir)
+        @os.list(@local_repository_dir).each do |package_name|
+          @os.list(File.join(@local_repository_dir, package_name)).each do |version_name|
+            results << "#{package_name}/#{version_name}"
+          end
         end
       end
       results
