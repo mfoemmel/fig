@@ -14,7 +14,7 @@ module Fig
       @overrides = {}
       if File.exist?('fig.properties')
         File.readlines('fig.properties').each do |line|
-          descriptor, path = line.split('=')
+          descriptor, path = line.strip.split('=')
           @overrides[descriptor] = path
         end
       end
