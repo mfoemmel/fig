@@ -137,10 +137,37 @@ module Fig
    def upload(local_file, remote_file, user)
      puts "uploading #{local_file} to #{remote_file}"
      uri = URI.parse(remote_file)
-     if uri.scheme == "ssh"
+     case uri.scheme
+     when "ssh"
        dir = uri.path[0, uri.path.rindex('/')]
        cmd = "mkdir -p #{dir} && cat > #{uri.path}"
        fail unless system "cat #{local_file} | ssh #{uri.user + '@' if uri.user}#{uri.host} '#{cmd}'"
+     when "ftp"
+#      fail unless system "curl -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
+       require 'net/ftp'
+       ftp_uri = URI.parse(ENV["FIG_REMOTE_URL"])
+       ftp_root_path = ftp_uri.path
+       ftp_root_dirs = ftp_uri.path.split("/")
+       remote_publish_path = uri.path[0, uri.path.rindex("/")]
+       remote_publish_dirs = remote_publish_path.split("/")
+       # Use array subtraction to deduce which project/version folder to upload to,
+       # i.e. [1,2,3] - [2,3,4] = [1]
+       remote_project_dirs = remote_publish_dirs - ftp_root_dirs
+       Net::FTP.open(uri.host) do |ftp|
+         ftp.login
+         # Assume that the FIG_REMOTE_URL path exists.
+         ftp.chdir(ftp_root_path)
+         remote_project_dirs.each do |dir|
+           # Can't automatically create parent directories, so do it manually.
+           if ftp.nlst().index(dir).nil?
+             ftp.mkdir(dir)
+             ftp.chdir(dir)
+           else
+             ftp.chdir(dir)
+           end
+         end
+         ftp.putbinaryfile(local_file)
+       end
      else
        fail unless system "curl -p -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
      end
