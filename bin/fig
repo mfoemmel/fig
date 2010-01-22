@@ -39,7 +39,7 @@ vars = {}
 ENV.each {|key,value| vars[key]=value }
 
 remote_url = nil
-if options[:update] || options[:publish] || options[:update_if_missing]
+if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
   remote_url = ENV['FIG_REMOTE_URL']
   if remote_url.nil?
     $stderr.puts "Please define the FIG_REMOTE_URL environment variable" 
@@ -109,6 +109,13 @@ end
 
 if options[:list]
   repos.list_packages.sort.each do |item|
+    puts item
+  end
+  exit 0
+end
+
+if options[:list_remote]
+  repos.list_remote_packages.sort.each do |item|
     puts item
   end
   exit 0

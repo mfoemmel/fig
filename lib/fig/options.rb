@@ -52,6 +52,9 @@ module Fig
       options[:list] = false
       opts.on('--list', 'list packages in local repository') { options[:list] = true }
 
+      options[:list_remote] = false
+      opts.on('--list-remote', 'list packages in remote repository') { options[:list_remote] = true }
+
       options[:cleans] = []
       opts.on('--clean PKG', 'remove  package from local repository') { |descriptor| options[:cleans] <<  descriptor }
 

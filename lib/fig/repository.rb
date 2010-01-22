@@ -30,6 +30,10 @@ module Fig
       results
     end
 
+    def list_remote_packages
+      @os.download_list(@remote_repository_url)
+    end
+
     def publish_package(package_statements, package_name, version_name) 
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)

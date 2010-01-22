@@ -29,6 +29,28 @@ module Fig
    NOT_MODIFIED = 3
    NOT_FOUND = 4
 
+   def download_list(url)
+     uri = URI.parse(url)
+     case uri.scheme
+     when "ftp"
+       ftp = Net::FTP.new(uri.host)
+       ftp.login
+       dirs = [] 
+       ftp.list("-1 " + uri.path) do |line|
+         dirs << line
+       end
+       packages = []
+       dirs.each do |dir|
+         ftp.list("-1 #{uri.path}/#{dir}") do |line|
+           packages << "#{dir}/#{line}"
+         end
+       end
+       packages
+    else
+       raise "Protocol not supported: #{url}"
+    end
+   end
+
    def download(url, path)
      FileUtils.mkdir_p(File.dirname(path))
      uri = URI.parse(url)
