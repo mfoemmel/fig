@@ -41,14 +41,14 @@ module Fig
       end
     end
 
-    def execute_config(base_package, package_name, config_name, version_name)
+    def execute_config(base_package, package_name, config_name, version_name, args)
       package = lookup_package(package_name || base_package.package_name, version_name)
       result = nil
       commands = package[config_name || "default"].commands
       with_environment do
         # todo nil check
         commands.each do |command|
-          result = yield expand_arg(command.command).gsub("@",package.directory).split(" ")
+          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub("@",package.directory).split(" ")
         end
       end
       result

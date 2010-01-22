@@ -141,8 +141,8 @@ elsif shell_command
 elsif argv[0]
   package_name, config_name, version_name = parse_descriptor(argv.shift)
   env.include_config(package, package_name, config_name, version_name)
-  env.execute_config(package, package_name, config_name, nil) { |cmd| shell_exec cmd }
+  env.execute_config(package, package_name, config_name, nil, argv) { |cmd| shell_exec cmd }
 elsif input
-  env.execute_config(package, nil, options[:config], nil) { |cmd| shell_exec cmd }
+  env.execute_config(package, nil, options[:config], nil, argv) { |cmd| shell_exec cmd }
 end
 
