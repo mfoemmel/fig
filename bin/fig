@@ -121,6 +121,16 @@ if options[:list_remote]
   exit 0
 end
 
+if not options[:list_configs].empty?
+  options[:list_configs].each do |descriptor|
+    package_name, version_name = descriptor.split('/')
+    repos.read_local_package(package_name, version_name).configs.each do |config|
+      puts config.name
+    end
+  end
+  exit 0
+end
+
 def shell_exec(cmd)
   exec(ENV['SHELL'], '-c', cmd.join(' '))
 end
