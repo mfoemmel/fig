@@ -92,21 +92,6 @@ options[:cleans].each do |descriptor|
   repos.clean(package_name, version_name)    
 end
 
-if input
-  package = Parser.new.parse_package(nil, nil, ".", input)
-  if options[:retrieve]
-    package.retrieves.each do |var, path|
-      env.add_retrieve(var, path)
-    end
-  end
-  unless options[:publish] || options[:list]
-    env.register_package(package)
-    env.apply_config(package, options[:config])
-  end
-else
-  package = Package.new(nil, nil, ".", [])
-end
-
 if options[:list]
   repos.list_packages.sort.each do |item|
     puts item
@@ -129,6 +114,21 @@ if not options[:list_configs].empty?
     end
   end
   exit 0
+end
+
+if input
+  package = Parser.new.parse_package(nil, nil, ".", input)
+  if options[:retrieve]
+    package.retrieves.each do |var, path|
+      env.add_retrieve(var, path)
+    end
+  end
+  unless options[:publish] || options[:list]
+    env.register_package(package)
+    env.apply_config(package, options[:config])
+  end
+else
+  package = Package.new(nil, nil, ".", [])
 end
 
 def shell_exec(cmd)

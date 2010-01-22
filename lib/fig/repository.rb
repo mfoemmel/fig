@@ -10,6 +10,14 @@ module Fig
       @update = update
       @update_if_missing = update_if_missing
       @parser = Parser.new
+
+      @overrides = {}
+      if File.exist?('fig.properties')
+        File.readlines('fig.properties').each do |line|
+          descriptor, path = line.split('=')
+          @overrides[descriptor] = path
+        end
+      end
     end
 
     def clean(package_name, version_name) 
@@ -66,13 +74,6 @@ module Fig
 #      update_package(package_name, version_name)
     end
 
-    def get_config_mapping(package_statements)
-      publish_mappings = {}
-      package_statements.each{|s| publish_mappings[s.local_name] = s.remote_name if s.is_a?(Publish) }
-      publish_mappings
-    end
-    
-
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
@@ -118,7 +119,14 @@ module Fig
     end
 
     def read_package_from_directory(dir, package_name, version_name)
-      read_package_from_file(File.join(dir, ".fig"), package_name, version_name)
+      file = File.join(dir, ".fig")
+      if not File.exist?(file)
+        file = File.join(dir, "package.fig")
+      end
+      if not File.exist?(file)
+        raise "File not found: #{file}"
+      end
+      read_package_from_file(file, package_name, version_name)
     end
 
     def read_package_from_file(file_name, package_name, version_name)
@@ -132,7 +140,14 @@ module Fig
     end
 
     def local_dir_for_package(package_name, version_name)
-      File.join(@local_repository_dir, package_name, version_name)
+      descriptor = "#{package_name}/#{version_name}"
+      dir = @overrides[descriptor]
+      if dir
+        $stderr.puts "override: #{descriptor}=#{dir}"
+      else
+        dir = File.join(@local_repository_dir, package_name, version_name)
+      end
+      dir
     end
 
   private
