@@ -88,6 +88,7 @@ module Fig
         file = "resources.tar.gz"
         file unless system "tar -zcf #{file} #{resources.join(' ')}"
         new_package_statements.unshift(Archive.new(file))
+        at_exit { File.delete(file) }
       end
       new_package_statements
     end
