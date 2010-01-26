@@ -149,7 +149,7 @@ if options[:publish]
   else
     fail "Nothing to publish"
   end
-  repos.publish_package(publish_statements, package_name, version_name)
+  repos.publish_package(publish_statements, package_name, version_name, options[:tags])
 elsif options[:echo]
   puts env[options[:echo]]
 elsif shell_command

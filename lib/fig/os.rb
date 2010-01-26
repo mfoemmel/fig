@@ -103,7 +103,7 @@ module Fig
           return false
         when NOT_FOUND
           tempfile.delete
-          raise "File not found: #{uri}"
+          raise NotFoundException 
         when SUCCESS
           FileUtils.mv(tempfile.path, path)
           return true

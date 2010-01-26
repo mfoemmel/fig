@@ -39,6 +39,9 @@ module Fig
       options[:publish] = nil
       opts.on('--publish PKG', 'install package in local and remote repositories') { |publish| options[:publish] = publish }
 
+      options[:tags] = []
+      opts.on('--tag TAG', 'create alias for package (requires --publish)') { |tag| options[:tags] << tag }
+
       options[:resources] =[]
       opts.on('--resource PATH', 'resource to include in package (when using --publish)') do |path| 
         options[:resources] << Resource.new(path) 
@@ -73,7 +76,7 @@ module Fig
         options[:modifiers] << Set.new(var, val) 
       end
 
-      opts.on('-p', '--append VAR=VAL', 'append environment variable') do |var_val| 
+      opts.on('-a', '-p', '--add VAR=VAL', 'prepend environment variable') do |var_val| 
         var, val = var_val.split('=')
         options[:modifiers] << Path.new(var, val)
       end

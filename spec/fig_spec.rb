@@ -101,7 +101,7 @@ describe "Fig" do
     input = <<-END
       resource tmp/bin/hello
       config default
-        append PATH=@/tmp/bin
+        add PATH=@/tmp/bin
       end
     END
     puts fig('--publish foo/1.2.3', input)
@@ -114,8 +114,15 @@ describe "Fig" do
     FileUtils.mkdir_p("tmp/bin")
     File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
     fail unless system "chmod +x tmp/bin/hello"
-    puts fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    puts fig('--publish foo/1.2.3 --resource tmp/bin/hello --add PATH=@/tmp/bin')
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+  end
+
+  it "publish with tags" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    puts fig('--publish foo/1.2.3 --add FOO=bar --tag current')
+    fig('-u -i foo/current -g FOO')[0].should == 'bar'
   end
 
   it "retrieve resource" do
@@ -127,7 +134,7 @@ describe "Fig" do
     input = <<-END
       resource tmp/lib/hello
       config default
-        append FOOPATH=@/tmp/lib/hello
+        add FOOPATH=@/tmp/lib/hello
       end
     END
     puts fig('--publish foo/1.2.3', input)

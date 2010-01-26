@@ -42,7 +42,9 @@ module Fig
       @os.download_list(@remote_repository_url)
     end
 
-    def publish_package(package_statements, package_name, version_name) 
+    def publish_package(package_statements, package_name, version_name, tags) 
+      tags.each { |tag| raise "Not a valid tag: #{tag}" unless tag =~ /[a-zA-Z0-9]+/ }
+
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       fig_file = File.join(temp_dir, ".fig")
@@ -71,6 +73,11 @@ module Fig
       end.select {|s|not s.nil?}
       @os.write(fig_file, content.join("\n").strip)
       @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user)
+      tags.each do |tag|
+        tag_file = File.join(temp_dir, "#{tag}.tag")
+        File.open(tag_file, "w") { |f| f << version_name } 
+        @os.upload(tag_file, remote_tag_file(package_name, tag), @remote_repository_user)
+      end
 #      update_package(package_name, version_name)
     end
 
@@ -103,6 +110,14 @@ module Fig
     def update_package(package_name, version_name)
       remote_fig_file = remote_fig_file_for_package(package_name, version_name)
       local_fig_file = local_fig_file_for_package(package_name, version_name)
+      begin 
+        tag_file = local_tag_file(package_name, version_name)
+        @os.download(remote_tag_file(package_name, version_name), tag_file)
+        update_package(package_name, File.read(tag_file))
+        return
+      rescue NotFoundException
+        # Not a tag, continue
+      end
       begin
         if @os.download(remote_fig_file, local_fig_file)
           install_package(package_name, version_name)
@@ -114,8 +129,13 @@ module Fig
     end
 
     def read_local_package(package_name, version_name)
-      dir = local_dir_for_package(package_name, version_name)
-      read_package_from_directory(dir, package_name, version_name)
+      tag_file = local_tag_file(package_name, version_name)
+      if File.exist?(tag_file)
+        read_local_package(package_name, File.read(tag_file))
+      else
+        dir = local_dir_for_package(package_name, version_name)
+        read_package_from_directory(dir, package_name, version_name)
+      end
     end 
 
     def read_remote_package(package_name, version_name)
@@ -154,6 +174,10 @@ module Fig
         dir = File.join(@local_repository_dir, package_name, version_name)
       end
       dir
+    end
+
+    def local_tag_file(package_name, tag)
+      File.join(@local_repository_dir, package_name, "#{tag}.tag")
     end
 
   private
@@ -201,6 +225,10 @@ module Fig
       file = local_fig_file_for_package(package_name, version_name)
       @os.write(file, package.unparse)
     end
+
+    def remote_tag_file(package_name, tag)
+      "#{@remote_repository_url}/#{package_name}/#{tag}.tag"
+    end  
 
     def remote_fig_file_for_package(package_name, version_name)
       "#{@remote_repository_url}/#{package_name}/#{version_name}/.fig"
