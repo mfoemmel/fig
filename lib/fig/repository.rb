@@ -103,8 +103,13 @@ module Fig
     def update_package(package_name, version_name)
       remote_fig_file = remote_fig_file_for_package(package_name, version_name)
       local_fig_file = local_fig_file_for_package(package_name, version_name)
-      if @os.download(remote_fig_file, local_fig_file)
-        install_package(package_name, version_name)
+      begin
+        if @os.download(remote_fig_file, local_fig_file)
+          install_package(package_name, version_name)
+        end
+      rescue NotFoundException
+        $stderr.puts "Package not found in remote repository: #{package_name}/#{version_name}"
+        exit 1
       end
     end
 
