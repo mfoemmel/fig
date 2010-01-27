@@ -16,11 +16,16 @@ module Fig
       raise "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
     end
 
+    def configs
+      @statements.select { |statement| statement.is_a?(Configuration) }
+    end
+
     def retrieves
       retrieves = {}
       statements.each { |statement| retrieves[statement.var] = statement.path if statement.is_a?(Retrieve) }
       retrieves
     end
+
     def archive_urls
       @statements.select{|s| s.is_a?(Archive)}.map{|s|s.url}
     end

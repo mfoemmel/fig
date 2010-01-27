@@ -12,7 +12,7 @@ grammar Fig
   end
 
   rule package_statement
-    archive / resource / retrieve / config / publish 
+    archive / resource / retrieve / config
   end
 
   rule archive
@@ -35,23 +35,6 @@ grammar Fig
     "retrieve" ws var:[a-zA-Z0-9]+ "->" path:[a-zA-Z0-9/\.-\[\]]+ ws {
       def to_package_statement
         Retrieve.new(var.text_value, path.text_value)
-      end
-    }
-  end
-
-  rule publish
-    "publish" ws local_name:config_name ("->" remote_name:config_name)? ws {
-      def to_package_statement
-        Publish.new(local_name.text_value, get_remote_name)
-      end
-
-      def get_remote_name
-        elements.each do |element|
-          if element.respond_to?(:remote_name) 
-            return element.remote_name.text_value
-          end
-        end
-        local_name.text_value
       end
     }
   end
@@ -139,7 +122,7 @@ grammar Fig
   end
 
   rule config_name
-    [a-zA-Z0-9_]+
+    [a-zA-Z0-9_\-.]+
   end
 
   rule name

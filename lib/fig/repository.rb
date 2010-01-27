@@ -10,6 +10,14 @@ module Fig
       @update = update
       @update_if_missing = update_if_missing
       @parser = Parser.new
+
+      @overrides = {}
+      if File.exist?('fig.properties')
+        File.readlines('fig.properties').each do |line|
+          descriptor, path = line.strip.split('=')
+          @overrides[descriptor] = path
+        end
+      end
     end
 
     def clean(package_name, version_name) 
@@ -20,19 +28,24 @@ module Fig
 
     def list_packages
       results = []
-      @os.list(@local_repository_dir).each do |package_name|
-        @os.list(File.join(@local_repository_dir, package_name)).each do |version_name|
-          results << "#{package_name}/#{version_name}"
+      if File.exist?(@local_repository_dir)
+        @os.list(@local_repository_dir).each do |package_name|
+          @os.list(File.join(@local_repository_dir, package_name)).each do |version_name|
+            results << "#{package_name}/#{version_name}"
+          end
         end
       end
       results
+    end
+
+    def list_remote_packages
+      @os.download_list(@remote_repository_url)
     end
 
     def publish_package(package_statements, package_name, version_name) 
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       fig_file = File.join(temp_dir, ".fig")
-      config_mapping = get_config_mapping(package_statements)
       content = bundle_resources(package_statements).map do |statement| 
         if statement.is_a?(Publish)
           nil
@@ -52,13 +65,6 @@ module Fig
           end
           @os.upload(archive_local, archive_remote, @remote_repository_user)
           statement.class.new(archive_name).unparse('')
-        elsif statement.is_a?(Configuration)
-          remote_name = config_mapping[statement.name]
-          if remote_name
-            statement.with_name(remote_name).unparse('')
-          else
-            nil
-          end
         else
           statement.unparse('')
         end
@@ -67,13 +73,6 @@ module Fig
       @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user)
 #      update_package(package_name, version_name)
     end
-
-    def get_config_mapping(package_statements)
-      publish_mappings = {}
-      package_statements.each{|s| publish_mappings[s.local_name] = s.remote_name if s.is_a?(Publish) }
-      publish_mappings
-    end
-    
 
     def bundle_resources(package_statements)
       resources = []
@@ -89,6 +88,7 @@ module Fig
         file = "resources.tar.gz"
         file unless system "tar -zcf #{file} #{resources.join(' ')}"
         new_package_statements.unshift(Archive.new(file))
+        at_exit { File.delete(file) }
       end
       new_package_statements
     end
@@ -103,8 +103,13 @@ module Fig
     def update_package(package_name, version_name)
       remote_fig_file = remote_fig_file_for_package(package_name, version_name)
       local_fig_file = local_fig_file_for_package(package_name, version_name)
-      if @os.download(remote_fig_file, local_fig_file)
-        install_package(package_name, version_name)
+      begin
+        if @os.download(remote_fig_file, local_fig_file)
+          install_package(package_name, version_name)
+        end
+      rescue NotFoundException
+        $stderr.puts "Package not found in remote repository: #{package_name}/#{version_name}"
+        exit 1
       end
     end
 
@@ -120,7 +125,14 @@ module Fig
     end
 
     def read_package_from_directory(dir, package_name, version_name)
-      read_package_from_file(File.join(dir, ".fig"), package_name, version_name)
+      file = File.join(dir, ".fig")
+      if not File.exist?(file)
+        file = File.join(dir, "package.fig")
+      end
+      if not File.exist?(file)
+        raise "File not found: #{file}"
+      end
+      read_package_from_file(file, package_name, version_name)
     end
 
     def read_package_from_file(file_name, package_name, version_name)
@@ -134,7 +146,14 @@ module Fig
     end
 
     def local_dir_for_package(package_name, version_name)
-      File.join(@local_repository_dir, package_name, version_name)
+      descriptor = "#{package_name}/#{version_name}"
+      dir = @overrides[descriptor]
+      if dir
+        $stderr.puts "override: #{descriptor}=#{dir}"
+      else
+        dir = File.join(@local_repository_dir, package_name, version_name)
+      end
+      dir
     end
 
   private
