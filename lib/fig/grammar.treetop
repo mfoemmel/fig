@@ -88,7 +88,7 @@ grammar Fig
   end
 
   rule path
-    ("append" / "path" / "add") ws name:[a-zA-Z0-9]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
+    ("append" / "path" / "add") ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
       def to_config_statement
         Path.new(name.text_value, value.text_value)
       end
@@ -96,7 +96,7 @@ grammar Fig
   end
 
   rule set
-    "set" ws name:[a-zA-Z0-9]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
+    "set" ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
       def to_config_statement
         Set.new(name.text_value, value.text_value)
       end
