@@ -38,16 +38,13 @@ module Fig
       when "ftp"
         ftp = Net::FTP.new(uri.host)
         ftp.login
-        dirs = [] 
-        ftp.list("-1 " + uri.path) do |line|
-          dirs << line
-        end
+        ftp.chdir(uri.path)
         packages = []
-        dirs.each do |dir|
-          ftp.list("-1 #{uri.path}/#{dir}") do |line|
-            packages << "#{dir}/#{line}"
-          end
+        ftp.retrlines('LIST -R .') do |line|
+          parts = line.gsub(/\\/, '/').sub(/:$/, '').split('/')
+          packages << "#{parts[1]}/#{parts[2]}" if parts.size == 3
         end
+        ftp.close
         packages
       else
         raise "Protocol not supported: #{url}"
