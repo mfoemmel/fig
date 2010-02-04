@@ -86,7 +86,7 @@ module Fig
       end
       if resources.size > 0
         file = "resources.tar.gz"
-        file unless system "tar -zcf #{file} #{resources.join(' ')}"
+        @os.create_archive(file, resources.join(' '))
         new_package_statements.unshift(Archive.new(file))
         at_exit { File.delete(file) }
       end

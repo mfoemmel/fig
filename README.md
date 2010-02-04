@@ -19,6 +19,18 @@ Fig can be installed via rubygems. The gems are hosted at [Gemcutter](http://gem
     $ gem install gemcutter
     $ gem tumble
 
+Fig also depends on a third-party library named, [libarchive](http://libarchive.rubyforge.org/). Libarchive is easily available 
+via most package management systems on Linux, FreeBSD, and OS X.  Libarchive versions greater than 2.6.0 are preferred.  If you are on Windows, the gem will install the libarchive binaries for you.
+
+    [Linux - Debian / Ubuntu]
+    apt-get libarchive-dev
+
+    [Linux - Red Hat / CentOS]
+    yum install libarchive-devel
+
+    [OS X - MacPorts]
+    port install libarchive
+
 Then you can install fig:
 
      $ gem install fig
