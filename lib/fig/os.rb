@@ -41,8 +41,8 @@ module Fig
         ftp.chdir(uri.path)
         packages = []
         ftp.retrlines('LIST -R .') do |line|
-          parts = line.gsub(/\\/, '/').sub(/:$/, '').split('/')
-          packages << "#{parts[1]}/#{parts[2]}" if parts.size == 3
+          parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').split('/')
+          packages << parts.join('/') if parts.size == 2
         end
         ftp.close
         packages
