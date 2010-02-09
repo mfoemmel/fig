@@ -1,4 +1,7 @@
 require 'fileutils'
+# Must specify absolute path of ::Archive when using
+# this module to avoid conflicts with Fig::Package::Archive
+require 'libarchive_ruby'
 require 'uri'
 require 'net/http'
 require 'tempfile'
@@ -126,13 +129,13 @@ module Fig
       download(url, path)
       case basename
       when /\.tar\.gz$/
-        fail unless system "tar -C #{dir} -zxf #{path}"
+        unpack_archive(dir, path)
      when /\.tgz$/
-        fail unless system "tar -C #{dir} -zxf #{path}"
+        unpack_archive(dir, path)
       when /\.tar\.bz2$/
-        fail unless system "tar -C #{dir} -jxf #{path}"       
+        unpack_archive(dir, path)
       when /\.zip$/
-        fail unless system "unzip -q -d #{dir} #{path}"
+        unpack_archive(dir, path)
       else
         raise "Unknown archive type: #{basename}"
       end
@@ -172,8 +175,6 @@ module Fig
           end
           ftp.putbinaryfile(local_file)
         end
-      else
-        fail unless system "curl -p -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
       end
     end
     
@@ -195,5 +196,37 @@ module Fig
     def log_info(msg)
       puts msg
     end
+
+    # Expects files_to_archive as an Array of filenames.
+    def create_archive(archive_name, files_to_archive)
+      ::Archive.write_open_filename(archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR) do |ar|
+        files_to_archive.each do |fn|
+          ar.new_entry do |entry|
+            entry.copy_stat(fn)
+            entry.pathname = fn
+            ar.write_header(entry)
+            if !entry.directory?
+              ar.write_data(open(fn) {|f| f.read })
+            end
+          end
+        end
+      end
+    end
+
+    # This method can handle the following archive types:
+    # .tar.bz2
+    # .tar.gz
+    # .tgz
+    # .zip
+    def unpack_archive(dir, file)
+      Dir.chdir(dir) do
+        ::Archive.read_open_filename(file) do |ar|
+          while entry = ar.next_header
+            ar.extract(entry)
+          end
+        end
+      end
+    end
+
   end
 end
