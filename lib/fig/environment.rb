@@ -114,7 +114,7 @@ module Fig
 
     # Replace @ symbol with the package's directory
     def expand_value(base_package, name, value)
-      return value if base_package.nil?
+      return value unless base_package && base_package.package_name
       file = value.gsub(/\@/, base_package.directory)
       if @retrieve_vars.member?(name)
         target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), File.basename(file))
