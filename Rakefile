@@ -11,6 +11,8 @@ begin
     gem.homepage = "http://github.com/mfoemmel/fig"
     gem.authors = ["Matthew Foemmel"]
     gem.add_dependency "libarchive", ">= 0.1.1"
+    gem.add_dependency "net-ssh", ">= 2.0.15"
+    gem.add_dependency "net-sftp", ">= 2.0.2"
     gem.add_dependency "polyglot", ">= 0.2.9"
     gem.add_dependency "treetop", ">= 1.4.2"
     gem.add_development_dependency "rspec", ">= 1.2.9"
@@ -52,4 +54,10 @@ end
 task :clean do
     rm_rf "./tmp"
     rm "./resources.tar.gz"
+end
+
+desc "Build and install the Fig gem for local testing."
+task :p do
+  sh "rake build"
+  sh "sudo gem install pkg/*.gem"
 end

@@ -4,6 +4,8 @@ require 'fileutils'
 require 'libarchive_ruby'
 require 'uri'
 require 'net/http'
+require 'net/ssh'
+require 'net/sftp'
 require 'tempfile'
 
 module Fig
@@ -83,35 +85,9 @@ module Fig
       when "ssh"
         # TODO need better way to do conditional download
         #       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
-        out = nil
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
-        tempfile = Tempfile.new("tmp")
-        IO.popen("ssh #{uri.user + '@' if uri.user}#{uri.host} \"fig-download #{timestamp} #{uri.path}\"") do |io|
-          first = true 
-          while bytes = io.read(4096)
-            if first
-              $stderr.puts "downloading #{url}"
-              first = false
-            end
-            tempfile << bytes
-          end
-        end
-        tempfile.close
-        case $?.exitstatus
-        when NOT_MODIFIED
-          tempfile.delete
-          return false
-        when NOT_FOUND
-          tempfile.delete
-          raise "File not found: #{uri}"
-        when SUCCESS
-          FileUtils.mv(tempfile.path, path)
-          return true
-        else
-          tempfile.delete
-          $stderr.puts "Unable to download file: #{$?.exitstatus}"
-          exit 1
-        end
+        cmd = "fig-download #{timestamp} #{uri.path}"
+        ssh_download(uri.user, uri.host, path, cmd)
       else
         raise "Unknown protocol: #{url}"
       end
@@ -146,9 +122,7 @@ module Fig
       uri = URI.parse(remote_file)
       case uri.scheme
       when "ssh"
-        dir = uri.path[0, uri.path.rindex('/')]
-       cmd = "mkdir -p #{dir} && cat > #{uri.path}"
-        fail unless system "cat #{local_file} | ssh #{uri.user + '@' if uri.user}#{uri.host} '#{cmd}'"
+        ssh_upload(uri.user, uri.host, local_file, remote_file)
       when "ftp"
         #      fail unless system "curl -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
        require 'net/ftp'
@@ -199,6 +173,7 @@ module Fig
 
     # Expects files_to_archive as an Array of filenames.
     def create_archive(archive_name, files_to_archive)
+      # TODO: Need to verify files_to_archive exists.
       ::Archive.write_open_filename(archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR) do |ar|
         files_to_archive.each do |fn|
           ar.new_entry do |entry|
@@ -225,6 +200,54 @@ module Fig
             ar.extract(entry)
           end
         end
+      end
+    end
+
+    private
+
+    # path = The local path the file should be downloaded to.
+    # cmd = The command to be run on the remote host.
+    def ssh_download(user, host, path, cmd)
+      return_code = nil
+      tempfile = Tempfile.new("tmp")
+      Net::SSH.start(host, user) do |ssh|
+        ssh.open_channel do |channel|
+          channel.exec(cmd)
+          channel.on_data() { |ch, data| tempfile << data }
+          channel.on_extended_data() { |ch, type, data| $stderr.puts "SSH Download ERROR: #{data}" }
+          channel.on_request("exit-status") { |ch, request|
+            return_code = request.read_long
+          }
+        end
+      end
+
+      tempfile.close()
+
+      case return_code
+      when NOT_MODIFIED
+        tempfile.delete
+        return false
+      when NOT_FOUND
+        tempfile.delete
+        raise "File not found: #{uri}"
+      when SUCCESS
+        FileUtils.mv(tempfile.path, path)
+        return true
+      else
+        tempfile.delete
+        $stderr.puts "Unable to download file: #{return_code}"
+        exit 1
+      end
+    end
+
+    def ssh_upload(user, host, local_file, remote_file)
+      uri = URI.parse(remote_file)
+      dir = uri.path[0, uri.path.rindex('/')]
+      Net::SSH.start(host, user) do |ssh|
+        ssh.exec!("mkdir -p #{dir}")
+      end
+      Net::SFTP.start(host, user) do |sftp|
+        sftp.upload!(local_file, uri.path)
       end
     end
 
