@@ -179,7 +179,7 @@ module Fig
         @os.clear_directory(local_dir)
         # some packages contain no files, only a fig file.
         if not (package.archive_urls.empty? && package.resource_urls.empty?)
-          @os.exec(temp_dir, "mv * #{local_dir}/")
+          FileUtils.mv(Dir.glob(File.join(temp_dir, "*")), local_dir)
         end
         write_local_package(package_name, version_name, package)
       rescue
