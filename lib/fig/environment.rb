@@ -88,7 +88,16 @@ module Fig
 
     def append_variable(base_package, name, value)
       value = expand_value(base_package, name, value)
-      prev = @variables[name]
+      # TODO: converting all environment variables to upcase is not a robust
+      #       comparison. It also assumes all env vars will be in upcase
+      #       in package.fig
+      prev = nil
+      @variables.each do |key, val|
+        if key.upcase == name.upcase
+          name = key
+          prev = val
+        end
+      end
       if prev
         @variables[name] = value + File::PATH_SEPARATOR + prev
       else
@@ -105,7 +114,6 @@ module Fig
         old_env.each { |key,value| ENV[key] = value }
       end
     end
-
 
     def lookup_package(package_name, version_name)
       package = @packages[package_name]

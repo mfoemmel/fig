@@ -1,8 +1,26 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'rubygems'
-require 'open4'
+require 'fig/os'
 require 'fileutils'
+
+class Popen
+  if Fig::OS.windows?
+    require 'win32/open3'
+    def self.popen(*cmd)
+      Open3.popen3(*cmd) { |stdin,stdout,stderr|
+        yield stdin, stdout, stderr
+      }
+    end
+  else
+    require 'open4'
+    def self.popen(*cmd)
+      Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
+        yield stdin, stdout, stderr
+      }
+    end
+  end
+end
 
 FIG_HOME = File.expand_path(File.dirname(__FILE__) + '/../tmp/fighome')
 FileUtils.mkdir_p(FIG_HOME)
@@ -18,7 +36,7 @@ def fig(args, input=nil)
   args = "--file - #{args}" if input
   out = nil
   err = nil
-  status = Open4::popen4("#{FIG_EXE} #{args}") do |pid, stdin, stdout, stderr|
+  Popen.popen("#{FIG_EXE} #{args}") do |stdin, stdout, stderr|
     if input
       stdin.puts input
       stdin.close

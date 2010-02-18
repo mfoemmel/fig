@@ -10,6 +10,7 @@ require 'fig/environment'
 require 'fig/repository'
 require 'fig/os'
 require 'fig/parser'
+require 'fig/windows'
 
 include Fig
 
@@ -139,10 +140,6 @@ else
   package = Package.new(nil, nil, ".", [])
 end
 
-def shell_exec(cmd)
-  exec(ENV['SHELL'], '-c', cmd.join(' '))
-end
-
 if options[:publish]
   raise "Unexpected arguments: #{argv.join(' ')}" if !argv.empty?
   package_name, config_name, version_name = parse_descriptor(options[:publish])
@@ -162,12 +159,11 @@ elsif options[:echo]
   puts env[options[:echo]]
 elsif shell_command
   argv.shift
-  env.execute_shell(shell_command) { |cmd| shell_exec cmd }
+  env.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
 elsif argv[0]
   package_name, config_name, version_name = parse_descriptor(argv.shift)
   env.include_config(package, package_name, config_name, version_name)
-  env.execute_config(package, package_name, config_name, nil, argv) { |cmd| shell_exec cmd }
+  env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
 elsif input
-  env.execute_config(package, nil, options[:config], nil, argv) { |cmd| shell_exec cmd }
+  env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
 end
-
