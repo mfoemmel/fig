@@ -5,7 +5,7 @@ Fig is a utility for configuring environments and managing dependencies across a
 
 An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing what environment variables should be modified when the package is included. 
 
-Developers can a use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files. This ensures that all developers on a team are using the same environemnts. 
+Developers can use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files. This ensures that all developers on a team are using the same environemnts. 
 
 Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a server somewhere that is shared by a team. Fig will automatically download packages from the remote repository and install them in the local repository, when needed. 
 
@@ -104,7 +104,7 @@ Fig also lets you append environment variables, using the system-specified path 
     $ mkdir bin
     $ echo "echo \$GREETING, World" > bin/hello
     $ chmod +x bin/hello
-    $ fig -s GREETING=Hello -p bin -- hello
+    $ fig -s GREETING=Hello -p PATH=bin -- hello
     Hello, World
 
 ### Fig Files ###
