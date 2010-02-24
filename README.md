@@ -169,7 +169,7 @@ The "-u" (or "--update") option tells fig to check the remote repository for pac
 Also, when including a package, you can specify a particular configuration by appending it to the package name using a colon:
 
     $ fig -i hello/1.0.0:french -- hello
-    Hello, World
+    Bonjour, World
 
 ### Retrieves ###
 
