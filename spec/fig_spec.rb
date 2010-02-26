@@ -157,4 +157,31 @@ describe "Fig" do
     fig('-m', input)
     File.read("tmp/lib2/foo/hello").should == "some library"
   end
+
+  it "package multiple resources" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.rm_rf("tmp")
+    FileUtils.mkdir_p("tmp/lib")
+    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
+    File.open("tmp/lib/hello2", "w") { |f| f << "some other library" }
+    input = <<-END
+      resource tmp/lib/hello
+      resource tmp/lib/hello2
+      config default
+        append FOOPATH=@/tmp/lib/hello
+        append FOOPATH=@/tmp/lib/hello2
+      end
+    END
+    puts fig('--publish foo/1.2.3', input)
+    input = <<-END
+      retrieve FOOPATH->tmp/lib2/[package]
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('-m', input)
+    File.read("tmp/lib2/foo/hello").should == "some library"
+    File.read("tmp/lib2/foo/hello2").should == "some other library"
+  end
 end
