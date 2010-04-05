@@ -30,7 +30,7 @@ module Fig
     end
     
     def write(path, content)
-      File.open(path, "w") { |f| f << content }
+      File.open(path, "w") { |f| f.binmode; f << content }
     end
     
     SUCCESS = 0
@@ -185,7 +185,7 @@ module Fig
             entry.pathname = fn
             ar.write_header(entry)
             if !entry.directory?
-              ar.write_data(open(fn) {|f| f.read })
+              ar.write_data(open(fn) {|f| f.binmode; f.read })
             end
           end
         end
