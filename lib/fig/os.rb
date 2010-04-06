@@ -1,6 +1,11 @@
 require 'fileutils'
+# Must specify absolute path of ::Archive when using
+# this module to avoid conflicts with Fig::Package::Archive
+require 'libarchive_ruby'
 require 'uri'
 require 'net/http'
+require 'net/ssh'
+require 'net/sftp'
 require 'tempfile'
 
 module Fig
@@ -38,16 +43,13 @@ module Fig
       when "ftp"
         ftp = Net::FTP.new(uri.host)
         ftp.login
-        dirs = [] 
-        ftp.list("-1 " + uri.path) do |line|
-          dirs << line
-        end
+        ftp.chdir(uri.path)
         packages = []
-        dirs.each do |dir|
-          ftp.list("-1 #{uri.path}/#{dir}") do |line|
-            packages << "#{dir}/#{line}"
-          end
+        ftp.retrlines('LIST -R .') do |line|
+          parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').split('/')
+          packages << parts.join('/') if parts.size == 2
         end
+        ftp.close
         packages
       else
         raise "Protocol not supported: #{url}"
@@ -83,7 +85,6 @@ module Fig
       when "ssh"
         # TODO need better way to do conditional download
         #       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
-        out = nil
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
         tempfile = Tempfile.new("tmp")
         IO.popen("ssh #{uri.user + '@' if uri.user}#{uri.host} \"fig-download #{timestamp} #{uri.path}\"") do |io|
@@ -129,13 +130,13 @@ module Fig
       download(url, path)
       case basename
       when /\.tar\.gz$/
-        fail unless system "tar -C #{dir} -zxf #{path}"
+        unpack_archive(dir, path)
      when /\.tgz$/
-        fail unless system "tar -C #{dir} -zxf #{path}"
+        unpack_archive(dir, path)
       when /\.tar\.bz2$/
-        fail unless system "tar -C #{dir} -jxf #{path}"       
+        unpack_archive(dir, path)
       when /\.zip$/
-        fail unless system "unzip -q -d #{dir} #{path}"
+        unpack_archive(dir, path)
       else
         raise "Unknown archive type: #{basename}"
       end
@@ -146,9 +147,7 @@ module Fig
       uri = URI.parse(remote_file)
       case uri.scheme
       when "ssh"
-        dir = uri.path[0, uri.path.rindex('/')]
-       cmd = "mkdir -p #{dir} && cat > #{uri.path}"
-        fail unless system "cat #{local_file} | ssh #{uri.user + '@' if uri.user}#{uri.host} '#{cmd}'"
+        ssh_upload(uri.user, uri.host, local_file, remote_file)
       when "ftp"
         #      fail unless system "curl -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
        require 'net/ftp'
@@ -175,8 +174,6 @@ module Fig
           end
           ftp.putbinaryfile(local_file)
         end
-      else
-        fail unless system "curl -p -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
       end
     end
     
@@ -198,5 +195,86 @@ module Fig
     def log_info(msg)
       puts msg
     end
+
+    # Expects files_to_archive as an Array of filenames.
+    def create_archive(archive_name, files_to_archive)
+      # TODO: Need to verify files_to_archive exists.
+      ::Archive.write_open_filename(archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR) do |ar|
+        files_to_archive.each do |fn|
+          ar.new_entry do |entry|
+            entry.copy_stat(fn)
+            entry.pathname = fn
+            ar.write_header(entry)
+            if !entry.directory?
+              ar.write_data(open(fn) {|f| f.read })
+            end
+          end
+        end
+      end
+    end
+
+    # This method can handle the following archive types:
+    # .tar.bz2
+    # .tar.gz
+    # .tgz
+    # .zip
+    def unpack_archive(dir, file)
+      Dir.chdir(dir) do
+        ::Archive.read_open_filename(file) do |ar|
+          while entry = ar.next_header
+            ar.extract(entry)
+          end
+        end
+      end
+    end
+
+    private
+
+    # path = The local path the file should be downloaded to.
+    # cmd = The command to be run on the remote host.
+    def ssh_download(user, host, path, cmd)
+      return_code = nil
+      tempfile = Tempfile.new("tmp")
+      Net::SSH.start(host, user) do |ssh|
+        ssh.open_channel do |channel|
+          channel.exec(cmd)
+          channel.on_data() { |ch, data| tempfile << data }
+          channel.on_extended_data() { |ch, type, data| $stderr.puts "SSH Download ERROR: #{data}" }
+          channel.on_request("exit-status") { |ch, request|
+            return_code = request.read_long
+          }
+        end
+      end
+
+      tempfile.close()
+
+      case return_code
+      when NOT_MODIFIED
+        tempfile.delete
+        return false
+      when NOT_FOUND
+        tempfile.delete
+        raise "File not found: #{uri}"
+      when SUCCESS
+        FileUtils.mv(tempfile.path, path)
+        return true
+      else
+        tempfile.delete
+        $stderr.puts "Unable to download file: #{return_code}"
+        exit 1
+      end
+    end
+
+    def ssh_upload(user, host, local_file, remote_file)
+      uri = URI.parse(remote_file)
+      dir = uri.path[0, uri.path.rindex('/')]
+      Net::SSH.start(host, user) do |ssh|
+        ssh.exec!("mkdir -p #{dir}")
+      end
+      Net::SFTP.start(host, user) do |sftp|
+        sftp.upload!(local_file, uri.path)
+      end
+    end
+
   end
 end

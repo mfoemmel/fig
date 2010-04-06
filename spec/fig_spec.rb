@@ -10,8 +10,7 @@ ENV['FIG_HOME'] = FIG_HOME
 
 FIG_REMOTE_DIR = File.expand_path(File.dirname(__FILE__) + '/../tmp/remote')
 FileUtils.mkdir_p(FIG_REMOTE_DIR)
-ENV['FIG_REMOTE_URL'] = "ssh://localhost#{FIG_REMOTE_DIR}"
-puts ENV['FIG_REMOTE_URL']
+ENV['FIG_REMOTE_URL'] = "ssh://#{ENV['USER']}@localhost#{FIG_REMOTE_DIR}"
 
 FIG_EXE = File.expand_path(File.dirname(__FILE__) + '/../bin/fig')
 

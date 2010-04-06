@@ -118,14 +118,22 @@ end
 
 if input
   package = Parser.new.parse_package(nil, nil, ".", input)
+  direct_retrieves=[]
   if options[:retrieve]
     package.retrieves.each do |var, path|
-      env.add_retrieve(var, path)
+      if var =~ /^@([^\/]+)(.*)/
+        direct_retrieves << [$1, $2, path]
+      else
+        env.add_retrieve(var, path)
+      end
     end
   end
   unless options[:publish] || options[:list]
     env.register_package(package)
     env.apply_config(package, options[:config])
+    direct_retrieves.each do |info|
+      env.direct_retrieve(info[0], info[1], info[2])
+    end
   end
 else
   package = Package.new(nil, nil, ".", [])

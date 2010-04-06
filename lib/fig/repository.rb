@@ -93,7 +93,7 @@ module Fig
       end
       if resources.size > 0
         file = "resources.tar.gz"
-        file unless system "tar -zcf #{file} #{resources.join(' ')}"
+        @os.create_archive(file, resources.join(' '))
         new_package_statements.unshift(Archive.new(file))
         at_exit { File.delete(file) }
       end
@@ -203,7 +203,7 @@ module Fig
         @os.clear_directory(local_dir)
         # some packages contain no files, only a fig file.
         if not (package.archive_urls.empty? && package.resource_urls.empty?)
-          @os.exec(temp_dir, "mv * #{local_dir}/")
+          FileUtils.mv(Dir.glob(File.join(temp_dir, "*")), local_dir)
         end
         write_local_package(package_name, version_name, package)
       rescue
