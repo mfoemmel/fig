@@ -1,8 +1,26 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'rubygems'
-require 'open4'
+require 'fig/os'
 require 'fileutils'
+
+class Popen
+  if Fig::OS.windows?
+    require 'win32/open3'
+    def self.popen(*cmd)
+      Open3.popen3(*cmd) { |stdin,stdout,stderr|
+        yield stdin, stdout, stderr
+      }
+    end
+  else
+    require 'open4'
+    def self.popen(*cmd)
+      Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
+        yield stdin, stdout, stderr
+      }
+    end
+  end
+end
 
 FIG_HOME = File.expand_path(File.dirname(__FILE__) + '/../tmp/fighome')
 FileUtils.mkdir_p(FIG_HOME)
@@ -18,7 +36,7 @@ def fig(args, input=nil)
   args = "--file - #{args}" if input
   out = nil
   err = nil
-  status = Open4::popen4("#{FIG_EXE} #{args}") do |pid, stdin, stdout, stderr|
+  Popen.popen("#{FIG_EXE} #{args}") do |stdin, stdout, stderr|
     if input
       stdin.puts input
       stdin.close
@@ -145,5 +163,32 @@ describe "Fig" do
     END
     fig('-m', input)
     File.read("tmp/lib2/foo/hello").should == "some library"
+  end
+
+  it "package multiple resources" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.rm_rf("tmp")
+    FileUtils.mkdir_p("tmp/lib")
+    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
+    File.open("tmp/lib/hello2", "w") { |f| f << "some other library" }
+    input = <<-END
+      resource tmp/lib/hello
+      resource tmp/lib/hello2
+      config default
+        append FOOPATH=@/tmp/lib/hello
+        append FOOPATH=@/tmp/lib/hello2
+      end
+    END
+    puts fig('--publish foo/1.2.3', input)
+    input = <<-END
+      retrieve FOOPATH->tmp/lib2/[package]
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('-m', input)
+    File.read("tmp/lib2/foo/hello").should == "some library"
+    File.read("tmp/lib2/foo/hello2").should == "some other library"
   end
 end

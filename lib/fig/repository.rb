@@ -93,7 +93,7 @@ module Fig
       end
       if resources.size > 0
         file = "resources.tar.gz"
-        @os.create_archive(file, resources.join(' '))
+        @os.create_archive(file, resources)
         new_package_statements.unshift(Archive.new(file))
         at_exit { File.delete(file) }
       end

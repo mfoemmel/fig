@@ -184,12 +184,16 @@ module Fig
 
     def exec(dir,command)
       Dir.chdir(dir) { raise "Command failed" unless system command }
-   end
+    end
     
     def copy(source, target)
       FileUtils.mkdir_p(File.dirname(target))
       FileUtils.copy_file(source, target)
       target
+    end
+
+    def move_file(dir, from, to)
+      Dir.chdir(dir) { FileUtils.mv(from, to, :force => true) }
     end
     
     def log_info(msg)
@@ -228,7 +232,34 @@ module Fig
       end
     end
 
+    def self.windows?
+      Config::CONFIG['host_os'] =~ /mswin/
+    end
+
+    def self.unix?
+      !windows?
+    end
+
+    def shell_exec(cmd)
+      if OS.windows?
+        Windows.shell_exec_windows(cmd)
+      else
+        shell_exec_unix(cmd)
+      end
+    end
+
     private
+
+    def shell_exec_unix(cmd)
+      Kernel.exec(ENV['SHELL'], '-c', cmd.join(' '))
+    end
+
+    def shell_exec_windows(cmd)
+      #command = ["C:/WINDOWS/system32/cmd.exe", "/C", "call"] + cmd
+      command = ["cmd.exe", "/C"] + cmd
+      command = command.join(' ')
+      Kernel.exec(command)
+    end
 
     # path = The local path the file should be downloaded to.
     # cmd = The command to be run on the remote host.
@@ -254,7 +285,7 @@ module Fig
         return false
       when NOT_FOUND
         tempfile.delete
-        raise "File not found: #{uri}"
+        raise "File not found: #{path}"
       when SUCCESS
         FileUtils.mv(tempfile.path, path)
         return true
