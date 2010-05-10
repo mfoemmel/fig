@@ -32,7 +32,7 @@ grammar Fig
   end
 
   rule retrieve
-    "retrieve" ws var:[@a-zA-Z0-9/\._]+ "->" path:[a-zA-Z0-9/\.-\[\]]+ ws {
+    "retrieve" ws var:[@a-zA-Z0-9/\._]+ "->" path:[a-zA-Z0-9/\.\-\[\]]+ ws {
       def to_package_statement
         Retrieve.new(var.text_value, path.text_value)
       end
