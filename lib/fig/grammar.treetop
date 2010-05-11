@@ -134,7 +134,7 @@ grammar Fig
   end
 
   rule ws
-    [ \n\t]+
+    [ \n\r\t]+
   end
 end
 
