@@ -1,0 +1,3 @@
+*.out
+_test
+_gotest_.*
