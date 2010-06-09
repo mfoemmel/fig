@@ -12,4 +12,6 @@ type Descriptor struct {
 	ConfigName  ConfigName
 }
 
-
+func (d *Descriptor) String() string {
+	return string(d.PackageName) + "/" + string(d.VersionName) + ":" + string(d.ConfigName)
+}

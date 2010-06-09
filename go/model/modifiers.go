@@ -69,3 +69,6 @@ func (im *IncludeModifier) Accept(handler ModifierHandler) os.Error {
 	return handler.HandleInclude(im.PackageName, im.VersionName, im.ConfigName)
 }
 
+func (im *IncludeModifier) Descriptor() *Descriptor {
+	return &Descriptor{im.PackageName, im.VersionName, im.ConfigName}
+}
