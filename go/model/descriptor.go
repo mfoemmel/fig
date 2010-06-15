@@ -12,6 +12,10 @@ type Descriptor struct {
 	ConfigName  ConfigName
 }
 
+func NewDescriptor(packageName string, versionName string, configName string) *Descriptor {
+	return &Descriptor{PackageName(packageName),VersionName(versionName),ConfigName(configName)}
+}
+
 func (d *Descriptor) String() string {
 	return string(d.PackageName) + "/" + string(d.VersionName) + ":" + string(d.ConfigName)
 }

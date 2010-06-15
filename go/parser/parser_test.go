@@ -4,9 +4,29 @@ import "testing"
 
 import . "fig/model"
 
-func TestKeyword(t *testing.T) {
+func TestSet(t *testing.T) {
+	scanner := NewScanner("test", []byte("\nset FOO=BAR"))
+	modifiers, err := scanner.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if l := len(modifiers); l != 1 {
+		t.Fatalf("Expected 1 modifier, got: %d", l)
+	}		
+	if name := modifiers[0].(*SetModifier).Name; name != "FOO" {
+		t.Errorf("Expected name: '%s', got '%s'", "FOO", name)
+	}
+	if value := modifiers[0].(*SetModifier).Value; value != "BAR" {
+		t.Errorf("Expected value: %s, got %s", "BAR", value)
+	}
+}
+
+func TestInclude(t *testing.T) {
 	scanner := NewScanner("test", []byte("include foo/1.2.3:bar"))
-	modifiers := scanner.Parse()
+	modifiers, err := scanner.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
 	if l := len(modifiers); l != 1 {
 		t.Fatalf("Expected 1 modifier, got: %d", l)
 	}		
@@ -20,11 +40,29 @@ func TestKeyword(t *testing.T) {
 		t.Errorf("Expected config name: %s, got %s", "bar", configName)
 	}
 
-/*	if keyword := scanner.ReadKeyword(); keyword != "include" {
-		t.Errorf("Expected: hello, got: %s", keyword)
-	}
-*/
 }
+
+func TestBadKeyword(t *testing.T) {
+	scanner := NewScanner("test", []byte("xyzzy a=b"))
+	_, err := scanner.Parse()
+	if err == nil {
+		t.Errorf("Expected error")
+	}
+	if err.message != keywordError {
+		t.Errorf(err.message)
+	}
+	if err.row != 1 {
+		t.Errorf("Expected row: %d, actual: %d", 1, err.row)
+	}
+	if err.col != 1 {
+		t.Errorf("Expected col: %d, actual: %d", 1, err.col)
+	}
+	if err.length != 5 {
+		t.Errorf("Expected length: %d, actual: %d", 5, err.length)
+	}
+//	t.Error(err.String())
+}
+
 /*
 func TestDescriptor(t *testing.T) {
 	scanner := NewScanner([]byte("foo/1.2.3:bar"))
