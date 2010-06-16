@@ -1,5 +1,6 @@
 package parser
 
+//import "fmt"
 import "testing"
 
 import . "fig/model"
@@ -43,24 +44,50 @@ func TestInclude(t *testing.T) {
 }
 
 func TestBadKeyword(t *testing.T) {
-	scanner := NewScanner("test", []byte("xyzzy a=b"))
+	checkError(t, "xyzzy a=b", keywordError, 1, 1, 5)
+}
+
+func TestBadSet(t *testing.T) {
+	checkError(t, "set !ab=c", variableNameError, 1, 5, 1)
+	checkError(t, "set a@b=c", variableNameError, 1, 6, 1)
+	checkError(t, "set ab#=c", variableNameError, 1, 7, 1)
+
+	checkError(t, "set ab =c", nameValueWhitespaceError, 1, 7, 1)
+	checkError(t, "set ab= c", nameValueWhitespaceError, 1, 8, 1)
+
+	checkError(t, "set a=$bc", variableValueError, 1, 7, 1)
+	checkError(t, "set a=b%c", variableValueError, 1, 8, 1)
+	checkError(t, "set a=bc^", variableValueError, 1, 9, 1)
+}
+
+func TestBadInclude(t *testing.T) {
+	checkError(t, "include &", packageNameError, 1, 9, 1)
+	checkError(t, "include a*", packageNameError, 1, 10, 1)
+	checkError(t, "include a/(", versionNameError, 1, 11, 1)
+	checkError(t, "include a/b)", versionNameError, 1, 12, 1)
+	checkError(t, "include a:!", configNameError, 1, 11, 1)
+	checkError(t, "include a:b@", configNameError, 1, 12, 1)
+}
+
+func checkError(t *testing.T, s string, message string, row int, col int, length int) {
+	scanner := NewScanner("test", []byte(s))
 	_, err := scanner.Parse()
 	if err == nil {
-		t.Errorf("Expected error")
+		t.Fatalf("Expected error")
 	}
-	if err.message != keywordError {
-		t.Errorf(err.message)
+	if err.message != message {
+		t.Errorf("Expected error: \"%s\", got: \"%s\"", message, err.message)
 	}
-	if err.row != 1 {
-		t.Errorf("Expected row: %d, actual: %d", 1, err.row)
+	if err.row != row {
+		t.Errorf("Expected row: %d, actual: %d", row, err.row)
 	}
-	if err.col != 1 {
-		t.Errorf("Expected col: %d, actual: %d", 1, err.col)
+	if err.col != col {
+		t.Errorf("Expected col: %d, actual: %d", col, err.col)
 	}
-	if err.length != 5 {
-		t.Errorf("Expected length: %d, actual: %d", 5, err.length)
+	if err.length != length {
+		t.Errorf("Expected length: %d, actual: %d", length, err.length)
 	}
-//	t.Error(err.String())
+//	fmt.Println(err)
 }
 
 /*
