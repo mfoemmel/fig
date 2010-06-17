@@ -6,41 +6,19 @@ import "testing"
 import . "fig/model"
 
 func TestSet(t *testing.T) {
-	scanner := NewScanner("test", []byte("\nset FOO=BAR"))
-	modifiers, err := scanner.Parse()
-	if err != nil {
-		t.Fatal(err)
+	input := "set FOO=BAR"
+	expected := []Modifier{
+		NewSetModifier("FOO", "BAR"),
 	}
-	if l := len(modifiers); l != 1 {
-		t.Fatalf("Expected 1 modifier, got: %d", l)
-	}		
-	if name := modifiers[0].(*SetModifier).Name; name != "FOO" {
-		t.Errorf("Expected name: '%s', got '%s'", "FOO", name)
-	}
-	if value := modifiers[0].(*SetModifier).Value; value != "BAR" {
-		t.Errorf("Expected value: %s, got %s", "BAR", value)
-	}
+	checkParse(t, input, expected)
 }
 
 func TestInclude(t *testing.T) {
-	scanner := NewScanner("test", []byte("include foo/1.2.3:bar"))
-	modifiers, err := scanner.Parse()
-	if err != nil {
-		t.Fatal(err)
+	input := "include foo/1.2.3:bar"
+	expected := []Modifier{
+		NewIncludeModifier("foo", "1.2.3", "bar"),
 	}
-	if l := len(modifiers); l != 1 {
-		t.Fatalf("Expected 1 modifier, got: %d", l)
-	}		
-	if packageName := modifiers[0].(*IncludeModifier).PackageName; packageName != "foo" {
-		t.Errorf("Expected package name: %s, got %s", "foo", packageName)
-	}
-	if versionName := modifiers[0].(*IncludeModifier).VersionName; versionName != "1.2.3" {
-		t.Errorf("Expected version name: %s, got %s", "1.2.3", versionName)
-	}
-	if configName := modifiers[0].(*IncludeModifier).ConfigName; configName != "bar" {
-		t.Errorf("Expected config name: %s, got %s", "bar", configName)
-	}
-
+	checkParse(t, input, expected)
 }
 
 func TestBadKeyword(t *testing.T) {
@@ -69,6 +47,51 @@ func TestBadInclude(t *testing.T) {
 	checkError(t, "include a:b@", configNameError, 1, 12, 1)
 }
 
+func checkParse(t *testing.T, s string, expected []Modifier) {
+	scanner := NewScanner("test", []byte(s))
+	modifiers, err := scanner.Parse()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkModifiers(t, expected, modifiers)
+}
+
+func checkModifiers(t *testing.T, expected []Modifier, actual []Modifier) {
+	if len(expected) != len(actual) {
+		t.Fatalf("Expected %d modifier, got %d", len(expected), len(actual))
+	}
+	for i, _ := range expected {
+		checkModifier(t, expected[i], actual[i])
+	}
+}
+
+func checkModifier(t *testing.T, expected Modifier, actual Modifier) {
+	switch a := actual.(type) {
+	case *SetModifier:
+		e := expected.(*SetModifier)
+		if a.Name != e.Name {
+			t.Errorf("Expected name: '%s', got '%s'", e.Name, a.Name)
+		}
+		if a.Value != e.Value {
+			t.Errorf("Expected name: '%s', got '%s'", e.Value, a.Value)
+		}
+
+	case *IncludeModifier:
+		e := expected.(*IncludeModifier)
+		if a.PackageName != e.PackageName {
+			t.Errorf("Expected package name: %s, got %s", e.PackageName, a.PackageName)
+		}
+		if a.VersionName != e.VersionName {
+			t.Errorf("Expected version name: %s, got %s", e.VersionName, a.VersionName)
+		}
+		if a.ConfigName != e.ConfigName {
+			t.Errorf("Expected config name: %s, got %s", e.ConfigName, a.ConfigName)
+		}
+	default:
+		t.Fatalf("Unexpected modifier type: %v", actual)
+	}
+}
+
 func checkError(t *testing.T, s string, message string, row int, col int, length int) {
 	scanner := NewScanner("test", []byte(s))
 	_, err := scanner.Parse()
@@ -87,24 +110,6 @@ func checkError(t *testing.T, s string, message string, row int, col int, length
 	if err.length != length {
 		t.Errorf("Expected length: %d, actual: %d", length, err.length)
 	}
-//	fmt.Println(err)
+	//	fmt.Println(err)
 }
 
-/*
-func TestDescriptor(t *testing.T) {
-	scanner := NewScanner([]byte("foo/1.2.3:bar"))
-	if scanner.Next() != PackageName {
-		t.Fatal("Expected package name")
-	}
-	packageName, versionName, configName := scanner.ReadDescriptor()
-	if packageName != "foo" {
-		t.Errorf("Expected package name: foo, got: %s", packageName)
-	}
-	if versionName != "foo" {
-		t.Errorf("Expected package name: foo, got: %s", packageName)
-	}
-	if configName != "foo" {
-		t.Errorf("Expected package name: foo, got: %s", packageName)
-	}
-}
-*/
