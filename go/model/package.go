@@ -27,21 +27,4 @@ func (pkg *Package) FindConfig(configName ConfigName) *Config {
 }
 
 
-//
-// Config
-//
-
-type Config struct {
-	ConfigName ConfigName
-	Modifiers  []Modifier
-}
-
-func NewConfig(configName ConfigName, modifiers ...Modifier) *Config {
-	return &Config{configName, modifiers}
-}
-
-func NewConfigWithModifiers(configName ConfigName, modifiers []Modifier) *Config {
-	return &Config{configName, modifiers}
-}
-
 
