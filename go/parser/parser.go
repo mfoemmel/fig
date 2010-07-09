@@ -5,7 +5,7 @@ import "fmt"
 
 import . "fig/model"
 
-type Scanner struct {
+type Parser struct {
 	source string
 	buf    []byte
 	c      int
@@ -17,27 +17,29 @@ type Scanner struct {
 
 const EOF = -1
 
-func NewScanner(source string, buf []byte) *Scanner {
-	return &Scanner{
+func NewParser(source string, buf []byte) *Parser {
+	parser := &Parser{
 		source: source,
 		buf:    buf,
 		c:      0,
 		start:  0,
-		pos:    0,
+		pos:    -1,
 		line:   1,
 		col:    1,
 	}
+	parser.next()
+	return parser
 }
 
 const keywordError = "invalid keyword; expected \"set\" or \"include\""
 
-func isKeywordChar(c byte) bool {
+func (p *Parser) isKeywordChar() bool {
 	switch {
-	case c >= 'a' && c <= 'z':
+	case p.c >= 'a' && p.c <= 'z':
 		return true
-	case c >= 'A' && c <= 'Z':
+	case p.c >= 'A' && p.c <= 'Z':
 		return true
-	case c >= '0' && c <= '9':
+	case p.c >= '0' && p.c <= '9':
 		return true
 	}
 	return false
@@ -45,7 +47,7 @@ func isKeywordChar(c byte) bool {
 
 const packageNameError = "invalid character in package name; expected [a-z A-Z 0-9 .]"
 
-func (s *Scanner) isPackageNameChar() bool {
+func (s *Parser) isPackageNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
@@ -58,7 +60,7 @@ func isVersionNamePrefix(c byte) bool {
 
 const versionNameError = "invalid character in version name; expected [a-z A-Z 0-9 .]"
 
-func (s *Scanner) isVersionNameChar() bool {
+func (s *Parser) isVersionNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
@@ -67,7 +69,7 @@ func (s *Scanner) isVersionNameChar() bool {
 
 const configNameError = "invalid character in config name; expected [a-z A-Z 0-9 .]"
 
-func (s *Scanner) isConfigNameChar() bool {
+func (s *Parser) isConfigNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
@@ -79,7 +81,7 @@ const nameValueWhitespaceError = "whitespace not allowed around '='"
 
 const variableNameError = "invalid character in variable name; expected [a-z A-Z 0-9]"
 
-func (s *Scanner) isVariableNameChar() bool {
+func (s *Parser) isVariableNameChar() bool {
 	c := s.c
 	return (c >= 'a' && c <= 'z') ||
 		(c >= 'A' && c <= 'Z') ||
@@ -88,7 +90,7 @@ func (s *Scanner) isVariableNameChar() bool {
 
 const variableValueError = "invalid character in variable value; expected [a-z A-Z 0-9]"
 
-func (s *Scanner) isVariableValueChar() bool {
+func (s *Parser) isVariableValueChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9')
@@ -111,48 +113,99 @@ type token struct {
 	line     string
 }
 
-func (s *Scanner) Parse() ([]Modifier, *Error) {
-	s.pos = -1
-	s.next()
+func (p *Parser) ParseConfig() (*Config, *Error) {
+	p.skipWhitespace()
+	keyword, err := p.keyword()
+	if err != nil {
+		return nil, err
+	}
+	switch keyword.text {
+	case "config":
+		name, err := p.configName()
+		if err != nil {
+			return nil, err
+		}
+		stmts, err := p.ParseConfigStatements()
+		if err != nil {
+			return nil, err
+		}
+		return NewConfigWithStatements(ConfigName(name), stmts), nil
+	}
+	return nil, nil
+}
+
+func (p *Parser) ParseConfigStatements() ([]ConfigStatement, *Error) {
+	stmts := make([]ConfigStatement, 0, 32)
+	for {
+		p.skipWhitespace()
+		stmt, err := p.ParseConfigStatement()
+		if err != nil {
+			return nil, err
+		}
+		if stmt == nil {
+			break
+		}
+		l := len(stmts)
+		stmts = stmts[0:l+1]
+		stmts[l] = stmt
+	}
+	return stmts, nil
+}
+
+func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
+	keyword, err := s.keyword()
+	if err != nil {
+		return nil, err
+	}
+
+	switch keyword.text {
+	case "end":
+		return nil, nil
+	case "set":
+		name, value, err := s.nameValue()
+		if err != nil {
+			return nil, err
+		}
+		return NewModifierStatement(NewSetModifier(name, value)), nil
+	case "include":
+		descriptor, err := s.descriptor()
+		if err != nil {
+			return nil, err
+		}
+		return NewModifierStatement(NewIncludeModifier(
+			descriptor.PackageName,
+			descriptor.VersionName,
+			descriptor.ConfigName)), nil
+	}
+
+	s.start -= len(keyword.text)
+	return nil, s.tokenError(keyword, keywordError)
+}
+
+func (s *Parser) configName() (string, *Error) {
 	s.skipWhitespace()
-	modifiers := make([]Modifier, 1)
-	keyword, match := s.keyword()
-	if match {
-		switch keyword.text {
-		case "set":
-			name, value, err := s.nameValue()
-			if err != nil {
-				return nil, err
-			}
-			modifiers[0] = NewSetModifier(name, value)
-		case "include":
-			descriptor, err := s.descriptor()
-			if err != nil {
-				return nil, err
-			}
-			modifiers[0] = NewIncludeModifier(
-				descriptor.PackageName,
-				descriptor.VersionName,
-				descriptor.ConfigName)
-		default:
-			s.start -= len(keyword.text)
-			return nil, s.tokenError(keyword, keywordError)
-		}
+	if !s.isConfigNameChar() {
+		return "", s.charError(configNameError)
 	}
-	return modifiers, nil
+	s.next()
+	for s.isConfigNameChar() {
+		s.next()
+	}
+	return s.token().text, nil
 }
 
-func (s *Scanner) keyword() (*token, bool) {
-	if isKeywordChar(s.buf[s.pos]) {
-		for isKeywordChar(s.buf[s.pos]) {
-			s.next()
+func (p *Parser) keyword() (*token, *Error) {
+	if p.isKeywordChar() {
+		p.next()
+		for p.isKeywordChar() {
+			p.next()
 		}
-		return s.token(), true
+		return p.token(), nil
 	}
-	return nil, false
+	return nil, p.charError("expected keyword")
 }
 
-func (s *Scanner) nameValue() (string, string, *Error) {
+func (s *Parser) nameValue() (string, string, *Error) {
 	name, ok := s.variableName()
 	if !ok || s.c != '=' {
 		if s.c != -1 && isWhitespace(byte(s.c)) {
@@ -177,7 +230,7 @@ func (s *Scanner) nameValue() (string, string, *Error) {
 }
 
 
-func (s *Scanner) variableName() (string, bool) {
+func (s *Parser) variableName() (string, bool) {
 	s.skipWhitespace()
 	if !s.isVariableNameChar() {
 		return "", false
@@ -189,7 +242,7 @@ func (s *Scanner) variableName() (string, bool) {
 	return s.token().text, true
 }
 
-func (s *Scanner) variableValue() (string, bool) {
+func (s *Parser) variableValue() (string, bool) {
 	if !s.isVariableValueChar() {
 		return "", false
 	}
@@ -200,7 +253,7 @@ func (s *Scanner) variableValue() (string, bool) {
 	return s.token().text, true
 }
 
-func (s *Scanner) descriptor() (*Descriptor, *Error) {
+func (s *Parser) descriptor() (*Descriptor, *Error) {
 	s.skipWhitespace()
 
 	packageName := ""
@@ -242,7 +295,7 @@ func (s *Scanner) descriptor() (*Descriptor, *Error) {
 	return NewDescriptor(packageName, versionName, configName), nil
 }
 
-func (s *Scanner) next() {
+func (s *Parser) next() {
 	s.pos++
 
 	if s.pos < len(s.buf) {
@@ -258,7 +311,7 @@ func (s *Scanner) next() {
 	}
 }
 
-func (s *Scanner) skip() {
+func (s *Parser) skip() {
 	if s.pos != s.start {
 		panic("can only skip at start of token")
 	}
@@ -266,13 +319,13 @@ func (s *Scanner) skip() {
 	s.start++
 }
 
-func (s *Scanner) skipWhitespace() {
+func (s *Parser) skipWhitespace() {
 	for s.c != -1 && isWhitespace(byte(s.c)) {
 		s.skip()
 	}
 }
 
-func (s *Scanner) token() *token {
+func (s *Parser) token() *token {
 
 	// Find start of line
 	lineStart := s.start
@@ -302,7 +355,7 @@ type Error struct {
 	line     string
 }
 
-func (s *Scanner) error(msg string, token bool) *Error {
+func (s *Parser) error(msg string, token bool) *Error {
 
 	// Find start of line
 	lineStart := s.start
@@ -319,11 +372,11 @@ func (s *Scanner) error(msg string, token bool) *Error {
 	return &Error{s.source, s.line, s.start, s.col-s.start, msg, string(s.buf[lineStart:lineEnd])}
 }
 
-func (s *Scanner) tokenError(t *token, msg string) *Error {
+func (s *Parser) tokenError(t *token, msg string) *Error {
 	return &Error{s.source, t.row, t.col, t.length, msg, t.line}
 }
 
-func (s *Scanner) charError(msg string) *Error {
+func (s *Parser) charError(msg string) *Error {
 	if s.c == -1 {
 		return s.error("unexpected end-of-file", false)
 	} 
@@ -354,6 +407,6 @@ func (err *Error) String() string {
 		carets)
 }
 
-func (s *Scanner) fail(msg string, token bool) {
+func (s *Parser) fail(msg string, token bool) {
 	panic(s.error(msg, token).String())
 }

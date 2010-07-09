@@ -5,20 +5,48 @@ import "testing"
 
 import . "fig/model"
 
+func TestEmptyConfig(t *testing.T) {
+	input := `
+config foo
+end
+`
+	expected := NewConfig("foo")
+	checkParseConfig(t, input, expected)
+}
+
+func TestConfigWithOneModifier(t *testing.T) {
+	input := `
+config foo
+  set FOO=BAR
+end
+`
+	expected := NewConfig("foo", NewModifierStatement(NewSetModifier("FOO","BAR")))
+	checkParseConfig(t, input, expected)
+}
+
+func TestConfigWithTwoModifier(t *testing.T) {
+	input := `
+config foo
+  set FOO1=BAR1
+  set FOO2=BAR2
+end
+`
+	expected := NewConfig("foo", 
+		NewModifierStatement(NewSetModifier("FOO1","BAR1")),
+		NewModifierStatement(NewSetModifier("FOO2","BAR2")))
+	checkParseConfig(t, input, expected)
+}
+
 func TestSet(t *testing.T) {
 	input := "set FOO=BAR"
-	expected := []Modifier{
-		NewSetModifier("FOO", "BAR"),
-	}
-	checkParse(t, input, expected)
+	expected := NewModifierStatement(NewSetModifier("FOO", "BAR"))
+	checkParseConfigStatement(t, input, expected)
 }
 
 func TestInclude(t *testing.T) {
 	input := "include foo/1.2.3:bar"
-	expected := []Modifier{
-		NewIncludeModifier("foo", "1.2.3", "bar"),
-	}
-	checkParse(t, input, expected)
+	expected := NewModifierStatement(NewIncludeModifier("foo", "1.2.3", "bar"))
+	checkParseConfigStatement(t, input, expected)
 }
 
 func TestBadKeyword(t *testing.T) {
@@ -47,22 +75,49 @@ func TestBadInclude(t *testing.T) {
 	checkError(t, "include a:b@", configNameError, 1, 12, 1)
 }
 
-func checkParse(t *testing.T, s string, expected []Modifier) {
-	scanner := NewScanner("test", []byte(s))
-	modifiers, err := scanner.Parse()
+func checkParseConfig(t *testing.T, s string, expected *Config) {
+	parser := NewParser("test", []byte(s))
+	config, err := parser.ParseConfig()
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkModifiers(t, expected, modifiers)
+	checkConfig(t, expected, config)
 }
 
-func checkModifiers(t *testing.T, expected []Modifier, actual []Modifier) {
+func checkParseConfigStatements(t *testing.T, s string, expected []ConfigStatement) {
+	parser := NewParser("test", []byte(s))
+	stmts, err := parser.ParseConfigStatements()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkConfigStatements(t, expected, stmts)
+}
+
+func checkParseConfigStatement(t *testing.T, s string, expected ConfigStatement) {
+	parser := NewParser("test", []byte(s))
+	stmt, err := parser.ParseConfigStatement()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkConfigStatement(t, expected, stmt)
+}
+
+func checkConfig(t *testing.T, expected *Config, actual *Config) {
+	checkConfigStatements(t, expected.Statements, actual.Statements)
+}
+
+func checkConfigStatements(t *testing.T, expected []ConfigStatement, actual []ConfigStatement) {
 	if len(expected) != len(actual) {
 		t.Fatalf("Expected %d modifier, got %d", len(expected), len(actual))
 	}
 	for i, _ := range expected {
-		checkModifier(t, expected[i], actual[i])
+		checkConfigStatement(t, expected[i], actual[i])
 	}
+}
+
+
+func checkConfigStatement(t *testing.T, expected ConfigStatement, actual ConfigStatement) {
+	checkModifier(t, expected.(*ModifierStatement).Modifier, actual.(*ModifierStatement).Modifier)
 }
 
 func checkModifier(t *testing.T, expected Modifier, actual Modifier) {
@@ -93,8 +148,8 @@ func checkModifier(t *testing.T, expected Modifier, actual Modifier) {
 }
 
 func checkError(t *testing.T, s string, message string, row int, col int, length int) {
-	scanner := NewScanner("test", []byte(s))
-	_, err := scanner.Parse()
+	parser := NewParser("test", []byte(s))
+	_, err := parser.ParseConfigStatements()
 	if err == nil {
 		t.Fatalf("Expected error")
 	}
