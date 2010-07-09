@@ -5,6 +5,24 @@ import "testing"
 
 import . "fig/model"
 
+func TestEmptyPackage(t *testing.T) {
+	input := `
+`
+	expected := NewPackage("test", "1.2.3", ".", []*Config{})
+	checkParsePackage(t, input, expected)
+}
+
+func TestPackageWithOneConfig(t *testing.T) {
+	input := `
+config foo
+end
+`
+	expected := NewPackage("test", "1.2.3", ".", []*Config{
+		NewConfig("foo"),
+	})
+	checkParsePackage(t, input, expected)
+}
+
 func TestEmptyConfig(t *testing.T) {
 	input := `
 config foo
@@ -75,6 +93,15 @@ func TestBadInclude(t *testing.T) {
 	checkError(t, "include a:b@", configNameError, 1, 12, 1)
 }
 
+func checkParsePackage(t *testing.T, s string, expected *Package) {
+	parser := NewParser("test", []byte(s))
+	pkg, err := parser.ParsePackage()
+	if err != nil {
+		t.Fatal(err)
+	}
+	checkPackage(t, expected, pkg)
+}
+
 func checkParseConfig(t *testing.T, s string, expected *Config) {
 	parser := NewParser("test", []byte(s))
 	config, err := parser.ParseConfig()
@@ -100,6 +127,24 @@ func checkParseConfigStatement(t *testing.T, s string, expected ConfigStatement)
 		t.Fatal(err)
 	}
 	checkConfigStatement(t, expected, stmt)
+}
+
+func checkPackage(t *testing.T, expected *Package, actual *Package) {
+	if expected.PackageName != actual.PackageName {
+		t.Errorf("PackageName mismatch: %s != %s", expected.PackageName, actual.PackageName)
+	}
+	if expected.VersionName != actual.VersionName {
+		t.Errorf("VersionName mismatch: %s != %s", expected.VersionName, actual.VersionName)
+	}
+	if expected.Directory != actual.Directory {
+		t.Errorf("Directory mismatch: %s != %s", expected.Directory, actual.Directory)
+	}
+	if len(expected.Configs) != len(actual.Configs) {
+		t.Fatalf("Expected %d configs, got %d", len(expected.Configs), len(actual.Configs))
+	}
+	for i, _ := range expected.Configs {
+		checkConfig(t, expected.Configs[i], actual.Configs[i])
+	}
 }
 
 func checkConfig(t *testing.T, expected *Config, actual *Config) {

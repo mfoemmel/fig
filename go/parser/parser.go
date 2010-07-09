@@ -113,8 +113,29 @@ type token struct {
 	line     string
 }
 
+func (p *Parser) ParsePackage() (*Package, *Error) {
+	stmts := make([]*Config, 0, 32)
+	for {
+		p.skipWhitespace()
+		stmt, err := p.ParseConfig()
+		if err != nil {
+			return nil, err
+		}
+		if stmt == nil {
+			break
+		}
+		l := len(stmts)
+		stmts = stmts[0:l+1]
+		stmts[l] = stmt
+	}
+	return NewPackage("test", "1.2.3", ".", stmts), nil
+}
+
 func (p *Parser) ParseConfig() (*Config, *Error) {
 	p.skipWhitespace()
+	if p.c == EOF {
+		return nil, nil
+	}
 	keyword, err := p.keyword()
 	if err != nil {
 		return nil, err
