@@ -13,7 +13,7 @@ type Package struct {
 	Configs     []*Config
 }
 
-func NewPackage(packageName PackageName, versionName VersionName, directory string, configs ...*Config) *Package {
+func NewPackage(packageName PackageName, versionName VersionName, directory string, configs []*Config) *Package {
 	return &Package{packageName, versionName, directory, configs}
 }
 

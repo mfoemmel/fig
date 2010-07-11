@@ -12,10 +12,21 @@ type Descriptor struct {
 	ConfigName  ConfigName
 }
 
-func NewDescriptor(packageName string, versionName string, configName string) *Descriptor {
-	return &Descriptor{PackageName(packageName),VersionName(versionName),ConfigName(configName)}
+func NewDescriptor(packageName string, versionName string, configName string) Descriptor {
+	return Descriptor{PackageName(packageName),VersionName(versionName),ConfigName(configName)}
 }
 
-func (d *Descriptor) String() string {
-	return string(d.PackageName) + "/" + string(d.VersionName) + ":" + string(d.ConfigName)
+func (this Descriptor) Equals(that Descriptor) bool {
+	return this.String() == that.String()
+}
+
+func (d Descriptor) String() string {
+	s := string(d.PackageName)
+	if d.VersionName != "" {
+		s += "/" + string(d.VersionName)
+	}
+	if d.ConfigName != "" {
+		s += ":" + string(d.ConfigName)
+	}
+	return s
 }
