@@ -274,7 +274,7 @@ func (s *Parser) variableValue() (string, bool) {
 	return s.token().text, true
 }
 
-func (s *Parser) descriptor() (*Descriptor, *Error) {
+func (s *Parser) descriptor() (Descriptor, *Error) {
 	s.skipWhitespace()
 
 	packageName := ""
@@ -291,7 +291,7 @@ func (s *Parser) descriptor() (*Descriptor, *Error) {
 	if s.c == '/' {
 		s.skip()
 		if !s.isVersionNameChar() {
-			return nil, s.charError(versionNameError)
+			return Descriptor{}, s.charError(versionNameError)
 		}
 		for s.isVersionNameChar() {
 			s.next()
@@ -310,7 +310,7 @@ func (s *Parser) descriptor() (*Descriptor, *Error) {
 	}
 
 	if s.c != -1 && !isWhitespace(byte(s.c)) {
-		return nil, s.charError(message)
+		return Descriptor{}, s.charError(message)
 	}
 
 	return NewDescriptor(packageName, versionName, configName), nil
@@ -406,6 +406,9 @@ func (s *Parser) charError(msg string) *Error {
 }
 
 func (err *Error) String() string {
+	if err == nil {
+		return "err == nil"
+	}
 
 	// Strip any leading whitespace on the line
 	pos := 0

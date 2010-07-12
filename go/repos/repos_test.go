@@ -4,7 +4,7 @@ import "testing"
 
 import . "fig/model"
 
-func TestFoo(t *testing.T) {
+func TestListPackages(t *testing.T) {
 	r := &fileRepository{"test"}
 	expected := []Descriptor{
 		NewDescriptor("bar","4.5.6",""),
@@ -22,5 +22,16 @@ func TestFoo(t *testing.T) {
 	}
 	if i != len(expected) {
 		t.Fatalf("Wrong number of packages, expected: %d, got: %d",len(expected),i)
+	}
+}
+
+func TestAddPackage(t *testing.T) {
+	r := &fileRepository{"test"}
+	pkg := NewPackage("baz","7.8.9",".",[]*Config{
+		NewConfig("default"),
+	})
+	r.AddPackage(pkg)
+	if ok, msg := ComparePackage(pkg, r.LoadPackage("baz","7.8.9")); !ok {
+		t.Error(msg)
 	}
 }

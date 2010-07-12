@@ -130,65 +130,27 @@ func checkParseConfigStatement(t *testing.T, s string, expected ConfigStatement)
 }
 
 func checkPackage(t *testing.T, expected *Package, actual *Package) {
-	if expected.PackageName != actual.PackageName {
-		t.Errorf("PackageName mismatch: %s != %s", expected.PackageName, actual.PackageName)
-	}
-	if expected.VersionName != actual.VersionName {
-		t.Errorf("VersionName mismatch: %s != %s", expected.VersionName, actual.VersionName)
-	}
-	if expected.Directory != actual.Directory {
-		t.Errorf("Directory mismatch: %s != %s", expected.Directory, actual.Directory)
-	}
-	if len(expected.Configs) != len(actual.Configs) {
-		t.Fatalf("Expected %d configs, got %d", len(expected.Configs), len(actual.Configs))
-	}
-	for i, _ := range expected.Configs {
-		checkConfig(t, expected.Configs[i], actual.Configs[i])
+	if ok, msg := ComparePackage(expected, actual); !ok {
+		t.Error(msg)
 	}
 }
 
 func checkConfig(t *testing.T, expected *Config, actual *Config) {
-	checkConfigStatements(t, expected.Statements, actual.Statements)
+	if ok, msg := CompareConfig(expected, actual); !ok {
+		t.Error(msg)
+	}
 }
 
 func checkConfigStatements(t *testing.T, expected []ConfigStatement, actual []ConfigStatement) {
-	if len(expected) != len(actual) {
-		t.Fatalf("Expected %d modifier, got %d", len(expected), len(actual))
-	}
-	for i, _ := range expected {
-		checkConfigStatement(t, expected[i], actual[i])
+	if ok, msg := CompareConfigStatements(expected, actual); !ok {		
+		t.Error(msg)
 	}
 }
 
 
 func checkConfigStatement(t *testing.T, expected ConfigStatement, actual ConfigStatement) {
-	checkModifier(t, expected.(*ModifierStatement).Modifier, actual.(*ModifierStatement).Modifier)
-}
-
-func checkModifier(t *testing.T, expected Modifier, actual Modifier) {
-	switch a := actual.(type) {
-	case *SetModifier:
-		e := expected.(*SetModifier)
-		if a.Name != e.Name {
-			t.Errorf("Expected name: '%s', got '%s'", e.Name, a.Name)
-		}
-		if a.Value != e.Value {
-			t.Errorf("Expected name: '%s', got '%s'", e.Value, a.Value)
-		}
-
-	case *IncludeModifier:
-		e := expected.(*IncludeModifier)
-		if a.PackageName != e.PackageName {
-			t.Errorf("Expected package name: %s, got %s", e.PackageName, a.PackageName)
-		}
-		if a.VersionName != e.VersionName {
-			t.Errorf("Expected version name: %s, got %s", e.VersionName, a.VersionName)
-		}
-		if a.ConfigName != e.ConfigName {
-			t.Errorf("Expected config name: %s, got %s", e.ConfigName, a.ConfigName)
-		}
-	default:
-		t.Fatalf("Unexpected modifier type: %v", actual)
+	if ok, msg := CompareModifier(expected.(*ModifierStatement).Modifier, actual.(*ModifierStatement).Modifier); !ok {
+		t.Error(msg)
 	}
 }
 

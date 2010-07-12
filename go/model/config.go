@@ -1,5 +1,7 @@
 package model
 
+import "fmt"
+
 //
 // Config
 //
@@ -41,3 +43,26 @@ func (stmt *ModifierStatement) Accept(handler ConfigStatementHandler) {
 	handler.HandleModifier(stmt.Modifier)
 }
 
+// Testing
+
+func CompareConfig(expected *Config, actual *Config) (bool,string) {
+	// todo compare name?
+	return CompareConfigStatements(expected.Statements, actual.Statements)
+}
+
+
+func CompareConfigStatements(expected []ConfigStatement, actual []ConfigStatement) (bool,string) {
+	if len(expected) != len(actual) {
+		return false, fmt.Sprintf("Expected %d modifier, got %d", len(expected), len(actual))
+	}
+	for i, _ := range expected {
+		if ok, msg := CompareConfigStatement(expected[i], actual[i]); !ok {
+			return ok, msg
+		}
+	}
+	return true, ""
+}
+
+func CompareConfigStatement(expected ConfigStatement, actual ConfigStatement) (bool,string) {
+	return CompareModifier(expected.(*ModifierStatement).Modifier, actual.(*ModifierStatement).Modifier)
+}
