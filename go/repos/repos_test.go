@@ -7,8 +7,8 @@ import . "fig/model"
 
 func TestListPackages(t *testing.T) {
 	r := resetRepos()
-	r.AddPackage(NewPackage("bar","4.5.6",".",[]*Config{}))
-	r.AddPackage(NewPackage("foo","1.2.3",".",[]*Config{}))
+	r.AddPackage(NewPackage("bar","4.5.6",".",[]PackageStatement{}))
+	r.AddPackage(NewPackage("foo","1.2.3",".",[]PackageStatement{}))
 	expected := []Descriptor{
 		NewDescriptor("bar","4.5.6",""),
 		NewDescriptor("foo","1.2.3",""),
@@ -30,8 +30,19 @@ func TestListPackages(t *testing.T) {
 
 func TestAddPackage(t *testing.T) {
 	r := resetRepos()
-	pkg := NewPackage("baz","7.8.9",".",[]*Config{
-		NewConfig("default"),
+	pkg := NewPackage("baz","7.8.9",".",[]PackageStatement{
+		NewConfigBlock(NewConfig("default")),
+	})
+	r.AddPackage(pkg)
+	if ok, msg := ComparePackage(pkg, r.LoadPackage("baz","7.8.9")); !ok {
+		t.Error(msg)
+	}
+}
+
+func TestAddWithResource(t *testing.T) {
+	r := resetRepos()
+	pkg := NewPackage("baz","7.8.9",".",[]PackageStatement{
+		NewConfigBlock(NewConfig("default")),
 	})
 	r.AddPackage(pkg)
 	if ok, msg := ComparePackage(pkg, r.LoadPackage("baz","7.8.9")); !ok {

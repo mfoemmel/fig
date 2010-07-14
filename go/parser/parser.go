@@ -114,7 +114,7 @@ type token struct {
 }
 
 func (p *Parser) ParsePackage() (*Package, *Error) {
-	stmts := make([]*Config, 0, 32)
+	stmts := make([]PackageStatement, 0, 32)
 	for {
 		p.skipWhitespace()
 		stmt, err := p.ParseConfig()
@@ -126,7 +126,7 @@ func (p *Parser) ParsePackage() (*Package, *Error) {
 		}
 		l := len(stmts)
 		stmts = stmts[0:l+1]
-		stmts[l] = stmt
+		stmts[l] = &ConfigBlock{stmt}
 	}
 	return NewPackage("test", "1.2.3", ".", stmts), nil
 }
