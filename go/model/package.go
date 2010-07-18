@@ -14,6 +14,7 @@ type PackageStatement interface {
 }
 
 type PackageStatementHandler interface {
+	ResourceStatement(path string)
 	ConfigBlock(*Config)
 }
 
@@ -30,16 +31,32 @@ func (pkg *Package) FindConfig(configName ConfigName) *Config {
 	return nil
 }
 
+// ConfigBlock
+
 type ConfigBlock struct {
 	Config *Config
+}
+
+func NewConfigBlock(c *Config) *ConfigBlock {
+	return &ConfigBlock{c}
 }
 
 func (cb *ConfigBlock) Accept(handler PackageStatementHandler) {
 	handler.ConfigBlock(cb.Config)
 }
 
-func NewConfigBlock(c *Config) *ConfigBlock {
-	return &ConfigBlock{c}
+// ResourceStatement
+
+type ResourceStatement struct {
+	Path string
+}
+
+func NewResourceStatement(path string) *ResourceStatement {
+	return &ResourceStatement{path}
+}
+
+func (rs *ResourceStatement) Accept(handler PackageStatementHandler) {
+	handler.ResourceStatement(rs.Path)
 }
 
 // Testing
@@ -71,6 +88,11 @@ func ComparePackageStatement(expected PackageStatement, actual PackageStatement)
 		if ok, msg := CompareConfig(expected.(*ConfigBlock).Config, actual.Config); !ok {
 			return ok, msg
 		}		
+	case *ResourceStatement:
+		if actual.Path != expected.(*ResourceStatement).Path {
+			return false, fmt.Sprintf("Expected path \"%s\", got \"%s\"", actual.Path, expected.(*ResourceStatement).Path)
+		}		
+		return true, ""
 	default:
 		panic("unexpected package statement type")
 	}

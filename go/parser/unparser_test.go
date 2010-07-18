@@ -14,9 +14,9 @@ config debug
   set DEBUG=true
 end
 `
-	defaultConfig := NewConfig("default", NewModifierStatement(NewSetModifier("FOO","BAR")))
-	debugConfig := NewConfig("debug", NewModifierStatement(NewSetModifier("DEBUG","true")))
-	checkUnparsePackage(t, NewPackage("foo", "1.2.3", "", []*Config{defaultConfig, debugConfig}), expected)
+	defaultConfig := NewConfigBlock(NewConfig("default", NewModifierStatement(NewSetModifier("FOO","BAR"))))
+	debugConfig := NewConfigBlock(NewConfig("debug", NewModifierStatement(NewSetModifier("DEBUG","true"))))
+	checkUnparsePackage(t, NewPackage("foo", "1.2.3", "", []PackageStatement{defaultConfig, debugConfig}), expected)
 }
 
 func TestUnparseConfig(t *testing.T) {

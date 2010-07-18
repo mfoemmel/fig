@@ -31,7 +31,7 @@ func NewParser(source string, buf []byte) *Parser {
 	return parser
 }
 
-const keywordError = "invalid keyword; expected \"set\" or \"include\""
+const keywordError = "invalid keyword, expected \"set\" or \"include\""
 
 func (p *Parser) isKeywordChar() bool {
 	switch {
@@ -45,7 +45,7 @@ func (p *Parser) isKeywordChar() bool {
 	return false
 }
 
-const packageNameError = "invalid character in package name; expected [a-z A-Z 0-9 .]"
+const packageNameError = "invalid character in package name, expected [a-z A-Z 0-9 .]"
 
 func (s *Parser) isPackageNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
@@ -58,7 +58,7 @@ func isVersionNamePrefix(c byte) bool {
 	return c == '/'
 }
 
-const versionNameError = "invalid character in version name; expected [a-z A-Z 0-9 .]"
+const versionNameError = "invalid character in version name, expected [a-z A-Z 0-9 .]"
 
 func (s *Parser) isVersionNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
@@ -67,7 +67,7 @@ func (s *Parser) isVersionNameChar() bool {
 		s.c == '.'
 }
 
-const configNameError = "invalid character in config name; expected [a-z A-Z 0-9 .]"
+const configNameError = "invalid character in config name, expected [a-z A-Z 0-9 .]"
 
 func (s *Parser) isConfigNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
@@ -79,7 +79,7 @@ func (s *Parser) isConfigNameChar() bool {
 
 const nameValueWhitespaceError = "whitespace not allowed around '='"
 
-const variableNameError = "invalid character in variable name; expected [a-z A-Z 0-9]"
+const variableNameError = "invalid character in variable name, expected [a-z A-Z 0-9]"
 
 func (s *Parser) isVariableNameChar() bool {
 	c := s.c
@@ -88,7 +88,7 @@ func (s *Parser) isVariableNameChar() bool {
 		(c >= '0' && c <= '9')
 }
 
-const variableValueError = "invalid character in variable value; expected [a-z A-Z 0-9]"
+const variableValueError = "invalid character in variable value, expected [a-z A-Z 0-9]"
 
 func (s *Parser) isVariableValueChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
@@ -96,6 +96,14 @@ func (s *Parser) isVariableValueChar() bool {
 		(s.c >= '0' && s.c <= '9')
 }
 
+const pathError = "invalid character in path, expected [a-z A-Z 0-9 .]"
+
+func (p *Parser) isPathChar() bool {
+	return (p.c >= 'a' && p.c <= 'z') ||
+		(p.c >= 'A' && p.c <= 'Z') ||
+		(p.c >= '0' && p.c <= '9') ||
+		(p.c == '.')
+}
 
 func isConfigNamePrefix(c byte) bool {
 	return c == ':'
@@ -117,7 +125,7 @@ func (p *Parser) ParsePackage() (*Package, *Error) {
 	stmts := make([]PackageStatement, 0, 32)
 	for {
 		p.skipWhitespace()
-		stmt, err := p.ParseConfig()
+		stmt, err := p.ParsePackageStatement()
 		if err != nil {
 			return nil, err
 		}
@@ -126,12 +134,12 @@ func (p *Parser) ParsePackage() (*Package, *Error) {
 		}
 		l := len(stmts)
 		stmts = stmts[0:l+1]
-		stmts[l] = &ConfigBlock{stmt}
+		stmts[l] = stmt
 	}
 	return NewPackage("test", "1.2.3", ".", stmts), nil
 }
 
-func (p *Parser) ParseConfig() (*Config, *Error) {
+func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 	p.skipWhitespace()
 	if p.c == EOF {
 		return nil, nil
@@ -150,9 +158,15 @@ func (p *Parser) ParseConfig() (*Config, *Error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewConfigWithStatements(ConfigName(name), stmts), nil
+		return &ConfigBlock{NewConfigWithStatements(ConfigName(name), stmts)}, nil
+	case "resource":
+		path, err := p.path()
+		if err != nil {
+			return nil, err
+		}
+		return &ResourceStatement{path}, nil
 	}
-	return nil, nil
+	return nil, p.tokenError(keyword, keywordError)
 }
 
 func (p *Parser) ParseConfigStatements() ([]ConfigStatement, *Error) {
@@ -316,6 +330,21 @@ func (s *Parser) descriptor() (Descriptor, *Error) {
 	return NewDescriptor(packageName, versionName, configName), nil
 }
 
+func (p *Parser) path() (string, *Error) {
+	p.skipWhitespace()
+	if !p.isPathChar() {
+		return "", p.charError(pathError)
+	}
+	p.next()
+	for p.isPathChar() {
+		p.next()
+	}
+	if p.c != EOF && !isWhitespace(byte(p.c)) {
+		return "", p.charError(pathError)
+	}
+	return p.token().text, nil
+}
+
 func (s *Parser) next() {
 	s.pos++
 
@@ -402,6 +431,7 @@ func (s *Parser) charError(msg string) *Error {
 		return s.error("unexpected end-of-file", false)
 	} 
 	s.next()
+	// TODO should only use last character in token
 	return s.tokenError(s.token(), msg)
 }
 

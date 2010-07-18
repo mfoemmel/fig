@@ -1,5 +1,7 @@
 package repos
 
+import "io"
+//import "fmt"
 import "os"
 import "path"
 
@@ -36,19 +38,6 @@ func (r *fileRepository) ListPackages() (<-chan Descriptor) {
 	return c
 }
 
-func (r *fileRepository) AddPackage(pkg *Package) {
-	packageDir := path.Join(r.baseDir, string(pkg.PackageName), string(pkg.VersionName))
-	err := os.MkdirAll(packageDir, 0777)
-	if err != nil {
-		panic(err)
-	}
-	file, err := os.Open(path.Join(packageDir, "package.fig"), os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0666)
-	if err != nil {
-		panic(err)
-	}
-	NewUnparser(file).UnparsePackage(pkg)
-}
-
 func (r *fileRepository) LoadPackage(packageName PackageName, versionName VersionName) *Package {
 	packageDir := path.Join(r.baseDir, string(packageName), string(versionName))
 	file, err := os.Open(path.Join(packageDir, "package.fig"), os.O_RDONLY, 0)
@@ -71,4 +60,49 @@ func (r *fileRepository) LoadPackage(packageName PackageName, versionName Versio
 	pkg.PackageName = packageName
 	pkg.VersionName = versionName
 	return pkg
+}
+
+type PackageWriter interface {
+	WriteStatements([]PackageStatement)
+	OpenResource(path string) io.WriteCloser
+	Commit()
+	Close()
+}
+
+type fileRepositoryPackageWriter struct {
+	repos *fileRepository	
+	packageName PackageName
+	versionName VersionName
+}
+
+func (w *fileRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) {
+	packageDir := path.Join(w.repos.baseDir, string(w.packageName), string(w.versionName))
+	err := os.MkdirAll(packageDir, 0777)
+	if err != nil {
+		panic(err)
+	}
+	file, err := os.Open(path.Join(packageDir, "package.fig"), os.O_WRONLY|os.O_CREAT|os.O_EXCL, 0666)
+	if err != nil {
+		panic(err)
+	}
+	NewUnparser(file).UnparsePackageStatements(stmts)
+
+}
+
+func (w *fileRepositoryPackageWriter) OpenResource(res string) io.WriteCloser {
+	file, err := os.Open(path.Join(w.repos.baseDir, res), os.O_WRONLY|os.O_CREAT, 0666)
+	if err != nil {
+		panic(err)
+	}
+	return file
+}
+
+func (w *fileRepositoryPackageWriter) Commit() {
+}
+
+func (w *fileRepositoryPackageWriter) Close() {
+}
+
+func (r *fileRepository) NewPackageWriter(packageName PackageName, versionName VersionName) PackageWriter {
+	return &fileRepositoryPackageWriter{r, packageName, versionName}
 }

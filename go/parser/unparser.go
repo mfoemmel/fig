@@ -14,17 +14,23 @@ func NewUnparser(out io.Writer) *Unparser {
 }
 
 func (u *Unparser) UnparsePackage(pkg *Package) {
-	for _, stmt := range pkg.Statements {
+	u.UnparsePackageStatements(pkg.Statements)
+}
+
+func (u *Unparser) UnparsePackageStatements(stmts []PackageStatement) {
+	for _, stmt := range stmts {
 		u.UnparsePackageStatement(stmt)
 	}
 }
 
 func (u *Unparser) UnparsePackageStatement(stmt PackageStatement) {
 	switch stmt := stmt.(type) {
+	case *ResourceStatement:
+		fmt.Fprintf(u.out, "resource %s\n", stmt.Path)
 	case *ConfigBlock:
 		u.UnparseConfig(stmt.Config)
 	default:
-		panic("unexpected package statement type")
+		panic(fmt.Sprintf("unexpected package statement type: %v", stmt))
 	}
 }
 

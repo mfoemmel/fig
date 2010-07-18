@@ -5,10 +5,17 @@ import "testing"
 
 import . "fig/model"
 
+func addPackage(r *fileRepository, pkg *Package) {
+	w := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	defer w.Close()
+	w.WriteStatements(pkg.Statements)
+	w.Commit()	
+}
+
 func TestListPackages(t *testing.T) {
 	r := resetRepos()
-	r.AddPackage(NewPackage("bar","4.5.6",".",[]PackageStatement{}))
-	r.AddPackage(NewPackage("foo","1.2.3",".",[]PackageStatement{}))
+	addPackage(r, NewPackage("bar","4.5.6",".",[]PackageStatement{}))
+	addPackage(r, NewPackage("foo","1.2.3",".",[]PackageStatement{}))
 	expected := []Descriptor{
 		NewDescriptor("bar","4.5.6",""),
 		NewDescriptor("foo","1.2.3",""),
@@ -33,7 +40,7 @@ func TestAddPackage(t *testing.T) {
 	pkg := NewPackage("baz","7.8.9",".",[]PackageStatement{
 		NewConfigBlock(NewConfig("default")),
 	})
-	r.AddPackage(pkg)
+	addPackage(r, pkg)
 	if ok, msg := ComparePackage(pkg, r.LoadPackage("baz","7.8.9")); !ok {
 		t.Error(msg)
 	}
@@ -42,9 +49,16 @@ func TestAddPackage(t *testing.T) {
 func TestAddWithResource(t *testing.T) {
 	r := resetRepos()
 	pkg := NewPackage("baz","7.8.9",".",[]PackageStatement{
-		NewConfigBlock(NewConfig("default")),
+		NewResourceStatement("test.jar"),
 	})
-	r.AddPackage(pkg)
+	w := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	defer w.Close()
+	w.WriteStatements(pkg.Statements)
+	foo := w.OpenResource("foo")
+	foo.Write([]byte("hello"))
+	foo.Close()
+	w.Commit()
+
 	if ok, msg := ComparePackage(pkg, r.LoadPackage("baz","7.8.9")); !ok {
 		t.Error(msg)
 	}
@@ -56,3 +70,4 @@ func resetRepos() *fileRepository {
 	os.Mkdir(path,0777)
 	return &fileRepository{path}
 }
+

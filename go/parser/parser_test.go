@@ -8,7 +8,7 @@ import . "fig/model"
 func TestEmptyPackage(t *testing.T) {
 	input := `
 `
-	expected := NewPackage("test", "1.2.3", ".", []*Config{})
+	expected := NewPackage("test", "1.2.3", ".", []PackageStatement{})
 	checkParsePackage(t, input, expected)
 }
 
@@ -17,8 +17,8 @@ func TestPackageWithOneConfig(t *testing.T) {
 config foo
 end
 `
-	expected := NewPackage("test", "1.2.3", ".", []*Config{
-		NewConfig("foo"),
+	expected := NewPackage("test", "1.2.3", ".", []PackageStatement{
+		NewConfigBlock(NewConfig("foo")),
 	})
 	checkParsePackage(t, input, expected)
 }
@@ -104,11 +104,11 @@ func checkParsePackage(t *testing.T, s string, expected *Package) {
 
 func checkParseConfig(t *testing.T, s string, expected *Config) {
 	parser := NewParser("test", []byte(s))
-	config, err := parser.ParseConfig()
+	stmt, err := parser.ParsePackageStatement()
 	if err != nil {
 		t.Fatal(err)
 	}
-	checkConfig(t, expected, config)
+	checkConfig(t, expected, stmt.(*ConfigBlock).Config)
 }
 
 func checkParseConfigStatements(t *testing.T, s string, expected []ConfigStatement) {
