@@ -62,6 +62,12 @@ func (r *fileRepository) LoadPackage(packageName PackageName, versionName Versio
 	return pkg
 }
 
+type PackageReader interface {
+	ReadStatements() []PackageStatement
+	OpenResource(path string) io.ReadCloser
+	Close()
+}
+
 type PackageWriter interface {
 	WriteStatements([]PackageStatement)
 	OpenResource(path string) io.WriteCloser
@@ -69,10 +75,38 @@ type PackageWriter interface {
 	Close()
 }
 
+type fileRepositoryPackageReader struct {
+    repos *fileRepository
+    packageName PackageName
+    versionName VersionName
+}
+
 type fileRepositoryPackageWriter struct {
-	repos *fileRepository	
+	repos *fileRepository
 	packageName PackageName
 	versionName VersionName
+}
+
+func (r *fileRepositoryPackageReader) ReadStatements() []PackageStatement {
+	packageDir := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName))
+	file, err := os.Open(path.Join(packageDir, "package.fig"), os.O_RDONLY, 0)
+	if err != nil {
+		panic(err)
+	}
+	stat, err := file.Stat()
+	if err != nil {
+		panic(err)
+	}
+	buf := make([]byte, stat.Size)
+	_, err = file.Read(buf)
+	if err != nil {
+		panic(err)
+	}
+	pkg, err2 := NewParser(file.Name(), buf).ParsePackage()
+	if err2 != nil {
+		panic(err2.String())
+	}
+	return pkg.Statements
 }
 
 func (w *fileRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) {
@@ -87,6 +121,17 @@ func (w *fileRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) 
 	}
 	NewUnparser(file).UnparsePackageStatements(stmts)
 
+}
+
+func (r *fileRepository) NewPackageReader(packageName PackageName, versionName VersionName) PackageReader {
+    return &fileRepositoryPackageReader{r, packageName, versionName}
+}
+
+func (r *fileRepositoryPackageReader) Close() {
+}
+
+func (r *fileRepositoryPackageReader) OpenResource(res string) io.ReadCloser {
+	return nil
 }
 
 func (w *fileRepositoryPackageWriter) OpenResource(res string) io.WriteCloser {
