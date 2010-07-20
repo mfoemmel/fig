@@ -1,6 +1,7 @@
 package repos
 
 import "io"
+import "io/ioutil"
 //import "fmt"
 import "os"
 import "path"
@@ -38,30 +39,6 @@ func (r *fileRepository) ListPackages() (<-chan Descriptor) {
 	return c
 }
 
-func (r *fileRepository) LoadPackage(packageName PackageName, versionName VersionName) *Package {
-	packageDir := path.Join(r.baseDir, string(packageName), string(versionName))
-	file, err := os.Open(path.Join(packageDir, "package.fig"), os.O_RDONLY, 0)
-	if err != nil {
-		panic(err)
-	}
-	stat, err := file.Stat()
-	if err != nil {
-		panic(err)
-	}
-	buf := make([]byte, stat.Size)
-	_, err = file.Read(buf)
-	if err != nil {
-		panic(err)
-	}
-	pkg, err2 := NewParser(file.Name(), buf).ParsePackage()
-	if err2 != nil {
-		panic(err2.String())
-	}
-	pkg.PackageName = packageName
-	pkg.VersionName = versionName
-	return pkg
-}
-
 type PackageReader interface {
 	ReadStatements() []PackageStatement
 	OpenResource(path string) io.ReadCloser
@@ -89,20 +66,12 @@ type fileRepositoryPackageWriter struct {
 
 func (r *fileRepositoryPackageReader) ReadStatements() []PackageStatement {
 	packageDir := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName))
-	file, err := os.Open(path.Join(packageDir, "package.fig"), os.O_RDONLY, 0)
+	filename := path.Join(packageDir, "package.fig")
+	buf, err := ioutil.ReadFile(filename)
 	if err != nil {
 		panic(err)
 	}
-	stat, err := file.Stat()
-	if err != nil {
-		panic(err)
-	}
-	buf := make([]byte, stat.Size)
-	_, err = file.Read(buf)
-	if err != nil {
-		panic(err)
-	}
-	pkg, err2 := NewParser(file.Name(), buf).ParsePackage()
+	pkg, err2 := NewParser(filename, buf).ParsePackage()
 	if err2 != nil {
 		panic(err2.String())
 	}
