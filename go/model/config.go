@@ -39,6 +39,18 @@ func NewModifierStatement(modifier Modifier) *ModifierStatement {
 	return &ModifierStatement{modifier}
 }
 
+func NewIncludeStatement(desc Descriptor) *ModifierStatement {
+	return &ModifierStatement{NewIncludeModifier(desc.PackageName,desc.VersionName,desc.ConfigName)}
+}
+
+func NewSetStatement(name string, value string) *ModifierStatement {
+	return &ModifierStatement{NewSetModifier(name,value)}
+}
+
+func NewPathStatement(name string, value string) *ModifierStatement {
+	return &ModifierStatement{NewPathModifier(name,value)}
+}
+
 func (stmt *ModifierStatement) Accept(handler ConfigStatementHandler) {
 	handler.HandleModifier(stmt.Modifier)
 }

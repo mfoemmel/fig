@@ -1,9 +1,7 @@
 include $(GOROOT)/src/Make.$(GOARCH)
 
-TARG=fig/repos
+TARG=fig/plan
 GOFILES=\
-	file.go \
-	mem.go \
-	repos.go \
+	plan.go\
 
 include $(GOROOT)/src/Make.pkg
