@@ -62,8 +62,8 @@ type IncludeModifier struct {
 	ConfigName  ConfigName
 }
 
-func NewIncludeModifier(packageName PackageName, versionName VersionName, configName ConfigName) Modifier {
-	return &IncludeModifier{packageName, versionName, configName}
+func NewIncludeModifier(desc Descriptor) Modifier {
+	return &IncludeModifier{desc.PackageName, desc.VersionName, desc.ConfigName}
 }
 
 func (im *IncludeModifier) Accept(handler ModifierHandler) os.Error {

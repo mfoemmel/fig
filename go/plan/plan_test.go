@@ -7,10 +7,7 @@ import . "fig/repos"
 
 func TestNoDependencies(t *testing.T) {
 	repo := NewMemoryRepository()
-	WritePackage(repo, "foo", "1.2.3", []PackageStatement{
-		NewConfigBlock(NewConfig("default")),
-	})
-
+	WritePackage(repo, NewPackageBuilder("foo", "1.2.3").Config("default").End().Build())
 	planner := NewPlanner(repo)
 	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
 	if err != nil {
@@ -23,12 +20,14 @@ func TestNoDependencies(t *testing.T) {
 
 func TestSimpleDependency(t *testing.T) {
 	repo := NewMemoryRepository()
-	WritePackage(repo, "foo", "1.2.3", []PackageStatement{
-		NewConfigBlock(NewConfig("default", NewIncludeStatement(NewDescriptor("bar","4.5.6","default")))),
-	})
-	WritePackage(repo, "bar", "4.5.6", []PackageStatement{
-		NewConfigBlock(NewConfig("default")),
-	})
+	foo := NewPackageBuilder("foo", "1.2.3").
+		Config("default").Include("bar", "4.5.6", "default").End().
+		Build()
+	bar := NewPackageBuilder("bar", "4.5.6").
+		Config("default").End().
+		Build()
+	WritePackage(repo, foo)
+	WritePackage(repo, bar)
 	planner := NewPlanner(repo)
 	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
 	if err != nil {
@@ -41,15 +40,18 @@ func TestSimpleDependency(t *testing.T) {
 
 func TestTransitiveDependency(t *testing.T) {
 	repo := NewMemoryRepository()
-	WritePackage(repo, "foo", "1.2.3", []PackageStatement{
-		NewConfigBlock(NewConfig("default", NewIncludeStatement(NewDescriptor("bar","4.5.6","default")))),
-	})
-	WritePackage(repo, "bar", "4.5.6", []PackageStatement{
-		NewConfigBlock(NewConfig("default", NewIncludeStatement(NewDescriptor("baz","7.8.9","default")))),
-	})
-	WritePackage(repo, "baz", "7.8.9", []PackageStatement{
-		NewConfigBlock(NewConfig("default")),
-	})
+	foo := NewPackageBuilder("foo", "1.2.3").
+		Config("default").Include("bar", "4.5.6", "default").End().
+		Build()
+	bar := NewPackageBuilder("bar", "4.5.6").
+		Config("default").Include("baz", "7.8.9", "default").End().
+		Build()
+	baz := NewPackageBuilder("baz", "7.8.9").
+		Config("default").End().
+		Build()
+	WritePackage(repo, foo)
+	WritePackage(repo, bar)
+	WritePackage(repo, baz)
 	planner := NewPlanner(repo)
 	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
 	if err != nil {

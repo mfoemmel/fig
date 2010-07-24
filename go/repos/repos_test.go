@@ -7,8 +7,8 @@ import . "fig/model"
 
 func TestListPackages(t *testing.T) {
 	r := resetRepos()
-	writePackage(r, NewPackage("bar", "4.5.6", ".", []PackageStatement{}))
-	writePackage(r, NewPackage("foo", "1.2.3", ".", []PackageStatement{}))
+	WritePackage(r, NewPackageBuilder("bar", "4.5.6").Build())
+	WritePackage(r, NewPackageBuilder("foo", "1.2.3").Build())
 	expected := []Descriptor{
 		NewDescriptor("bar", "4.5.6", ""),
 		NewDescriptor("foo", "1.2.3", ""),
@@ -30,11 +30,9 @@ func TestListPackages(t *testing.T) {
 
 func TestAddPackage(t *testing.T) {
 	r := resetRepos()
-	pkg := NewPackage("baz", "7.8.9", ".", []PackageStatement{
-		NewConfigBlock(NewConfig("default")),
-	})
-	writePackage(r, pkg)
-	ok, msg := ComparePackage(pkg, readPackage(r, "baz", "7.8.9"))
+	pkg := NewPackageBuilder("baz", "7.8.9").Config("default").End().Build()
+	WritePackage(r, pkg)
+	ok, msg := ComparePackage(pkg, ReadPackage(r, "baz", "7.8.9"))
 	if !ok {
 		t.Error(msg)
 	}
@@ -42,9 +40,7 @@ func TestAddPackage(t *testing.T) {
 
 func TestAddWithResource(t *testing.T) {
 	r := resetRepos()
-	pkg := NewPackage("baz", "7.8.9", ".", []PackageStatement{
-		NewResourceStatement("test.jar"),
-	})
+	pkg := NewPackageBuilder("baz", "7.8.9").Resource("test.jar").Build()
 	w := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
 	defer w.Close()
 	w.WriteStatements(pkg.Statements)
@@ -53,25 +49,9 @@ func TestAddWithResource(t *testing.T) {
 	foo.Close()
 	w.Commit()
 
-	if ok, msg := ComparePackage(pkg, readPackage(r, "baz", "7.8.9")); !ok {
+	if ok, msg := ComparePackage(pkg, ReadPackage(r, "baz", "7.8.9")); !ok {
 		t.Error(msg)
 	}
-
-}
-
-func writePackage(r *fileRepository, pkg *Package) {
-	w := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
-	defer w.Close()
-	w.WriteStatements(pkg.Statements)
-	w.Commit()
-}
-
-func readPackage(repos *fileRepository, name string, version string) *Package {
-	r := repos.NewPackageReader(PackageName(name), VersionName(version))
-	defer r.Close()
-	statements := r.ReadStatements()
-	pkg := NewPackage(PackageName(name), VersionName(version), ".", statements)
-	return pkg
 }
 
 func resetRepos() *fileRepository {

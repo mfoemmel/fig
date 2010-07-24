@@ -14,9 +14,12 @@ config debug
   set DEBUG=true
 end
 `
-	defaultConfig := NewConfigBlock(NewConfig("default", NewModifierStatement(NewSetModifier("FOO","BAR"))))
-	debugConfig := NewConfigBlock(NewConfig("debug", NewModifierStatement(NewSetModifier("DEBUG","true"))))
-	checkUnparsePackage(t, NewPackage("foo", "1.2.3", "", []PackageStatement{defaultConfig, debugConfig}), expected)
+	input := NewPackageBuilder("foo","1.2.3").
+		Config("default").Set("FOO","BAR").End().
+		Config("debug").Set("DEBUG","true").End().
+		Build()
+
+	checkUnparsePackage(t, input, expected)
 }
 
 func TestUnparseConfig(t *testing.T) {
@@ -25,7 +28,7 @@ func TestUnparseConfig(t *testing.T) {
   set FOO=BAR
 end
 `
-	checkUnparseConfig(t, NewConfig("default", NewModifierStatement(NewSetModifier("FOO","BAR"))), expected)
+	checkUnparseConfig(t, NewConfigBuilder("default").Set("FOO","BAR").Build(), expected)
 }
 
 func TestUnparseSetModifier(t *testing.T) {
@@ -37,7 +40,7 @@ func TestUnparsePathModifier(t *testing.T) {
 }
 
 func TestUnparseIncludeModifier(t *testing.T) {
-	checkUnparseModifier(t, NewIncludeModifier("foo","1.2.3","debug"), "  include foo/1.2.3:debug\n")
+	checkUnparseModifier(t, NewIncludeModifier(NewDescriptor("foo","1.2.3","debug")), "  include foo/1.2.3:debug\n")
 }
 
 func checkUnparsePackage(t *testing.T, pkg *Package, expected string) {

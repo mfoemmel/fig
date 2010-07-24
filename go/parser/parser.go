@@ -158,7 +158,7 @@ func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 		if err != nil {
 			return nil, err
 		}
-		return &ConfigBlock{NewConfigWithStatements(ConfigName(name), stmts)}, nil
+		return &ConfigBlock{NewConfig(ConfigName(name), stmts)}, nil
 	case "resource":
 		path, err := p.path()
 		if err != nil {
@@ -207,10 +207,7 @@ func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewModifierStatement(NewIncludeModifier(
-			descriptor.PackageName,
-			descriptor.VersionName,
-			descriptor.ConfigName)), nil
+		return NewModifierStatement(NewIncludeModifier(descriptor)), nil
 	}
 
 	s.start -= len(keyword.text)

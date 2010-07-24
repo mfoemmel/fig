@@ -23,16 +23,16 @@ type PackageWriter interface {
 	Close()
 }
 
-func ReadPackage(repo Repository, packageName PackageName, versionName VersionName) []PackageStatement {
+func ReadPackage(repo Repository, packageName PackageName, versionName VersionName) *Package {
 	r := repo.NewPackageReader(packageName, versionName)
 	defer r.Close()
-	return r.ReadStatements()
+	return NewPackage(packageName, versionName, ".", r.ReadStatements())
 }
 
-func WritePackage(repo Repository, packageName PackageName, versionName VersionName, statements []PackageStatement) {
-	w := repo.NewPackageWriter(packageName,versionName)
+func WritePackage(repo Repository, pkg *Package) {
+	w := repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
 	defer w.Close()
-	w.WriteStatements(statements)
+	w.WriteStatements(pkg.Statements)
 	w.Commit()
 }
 

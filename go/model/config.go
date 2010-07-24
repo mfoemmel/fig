@@ -11,11 +11,7 @@ type Config struct {
 	Statements  []ConfigStatement
 }
 
-func NewConfig(configName ConfigName, stmts ...ConfigStatement) *Config {
-	return &Config{configName, stmts}
-}
-
-func NewConfigWithStatements(configName ConfigName, stmts []ConfigStatement) *Config {
+func NewConfig(configName ConfigName, stmts []ConfigStatement) *Config {
 	return &Config{configName, stmts}
 }
 
@@ -40,7 +36,7 @@ func NewModifierStatement(modifier Modifier) *ModifierStatement {
 }
 
 func NewIncludeStatement(desc Descriptor) *ModifierStatement {
-	return &ModifierStatement{NewIncludeModifier(desc.PackageName,desc.VersionName,desc.ConfigName)}
+	return &ModifierStatement{NewIncludeModifier(desc)}
 }
 
 func NewSetStatement(name string, value string) *ModifierStatement {

@@ -22,8 +22,8 @@ func NewPlanner(repo Repository) *Planner {
 
 func (p *Planner) Plan(desc Descriptor) ([]Descriptor, os.Error) {
 	p.addDescriptor(desc)
-	stmts := ReadPackage(p.repo, desc.PackageName, desc.VersionName)
-	config := findConfig(stmts, desc.ConfigName)
+	pkg := ReadPackage(p.repo, desc.PackageName, desc.VersionName)
+	config := findConfig(pkg.Statements, desc.ConfigName)
 	for _, stmt := range config.Statements {
 		if modstmt, ok := stmt.(*ModifierStatement); ok {
 			if include, ok := modstmt.Modifier.(*IncludeModifier); ok {

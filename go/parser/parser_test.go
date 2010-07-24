@@ -8,7 +8,7 @@ import . "fig/model"
 func TestEmptyPackage(t *testing.T) {
 	input := `
 `
-	expected := NewPackage("test", "1.2.3", ".", []PackageStatement{})
+	expected := NewPackageBuilder("test", "1.2.3").Build()
 	checkParsePackage(t, input, expected)
 }
 
@@ -17,9 +17,7 @@ func TestPackageWithOneConfig(t *testing.T) {
 config foo
 end
 `
-	expected := NewPackage("test", "1.2.3", ".", []PackageStatement{
-		NewConfigBlock(NewConfig("foo")),
-	})
+	expected := NewPackageBuilder("test", "1.2.3").Config("foo").End().Build()
 	checkParsePackage(t, input, expected)
 }
 
@@ -28,7 +26,7 @@ func TestEmptyConfig(t *testing.T) {
 config foo
 end
 `
-	expected := NewConfig("foo")
+	expected := NewConfigBuilder("foo").Build()
 	checkParseConfig(t, input, expected)
 }
 
@@ -38,7 +36,7 @@ config foo
   set FOO=BAR
 end
 `
-	expected := NewConfig("foo", NewModifierStatement(NewSetModifier("FOO","BAR")))
+	expected := NewConfigBuilder("foo").Set("FOO","BAR").Build()
 	checkParseConfig(t, input, expected)
 }
 
@@ -49,9 +47,7 @@ config foo
   set FOO2=BAR2
 end
 `
-	expected := NewConfig("foo", 
-		NewModifierStatement(NewSetModifier("FOO1","BAR1")),
-		NewModifierStatement(NewSetModifier("FOO2","BAR2")))
+	expected := NewConfigBuilder("foo").Set("FOO1","BAR1").Set("FOO2","BAR2").Build() 
 	checkParseConfig(t, input, expected)
 }
 
@@ -63,7 +59,7 @@ func TestSet(t *testing.T) {
 
 func TestInclude(t *testing.T) {
 	input := "include foo/1.2.3:bar"
-	expected := NewModifierStatement(NewIncludeModifier("foo", "1.2.3", "bar"))
+	expected := NewModifierStatement(NewIncludeModifier(NewDescriptor("foo", "1.2.3", "bar")))
 	checkParseConfigStatement(t, input, expected)
 }
 
