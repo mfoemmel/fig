@@ -21,7 +21,6 @@ func NewPlanner(repo Repository) *Planner {
 }
 
 func (p *Planner) Plan(desc Descriptor) ([]Descriptor, os.Error) {
-	p.addDescriptor(desc)
 	pkg := ReadPackage(p.repo, desc.PackageName, desc.VersionName)
 	config := findConfig(pkg.Statements, desc.ConfigName)
 	for _, stmt := range config.Statements {
@@ -31,10 +30,16 @@ func (p *Planner) Plan(desc Descriptor) ([]Descriptor, os.Error) {
 			}
 		}
 	}
+	p.addDescriptor(desc)
 	return p.results, nil
 }
 
 func (p *Planner) addDescriptor(desc Descriptor) {
+	for _, existing := range p.results {
+		if desc.Equals(existing) {
+			return
+		}
+	}
 	l := len(p.results)
 	p.results = p.results[0:l+1]
 	p.results[l] = desc
