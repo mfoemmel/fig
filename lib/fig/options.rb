@@ -39,6 +39,9 @@ module Fig
       options[:publish] = nil
       opts.on('--publish PKG', 'install package in local and remote repositories') { |publish| options[:publish] = publish }
 
+      options[:publish_local] = nil
+      opts.on('--publish-local PKG', 'install package in local repositorie only') { |publish_local| options[:publish_local] = publish_local }
+
       options[:resources] =[]
       opts.on('--resource PATH', 'resource to include in package (when using --publish)') do |path| 
         options[:resources] << Resource.new(path) 

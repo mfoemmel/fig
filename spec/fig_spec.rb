@@ -106,6 +106,7 @@ describe "Fig" do
       end
     END
     puts fig('--publish foo/1.2.3', input)
+    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
@@ -122,6 +123,7 @@ describe "Fig" do
       end
     END
     puts fig('--publish foo/1.2.3', input)
+    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
@@ -132,7 +134,30 @@ describe "Fig" do
     File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
     fail unless system "chmod +x tmp/bin/hello"
     puts fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+  end
+
+  it "refuses to overwrite existing version in remote repository without being forced" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.mkdir_p(FIG_REMOTE_DIR + "/foo/1.2.3")
+    File.open(FIG_REMOTE_DIR + "/foo/1.2.3/.fig", 'w').close 
+    FileUtils.mkdir_p("tmp/bin")
+    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
+    fail unless system "chmod +x tmp/bin/hello"
+    fail if fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+  end
+
+  it "publishes to the local repo only when told to" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.mkdir_p("tmp/bin")
+    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
+    fail unless system "chmod +x tmp/bin/hello"
+    puts fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail unless fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
   it "retrieve resource" do

@@ -106,7 +106,7 @@ module Fig
       case basename
       when /\.tar\.gz$/
         unpack_archive(dir, path)
-     when /\.tgz$/
+      when /\.tgz$/
         unpack_archive(dir, path)
       when /\.tar\.bz2$/
         unpack_archive(dir, path)
@@ -164,7 +164,6 @@ module Fig
     def copy(source, target)
       FileUtils.mkdir_p(File.dirname(target))
       FileUtils.copy_file(source, target)
-      target
     end
 
     def move_file(dir, from, to)

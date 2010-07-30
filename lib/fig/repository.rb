@@ -42,7 +42,7 @@ module Fig
       @os.download_list(@remote_repository_url)
     end
 
-    def publish_package(package_statements, package_name, version_name) 
+    def publish_package(package_statements, package_name, version_name, local_only) 
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       fig_file = File.join(temp_dir, ".fig")
@@ -63,15 +63,19 @@ module Fig
           else
             archive_local = statement.url
           end
-          @os.upload(archive_local, archive_remote, @remote_repository_user)
+          @os.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
+          @os.copy(archive_local, local_dir_for_package(package_name, version_name) + "/" + archive_name)
+          if statement.is_a?(Archive)
+            @os.unpack_archive(local_dir_for_package(package_name, version_name), archive_local)
+          end
           statement.class.new(archive_name).unparse('')
         else
           statement.unparse('')
         end
       end.select {|s|not s.nil?}
       @os.write(fig_file, content.join("\n").strip)
-      @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user)
-#      update_package(package_name, version_name)
+      @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user) unless local_only
+      @os.copy(fig_file, local_fig_file_for_package(package_name, version_name))
     end
 
     def bundle_resources(package_statements)

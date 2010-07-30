@@ -129,7 +129,7 @@ if input
       end
     end
   end
-  unless options[:publish] || options[:list]
+  unless options[:publish] || options[:list] || options[:publish_local]
     env.register_package(package)
     env.apply_config(package, options[:config])
     direct_retrieves.each do |info|
@@ -140,9 +140,9 @@ else
   package = Package.new(nil, nil, ".", [])
 end
 
-if options[:publish]
+if options[:publish] || options[:publish_local]
   raise "Unexpected arguments: #{argv.join(' ')}" if !argv.empty?
-  package_name, config_name, version_name = parse_descriptor(options[:publish])
+  package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
   if package_name.nil? || version_name.nil?
     raise "Please specify a package name and a version name"
   end
@@ -154,7 +154,7 @@ if options[:publish]
   else
     fail "Nothing to publish"
   end
-  repos.publish_package(publish_statements, package_name, version_name)
+  repos.publish_package(publish_statements, package_name, version_name, options[:publish_local])
 elsif options[:echo]
   puts env[options[:echo]]
 elsif shell_command
