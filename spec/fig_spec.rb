@@ -47,10 +47,7 @@ def fig(args, input=nil)
       $stderr.puts err
     end
   end
-  if $?.exitstatus != 0
-    raise "Command failed: #{$?.exitstatus}"
-  end
-  return out, err
+  return out, err, $?.exitstatus
 end
 
 describe "Fig" do
@@ -69,7 +66,7 @@ describe "Fig" do
   end
 
   it "append environment variable from command line" do
-    fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}",""]
+    fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}","",0]
   end
 
   it "append environment variable from fig file" do
@@ -78,11 +75,11 @@ describe "Fig" do
         add PATH=foo
       end
     END
-    fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}",""]
+    fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}","",0]
   end
 
   it "append empty environment variable" do
-    fig('-p XYZZY=foo -g XYZZY').should == ["foo",""]
+    fig('-p XYZZY=foo -g XYZZY').should == ["foo","",0]
   end
 
   it "should ignore comments" do
@@ -105,8 +102,9 @@ describe "Fig" do
         set FOO=BAR
       end
     END
-    puts fig('--publish foo/1.2.3', input)
+    fig('--publish foo/1.2.3', input)
     fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
@@ -122,8 +120,9 @@ describe "Fig" do
         append PATH=@/tmp/bin
       end
     END
-    puts fig('--publish foo/1.2.3', input)
+    fig('--publish foo/1.2.3', input)
     fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
@@ -133,20 +132,37 @@ describe "Fig" do
     FileUtils.mkdir_p("tmp/bin")
     File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
     fail unless system "chmod +x tmp/bin/hello"
-    puts fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
     fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
   it "refuses to overwrite existing version in remote repository without being forced" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.mkdir_p(FIG_REMOTE_DIR + "/foo/1.2.3")
-    File.open(FIG_REMOTE_DIR + "/foo/1.2.3/.fig", 'w').close 
-    FileUtils.mkdir_p("tmp/bin")
-    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
-    fail unless system "chmod +x tmp/bin/hello"
-    fail if fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    input = <<-END
+      config default
+        set FOO=SHEEP
+      end
+    END
+    fig('--publish foo/1.2.3', input)
+    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fig('-u -i foo/1.2.3 -g FOO')[0].should == 'SHEEP'
+
+    input = <<-END
+      config default
+        set FOO=CHEESE
+      end
+    END
+    (out, err, exitstatus) = fig('--publish foo/1.2.3', input)
+    exitstatus.should == 1
+    fig('-u -i foo/1.2.3 -g FOO')[0].should == 'SHEEP'
+
+    (out, err, exitstatus) = fig('--publish foo/1.2.3 --force', input)
+    exitstatus.should == 0
+    fig('-u -i foo/1.2.3 -g FOO')[0].should == 'CHEESE'
   end
 
   it "publishes to the local repo only when told to" do
@@ -155,7 +171,7 @@ describe "Fig" do
     FileUtils.mkdir_p("tmp/bin")
     File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
     fail unless system "chmod +x tmp/bin/hello"
-    puts fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
     fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
     fail unless fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
@@ -172,7 +188,7 @@ describe "Fig" do
         append FOOPATH=@/tmp/lib/hello
       end
     END
-    puts fig('--publish foo/1.2.3', input)
+    fig('--publish foo/1.2.3', input)
     input = <<-END
       retrieve FOOPATH->tmp/lib2/[package]
       config default
@@ -198,7 +214,7 @@ describe "Fig" do
         append FOOPATH=@/tmp/lib/hello2
       end
     END
-    puts fig('--publish foo/1.2.3', input)
+    fig('--publish foo/1.2.3', input)
     input = <<-END
       retrieve FOOPATH->tmp/lib2/[package]
       config default

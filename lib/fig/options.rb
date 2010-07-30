@@ -42,6 +42,9 @@ module Fig
       options[:publish_local] = nil
       opts.on('--publish-local PKG', 'install package in local repositorie only') { |publish_local| options[:publish_local] = publish_local }
 
+      options[:force] = nil
+      opts.on('--force', 'force overwriting of an existing remote package version') { |force| options[:force] = force }
+
       options[:resources] =[]
       opts.on('--resource PATH', 'resource to include in package (when using --publish)') do |path| 
         options[:resources] << Resource.new(path) 

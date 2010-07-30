@@ -38,7 +38,11 @@ module Fig
     NOT_FOUND = 4
     
     def download_list(url)
-      uri = URI.parse(url)
+      begin
+        uri = URI.parse(url)
+      rescue 
+        raise "Unable to parse url: '#{url}'"
+      end
       case uri.scheme
       when "ftp"
         ftp = Net::FTP.new(uri.host)
@@ -50,6 +54,19 @@ module Fig
           packages << parts.join('/') if parts.size == 2
         end
         ftp.close
+        packages
+      when "ssh"
+        packages = []
+        Net::SSH.start(uri.host, uri.user) do |ssh|
+          ls = ssh.exec!("[ -d #{uri.path} ] && find #{uri.path}")
+          if not ls.nil?
+            ls = ls.gsub(uri.path + "/", "").gsub(uri.path, "")
+            ls.each do |line|
+              parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').split('/')
+              packages << parts.join('/') if parts.size == 2
+            end
+          end
+        end
         packages
       else
         raise "Protocol not supported: #{url}"

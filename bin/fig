@@ -154,6 +154,19 @@ if options[:publish] || options[:publish_local]
   else
     fail "Nothing to publish"
   end
+  if options[:publish]
+    puts "Checking status of #{package_name}/#{version_name}..."
+    if repos.list_remote_packages.include?("#{package_name}/#{version_name}\n") 
+      puts "#{package_name}/#{version_name} has already been published"
+      if not options[:force]
+        puts "Use the --force option if you really want to overwrite, or us --publish-local for testing"
+        exit 1
+      else
+        puts "Overwriting..."
+      end
+    end
+  end
+  puts "Publishing #{package_name}/#{version_name}"
   repos.publish_package(publish_statements, package_name, version_name, options[:publish_local])
 elsif options[:echo]
   puts env[options[:echo]]
