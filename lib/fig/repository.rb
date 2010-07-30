@@ -66,7 +66,7 @@ module Fig
           @os.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
           @os.copy(archive_local, local_dir_for_package(package_name, version_name) + "/" + archive_name)
           if statement.is_a?(Archive)
-            @os.unpack_archive(local_dir_for_package(package_name, version_name), archive_local)
+            @os.unpack_archive(local_dir_for_package(package_name, version_name), archive_name)
           end
           statement.class.new(archive_name).unparse('')
         else

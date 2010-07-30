@@ -62,7 +62,7 @@ module Fig
           if not ls.nil?
             ls = ls.gsub(uri.path + "/", "").gsub(uri.path, "")
             ls.each do |line|
-              parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').split('/')
+              parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
               packages << parts.join('/') if parts.size == 2
             end
           end
