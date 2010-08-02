@@ -173,7 +173,7 @@ describe "Fig" do
     fail unless system "chmod +x tmp/bin/hello"
     fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
     fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
-    fail unless fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
+    fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
   it "retrieve resource" do
@@ -224,5 +224,22 @@ describe "Fig" do
     fig('-m', input)
     File.read("tmp/lib2/foo/hello").should == "some library"
     File.read("tmp/lib2/foo/hello2").should == "some other library"
+  end
+
+  it "update local packages if they already exist" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.mkdir_p("tmp/bin")
+    File.open("tmp/bin/hello", "w") { |f| f << "echo sheep" }
+    fail unless system "chmod +x tmp/bin/hello"
+    fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fig('-m -i foo/1.2.3 -- hello')[0].should == 'sheep'
+    
+    File.open("tmp/bin/hello", "w") { |f| f << "echo cheese" }
+    fail unless system "chmod +x tmp/bin/hello"
+    fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
+    fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fig('-m -i foo/1.2.3 -- hello')[0].should == 'cheese'
   end
 end
