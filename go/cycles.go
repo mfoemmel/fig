@@ -1,4 +1,4 @@
-package graph
+package fig
 
 // FindCycles returns a list of all cycles within the graph, using
 // the Tarjan algorithm (http://en.wikipedia.org/wiki/Tarjan's_strongly_connected_components_algorithm)

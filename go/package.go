@@ -1,11 +1,10 @@
-package model
+package fig
 
 import "fmt"
 
 type Package struct {
 	PackageName PackageName
 	VersionName VersionName
-	Directory   string
 	Statements  []PackageStatement
 }
 
@@ -18,8 +17,8 @@ type PackageStatementHandler interface {
 	ConfigBlock(*Config)
 }
 
-func NewPackage(packageName PackageName, versionName VersionName, directory string, configs []PackageStatement) *Package {
-	return &Package{packageName, versionName, directory, configs}
+func NewPackage(packageName PackageName, versionName VersionName, configs []PackageStatement) *Package {
+	return &Package{packageName, versionName, configs}
 }
 
 func (pkg *Package) FindConfig(configName ConfigName) *Config {
@@ -67,9 +66,6 @@ func ComparePackage(expected *Package, actual *Package) (bool,string) {
 	}
 	if expected.VersionName != actual.VersionName {
 		return false, fmt.Sprintf("VersionName mismatch: %s != %s", expected.VersionName, actual.VersionName)
-	}
-	if expected.Directory != actual.Directory {
-		return false, fmt.Sprintf("Directory mismatch: %s != %s", expected.Directory, actual.Directory)
 	}
 	if len(expected.Statements) != len(actual.Statements) {
 		return false, fmt.Sprintf("Expected %d statements, got %d", len(expected.Statements), len(actual.Statements))

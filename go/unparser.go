@@ -1,9 +1,7 @@
-package parser
+package fig
 
 import "fmt"
 import "io"
-
-import . "fig/model"
 
 type Unparser struct {
 	out io.Writer

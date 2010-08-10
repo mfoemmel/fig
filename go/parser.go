@@ -1,9 +1,7 @@
-package parser
+package fig
 
 import "fmt"
 //import "io"
-
-import . "fig/model"
 
 type Parser struct {
 	source string
@@ -136,7 +134,7 @@ func (p *Parser) ParsePackage() (*Package, *Error) {
 		stmts = stmts[0:l+1]
 		stmts[l] = stmt
 	}
-	return NewPackage("test", "1.2.3", ".", stmts), nil
+	return NewPackage("test", "1.2.3", stmts), nil
 }
 
 func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {

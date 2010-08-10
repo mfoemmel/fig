@@ -1,5 +1,6 @@
-*.out
-_test
-_gotest_.*
-_obj
-_go_.*
+/_obj
+/_test
+/_go_.6
+/_gotest_.6
+/main.6
+/*.out

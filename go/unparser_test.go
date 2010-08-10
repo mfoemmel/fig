@@ -1,9 +1,7 @@
-package parser
+package fig
 
 import "bytes"
 import "testing"
-
-import . "fig/model"
 
 func TestUnparsePackage(t *testing.T) {
 	expected := 

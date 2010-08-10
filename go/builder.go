@@ -1,4 +1,4 @@
-package model
+package fig
 
 import "container/vector"
 
@@ -27,7 +27,7 @@ func (packageBuilder *PackageBuilder) Build() *Package {
 	for i, statement := range packageBuilder.statements {
 		statements[i] = statement.(PackageStatement)
 	}
-	return NewPackage(packageBuilder.packageName, packageBuilder.versionName, ".", statements)
+	return NewPackage(packageBuilder.packageName, packageBuilder.versionName, statements)
 }
 
 func (packageBuilder *PackageBuilder) Resource(path string) *PackageBuilder {

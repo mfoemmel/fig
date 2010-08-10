@@ -1,8 +1,6 @@
-package repos
+package fig
 
 import "io"
-
-import . "fig/model"
 
 type memoryRepository struct {
 	packages map[string] []PackageStatement

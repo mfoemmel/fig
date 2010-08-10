@@ -1,4 +1,4 @@
-package model
+package fig
 
 // Backtrace shows the chain of dependencies that 
 // led up to a particular error. Implemented as

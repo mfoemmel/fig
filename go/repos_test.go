@@ -1,9 +1,7 @@
-package repos
+package fig
 
 import "os"
 import "testing"
-
-import . "fig/model"
 
 func TestListPackages(t *testing.T) {
 	r := resetRepos()

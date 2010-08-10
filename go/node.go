@@ -1,4 +1,4 @@
-package graph
+package fig
 
 // Types that implement the Node interface can be used with the 
 // directed graph algorithms supplied in this package. 
@@ -39,4 +39,11 @@ func (nodes *NodeList) String() string {
 	return s
 }
 
-
+func (nodes *NodeList) Slice() []Node {
+	slice := make([]Node, nodes.Len())
+	for i, _ := range slice {
+		slice[i] = nodes.node
+		nodes = nodes.parent
+	}
+	return slice
+}

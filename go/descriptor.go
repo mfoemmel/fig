@@ -1,4 +1,4 @@
-package model
+package fig
 
 type PackageName string
 type VersionName string

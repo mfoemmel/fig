@@ -1,4 +1,4 @@
-package graph
+package fig
 
 import "container/vector"
 import "testing"

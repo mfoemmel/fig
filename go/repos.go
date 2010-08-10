@@ -1,8 +1,6 @@
-package repos
+package fig
 
 import "io"
-
-import . "fig/model"
 
 type Repository interface {
 	ListPackages() (<-chan Descriptor) 
@@ -26,7 +24,7 @@ type PackageWriter interface {
 func ReadPackage(repo Repository, packageName PackageName, versionName VersionName) *Package {
 	r := repo.NewPackageReader(packageName, versionName)
 	defer r.Close()
-	return NewPackage(packageName, versionName, ".", r.ReadStatements())
+	return NewPackage(packageName, versionName, r.ReadStatements())
 }
 
 func WritePackage(repo Repository, pkg *Package) {

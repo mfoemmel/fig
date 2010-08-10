@@ -1,12 +1,9 @@
-package repos
+package fig
 
 import "io"
 import "io/ioutil"
 import "os"
 import "path"
-
-import . "fig/model"
-import . "fig/parser"
 
 type fileRepository struct {
 	baseDir string

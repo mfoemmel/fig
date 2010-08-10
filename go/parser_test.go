@@ -1,9 +1,7 @@
-package parser
+package fig
 
 //import "fmt"
 import "testing"
-
-import . "fig/model"
 
 func TestEmptyPackage(t *testing.T) {
 	input := `
