@@ -3,9 +3,9 @@ include $(GOROOT)/src/Make.$(GOARCH)
 TARG=fig
 GOFILES=\
 	plan.go\
-	cycles.go\
-	node.go\
-	sort.go\
+	graph_cycles.go\
+	graph_node.go\
+	graph_sort.go\
 	file.go\
 	mem.go\
 	repos.go\
