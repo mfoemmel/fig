@@ -6,9 +6,9 @@ GOFILES=\
 	graph_cycles.go\
 	graph_node.go\
 	graph_sort.go\
-	file.go\
-	mem.go\
 	repos.go\
+	repos_file.go\
+	repos_mem.go\
 	parser.go\
 	unparser.go\
 	backtrace.go\
