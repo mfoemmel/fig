@@ -29,7 +29,8 @@ func NewParser(source string, buf []byte) *Parser {
 	return parser
 }
 
-const keywordError = "invalid keyword, expected \"set\" or \"include\""
+const packageKeywordError = `invalid keyword, expected "resource", "archive", or "config"`
+const configKeywordError = `invalid keyword, expected "set", "path", or "include"`
 
 func (p *Parser) isKeywordChar() bool {
 	switch {
@@ -86,21 +87,26 @@ func (s *Parser) isVariableNameChar() bool {
 		(c >= '0' && c <= '9')
 }
 
-const variableValueError = "invalid character in variable value, expected [a-z A-Z 0-9]"
+const variableValueError = "invalid character in variable value, expected [a-z A-Z 0-9 . /]"
 
 func (s *Parser) isVariableValueChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
-		(s.c >= '0' && s.c <= '9')
+		(s.c >= '0' && s.c <= '9') ||
+		s.c == '/' || 
+		s.c == '.' || 
+		s.c == '@' // TODO need to convert legacy paths properly
 }
 
-const pathError = "invalid character in path, expected [a-z A-Z 0-9 .]"
+const pathError = "invalid character in path, expected [a-z A-Z 0-9 . /]"
 
 func (p *Parser) isPathChar() bool {
 	return (p.c >= 'a' && p.c <= 'z') ||
 		(p.c >= 'A' && p.c <= 'Z') ||
 		(p.c >= '0' && p.c <= '9') ||
-		(p.c == '.')
+		(p.c == '.') || 
+		(p.c == '/') ||
+		(p.c == '"') // TODO should parse strings correctly
 }
 
 func isConfigNamePrefix(c byte) bool {
@@ -147,6 +153,18 @@ func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 		return nil, err
 	}
 	switch keyword.text {
+	case "resource":
+		path, err := p.path()
+		if err != nil {
+			return nil, err
+		}
+		return &ResourceStatement{path}, nil
+	case "archive":
+		path, err := p.path()
+		if err != nil {
+			return nil, err
+		}
+		return &ArchiveStatement{path}, nil
 	case "config":
 		name, err := p.configName()
 		if err != nil {
@@ -157,14 +175,8 @@ func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 			return nil, err
 		}
 		return &ConfigBlock{NewConfig(ConfigName(name), stmts)}, nil
-	case "resource":
-		path, err := p.path()
-		if err != nil {
-			return nil, err
-		}
-		return &ResourceStatement{path}, nil
 	}
-	return nil, p.tokenError(keyword, keywordError)
+	return nil, p.tokenError(keyword, packageKeywordError)
 }
 
 func (p *Parser) ParseConfigStatements() ([]ConfigStatement, *Error) {
@@ -200,6 +212,12 @@ func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
 			return nil, err
 		}
 		return NewModifierStatement(NewSetModifier(name, value)), nil
+	case "path", "append":
+		name, value, err := s.nameValue()
+		if err != nil {
+			return nil, err
+		}
+		return NewModifierStatement(NewPathModifier(name, value)), nil
 	case "include":
 		descriptor, err := s.descriptor()
 		if err != nil {
@@ -209,7 +227,7 @@ func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
 	}
 
 	s.start -= len(keyword.text)
-	return nil, s.tokenError(keyword, keywordError)
+	return nil, s.tokenError(keyword, configKeywordError)
 }
 
 func (s *Parser) configName() (string, *Error) {
@@ -371,18 +389,8 @@ func (s *Parser) skipWhitespace() {
 }
 
 func (s *Parser) token() *token {
-
-	// Find start of line
-	lineStart := s.start
-	for lineStart > 0 && s.buf[lineStart-1] != '\n' {
-		lineStart--
-	}
-
-	// Find end of line
-	lineEnd := s.pos
-	for lineEnd < len(s.buf) && s.buf[lineEnd] != '\n' {
-		lineEnd++
-	}
+	lineStart := s.lineStart()
+	lineEnd := s.lineEnd()
 
 	t := string(s.buf[s.start:s.pos])
 	col := s.start - lineStart + 1
@@ -390,6 +398,21 @@ func (s *Parser) token() *token {
 	return &token{t, s.line, col, len(t), string(s.buf[lineStart:lineEnd])}
 }
 
+func (p *Parser) lineStart() int {
+	lineStart := p.start
+	for lineStart > 0 && p.buf[lineStart-1] != '\n' {
+		lineStart--
+	}
+	return lineStart
+}
+
+func (p *Parser) lineEnd() int {
+	lineEnd := p.pos
+	for lineEnd < len(p.buf) && p.buf[lineEnd] != '\n' {
+		lineEnd++
+	}
+	return lineEnd
+}
 
 type Error struct {
 	source   string
@@ -401,18 +424,8 @@ type Error struct {
 }
 
 func (s *Parser) error(msg string, token bool) *Error {
-
-	// Find start of line
-	lineStart := s.start
-	for lineStart > 0 && s.buf[lineStart-1] != '\n' {
-		lineStart--
-	}
-
-	// Find end of line
-	lineEnd := s.pos
-	for lineEnd < len(s.buf) && s.buf[lineEnd] != '\n' {
-		lineEnd++
-	}
+	lineStart := s.lineStart()
+	lineEnd := s.lineEnd()
 
 	return &Error{s.source, s.line, s.start, s.col-s.start, msg, string(s.buf[lineStart:lineEnd])}
 }
@@ -426,7 +439,8 @@ func (s *Parser) charError(msg string) *Error {
 		return s.error("unexpected end-of-file", false)
 	} 
 	s.next()
-	// TODO should only use last character in token
+
+	s.start = s.pos - 1
 	return s.tokenError(s.token(), msg)
 }
 

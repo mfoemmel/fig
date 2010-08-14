@@ -5,7 +5,9 @@ import "testing"
 
 func TestUnparsePackage(t *testing.T) {
 	expected := 
-`config default
+`resource foo.bar
+archive foo.tar.gz
+config default
   set FOO=BAR
 end
 config debug
@@ -13,6 +15,8 @@ config debug
 end
 `
 	input := NewPackageBuilder("foo","1.2.3").
+		Resource("foo.bar").
+		Archive("foo.tar.gz").
 		Config("default").Set("FOO","BAR").End().
 		Config("debug").Set("DEBUG","true").End().
 		Build()

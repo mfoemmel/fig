@@ -14,6 +14,7 @@ type PackageStatement interface {
 
 type PackageStatementHandler interface {
 	ResourceStatement(path string)
+	ArchiveStatement(path string)
 	ConfigBlock(*Config)
 }
 
@@ -58,6 +59,20 @@ func (rs *ResourceStatement) Accept(handler PackageStatementHandler) {
 	handler.ResourceStatement(rs.Path)
 }
 
+// ArchiveStatement
+
+type ArchiveStatement struct {
+	Path string
+}
+
+func NewArchiveStatement(path string) *ArchiveStatement {
+	return &ArchiveStatement{path}
+}
+
+func (as *ArchiveStatement) Accept(handler PackageStatementHandler) {
+	handler.ArchiveStatement(as.Path)
+}
+
 // Testing
 
 func ComparePackage(expected *Package, actual *Package) (bool,string) {
@@ -80,15 +95,20 @@ func ComparePackage(expected *Package, actual *Package) (bool,string) {
 
 func ComparePackageStatement(expected PackageStatement, actual PackageStatement) (bool,string) {
 	switch actual := actual.(type) {
-	case *ConfigBlock:
-		if ok, msg := CompareConfig(expected.(*ConfigBlock).Config, actual.Config); !ok {
-			return ok, msg
-		}		
 	case *ResourceStatement:
 		if actual.Path != expected.(*ResourceStatement).Path {
 			return false, fmt.Sprintf("Expected path \"%s\", got \"%s\"", actual.Path, expected.(*ResourceStatement).Path)
 		}		
 		return true, ""
+	case *ArchiveStatement:
+		if actual.Path != expected.(*ArchiveStatement).Path {
+			return false, fmt.Sprintf("Expected path \"%s\", got \"%s\"", actual.Path, expected.(*ArchiveStatement).Path)
+		}		
+		return true, ""
+	case *ConfigBlock:
+		if ok, msg := CompareConfig(expected.(*ConfigBlock).Config, actual.Config); !ok {
+			return ok, msg
+		}		
 	default:
 		panic("unexpected package statement type")
 	}

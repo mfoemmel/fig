@@ -35,6 +35,11 @@ func (packageBuilder *PackageBuilder) Resource(path string) *PackageBuilder {
 	return packageBuilder
 }
 
+func (packageBuilder *PackageBuilder) Archive(path string) *PackageBuilder {
+	packageBuilder.statements.Push(NewArchiveStatement(path))
+	return packageBuilder
+}
+
 func (packageBuilder *PackageBuilder) Config(name string) *ConfigBuilder {
 	return &ConfigBuilder{packageBuilder, ConfigName(name), vector.Vector{}}
 }

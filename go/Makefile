@@ -2,7 +2,9 @@ include $(GOROOT)/src/Make.$(GOARCH)
 
 TARG=fig
 GOFILES=\
-	plan.go\
+	cmd.go\
+	cmd_help.go\
+	engine.go\
 	graph_cycles.go\
 	graph_node.go\
 	graph_sort.go\
@@ -11,6 +13,7 @@ GOFILES=\
 	repos_mem.go\
 	parser.go\
 	unparser.go\
+	plan.go\
 	backtrace.go\
 	builder.go\
 	config.go\

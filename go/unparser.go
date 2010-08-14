@@ -25,6 +25,8 @@ func (u *Unparser) UnparsePackageStatement(stmt PackageStatement) {
 	switch stmt := stmt.(type) {
 	case *ResourceStatement:
 		fmt.Fprintf(u.out, "resource %s\n", stmt.Path)
+	case *ArchiveStatement:
+		fmt.Fprintf(u.out, "archive %s\n", stmt.Path)
 	case *ConfigBlock:
 		u.UnparseConfig(stmt.Config)
 	default:

@@ -86,6 +86,14 @@ func CompareModifier(expected Modifier, actual Modifier) (bool, string) {
 		if a.Value != e.Value {
 			return false, fmt.Sprintf("Expected name: '%s', got '%s'", e.Value, a.Value)
 		}
+	case *PathModifier:
+		e := expected.(*PathModifier)
+		if a.Name != e.Name {
+			return false, fmt.Sprintf("Expected name: '%s', got '%s'", e.Name, a.Name)
+		}
+		if a.Value != e.Value {
+			return false, fmt.Sprintf("Expected name: '%s', got '%s'", e.Value, a.Value)
+		}
 	case *IncludeModifier:
 		e := expected.(*IncludeModifier)
 		if a.PackageName != e.PackageName {

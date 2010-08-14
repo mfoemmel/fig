@@ -10,6 +10,22 @@ func TestEmptyPackage(t *testing.T) {
 	checkParsePackage(t, input, expected)
 }
 
+func TestPackageWithResource(t *testing.T) {
+	input := `
+resource foo/bar.baz
+`
+	expected := NewPackageBuilder("test", "1.2.3").Resource("foo/bar.baz").Build()
+	checkParsePackage(t, input, expected)
+}
+
+func TestPackageWithArchive(t *testing.T) {
+	input := `
+archive foo/bar.tar.gz
+`
+	expected := NewPackageBuilder("test", "1.2.3").Archive("foo/bar.tar.gz").Build()
+	checkParsePackage(t, input, expected)
+}
+
 func TestPackageWithOneConfig(t *testing.T) {
 	input := `
 config foo
@@ -42,10 +58,10 @@ func TestConfigWithTwoModifier(t *testing.T) {
 	input := `
 config foo
   set FOO1=BAR1
-  set FOO2=BAR2
+  path FOO2=BAR2
 end
 `
-	expected := NewConfigBuilder("foo").Set("FOO1","BAR1").Set("FOO2","BAR2").Build() 
+	expected := NewConfigBuilder("foo").Set("FOO1","BAR1").Path("FOO2","BAR2").Build() 
 	checkParseConfig(t, input, expected)
 }
 
@@ -62,7 +78,7 @@ func TestInclude(t *testing.T) {
 }
 
 func TestBadKeyword(t *testing.T) {
-	checkError(t, "xyzzy a=b", keywordError, 1, 1, 5)
+	checkError(t, "xyzzy a=b", configKeywordError, 1, 1, 5)
 }
 
 func TestBadSet(t *testing.T) {

@@ -1,9 +1,12 @@
 package main
 
-import "fmt"
+//import "fmt"
+import "os"
 
 import "fig"
 
 func main() {
-	fmt.Printf("Hello, world %v\n", fig.NewPackage("A","b",[]fig.PackageStatement{}))
+	repo := fig.NewFileRepository("../repos")
+	pkg := fig.ReadPackage(repo, fig.PackageName(os.Args[1]), fig.VersionName(os.Args[2]))
+	fig.NewUnparser(os.Stdout).UnparsePackage(pkg)
 }

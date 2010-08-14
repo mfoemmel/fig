@@ -1,5 +1,6 @@
 package fig
 
+//import "fmt"
 import "io"
 import "io/ioutil"
 import "os"
@@ -7,6 +8,10 @@ import "path"
 
 type fileRepository struct {
 	baseDir string
+}
+
+func NewFileRepository(baseDir string) Repository {
+	return &fileRepository{baseDir}
 }
 
 func (r *fileRepository) ListPackages() (<-chan Descriptor) {
@@ -49,8 +54,13 @@ type fileRepositoryPackageWriter struct {
 
 func (r *fileRepositoryPackageReader) ReadStatements() []PackageStatement {
 	packageDir := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName))
-	filename := path.Join(packageDir, "package.fig")
+	filename := path.Join(packageDir, "package.fig") // 
 	buf, err := ioutil.ReadFile(filename)
+	// support legacy repositories
+	if err != nil {
+		filename = path.Join(packageDir, ".fig") 
+		buf, err = ioutil.ReadFile(filename)
+	}
 	if err != nil {
 		panic(err)
 	}
