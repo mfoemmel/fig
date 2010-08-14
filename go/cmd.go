@@ -13,7 +13,7 @@ type CommandHandler interface {
 }
 
 type Command interface {
-	Execute(io.Writer)
+	Execute(Repository, io.Writer)
 }
 
 func (cmd *HelpCommand) Accept(handler CommandHandler) {
@@ -34,6 +34,8 @@ func ParseArgs(args []string) (Command, os.Error) {
 	switch iter.Get() {
 	case "help":
 		return &HelpCommand{}, nil
+	case "show":
+		return parseShow(iter)
 /*	case "list":
 		return parseList(iter)
 	case "publish":
@@ -45,6 +47,17 @@ func ParseArgs(args []string) (Command, os.Error) {
 	}
 
 	return nil, os.NewError(fmt.Sprintf("Unknown command: %s", args[1]))
+}
+
+func parseShow(iter *ArgIterator) (Command, os.Error) {
+        if !iter.Next() {
+                return nil, os.NewError("Please specify a package/version")
+        }
+	desc, err := NewParser("",[]byte(iter.Get())).descriptor()
+	if err != nil {
+		return nil, err
+	}
+        return &ShowCommand{desc.PackageName, desc.VersionName}, nil
 }
 
 // Helper class for iterating thru command line args

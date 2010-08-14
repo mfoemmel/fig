@@ -4,7 +4,7 @@ TARG=fig
 GOFILES=\
 	cmd.go\
 	cmd_help.go\
-	engine.go\
+	cmd_show.go\
 	graph_cycles.go\
 	graph_node.go\
 	graph_sort.go\

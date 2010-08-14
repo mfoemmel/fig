@@ -61,6 +61,9 @@ func (r *fileRepositoryPackageReader) ReadStatements() []PackageStatement {
 		filename = path.Join(packageDir, ".fig") 
 		buf, err = ioutil.ReadFile(filename)
 	}
+	if err == os.EEXIST {
+		panic("missing")
+	}
 	if err != nil {
 		panic(err)
 	}

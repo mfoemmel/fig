@@ -37,6 +37,7 @@ are options, so all of the following are valid descriptors:
 type HelpCommand struct {
 }
 
-func (cmd *HelpCommand) Execute(out io.Writer) {
+func (cmd *HelpCommand) Execute(repo Repository, out io.Writer) {
 	out.Write([]byte(helpText))
 }
+

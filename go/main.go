@@ -7,6 +7,10 @@ import "fig"
 
 func main() {
 	repo := fig.NewFileRepository("../repos")
-	pkg := fig.ReadPackage(repo, fig.PackageName(os.Args[1]), fig.VersionName(os.Args[2]))
-	fig.NewUnparser(os.Stdout).UnparsePackage(pkg)
+	cmd, err := fig.ParseArgs(os.Args)
+	if err != nil {
+		os.Stderr.Write([]byte(err.String() + "\n"))
+		os.Exit(1)
+	}
+	cmd.Execute(repo, os.Stdout)
 }
