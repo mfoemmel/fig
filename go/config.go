@@ -1,6 +1,7 @@
 package fig
 
 import "fmt"
+import "container/vector"
 
 //
 // Config
@@ -15,6 +16,22 @@ func NewConfig(configName ConfigName, stmts []ConfigStatement) *Config {
 	return &Config{configName, stmts}
 }
 
+func (config *Config) FindIncludeDescriptors() []Descriptor {
+	vec := &vector.Vector{}
+	for _, stmt := range config.Statements {
+		if modstmt, ok := stmt.(*ModifierStatement); ok {
+			if include, ok := modstmt.Modifier.(*IncludeModifier); ok {
+				desc := include.Descriptor()
+				vec.Push(desc)
+			}
+		}
+	}	
+	descs := make([]Descriptor, vec.Len())
+	for i, _ := range descs {
+		descs[i] = vec.At(i).(Descriptor)
+	}
+	return descs
+}
 //
 // ConfigStatement
 //

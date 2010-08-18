@@ -66,13 +66,15 @@ func (s *Parser) isVersionNameChar() bool {
 		s.c == '.'
 }
 
-const configNameError = "invalid character in config name, expected [a-z A-Z 0-9 .]"
+const configNameError = "invalid character in config name, expected [a-z A-Z 0-9 . - _]"
 
 func (s *Parser) isConfigNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
-		s.c == '.'
+		s.c == '.' ||
+		s.c == '-' ||
+		s.c == '_' 
 }
 
 
@@ -87,14 +89,16 @@ func (s *Parser) isVariableNameChar() bool {
 		(c >= '0' && c <= '9')
 }
 
-const variableValueError = "invalid character in variable value, expected [a-z A-Z 0-9 . /]"
+const variableValueError = "invalid character in variable value, expected [a-z A-Z 0-9 . - _ /]"
 
 func (s *Parser) isVariableValueChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
-		s.c == '/' || 
 		s.c == '.' || 
+		s.c == '-' || 
+		s.c == '_' || 
+		s.c == '/' || 
 		s.c == '@' // TODO need to convert legacy paths properly
 }
 
@@ -238,6 +242,9 @@ func (s *Parser) configName() (string, *Error) {
 	s.next()
 	for s.isConfigNameChar() {
 		s.next()
+	}
+	if s.c != -1 && !isWhitespace(byte(s.c)) {
+		return "", s.charError(configNameError)
 	}
 	return s.token().text, nil
 }

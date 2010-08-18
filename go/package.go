@@ -24,8 +24,8 @@ func NewPackage(packageName PackageName, versionName VersionName, configs []Pack
 
 func (pkg *Package) FindConfig(configName ConfigName) *Config {
 	for _, config := range pkg.Statements {
-		if config.(*ConfigBlock).Config.ConfigName == configName {
-			return config.(*ConfigBlock).Config
+		if block, ok := config.(*ConfigBlock); ok && block.Config.ConfigName == configName {
+			return block.Config
 		}
 	}
 	return nil

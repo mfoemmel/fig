@@ -3,6 +3,7 @@ include $(GOROOT)/src/Make.$(GOARCH)
 TARG=fig
 GOFILES=\
 	cmd.go\
+	cmd_deps.go\
 	cmd_help.go\
 	cmd_list.go\
 	cmd_show.go\
