@@ -52,17 +52,18 @@ type fileRepositoryPackageWriter struct {
 	versionName VersionName
 }
 
-func (r *fileRepositoryPackageReader) ReadStatements() []PackageStatement {
+func (r *fileRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.Error) {
 	packageDir := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName))
 	filename := path.Join(packageDir, "package.fig") // 
 	buf, err := ioutil.ReadFile(filename)
 	// support legacy repositories
-	if err != nil {
+	if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
 		filename = path.Join(packageDir, ".fig") 
 		buf, err = ioutil.ReadFile(filename)
 	}
-	if err == os.EEXIST {
-		panic("missing")
+	if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
+		// TODO should have a custom PackageNotFoundError with backtrace
+		return nil, err
 	}
 	if err != nil {
 		panic(err)
@@ -71,7 +72,7 @@ func (r *fileRepositoryPackageReader) ReadStatements() []PackageStatement {
 	if err2 != nil {
 		panic(err2.String())
 	}
-	return pkg.Statements
+	return pkg.Statements, nil
 }
 
 func (w *fileRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) {

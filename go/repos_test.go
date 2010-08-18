@@ -30,7 +30,11 @@ func TestAddPackage(t *testing.T) {
 	r := resetRepos()
 	pkg := NewPackageBuilder("baz", "7.8.9").Config("default").End().Build()
 	WritePackage(r, pkg)
-	ok, msg := ComparePackage(pkg, ReadPackage(r, "baz", "7.8.9"))
+	actual, err := ReadPackage(r, "baz", "7.8.9")
+	if err != nil {
+		t.Fatal(err)
+	}
+	ok, msg := ComparePackage(pkg, actual)
 	if !ok {
 		t.Error(msg)
 	}
@@ -47,7 +51,11 @@ func TestAddWithResource(t *testing.T) {
 	foo.Close()
 	w.Commit()
 
-	if ok, msg := ComparePackage(pkg, ReadPackage(r, "baz", "7.8.9")); !ok {
+	actual, err := ReadPackage(r, "baz", "7.8.9")
+	if err != nil {
+		t.Fatal(err)
+	}
+	if ok, msg := ComparePackage(pkg, actual); !ok {
 		t.Error(msg)
 	}
 }

@@ -34,11 +34,11 @@ func ParseArgs(args []string) (Command, os.Error) {
 	switch iter.Get() {
 	case "help":
 		return &HelpCommand{}, nil
+	case "list":
+		return parseList(iter)
 	case "show":
 		return parseShow(iter)
-/*	case "list":
-		return parseList(iter)
-	case "publish":
+/*	case "publish":
 		return parsePublish(iter)
 	case "retrieve":
 		return parseRetrieve(iter)
@@ -49,13 +49,23 @@ func ParseArgs(args []string) (Command, os.Error) {
 	return nil, os.NewError(fmt.Sprintf("Unknown command: %s", args[1]))
 }
 
+func parseList(iter *ArgIterator) (Command, os.Error) {
+        if iter.Next() {
+                return nil, os.NewError(fmt.Sprintf("Unexpected argument: %s", iter.Get()))
+        }
+        return &ListCommand{}, nil
+}
+
 func parseShow(iter *ArgIterator) (Command, os.Error) {
         if !iter.Next() {
-                return nil, os.NewError("Please specify a package/version")
+                return nil, os.NewError("Please specify a package and version (e.g. foo/1.2.3)")
         }
-	desc, err := NewParser("",[]byte(iter.Get())).descriptor()
+	desc, err := NewParser("<arg>",[]byte(iter.Get())).descriptor()
 	if err != nil {
 		return nil, err
+	}
+	if desc.PackageName == "" || desc.VersionName == "" {
+                return nil, os.NewError("Please specify a package and version (e.g. foo/1.2.3)")
 	}
         return &ShowCommand{desc.PackageName, desc.VersionName}, nil
 }

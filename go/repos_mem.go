@@ -1,6 +1,8 @@
 package fig
 
 import "io"
+import "os"
+import "strings"
 
 type memoryRepository struct {
 	packages map[string] []PackageStatement
@@ -23,15 +25,23 @@ func NewMemoryRepository() Repository {
 }
 
 func (m *memoryRepository) ListPackages() (<-chan Descriptor) {
-	return nil
+	c := make(chan Descriptor, 100)
+	go func() {
+		for name, _ := range m.packages {
+			packageVersion := strings.Split(name, "/", 2)
+			c <- NewDescriptor(packageVersion[0], packageVersion[1], "")
+		}
+		close(c)
+	}()
+	return c
 }
 
 func (m *memoryRepository) NewPackageReader(packageName PackageName, versionName VersionName) PackageReader {
 	return &memoryRepositoryPackageReader{m, packageName, versionName}
 }
 
-func (r *memoryRepositoryPackageReader) ReadStatements() []PackageStatement {
-	return r.repo.packages[string(r.packageName) + "/" + string(r.versionName)]
+func (r *memoryRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.Error) {
+	return r.repo.packages[string(r.packageName) + "/" + string(r.versionName)], nil
 }
 
 func (m *memoryRepositoryPackageReader) OpenResource(path string) io.ReadCloser {

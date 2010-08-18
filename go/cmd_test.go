@@ -25,11 +25,9 @@ func TestHelp(t *testing.T) {
 //
 // Show
 //
-
 func TestShow(t *testing.T) {
 	checkArgs(t, "fig show test/1.2.3", show("test","1.2.3"))
 }
-
 
 //
 // Helpers
@@ -80,3 +78,4 @@ func help() Command {
 func show(packageName string, versionName string) Command {
 	return &ShowCommand{PackageName(packageName),VersionName(versionName)}
 }
+

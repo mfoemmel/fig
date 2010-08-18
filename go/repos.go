@@ -1,6 +1,7 @@
 package fig
 
 import "io"
+import "os"
 
 type Repository interface {
 	ListPackages() (<-chan Descriptor) 
@@ -9,7 +10,7 @@ type Repository interface {
 }
 
 type PackageReader interface {
-	ReadStatements() []PackageStatement
+	ReadStatements() ([]PackageStatement, os.Error)
 	OpenResource(path string) io.ReadCloser
 	Close()
 }
@@ -21,10 +22,14 @@ type PackageWriter interface {
 	Close()
 }
 
-func ReadPackage(repo Repository, packageName PackageName, versionName VersionName) *Package {
+func ReadPackage(repo Repository, packageName PackageName, versionName VersionName) (*Package, os.Error) {
 	r := repo.NewPackageReader(packageName, versionName)
 	defer r.Close()
-	return NewPackage(packageName, versionName, r.ReadStatements())
+	stmts, err := r.ReadStatements()
+	if err != nil {
+		return nil, err
+	}
+	return NewPackage(packageName, versionName, stmts), nil
 }
 
 func WritePackage(repo Repository, pkg *Package) {

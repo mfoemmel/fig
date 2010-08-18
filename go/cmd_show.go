@@ -1,6 +1,7 @@
 package fig
 
 import "io"
+import "os"
 
 type ShowCommand struct {
 	packageName PackageName
@@ -8,6 +9,10 @@ type ShowCommand struct {
 }
 
 func (cmd *ShowCommand) Execute(repo Repository, out io.Writer) {
-	pkg := ReadPackage(repo, cmd.packageName, cmd.versionName)
+	pkg, err := ReadPackage(repo, cmd.packageName, cmd.versionName)
+	if err != nil {
+		os.Stderr.Write([]byte(err.String() + "\n"))
+		os.Exit(1)
+	}
 	NewUnparser(out).UnparsePackage(pkg)
 }

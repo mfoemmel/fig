@@ -91,7 +91,10 @@ func (p *Planner) Plan(desc Descriptor) ([]Descriptor, os.Error) {
 
 func (p *Planner) visit(desc Descriptor, backtrace *Backtrace) os.Error {
 	backtrace = backtrace.Push(desc)
-	pkg := ReadPackage(p.repo, desc.PackageName, desc.VersionName)
+	pkg, err := ReadPackage(p.repo, desc.PackageName, desc.VersionName)
+	if err != nil {
+		return err
+	}
 	pkgNode, exists := p.packages[desc.PackageName]
 	if exists {
 		if pkgNode.backtrace.Descriptor.VersionName != desc.VersionName {
