@@ -7,6 +7,7 @@ GOFILES=\
 	cmd_help.go\
 	cmd_list.go\
 	cmd_show.go\
+	cmd_tree.go\
 	graph_cycles.go\
 	graph_node.go\
 	graph_sort.go\

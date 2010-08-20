@@ -44,13 +44,15 @@ func (p *Parser) isKeywordChar() bool {
 	return false
 }
 
-const packageNameError = "invalid character in package name, expected [a-z A-Z 0-9 .]"
+const packageNameError = "invalid character in package name, expected [a-z A-Z 0-9 . - _]"
 
 func (s *Parser) isPackageNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
-		s.c == '.'
+		s.c == '.' ||
+		s.c == '-' ||
+		s.c == '_'
 }
 
 func isVersionNamePrefix(c byte) bool {
@@ -80,13 +82,14 @@ func (s *Parser) isConfigNameChar() bool {
 
 const nameValueWhitespaceError = "whitespace not allowed around '='"
 
-const variableNameError = "invalid character in variable name, expected [a-z A-Z 0-9]"
+const variableNameError = "invalid character in variable name, expected [a-z A-Z 0-9 _]"
 
 func (s *Parser) isVariableNameChar() bool {
 	c := s.c
 	return (c >= 'a' && c <= 'z') ||
 		(c >= 'A' && c <= 'Z') ||
-		(c >= '0' && c <= '9')
+		(c >= '0' && c <= '9') ||
+		(c == '_')
 }
 
 const variableValueError = "invalid character in variable value, expected [a-z A-Z 0-9 . - _ /]"
@@ -102,14 +105,17 @@ func (s *Parser) isVariableValueChar() bool {
 		s.c == '@' // TODO need to convert legacy paths properly
 }
 
-const pathError = "invalid character in path, expected [a-z A-Z 0-9 . /]"
+const pathError = "invalid character in path, expected [a-z A-Z 0-9 . - _ / :]"
 
 func (p *Parser) isPathChar() bool {
 	return (p.c >= 'a' && p.c <= 'z') ||
 		(p.c >= 'A' && p.c <= 'Z') ||
 		(p.c >= '0' && p.c <= '9') ||
 		(p.c == '.') || 
+		(p.c == '-') || 
+		(p.c == '_') || 
 		(p.c == '/') ||
+		(p.c == ':') ||
 		(p.c == '"') // TODO should parse strings correctly
 }
 
@@ -129,7 +135,7 @@ type token struct {
 	line     string
 }
 
-func (p *Parser) ParsePackage() (*Package, *Error) {
+func (p *Parser) ParsePackage(packageName PackageName, versionName VersionName) (*Package, *Error) {
 	stmts := make([]PackageStatement, 0, 32)
 	for {
 		p.skipWhitespace()
@@ -144,7 +150,7 @@ func (p *Parser) ParsePackage() (*Package, *Error) {
 		stmts = stmts[0:l+1]
 		stmts[l] = stmt
 	}
-	return NewPackage("test", "1.2.3", stmts), nil
+	return NewPackage(packageName, versionName, stmts), nil
 }
 
 func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
@@ -157,6 +163,13 @@ func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 		return nil, err
 	}
 	switch keyword.text {
+	case "retrieve":
+		// ignore for now
+		for p.c != '\n' {
+			p.next()
+		}
+		p.token()
+		return p.ParsePackageStatement()
 	case "resource":
 		path, err := p.path()
 		if err != nil {
@@ -210,6 +223,14 @@ func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
 	switch keyword.text {
 	case "end":
 		return nil, nil
+	case "command":
+		// ignore for now
+		for s.c != '\n' {
+			s.next()
+		}
+		s.token()
+		s.skipWhitespace()
+		return s.ParseConfigStatement()
 	case "set":
 		name, value, err := s.nameValue()
 		if err != nil {

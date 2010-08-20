@@ -11,6 +11,7 @@ func parseDepsArgs(iter *ArgIterator) (Command, os.Error) {
         if !iter.Next() {
                 return nil, os.NewError("Please specify a descriptor (e.g. foo/1.2.3)")
         }
+	// todo - parser shouldn't print line/column if "source" arg is empty
 	desc, err := NewParser("<arg>",[]byte(iter.Get())).descriptor()
 	if err != nil {
 		return nil, err
@@ -23,7 +24,11 @@ func (cmd *DepsCommand) Execute(repo Repository, out io.Writer) {
 	if err != nil {
 		panic(err)
 	}
-	config := pkg.FindConfig("default")
+	configName := cmd.descriptor.ConfigName
+	if configName == "" {
+		configName = "default"
+	}
+	config := pkg.FindConfig(configName)
 	if config == nil {
 		panic("config not found")
 	}

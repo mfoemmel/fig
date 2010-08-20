@@ -28,6 +28,8 @@ func ParseArgs(args []string) (Command, os.Error) {
 		return parseListArgs(iter)
 	case "show":
 		return parseShowArgs(iter)
+	case "tree":
+		return parseTreeArgs(iter)
 /*	case "publish":
 		return parsePublish(iter)
 	case "retrieve":

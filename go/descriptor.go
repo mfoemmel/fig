@@ -30,3 +30,15 @@ func (d Descriptor) String() string {
 	}
 	return s
 }
+
+func (in Descriptor) RelativeTo(base Descriptor) (out Descriptor) {
+	out = in
+	if out.PackageName == "" {
+		if out.VersionName != "" {
+			panic("can't have a version name without a package name")
+		}
+		out.PackageName = base.PackageName
+		out.VersionName = base.VersionName
+	}
+	return
+}

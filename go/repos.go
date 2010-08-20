@@ -39,3 +39,12 @@ func WritePackage(repo Repository, pkg *Package) {
 	w.Commit()
 }
 
+func WriteRawPackage(repo Repository, packageName PackageName, versionName VersionName, contents string) os.Error {
+	pkg, err := NewParser("", []byte(contents)).ParsePackage(packageName, versionName)
+	if err != nil {
+		panic(err)
+	}
+	WritePackage(repo, pkg)
+	return nil
+}
+

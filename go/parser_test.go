@@ -105,7 +105,7 @@ func TestBadInclude(t *testing.T) {
 
 func checkParsePackage(t *testing.T, s string, expected *Package) {
 	parser := NewParser("test", []byte(s))
-	pkg, err := parser.ParsePackage()
+	pkg, err := parser.ParsePackage("test","1.2.3")
 	if err != nil {
 		t.Fatal(err)
 	}

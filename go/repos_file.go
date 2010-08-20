@@ -68,7 +68,7 @@ func (r *fileRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.E
 	if err != nil {
 		panic(err)
 	}
-	pkg, err2 := NewParser(filename, buf).ParsePackage()
+	pkg, err2 := NewParser(filename, buf).ParsePackage(r.packageName, r.versionName)
 	if err2 != nil {
 		panic(err2.String())
 	}

@@ -41,7 +41,12 @@ func (m *memoryRepository) NewPackageReader(packageName PackageName, versionName
 }
 
 func (r *memoryRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.Error) {
-	return r.repo.packages[string(r.packageName) + "/" + string(r.versionName)], nil
+	key := makeKey(r.packageName, r.versionName)
+	stmts, ok := r.repo.packages[key]
+	if !ok {
+		return nil, os.NewError("package not found: " + key)
+	}
+	return stmts, nil
 }
 
 func (m *memoryRepositoryPackageReader) OpenResource(path string) io.ReadCloser {
@@ -56,7 +61,7 @@ func (m *memoryRepository) NewPackageWriter(packageName PackageName, versionName
 }
 
 func (w *memoryRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) {
-	w.repo.packages[string(w.packageName) + "/" + string(w.versionName)] = stmts
+	w.repo.packages[makeKey(w.packageName,w.versionName)] = stmts
 }
 
 func (m *memoryRepositoryPackageWriter) OpenResource(path string) io.WriteCloser {
@@ -67,4 +72,8 @@ func (m *memoryRepositoryPackageWriter) Commit() {
 }
 
 func (m *memoryRepositoryPackageWriter) Close() {
+}
+
+func makeKey(packageName PackageName, versionName VersionName) string {
+	return string(packageName) + "/" + string(versionName)
 }
