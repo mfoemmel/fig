@@ -1,5 +1,6 @@
 package fig
 
+import "bytes"
 import "reflect"
 import "strings"
 import "testing"
@@ -79,3 +80,14 @@ func show(packageName string, versionName string) Command {
 	return &ShowCommand{PackageName(packageName),VersionName(versionName)}
 }
 
+//
+// Context
+//
+
+func NewTestContext() (*Context, *bytes.Buffer, *bytes.Buffer) {
+	repo := NewMemoryRepository()
+	space := NewMemoryWorkspace()
+	out := bytes.NewBuffer(nil)
+	err := bytes.NewBuffer(nil)
+	return &Context{repo, space, out, err}, out, err
+}

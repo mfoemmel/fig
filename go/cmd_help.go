@@ -1,7 +1,5 @@
 package fig
 
-import "io"
-
 const helpText = `
 Fig is a cross-platform, language-agnostic package manager.
 
@@ -37,7 +35,7 @@ are options, so all of the following are valid descriptors:
 type HelpCommand struct {
 }
 
-func (cmd *HelpCommand) Execute(repo Repository, out io.Writer) {
-	out.Write([]byte(helpText))
+func (cmd *HelpCommand) Execute(ctx *Context) {
+	ctx.out.Write([]byte(helpText))
 }
 

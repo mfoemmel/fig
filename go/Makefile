@@ -5,6 +5,7 @@ GOFILES=\
 	cmd.go\
 	cmd_deps.go\
 	cmd_help.go\
+	cmd_install.go\
 	cmd_list.go\
 	cmd_show.go\
 	cmd_tree.go\
@@ -17,6 +18,7 @@ GOFILES=\
 	parser.go\
 	unparser.go\
 	plan.go\
+	workspace_mem.go\
 	backtrace.go\
 	builder.go\
 	config.go\

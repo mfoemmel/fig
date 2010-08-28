@@ -1,6 +1,5 @@
 package fig
 
-import "bytes"
 import "testing"
 
 func TestListArgs(t *testing.T) {
@@ -8,22 +7,20 @@ func TestListArgs(t *testing.T) {
 }
 
 func TestListExecuteNoPackages(t *testing.T) {
-	repo := NewMemoryRepository()
-	buf := &bytes.Buffer{}
-	list().Execute(repo, buf)
-	if buf.String() != "" {
-		t.Fatalf("expected empty list, got: %s", buf.String())
+	ctx, out, _ := NewTestContext()
+	list().Execute(ctx)
+	if out.String() != "" {
+		t.Fatalf("expected empty list, got: %s", out.String())
 	}
 }
 
 func TestListExecuteOnePackage(t *testing.T) {
-	repo := NewMemoryRepository()
-	WritePackage(repo, NewPackageBuilder("foo", "1.2.3").Build())	
-	buf := &bytes.Buffer{}
-	list().Execute(repo, buf)
+	ctx, out, _ := NewTestContext()
+	WritePackage(ctx.repo, NewPackageBuilder("foo", "1.2.3").Build())	
+	list().Execute(ctx)
 	expected := "foo/1.2.3\n"
-	if buf.String() != expected {
-		t.Fatalf("expected: %s, got: %s", expected, buf.String())
+	if out.String() != expected {
+		t.Fatalf("expected: %s, got: %s", expected, out.String())
 	}
 }
 

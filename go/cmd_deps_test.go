@@ -1,6 +1,5 @@
 package fig
 
-import "bytes"
 import "testing"
 
 func TestDepsArgs(t *testing.T) {
@@ -8,27 +7,25 @@ func TestDepsArgs(t *testing.T) {
 }
 
 func TestDepsExecuteNoDeps(t *testing.T) {
-	repo := NewMemoryRepository()
-	WritePackage(repo, NewPackageBuilder("foo", "1.2.3").Config("default").End().Build())	
-	buf := &bytes.Buffer{}
-	deps("foo","1.2.3").Execute(repo, buf)
+	ctx, out, _ := NewTestContext()
+	WritePackage(ctx.repo, NewPackageBuilder("foo", "1.2.3").Config("default").End().Build())	
+	deps("foo","1.2.3").Execute(ctx)
 	expected := ""
-	if buf.String() != expected {
-		t.Fatalf("expected: %s, got: %s", expected, buf.String())
+	if out.String() != expected {
+		t.Fatalf("expected: %s, got: %s", expected, out.String())
 	}
 }
 
 func TestDepsExecuteOneDep(t *testing.T) {
-	repo := NewMemoryRepository()
-	WritePackage(repo, 
+	ctx, out, _ := NewTestContext()
+	WritePackage(ctx.repo, 
 		NewPackageBuilder("foo", "1.2.3").
 		Config("default").Include("bar","4.5.6","default").End().
 		Build())	
-	buf := &bytes.Buffer{}
-	deps("foo","1.2.3").Execute(repo, buf)
+	deps("foo","1.2.3").Execute(ctx)
 	expected := "bar/4.5.6:default\n"
-	if buf.String() != expected {
-		t.Fatalf("expected: %s, got: %s", expected, buf.String())
+	if out.String() != expected {
+		t.Fatalf("expected: %s, got: %s", expected, out.String())
 	}
 }
 

@@ -1,6 +1,5 @@
 package fig
 
-import "io"
 import "os"
 
 type DepsCommand struct {
@@ -19,8 +18,8 @@ func parseDepsArgs(iter *ArgIterator) (Command, os.Error) {
         return &DepsCommand{desc}, nil
 }
 
-func (cmd *DepsCommand) Execute(repo Repository, out io.Writer) {
-	pkg, err := ReadPackage(repo, cmd.descriptor.PackageName, cmd.descriptor.VersionName)
+func (cmd *DepsCommand) Execute(ctx *Context) {
+	pkg, err := ReadPackage(ctx.repo, cmd.descriptor.PackageName, cmd.descriptor.VersionName)
 	if err != nil {
 		panic(err)
 	}
@@ -33,6 +32,6 @@ func (cmd *DepsCommand) Execute(repo Repository, out io.Writer) {
 		panic("config not found")
 	}
 	for _, desc := range config.FindIncludeDescriptors() {
-		out.Write([]byte(desc.String() + "\n"))
+		ctx.out.Write([]byte(desc.String() + "\n"))
 	}
 }

@@ -4,8 +4,15 @@ import "fmt"
 import "io"
 import "os"
 
+type Context struct {
+	repo Repository
+	space Workspace
+	out io.Writer
+	err io.Writer
+}
+
 type Command interface {
-	Execute(Repository, io.Writer)
+	Execute(ctx *Context)
 }
 
 func ParseArgs(args []string) (Command, os.Error) {
@@ -24,6 +31,8 @@ func ParseArgs(args []string) (Command, os.Error) {
 		return parseDepsArgs(iter)
 	case "help":
 		return &HelpCommand{}, nil
+	case "install":
+		return parseInstallArgs(iter)
 	case "list":
 		return parseListArgs(iter)
 	case "show":

@@ -20,8 +20,8 @@ func parseTreeArgs(iter *ArgIterator) (Command, os.Error) {
         return &TreeCommand{desc}, nil
 }
 
-func (cmd *TreeCommand) Execute(repo Repository, out io.Writer) {
-	cmd.visit(repo, out, 0, Descriptor{}, cmd.descriptor)
+func (cmd *TreeCommand) Execute(ctx *Context) {
+	cmd.visit(ctx.repo, ctx.out, 0, Descriptor{}, cmd.descriptor)
 }
 
 // todo we should run this through the cycle detector to avoid infinite loops
@@ -33,7 +33,7 @@ func (cmd *TreeCommand) visit(repo Repository, out io.Writer, indent int, parent
 	buf.Write([]byte(descriptor.String()))
 	descriptor = descriptor.RelativeTo(parent)
 	if descriptor.VersionName == "" {
-		buf.Write([]byte(" (skipping)"))
+		buf.Write([]byte("..."))
 	}
 	buf.Write([]byte("\n"))
 	out.Write(buf.Bytes())

@@ -1,6 +1,5 @@
 package fig
 
-import "io"
 import "os"
 
 type ShowCommand struct {
@@ -22,11 +21,13 @@ func parseShowArgs(iter *ArgIterator) (Command, os.Error) {
         return &ShowCommand{desc.PackageName, desc.VersionName}, nil
 }
 
-func (cmd *ShowCommand) Execute(repo Repository, out io.Writer) {
-	pkg, err := ReadPackage(repo, cmd.packageName, cmd.versionName)
+func (cmd *ShowCommand) Execute(ctx *Context) {
+	pkg, err := ReadPackage(ctx.repo, cmd.packageName, cmd.versionName)
 	if err != nil {
+		// todo Context should have an "err" field
+		// todo Execute should return an exit code
 		os.Stderr.Write([]byte(err.String() + "\n"))
 		os.Exit(1)
 	}
-	NewUnparser(out).UnparsePackage(pkg)
+	NewUnparser(ctx.out).UnparsePackage(pkg)
 }
