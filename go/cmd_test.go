@@ -85,9 +85,10 @@ func show(packageName string, versionName string) Command {
 //
 
 func NewTestContext() (*Context, *bytes.Buffer, *bytes.Buffer) {
+	fs := NewMemoryFileSystem()
 	repo := NewMemoryRepository()
 	space := NewMemoryWorkspace()
 	out := bytes.NewBuffer(nil)
 	err := bytes.NewBuffer(nil)
-	return &Context{repo, space, out, err}, out, err
+	return &Context{fs, repo, space, out, err}, out, err
 }

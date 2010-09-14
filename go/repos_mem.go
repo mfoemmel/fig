@@ -49,8 +49,8 @@ func (r *memoryRepositoryPackageReader) ReadStatements() ([]PackageStatement, os
 	return stmts, nil
 }
 
-func (m *memoryRepositoryPackageReader) OpenResource(path string) io.ReadCloser {
-	return nil
+func (m *memoryRepositoryPackageReader) OpenResource(path string) (io.ReadCloser, os.Error) {
+	return nil, nil
 }
 
 func (m *memoryRepositoryPackageReader) Close() {

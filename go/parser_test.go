@@ -10,6 +10,12 @@ func TestEmptyPackage(t *testing.T) {
 	checkParsePackage(t, input, expected)
 }
 
+func TestPackageWithName(t *testing.T) {
+	input := "package foo/1.2.3"
+	expected := NewPackageBuilder("foo", "1.2.3").Name("foo", "1.2.3").Build()
+	checkParsePackage(t, input, expected)
+}
+
 func TestPackageWithResource(t *testing.T) {
 	input := `
 resource foo/bar.baz

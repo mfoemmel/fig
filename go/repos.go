@@ -11,7 +11,7 @@ type Repository interface {
 
 type PackageReader interface {
 	ReadStatements() ([]PackageStatement, os.Error)
-	OpenResource(path string) io.ReadCloser
+	OpenResource(path string) (io.ReadCloser, os.Error)
 	Close()
 }
 

@@ -13,6 +13,7 @@ type PackageStatement interface {
 }
 
 type PackageStatementHandler interface {
+	NameStatement(PackageName, VersionName)
 	ResourceStatement(path string)
 	ArchiveStatement(path string)
 	ConfigBlock(*Config)
@@ -31,18 +32,19 @@ func (pkg *Package) FindConfig(configName ConfigName) *Config {
 	return nil
 }
 
-// ConfigBlock
+// NameStatement
 
-type ConfigBlock struct {
-	Config *Config
+type NameStatement struct {
+	PackageName PackageName
+	VersionName VersionName
 }
 
-func NewConfigBlock(c *Config) *ConfigBlock {
-	return &ConfigBlock{c}
+func NewNameStatement(packageName PackageName, versionName VersionName) *NameStatement {
+	return &NameStatement{packageName, versionName}
 }
 
-func (cb *ConfigBlock) Accept(handler PackageStatementHandler) {
-	handler.ConfigBlock(cb.Config)
+func (ns *NameStatement) Accept(handler PackageStatementHandler) {
+	handler.NameStatement(ns.PackageName, ns.VersionName)
 }
 
 // ResourceStatement
@@ -73,6 +75,20 @@ func (as *ArchiveStatement) Accept(handler PackageStatementHandler) {
 	handler.ArchiveStatement(as.Path)
 }
 
+// ConfigBlock
+
+type ConfigBlock struct {
+	Config *Config
+}
+
+func NewConfigBlock(c *Config) *ConfigBlock {
+	return &ConfigBlock{c}
+}
+
+func (cb *ConfigBlock) Accept(handler PackageStatementHandler) {
+	handler.ConfigBlock(cb.Config)
+}
+
 // Testing
 
 func ComparePackage(expected *Package, actual *Package) (bool,string) {
@@ -95,6 +111,14 @@ func ComparePackage(expected *Package, actual *Package) (bool,string) {
 
 func ComparePackageStatement(expected PackageStatement, actual PackageStatement) (bool,string) {
 	switch actual := actual.(type) {
+	case *NameStatement:
+		if actual.PackageName != expected.(*NameStatement).PackageName {
+			return false, fmt.Sprintf("Expected package name \"%s\", got \"%s\"", actual.PackageName, expected.(*NameStatement).PackageName)
+		}		
+		if actual.VersionName != expected.(*NameStatement).VersionName {
+			return false, fmt.Sprintf("Expected version name \"%s\", got \"%s\"", actual.VersionName, expected.(*NameStatement).VersionName)
+		}		
+		return true, ""
 	case *ResourceStatement:
 		if actual.Path != expected.(*ResourceStatement).Path {
 			return false, fmt.Sprintf("Expected path \"%s\", got \"%s\"", actual.Path, expected.(*ResourceStatement).Path)

@@ -5,10 +5,15 @@ import "io"
 import "os"
 
 type Context struct {
+	fs FileSystem
 	repo Repository
 	space Workspace
 	out io.Writer
 	err io.Writer
+}
+
+func NewContext(fs FileSystem, repo Repository, space Workspace, out io.Writer, err io.Writer) *Context {
+	return &Context{fs, repo, space, out, err}
 }
 
 type Command interface {
@@ -23,7 +28,7 @@ func ParseArgs(args []string) (Command, os.Error) {
 	}
 
 	if !iter.Next() {
-		return nil, os.NewError("Please specify a command to run")
+		return nil, os.NewError("Please specify a command to run (try 'fig help')")
 	}
 
 	switch iter.Get() {
@@ -39,9 +44,9 @@ func ParseArgs(args []string) (Command, os.Error) {
 		return parseShowArgs(iter)
 	case "tree":
 		return parseTreeArgs(iter)
-/*	case "publish":
-		return parsePublish(iter)
-	case "retrieve":
+	case "publish":
+		return parsePublishArgs(iter)
+/*	case "retrieve":
 		return parseRetrieve(iter)
 	case "run":
 		return parseRun(iter)*/

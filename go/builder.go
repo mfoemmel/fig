@@ -30,6 +30,10 @@ func (packageBuilder *PackageBuilder) Build() *Package {
 	return NewPackage(packageBuilder.packageName, packageBuilder.versionName, statements)
 }
 
+func (packageBuilder *PackageBuilder) Name(packageName string, versionName string) *PackageBuilder {
+	packageBuilder.statements.Push(NewNameStatement(PackageName(packageName), VersionName(versionName)))
+	return packageBuilder
+}
 func (packageBuilder *PackageBuilder) Resource(path string) *PackageBuilder {
 	packageBuilder.statements.Push(NewResourceStatement(path))
 	return packageBuilder

@@ -59,13 +59,15 @@ func isVersionNamePrefix(c byte) bool {
 	return c == '/'
 }
 
-const versionNameError = "invalid character in version name, expected [a-z A-Z 0-9 .]"
+const versionNameError = "invalid character in version name, expected [a-z A-Z 0-9 . - _]"
 
 func (s *Parser) isVersionNameChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
-		s.c == '.'
+		s.c == '.' ||
+		s.c == '-' ||
+		s.c == '_' 
 }
 
 const configNameError = "invalid character in config name, expected [a-z A-Z 0-9 . - _]"
@@ -146,6 +148,12 @@ func (p *Parser) ParsePackage(packageName PackageName, versionName VersionName) 
 		if stmt == nil {
 			break
 		}
+		
+		if name, ok := stmt.(*NameStatement); ok {
+			packageName = name.PackageName
+			versionName = name.VersionName
+		}
+
 		l := len(stmts)
 		stmts = stmts[0:l+1]
 		stmts[l] = stmt
@@ -163,6 +171,12 @@ func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 		return nil, err
 	}
 	switch keyword.text {
+	case "package":
+		packageName, versionName, err := p.packageName()
+		if err != nil {
+			return nil, err
+		}
+		return &NameStatement{PackageName(packageName), VersionName(versionName)}, nil
 	case "retrieve":
 		// ignore for now
 		for p.c != '\n' {
@@ -197,7 +211,7 @@ func (p *Parser) ParsePackageStatement() (PackageStatement, *Error) {
 }
 
 func (p *Parser) ParseConfigStatements() ([]ConfigStatement, *Error) {
-	stmts := make([]ConfigStatement, 0, 32)
+	stmts := make([]ConfigStatement, 0, 512) // todo hard coded max
 	for {
 		p.skipWhitespace()
 		stmt, err := p.ParseConfigStatement()
@@ -253,6 +267,37 @@ func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
 
 	s.start -= len(keyword.text)
 	return nil, s.tokenError(keyword, configKeywordError)
+}
+
+func (s *Parser) packageName() (string, string, *Error) {
+	s.skipWhitespace()
+	if !s.isPackageNameChar() {
+		return "", "", s.charError(packageNameError)
+	}
+	s.next()
+	for s.isPackageNameChar() {
+		s.next()
+	}
+	packageName := s.token().text
+
+	if s.c != '/' {
+		return "", "", s.charError(versionNameError)
+	}
+	s.skip()
+
+	if !s.isVersionNameChar() {
+		return "", "", s.charError(versionNameError)
+	}
+	for s.isVersionNameChar() {
+		s.next()
+	}
+	versionName := s.token().text
+
+	if s.c != -1 && !isWhitespace(byte(s.c)) {
+		return "", "", s.charError(versionNameError)
+	}
+
+	return packageName, versionName, nil
 }
 
 func (s *Parser) configName() (string, *Error) {
@@ -383,7 +428,12 @@ func (p *Parser) path() (string, *Error) {
 	if p.c != EOF && !isWhitespace(byte(p.c)) {
 		return "", p.charError(pathError)
 	}
-	return p.token().text, nil
+	text := p.token().text
+	// need to parse quoted strings properly
+	if text[0] == '"' {
+		text = text[1:len(text)-1]
+	}
+	return text, nil
 }
 
 func (s *Parser) next() {

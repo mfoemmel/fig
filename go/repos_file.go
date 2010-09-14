@@ -96,8 +96,17 @@ func (r *fileRepository) NewPackageReader(packageName PackageName, versionName V
 func (r *fileRepositoryPackageReader) Close() {
 }
 
-func (r *fileRepositoryPackageReader) OpenResource(res string) io.ReadCloser {
-	return nil
+func (r *fileRepositoryPackageReader) OpenResource(res string) (io.ReadCloser, os.Error) {
+	full := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName), res)
+	file, err := os.Open(full, os.O_RDONLY, 0)
+	if err != nil {
+		if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
+			return nil, os.NewError("Resource not found: " + full)
+		} else {
+			return nil, err
+		}
+	}
+	return file, nil
 }
 
 func (w *fileRepositoryPackageWriter) OpenResource(res string) io.WriteCloser {
