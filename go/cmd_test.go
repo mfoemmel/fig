@@ -35,7 +35,7 @@ func TestShow(t *testing.T) {
 //
 
 func parseCommand(t *testing.T, s string) Command {
-        cmd, err := ParseArgs(strings.Split(s, " ", 0))
+        cmd, err := ParseArgs(strings.Split(s, " ", -1))
         assertNil(t, err)
         return cmd
 }
@@ -45,7 +45,7 @@ func checkArgs(t *testing.T, s string, cmd Command) {
 }
 
 func checkArgsError(t *testing.T, s string, msg string) {
-        cmd, err := ParseArgs(strings.Split(s, " ", 0))
+        cmd, err := ParseArgs(strings.Split(s, " ", -1))
         assertNil(t, cmd)
         assertEquals(t, err.String(), msg)
 }
