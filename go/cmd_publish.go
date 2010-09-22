@@ -1,5 +1,6 @@
 package fig
 
+import "io"
 import "os"
 
 type PublishCommand struct {
@@ -20,7 +21,19 @@ func (cmd *PublishCommand) Execute(ctx *Context) {
 	if err2 != nil {
 		panic(err2)
 	}
-	WritePackage(ctx.repo, pkg)
+	
+	w := ctx.repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	w.WriteStatements(pkg.Statements)
+	for _, stmt := range pkg.Statements {
+		if res, ok := stmt.(*ResourceStatement); ok {
+			out/*, err*/ := w.OpenArchive()
+			in, err := ctx.fs.OpenReader(res.Path)
+			if err != nil {
+				panic(err)
+			}
+			io.Copy(out, in)
+		}
+	}
 //	NewParser("package.fig", ctx.localPackage)
 //	w := ctx.repo.NewPackageWriter()
 }

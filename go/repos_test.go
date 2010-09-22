@@ -46,7 +46,8 @@ func TestAddWithResource(t *testing.T) {
 	w := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
 	defer w.Close()
 	w.WriteStatements(pkg.Statements)
-	foo := w.OpenResource("test.jar")
+	// todo write as a tar
+	foo := w.OpenArchive()
 	foo.Write([]byte("hello"))
 	foo.Close()
 	w.Commit()

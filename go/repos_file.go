@@ -96,8 +96,8 @@ func (r *fileRepository) NewPackageReader(packageName PackageName, versionName V
 func (r *fileRepositoryPackageReader) Close() {
 }
 
-func (r *fileRepositoryPackageReader) OpenResource(res string) (io.ReadCloser, os.Error) {
-	full := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName), res)
+func (r *fileRepositoryPackageReader) OpenArchive() (io.ReadCloser, os.Error) {
+	full := path.Join(r.repos.baseDir, string(r.packageName), string(r.versionName), "archive.tar.gz")
 	file, err := os.Open(full, os.O_RDONLY, 0)
 	if err != nil {
 		if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
@@ -109,8 +109,8 @@ func (r *fileRepositoryPackageReader) OpenResource(res string) (io.ReadCloser, o
 	return file, nil
 }
 
-func (w *fileRepositoryPackageWriter) OpenResource(res string) io.WriteCloser {
-	file, err := os.Open(path.Join(w.repos.baseDir, res), os.O_WRONLY|os.O_CREAT, 0666)
+func (w *fileRepositoryPackageWriter) OpenArchive() io.WriteCloser {
+	file, err := os.Open(path.Join(w.repos.baseDir, "archive.tar.gz"), os.O_WRONLY|os.O_CREAT, 0666)
 	if err != nil {
 		panic(err)
 	}

@@ -33,7 +33,8 @@ func (cmd *InstallCommand) Execute(ctx *Context) {
 	}
 	for _, stmt := range stmts {
 		if archiveStmt, ok := stmt.(*ArchiveStatement); ok {
-			in, err := pkg.OpenResource(archiveStmt.Path)
+//			in, err := pkg.OpenResource(archiveStmt.Path)
+			in, err := pkg.OpenArchive()
 			println(archiveStmt.Path)
 			if err != nil {
 				panic(err)

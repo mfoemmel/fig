@@ -101,8 +101,16 @@ func ComparePackage(expected *Package, actual *Package) (bool,string) {
 	if len(expected.Statements) != len(actual.Statements) {
 		return false, fmt.Sprintf("Expected %d statements, got %d", len(expected.Statements), len(actual.Statements))
 	}
-	for i, _ := range expected.Statements {
-		if ok, msg := ComparePackageStatement(expected.Statements[i], actual.Statements[i]); !ok {
+	ok, msg := ComparePackageStatements(expected.Statements, actual.Statements)
+	if !ok {
+		return ok, msg
+	}
+	return true, ""
+}
+
+func ComparePackageStatements(expected []PackageStatement, actual []PackageStatement) (bool,string) {
+	for i, _ := range expected {
+		if ok, msg := ComparePackageStatement(expected[i], actual[i]); !ok {
 			return ok, msg
 		}
 	}

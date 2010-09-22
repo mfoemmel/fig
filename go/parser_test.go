@@ -151,6 +151,12 @@ func checkPackage(t *testing.T, expected *Package, actual *Package) {
 	}
 }
 
+func checkPackageStatements(t *testing.T, expected []PackageStatement, actual []PackageStatement) {
+	if ok, msg := ComparePackageStatements(expected, actual); !ok {
+		t.Error(msg)
+	}
+}
+
 func checkConfig(t *testing.T, expected *Config, actual *Config) {
 	if ok, msg := CompareConfig(expected, actual); !ok {
 		t.Error(msg)

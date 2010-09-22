@@ -11,13 +11,13 @@ type Repository interface {
 
 type PackageReader interface {
 	ReadStatements() ([]PackageStatement, os.Error)
-	OpenResource(path string) (io.ReadCloser, os.Error)
+	OpenArchive() (io.ReadCloser, os.Error)
 	Close()
 }
 
 type PackageWriter interface {
 	WriteStatements([]PackageStatement)
-	OpenResource(path string) io.WriteCloser
+	OpenArchive() io.WriteCloser
 	Commit()
 	Close()
 }
