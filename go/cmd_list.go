@@ -13,9 +13,10 @@ func parseListArgs(iter *ArgIterator) (Command, os.Error) {
         return &ListCommand{}, nil
 }
 
-func (cmd *ListCommand) Execute(ctx *Context) {
+func (cmd *ListCommand) Execute(ctx *Context) int {
 	for pkg := range ctx.repo.ListPackages() {
 		line := fmt.Sprintf("%s/%s\n", pkg.PackageName, pkg.VersionName)
 		ctx.out.Write([]byte(line))
 	}
+	return 0
 }

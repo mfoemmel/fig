@@ -17,7 +17,7 @@ func NewContext(fs FileSystem, repo Repository, space Workspace, out io.Writer, 
 }
 
 type Command interface {
-	Execute(ctx *Context)
+	Execute(ctx *Context) int
 }
 
 func ParseArgs(args []string) (Command, os.Error) {

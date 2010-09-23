@@ -13,7 +13,7 @@ func parsePublishArgs(iter *ArgIterator) (Command, os.Error) {
         return &PublishCommand{}, nil
 }
 
-func (cmd *PublishCommand) Execute(ctx *Context) {
+func (cmd *PublishCommand) Execute(ctx *Context) int {
 	path := "package.fig"
 	localPackage, err := ReadFile(ctx.fs, path)
 	if err != nil {
@@ -59,4 +59,5 @@ func (cmd *PublishCommand) Execute(ctx *Context) {
 	}
 //	NewParser("package.fig", ctx.localPackage)
 //	w := ctx.repo.NewPackageWriter()
+	return 0
 }

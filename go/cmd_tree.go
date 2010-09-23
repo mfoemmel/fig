@@ -20,8 +20,9 @@ func parseTreeArgs(iter *ArgIterator) (Command, os.Error) {
         return &TreeCommand{desc}, nil
 }
 
-func (cmd *TreeCommand) Execute(ctx *Context) {
+func (cmd *TreeCommand) Execute(ctx *Context) int {
 	cmd.visit(ctx.repo, ctx.out, 0, Descriptor{}, cmd.descriptor)
+	return 0
 }
 
 // todo we should run this through the cycle detector to avoid infinite loops

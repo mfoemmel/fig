@@ -24,7 +24,7 @@ func parseInstallArgs(iter *ArgIterator) (Command, os.Error) {
         return &InstallCommand{desc.PackageName, desc.VersionName}, nil
 }
 
-func (cmd *InstallCommand) Execute(ctx *Context) {
+func (cmd *InstallCommand) Execute(ctx *Context) int {
 	ctx.space.Install(cmd.packageName, cmd.versionName)
 	pkg := ctx.repo.NewPackageReader(cmd.packageName, cmd.versionName)
 	stmts, err := pkg.ReadStatements()
@@ -60,4 +60,6 @@ func (cmd *InstallCommand) Execute(ctx *Context) {
 		}
 	}
 	defer pkg.Close()
+	
+	return 0
 }

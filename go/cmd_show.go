@@ -21,13 +21,13 @@ func parseShowArgs(iter *ArgIterator) (Command, os.Error) {
         return &ShowCommand{desc.PackageName, desc.VersionName}, nil
 }
 
-func (cmd *ShowCommand) Execute(ctx *Context) {
+func (cmd *ShowCommand) Execute(ctx *Context) int {
 	pkg, err := ReadPackage(ctx.repo, cmd.packageName, cmd.versionName)
 	if err != nil {
 		// todo Context should have an "err" field
-		// todo Execute should return an exit code
 		os.Stderr.Write([]byte(err.String() + "\n"))
-		os.Exit(1)
+		return 1
 	}
 	NewUnparser(ctx.out).UnparsePackage(pkg)
+	return 0
 }

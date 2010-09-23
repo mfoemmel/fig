@@ -14,5 +14,6 @@ func main() {
 		os.Stderr.Write([]byte(err.String() + "\n"))
 		os.Exit(1)
 	}
-	cmd.Execute(ctx)
+	rc := cmd.Execute(ctx)
+	os.Exit(rc)
 }

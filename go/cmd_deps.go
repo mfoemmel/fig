@@ -18,7 +18,7 @@ func parseDepsArgs(iter *ArgIterator) (Command, os.Error) {
         return &DepsCommand{desc}, nil
 }
 
-func (cmd *DepsCommand) Execute(ctx *Context) {
+func (cmd *DepsCommand) Execute(ctx *Context) int {
 	pkg, err := ReadPackage(ctx.repo, cmd.descriptor.PackageName, cmd.descriptor.VersionName)
 	if err != nil {
 		panic(err)
@@ -34,4 +34,5 @@ func (cmd *DepsCommand) Execute(ctx *Context) {
 	for _, desc := range config.FindIncludeDescriptors() {
 		ctx.out.Write([]byte(desc.String() + "\n"))
 	}
+	return 0
 }
