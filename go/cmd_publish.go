@@ -1,6 +1,7 @@
 package fig
 
 import "archive/tar"
+import "compress/gzip"
 //import "io"
 import "io/ioutil"
 import "os"
@@ -30,7 +31,14 @@ func (cmd *PublishCommand) Execute(ctx *Context) int {
 	// Set up archive stream
 	out/*, err*/ := w.OpenArchive()
 	defer out.Close()
-	archive := tar.NewWriter(out)
+
+	zout, err := gzip.NewWriter(out)
+	if err != nil {
+		panic(err)
+	}
+	defer zout.Close()
+
+	archive := tar.NewWriter(zout)
 	if err != nil {
 		panic(err)
 	}

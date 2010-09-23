@@ -1,6 +1,7 @@
 package fig
 
 import "archive/tar"
+import "compress/gzip"
 import "io/ioutil"
 import "testing"
 //import "fmt"
@@ -61,7 +62,12 @@ end
 	if err != nil {
 		t.Fatal(err)
 	}
-	archive := tar.NewReader(in)
+
+	zipin, err := gzip.NewReader(in)
+	if err != nil {
+		t.Fatal(err)
+	}
+	archive := tar.NewReader(zipin)
 	header, err := archive.Next()
 	if err != nil {
 		t.Fatal(err)
