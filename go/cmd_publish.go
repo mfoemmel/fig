@@ -1,6 +1,8 @@
 package fig
 
-import "io"
+import "archive/tar"
+//import "io"
+import "io/ioutil"
 import "os"
 
 type PublishCommand struct {
@@ -24,14 +26,35 @@ func (cmd *PublishCommand) Execute(ctx *Context) {
 	
 	w := ctx.repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
 	w.WriteStatements(pkg.Statements)
+
+	// Set up archive stream
+	out/*, err*/ := w.OpenArchive()
+	defer out.Close()
+	archive := tar.NewWriter(out)
+	if err != nil {
+		panic(err)
+	}
+	defer archive.Close()
 	for _, stmt := range pkg.Statements {
 		if res, ok := stmt.(*ResourceStatement); ok {
-			out/*, err*/ := w.OpenArchive()
+			size, err := ctx.fs.Size(res.Path)
 			in, err := ctx.fs.OpenReader(res.Path)
 			if err != nil {
 				panic(err)
 			}
-			io.Copy(out, in)
+
+			tmp, _ := ioutil.ReadAll(in)
+
+			header := &tar.Header{}
+			header.Name = res.Path
+			header.Size = size
+			archive.WriteHeader(header)
+			if err != nil {
+				panic(err)
+			}
+			archive.Write(tmp)
+//			archive.Flush()
+//			io.Copy(archive, in)
 		}
 	}
 //	NewParser("package.fig", ctx.localPackage)

@@ -23,6 +23,13 @@ func NewMemoryFileSystem() FileSystem {
 	return &memoryFileSystem{make(map[string] []byte)}
 }
 
+func (fs *memoryFileSystem) Size(path string) (int64, os.Error) {
+	if content, ok := fs.files[path]; ok {
+		return int64(len(content)), nil
+	}
+	return -1, os.NewError("file not found")
+}
+
 func (fs *memoryFileSystem) OpenReader(path string) (io.ReadCloser, os.Error) {
 	data, ok := fs.files[path]
 	if !ok {

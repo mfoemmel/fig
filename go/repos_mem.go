@@ -7,8 +7,9 @@ import "strings"
 
 type memoryPackage struct {
 	statements []PackageStatement
-	archive *bytes.Buffer
+	archive []byte
 }
+
 type memoryRepository struct {
 	packages map[string] *memoryPackage
 }
@@ -23,11 +24,30 @@ type memoryRepositoryPackageWriter struct {
 	pkg *memoryPackage
 }
 
-type bufferCloser struct {
-	*bytes.Buffer
+type archiveReader struct {
+	pkg *memoryPackage
+	buf *bytes.Buffer
 }
 
-func (*bufferCloser) Close() os.Error {
+func (ar *archiveReader) Read(bytes []byte) (int,os.Error) {
+	return ar.buf.Read(bytes)
+}
+
+func (ar *archiveReader) Close() os.Error {
+	return nil
+}
+
+type archiveWriter struct {
+	pkg *memoryPackage
+	buf *bytes.Buffer
+}
+
+func (aw *archiveWriter) Write(bytes []byte) (int,os.Error) {
+	return aw.buf.Write(bytes)
+}
+
+func (aw *archiveWriter) Close() os.Error {
+	aw.pkg.archive = aw.buf.Bytes()
 	return nil
 }
 
@@ -66,7 +86,7 @@ func (r *memoryRepositoryPackageReader) ReadStatements() ([]PackageStatement, os
 }
 
 func (r *memoryRepositoryPackageReader) OpenArchive() (io.ReadCloser, os.Error) {
-	return &bufferCloser{r.pkg.archive}, nil
+	return &archiveReader{r.pkg, bytes.NewBuffer(r.pkg.archive)}, nil
 }
 
 func (m *memoryRepositoryPackageReader) Close() {
@@ -76,7 +96,7 @@ func (m *memoryRepository) NewPackageWriter(packageName PackageName, versionName
 	key := makeKey(packageName, versionName)
 	pkg, ok := m.packages[key]
 	if !ok {
-		pkg = &memoryPackage{nil, bytes.NewBuffer(nil)}
+		pkg = &memoryPackage{nil, nil}
 		m.packages[key] = pkg
 //		return nil//, os.NewError("package not found: " + key)
 	}
@@ -88,7 +108,7 @@ func (w *memoryRepositoryPackageWriter) WriteStatements(stmts []PackageStatement
 }
 
 func (m *memoryRepositoryPackageWriter) OpenArchive() io.WriteCloser {
-	return &bufferCloser{m.pkg.archive}
+	return &archiveWriter{m.pkg, bytes.NewBuffer(m.pkg.archive)}
 }
 
 func (m *memoryRepositoryPackageWriter) Commit() {

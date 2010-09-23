@@ -1,7 +1,9 @@
 package fig
 
+import "archive/tar"
 import "io/ioutil"
 import "testing"
+//import "fmt"
 
 func TestPublishArgs(t *testing.T) {
 	checkArgs(t, "fig publish", publish())
@@ -55,16 +57,25 @@ end
 		End().Build()
 	checkPackageStatements(t, expected.Statements, stmts)
 
-	archive, err := r.OpenArchive()
+	in, err := r.OpenArchive()
 	if err != nil {
 		t.Fatal(err)
+	}
+	archive := tar.NewReader(in)
+	header, err := archive.Next()
+	if err != nil {
+		t.Fatal(err)
+	}
+	if header.Name != "foo.txt" {
+		t.Fatal("expected: %s, got: %s", "foo.txt", header.Name)
 	}
 	content, err := ioutil.ReadAll(archive)
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	if string(content) != "foo contents" {
-		t.Fatalf("expected: %s, got: %s", "foo contents", content)
+		t.Fatalf("expected: '%s', got: '%s'", "foo contents", content)
 	}
 }
 
