@@ -1,7 +1,7 @@
 package fig
 
-const helpText = `
-Fig is a cross-platform, language-agnostic package manager.
+const helpText = 
+`Fig is a cross-platform, language-agnostic package manager.
 
 Usage: fig <command> [<args>...]
 

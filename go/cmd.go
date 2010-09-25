@@ -46,6 +46,8 @@ func ParseArgs(args []string) (Command, os.Error) {
 		return parseTreeArgs(iter)
 	case "publish":
 		return parsePublishArgs(iter)
+	case "repo":
+		return parseRepoArgs(iter)
 /*	case "retrieve":
 		return parseRetrieve(iter)
 	case "run":

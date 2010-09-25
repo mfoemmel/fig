@@ -8,6 +8,7 @@ GOFILES=\
 	cmd_install.go\
 	cmd_list.go\
 	cmd_publish.go\
+	cmd_repo.go\
 	cmd_show.go\
 	cmd_tree.go\
 	fs.go\
@@ -18,6 +19,7 @@ GOFILES=\
 	repos.go\
 	repos_file.go\
 	repos_mem.go\
+	settings.go\
 	parser.go\
 	unparser.go\
 	plan.go\
@@ -30,6 +32,8 @@ GOFILES=\
 	descriptor.go\
 	modifiers.go\
 	package.go\
+
+CLEANFILES+=fig
 
 fig: main.$(O) _obj/fig.a
 	$(LD) -o fig -L _obj main.$(O) 

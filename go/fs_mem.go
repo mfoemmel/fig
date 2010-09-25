@@ -23,6 +23,11 @@ func NewMemoryFileSystem() FileSystem {
 	return &memoryFileSystem{make(map[string] []byte)}
 }
 
+func (fs *memoryFileSystem) Exists(path string) bool {
+	_, exists := fs.files[path]
+	return exists
+}
+
 func (fs *memoryFileSystem) Size(path string) (int64, os.Error) {
 	if content, ok := fs.files[path]; ok {
 		return int64(len(content)), nil

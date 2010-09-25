@@ -5,6 +5,7 @@ import "io/ioutil"
 import "os"
 
 type FileSystem interface {
+	Exists(path string) bool
 	Size(path string) (int64, os.Error)
 	OpenReader(path string) (io.ReadCloser, os.Error)
 	OpenWriter(path string) (io.WriteCloser, os.Error)
