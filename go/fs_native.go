@@ -28,7 +28,7 @@ func (fs *nativeFileSystem) Size(path string) (int64, os.Error) {
 }
 
 func (fs *nativeFileSystem) OpenReader(path string) (io.ReadCloser, os.Error) {
-	panic("not implemented")
+	return os.Open(path, os.O_RDONLY, 0)
 }
 
 func (fs *nativeFileSystem) OpenWriter(path string) (io.WriteCloser, os.Error) {

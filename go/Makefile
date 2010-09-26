@@ -13,6 +13,7 @@ GOFILES=\
 	cmd_tree.go\
 	fs.go\
 	fs_mem.go\
+	fs_native.go\
 	graph_cycles.go\
 	graph_node.go\
 	graph_sort.go\

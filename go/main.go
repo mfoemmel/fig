@@ -6,9 +6,10 @@ import "os"
 import "fig"
 
 func main() {
+	fs := fig.NewNativeFileSystem()
 	repo := fig.NewFileRepository("../repos")
 	space := fig.NewFileWorkspace("../space")
-	ctx := fig.NewContext(nil, repo, space, os.Stdout, os.Stdin)
+	ctx := fig.NewContext(fs, repo, space, os.Stdout, os.Stdin)
 	cmd, err := fig.ParseArgs(os.Args)
 	if err != nil {
 		os.Stderr.Write([]byte(err.String() + "\n"))
