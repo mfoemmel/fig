@@ -7,9 +7,11 @@ func TestUnparsePackage(t *testing.T) {
 	expected := 
 `resource foo.bar
 archive foo.tar.gz
+
 config default
   set FOO=BAR
 end
+
 config debug
   set DEBUG=true
 end
@@ -26,7 +28,8 @@ end
 
 func TestUnparseConfig(t *testing.T) {
 	expected := 
-`config default
+`
+config default
   set FOO=BAR
 end
 `

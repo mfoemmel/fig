@@ -26,12 +26,23 @@ func (cmd *PublishCommand) Execute(ctx *Context) int {
 	if err != nil {
 		panic(err)
 	}
+
 	pkg, err2 := NewParser(path, localPackage).ParsePackage("","")
 	if err2 != nil {
-		panic(err2)
+		ctx.err.Write([]byte(err2.String()))
+		return 1		
 	}
-	
-	w := ctx.repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+
+	if pkg.PackageName == "" {
+		ctx.err.Write([]byte("missing 'package' statement"))
+		return 1		
+	}
+
+	w, err := ctx.repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	if err != nil {
+		ctx.err.Write([]byte(err.String() + "\n"))
+		return 1		
+	}
 	w.WriteStatements(pkg.Statements)
 
 	// Set up archive stream
@@ -69,6 +80,32 @@ func (cmd *PublishCommand) Execute(ctx *Context) int {
 			archive.Write(tmp)
 //			archive.Flush()
 //			io.Copy(archive, in)
+		}
+		if config, ok := stmt.(*ConfigBlock); ok {
+			for _, configStmt := range config.Config.Statements {
+				if modStmt, ok := configStmt.(*ModifierStatement); ok {
+					if pathStmt, ok := modStmt.Modifier.(*PathModifier); ok {
+						size, err := ctx.fs.Size(pathStmt.Value)
+						in, err := ctx.fs.OpenReader(pathStmt.Value)
+						if err != nil {
+							panic(err)
+						}
+						
+						tmp, _ := ioutil.ReadAll(in)
+						
+						header := &tar.Header{}
+						header.Name = pathStmt.Value
+						header.Size = size
+						archive.WriteHeader(header)
+						if err != nil {
+							panic(err)
+						}
+						archive.Write(tmp)
+					//			archive.Flush()
+//			io.Copy(archive, in)
+					}
+				}
+			}
 		}
 	}
 //	NewParser("package.fig", ctx.localPackage)

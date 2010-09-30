@@ -50,6 +50,8 @@ type fileRepositoryPackageWriter struct {
 	repos *fileRepository
 	packageName PackageName
 	versionName VersionName
+	packageDir string
+
 }
 
 func (r *fileRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.Error) {
@@ -123,6 +125,14 @@ func (w *fileRepositoryPackageWriter) Commit() {
 func (w *fileRepositoryPackageWriter) Close() {
 }
 
-func (r *fileRepository) NewPackageWriter(packageName PackageName, versionName VersionName) PackageWriter {
-	return &fileRepositoryPackageWriter{r, packageName, versionName}
+func (r *fileRepository) NewPackageWriter(packageName PackageName, versionName VersionName) (PackageWriter, os.Error) {
+	packageDir := path.Join(r.baseDir, string(packageName), string(versionName))
+	_, err := os.Stat(packageDir)
+	if err == nil {
+		return nil, os.NewError("package already exists in repository: " + string(packageName) + "/" + string(versionName))
+	}
+	if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
+		return &fileRepositoryPackageWriter{r, packageName, versionName, packageDir}, nil
+	}
+	panic(err)
 }

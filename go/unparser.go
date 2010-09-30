@@ -23,6 +23,8 @@ func (u *Unparser) UnparsePackageStatements(stmts []PackageStatement) {
 
 func (u *Unparser) UnparsePackageStatement(stmt PackageStatement) {
 	switch stmt := stmt.(type) {
+	case *NameStatement:
+		fmt.Fprintf(u.out, "package %s/%s\n", stmt.PackageName, stmt.VersionName)
 	case *ResourceStatement:
 		fmt.Fprintf(u.out, "resource %s\n", stmt.Path)
 	case *ArchiveStatement:
@@ -35,7 +37,7 @@ func (u *Unparser) UnparsePackageStatement(stmt PackageStatement) {
 }
 
 func (u *Unparser) UnparseConfig(config *Config) {
-	fmt.Fprintf(u.out, "config %s\n", config.ConfigName)
+	fmt.Fprintf(u.out, "\nconfig %s\n", config.ConfigName)
 	for _, stmt := range config.Statements {
 		u.UnparseModifier(stmt.(*ModifierStatement).Modifier)
 	}

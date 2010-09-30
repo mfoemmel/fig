@@ -43,7 +43,10 @@ func TestAddPackage(t *testing.T) {
 func TestAddWithResource(t *testing.T) {
 	r := resetRepos()
 	pkg := NewPackageBuilder("baz", "7.8.9").Resource("test.jar").Build()
-	w := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	w, err := r.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	if err != nil {
+		t.Fatal(err.String())
+	}
 	defer w.Close()
 	w.WriteStatements(pkg.Statements)
 	// todo write as a tar

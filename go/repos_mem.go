@@ -92,7 +92,7 @@ func (r *memoryRepositoryPackageReader) OpenArchive() (io.ReadCloser, os.Error) 
 func (m *memoryRepositoryPackageReader) Close() {
 }
 
-func (m *memoryRepository) NewPackageWriter(packageName PackageName, versionName VersionName) PackageWriter {
+func (m *memoryRepository) NewPackageWriter(packageName PackageName, versionName VersionName) (PackageWriter, os.Error) {
 	key := makeKey(packageName, versionName)
 	pkg, ok := m.packages[key]
 	if !ok {
@@ -100,7 +100,7 @@ func (m *memoryRepository) NewPackageWriter(packageName PackageName, versionName
 		m.packages[key] = pkg
 //		return nil//, os.NewError("package not found: " + key)
 	}
-	return &memoryRepositoryPackageWriter{m, pkg}
+	return &memoryRepositoryPackageWriter{m, pkg}, nil
 }
 
 func (w *memoryRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) {

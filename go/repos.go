@@ -6,7 +6,7 @@ import "os"
 type Repository interface {
 	ListPackages() (<-chan Descriptor) 
 	NewPackageReader(PackageName, VersionName) PackageReader
-	NewPackageWriter(PackageName, VersionName) PackageWriter
+	NewPackageWriter(PackageName, VersionName) (PackageWriter, os.Error)
 }
 
 type PackageReader interface {
@@ -33,7 +33,10 @@ func ReadPackage(repo Repository, packageName PackageName, versionName VersionNa
 }
 
 func WritePackage(repo Repository, pkg *Package) {
-	w := repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	w, err := repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
+	if err != nil {
+		panic(err)
+	}
 	defer w.Close()
 	w.WriteStatements(pkg.Statements)
 	w.Commit()
