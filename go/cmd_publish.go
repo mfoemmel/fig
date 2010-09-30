@@ -16,6 +16,12 @@ func parsePublishArgs(iter *ArgIterator) (Command, os.Error) {
 
 func (cmd *PublishCommand) Execute(ctx *Context) int {
 	path := "package.fig"
+	
+	if !ctx.fs.Exists(path) {
+		ctx.err.Write([]byte("File not found: " + path + "\n"))
+		return 1
+	}
+	
 	localPackage, err := ReadFile(ctx.fs, path)
 	if err != nil {
 		panic(err)

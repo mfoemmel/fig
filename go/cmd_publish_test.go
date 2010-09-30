@@ -10,6 +10,17 @@ func TestPublishArgs(t *testing.T) {
 	checkArgs(t, "fig publish", publish())
 }
 
+func TestPublishMissingPackageFile(t *testing.T) {
+	ctx, _, err := NewTestContext()
+
+	publish().Execute(ctx)
+
+	expected := "File not found: package.fig\n"
+	if expected != err.String() {
+		t.Fatalf("expected: %s, got: %s", expected, err.String())
+	}
+}
+
 func TestPublish(t *testing.T) {
 	local := 
 `package foo/1.2.3
