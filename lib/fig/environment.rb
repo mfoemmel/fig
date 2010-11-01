@@ -131,7 +131,14 @@ module Fig
       return value unless base_package && base_package.package_name
       file = value.gsub(/\@/, base_package.directory)
       if @retrieve_vars.member?(name)
-        target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), File.basename(file))
+        # A '//' in the source file's path tells us to preserve path information
+        # after the '//' when doing a retrieve.
+        if file.split('//').size > 1
+          preserved_path = file.split('//').last
+          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), preserved_path)
+        else
+          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), File.basename(file))
+        end
         unless @os.exist?(target) && @os.mtime(target) >= @os.mtime(file)
           @os.log_info("retrieving #{target}")
           @os.copy(file, target)

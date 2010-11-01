@@ -199,6 +199,35 @@ describe "Fig" do
     File.read("tmp/lib2/foo/hello").should == "some library"
   end
 
+  it "retrieve preserves the path after '//' when copying files into your project directory" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.rm_rf("tmp")
+    FileUtils.mkdir_p("tmp/include")
+    File.open("tmp/include/hello.h", "w") { |f| f << "a header file" }
+    File.open("tmp/include/hello2.h", "w") { |f| f << "another header file" }
+    input = <<-END
+      resource tmp/include/hello.h
+      resource tmp/include/hello2.h
+      config default
+        append INCLUDE=@/tmp//include/hello.h
+        append INCLUDE=@/tmp//include/hello2.h
+      end
+    END
+    fig('--publish foo/1.2.3', input)
+
+    input = <<-END
+      retrieve INCLUDE->tmp/include2/[package]
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('-u', input)
+
+    File.read("tmp/include2/foo/include/hello.h").should == "a header file"
+    File.read("tmp/include2/foo/include/hello2.h").should == "another header file"
+  end
+
   it "package multiple resources" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
