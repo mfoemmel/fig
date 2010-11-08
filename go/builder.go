@@ -54,7 +54,7 @@ func (configBuilder *ConfigBuilder) Set(name string, value string) *ConfigBuilde
 }
 
 func (configBuilder *ConfigBuilder) Path(name string, value string) *ConfigBuilder {
-	configBuilder.statements.Push(NewModifierStatement(NewPathModifier(name, value)))
+	configBuilder.statements.Push(NewModifierStatement(NewPathModifier("", name, value)))
 	return configBuilder
 }
 

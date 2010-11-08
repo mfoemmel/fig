@@ -39,12 +39,13 @@ func (sm *SetModifier) Accept(handler ModifierHandler) os.Error {
 //
 
 type PathModifier struct {
-	Name  string
-	Value string
+	Location string
+	Name     string
+	Value    string
 }
 
-func NewPathModifier(name string, value string) Modifier {
-	return &PathModifier{name, value}
+func NewPathModifier(location string, name string, value string) Modifier {
+	return &PathModifier{location, name, value}
 }
 
 func (pm *PathModifier) Accept(handler ModifierHandler) os.Error {

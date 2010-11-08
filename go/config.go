@@ -61,7 +61,7 @@ func NewSetStatement(name string, value string) *ModifierStatement {
 }
 
 func NewPathStatement(name string, value string) *ModifierStatement {
-	return &ModifierStatement{NewPathModifier(name,value)}
+	return &ModifierStatement{NewPathModifier("",name,value)}
 }
 
 func (stmt *ModifierStatement) Accept(handler ConfigStatementHandler) {

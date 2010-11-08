@@ -28,6 +28,11 @@ func (fs *memoryFileSystem) Exists(path string) bool {
 	return exists
 }
 
+func (fs *memoryFileSystem) IsDirectory(path string) bool {
+	contents, exists := fs.files[path]
+	return exists && contents == nil
+}
+
 func (fs *memoryFileSystem) Size(path string) (int64, os.Error) {
 	if content, ok := fs.files[path]; ok {
 		return int64(len(content)), nil

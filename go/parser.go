@@ -137,6 +137,10 @@ type token struct {
 	line     string
 }
 
+func (t *token) location() string {
+	return fmt.Sprintf("line %d", t.row)
+}
+
 func (p *Parser) ParsePackage(packageName PackageName, versionName VersionName) (*Package, *Error) {
 	stmts := make([]PackageStatement, 0, 32)
 	for {
@@ -256,7 +260,7 @@ func (s *Parser) ParseConfigStatement() (ConfigStatement, *Error) {
 		if err != nil {
 			return nil, err
 		}
-		return NewModifierStatement(NewPathModifier(name, value)), nil
+		return NewModifierStatement(NewPathModifier(keyword.location(), name, value)), nil
 	case "include":
 		descriptor, err := s.descriptor()
 		if err != nil {

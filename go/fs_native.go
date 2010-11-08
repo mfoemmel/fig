@@ -23,6 +23,18 @@ func (fs *nativeFileSystem) Exists(path string) bool {
 	panic(err)
 }
 
+func (fs *nativeFileSystem) IsDirectory(path string) bool {
+	info, err := os.Stat(path)
+	if err != nil {
+		if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
+			return false
+		} else {
+			panic(err)
+		}
+	}
+	return info.IsDirectory()
+}
+
 func (fs *nativeFileSystem) Size(path string) (int64, os.Error) {
 	panic("not implemented")
 }

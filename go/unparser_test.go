@@ -41,7 +41,7 @@ func TestUnparseSetModifier(t *testing.T) {
 }
 
 func TestUnparsePathModifier(t *testing.T) {
-	checkUnparseModifier(t, NewPathModifier("FOO","BAR"), "  path FOO=BAR\n")
+	checkUnparseModifier(t, NewPathModifier("", "FOO","BAR"), "  path FOO=BAR\n")
 }
 
 func TestUnparseIncludeModifier(t *testing.T) {

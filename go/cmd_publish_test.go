@@ -3,6 +3,7 @@ package fig
 import "archive/tar"
 import "compress/gzip"
 import "io/ioutil"
+import "os"
 import "testing"
 //import "fmt"
 
@@ -39,6 +40,7 @@ end
 	}
 
 	expected := NewPackageBuilder("foo","1.2.3").Name("foo", "1.2.3").Config("default").Set("FOO","BAR").End().Build()
+
 	checkPackage(t, expected, pkg)
 }
 
@@ -67,61 +69,43 @@ end
 		Config("default").
 		Set("FOO","BAR").
 		End().Build()
+
 	checkPackageStatements(t, expected.Statements, stmts)
 
-	in, err := r.OpenArchive()
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	zipin, err := gzip.NewReader(in)
-	if err != nil {
-		t.Fatal(err)
-	}
-	archive := tar.NewReader(zipin)
-	header, err := archive.Next()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if header.Name != "foo.txt" {
-		t.Fatal("expected: %s, got: %s", "foo.txt", header.Name)
-	}
-	content, err := ioutil.ReadAll(archive)
-	if err != nil {
-		t.Fatal(err)
-	}
-
-	if string(content) != "foo contents" {
-		t.Fatalf("expected: '%s', got: '%s'", "foo contents", content)
-	}
+	checkArchive(t, r, map[string]string{"foo.txt":"foo contents"})
 }
 
-func TestPublishPath(t *testing.T) {
+func TestPublishWithPathDir(t *testing.T) {
 	local := 
 `package foo/1.2.3
-
 config default
-  path FOO=foo.txt
+  path PATH=bin
 end
 `
 	ctx, _, _ := NewTestContext()
 	WriteFile(ctx.fs, "package.fig", []byte(local))
-	WriteFile(ctx.fs, "foo.txt", []byte("foo contents"))
+	WriteFile(ctx.fs, "bin/foo", []byte("foo contents"))
+	WriteFile(ctx.fs, "bin/bar", []byte("bar contents"))
 
 	publish().Execute(ctx)
 
 	r := ctx.repo.NewPackageReader("foo", "1.2.3")
 	stmts, err := r.ReadStatements()
 	if err != nil {
-		t.Fatal(err)
+		t.Fatalf("error reading statements: %s", err)
 	}
 
 	expected := NewPackageBuilder("foo","1.2.3").Name("foo", "1.2.3").
 		Config("default").
-		Path("FOO","foo.txt").
+		Path("PATH","bin").
 		End().Build()
+
 	checkPackageStatements(t, expected.Statements, stmts)
 
+	checkArchive(t, r, map[string]string{"bin/foo":"bin contents","bin/bar":"bar contents"})
+}
+
+func checkArchive(t *testing.T, r PackageReader, files map[string] string) {
 	in, err := r.OpenArchive()
 	if err != nil {
 		t.Fatal(err)
@@ -131,23 +115,41 @@ end
 	if err != nil {
 		t.Fatal(err)
 	}
+
 	archive := tar.NewReader(zipin)
-	header, err := archive.Next()
-	if err != nil {
-		t.Fatal(err)
-	}
-	if header.Name != "foo.txt" {
-		t.Fatal("expected: %s, got: %s", "foo.txt", header.Name)
-	}
-	content, err := ioutil.ReadAll(archive)
-	if err != nil {
-		t.Fatal(err)
+
+	for {
+		header, err := archive.Next()
+		if err == os.EOF {
+			break
+		}
+		if err != nil {
+			t.Fatalf("archive.Next(): %s", err)
+		}
+		expected, ok := files[header.Name]
+		if !ok {
+			t.Fatalf("unexpected file in archive: %s", header.Name)
+		}
+		
+		files[header.Name] = "", false
+
+		actual, err := ioutil.ReadAll(archive)
+		if err != nil {
+			t.Fatal(err)
+		}
+		
+		if string(actual) != expected {
+			t.Fatalf("expected: '%s', got: '%s'", expected, string(actual))
+		}
 	}
 
-	if string(content) != "foo contents" {
-		t.Fatalf("expected: '%s', got: '%s'", "foo contents", content)
+	if len(files) != 0 {
+		for path, _ := range files {
+			t.Fatalf("missing file in archive: %s", path)
+		}
 	}
 }
+
 
 func publish() Command {
 	return &PublishCommand{}
