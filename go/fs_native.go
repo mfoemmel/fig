@@ -23,6 +23,18 @@ func (fs *nativeFileSystem) Exists(path string) bool {
 	panic(err)
 }
 
+func (fs *nativeFileSystem) Mkdir(path string) os.Error {
+	return os.Mkdir(path, 0777)
+}
+
+func (fs *nativeFileSystem) List(path string) ([]string, os.Error) {
+	dir, err := os.Open(path, os.O_RDONLY, 0)
+	if err != nil {
+		return nil, err
+	}
+	return dir.Readdirnames(-1)
+}
+
 func (fs *nativeFileSystem) IsDirectory(path string) bool {
 	info, err := os.Stat(path)
 	if err != nil {

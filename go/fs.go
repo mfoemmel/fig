@@ -6,6 +6,8 @@ import "os"
 
 type FileSystem interface {
 	Exists(path string) bool
+	Mkdir(path string) os.Error
+	List(path string) ([]string, os.Error)
 	IsDirectory(path string) bool
 	Size(path string) (int64, os.Error)
 	OpenReader(path string) (io.ReadCloser, os.Error)

@@ -4,6 +4,7 @@ import "bytes"
 import "fmt"
 import "io"
 import "os"
+import "strings"
 
 type memoryFileSystem struct {
 	files map[string] []byte
@@ -26,6 +27,24 @@ func NewMemoryFileSystem() FileSystem {
 func (fs *memoryFileSystem) Exists(path string) bool {
 	_, exists := fs.files[path]
 	return exists
+}
+
+func (fs *memoryFileSystem) Mkdir(path string) os.Error {
+	fs.files[path] = nil, true
+	return nil
+}
+
+func (fs *memoryFileSystem) List(path string) ([]string, os.Error) {
+	if !strings.HasSuffix(path, "/") {
+		path = path + "/"
+	}
+	children := make([]string, 0, 4)
+	for child, _ := range fs.files {
+		if strings.HasPrefix(child, path) {
+			children = append(children, child)
+		}
+	}
+	return children, nil
 }
 
 func (fs *memoryFileSystem) IsDirectory(path string) bool {

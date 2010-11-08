@@ -90,7 +90,14 @@ func copyToArchive(ctx *Context, path string, archive *tar.Writer) os.Error {
 	}
 
 	if ctx.fs.IsDirectory(path) {
-		panic("dir")
+		children, err := ctx.fs.List(path)
+		if err != nil {
+			panic(err)
+		}
+		for _, child := range children {
+			println("archiving child: " + child)
+			copyToArchive(ctx, path + "/" + child, archive)
+		}
 	} else {
 		size, err := ctx.fs.Size(path)
 		in, err := ctx.fs.OpenReader(path)

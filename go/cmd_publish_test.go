@@ -84,6 +84,7 @@ end
 `
 	ctx, _, _ := NewTestContext()
 	WriteFile(ctx.fs, "package.fig", []byte(local))
+	ctx.fs.Mkdir("bin")
 	WriteFile(ctx.fs, "bin/foo", []byte("foo contents"))
 	WriteFile(ctx.fs, "bin/bar", []byte("bar contents"))
 
@@ -123,6 +124,7 @@ func checkArchive(t *testing.T, r PackageReader, files map[string] string) {
 		if err == os.EOF {
 			break
 		}
+		println("*" + header.Name)
 		if err != nil {
 			t.Fatalf("archive.Next(): %s", err)
 		}
