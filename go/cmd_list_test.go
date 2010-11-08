@@ -16,7 +16,7 @@ func TestListExecuteNoPackages(t *testing.T) {
 
 func TestListExecuteOnePackage(t *testing.T) {
 	ctx, out, _ := NewTestContext()
-	WritePackage(ctx.repo, NewPackageBuilder("foo", "1.2.3").Build())	
+	WritePackage(ctx.repo, NewPackageBuilder("foo", "1.2.3").Build())
 	list().Execute(ctx)
 	expected := "foo/1.2.3\n"
 	if out.String() != expected {

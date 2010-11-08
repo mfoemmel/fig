@@ -5,11 +5,11 @@ import "io"
 import "os"
 
 type Context struct {
-	fs FileSystem
-	repo Repository
+	fs    FileSystem
+	repo  Repository
 	space Workspace
-	out io.Writer
-	err io.Writer
+	out   io.Writer
+	err   io.Writer
 }
 
 func NewContext(fs FileSystem, repo Repository, space Workspace, out io.Writer, err io.Writer) *Context {
@@ -48,10 +48,12 @@ func ParseArgs(args []string) (Command, os.Error) {
 		return parsePublishArgs(iter)
 	case "repo":
 		return parseRepoArgs(iter)
-/*	case "retrieve":
-		return parseRetrieve(iter)
-	case "run":
-		return parseRun(iter)*/
+/*
+    case "retrieve":
+        return parseRetrieve(iter)
+    case "run":
+        return parseRun(iter)
+*/
 	}
 
 	return nil, os.NewError(fmt.Sprintf("Unknown command: %s", args[1]))

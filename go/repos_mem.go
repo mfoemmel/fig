@@ -7,21 +7,21 @@ import "strings"
 
 type memoryPackage struct {
 	statements []PackageStatement
-	archive []byte
+	archive    []byte
 }
 
 type memoryRepository struct {
-	packages map[string] *memoryPackage
+	packages map[string]*memoryPackage
 }
 
 type memoryRepositoryPackageReader struct {
 	repo *memoryRepository
-	pkg *memoryPackage
+	pkg  *memoryPackage
 }
 
 type memoryRepositoryPackageWriter struct {
 	repo *memoryRepository
-	pkg *memoryPackage
+	pkg  *memoryPackage
 }
 
 type archiveReader struct {
@@ -29,7 +29,7 @@ type archiveReader struct {
 	buf *bytes.Buffer
 }
 
-func (ar *archiveReader) Read(bytes []byte) (int,os.Error) {
+func (ar *archiveReader) Read(bytes []byte) (int, os.Error) {
 	return ar.buf.Read(bytes)
 }
 
@@ -42,7 +42,7 @@ type archiveWriter struct {
 	buf *bytes.Buffer
 }
 
-func (aw *archiveWriter) Write(bytes []byte) (int,os.Error) {
+func (aw *archiveWriter) Write(bytes []byte) (int, os.Error) {
 	return aw.buf.Write(bytes)
 }
 
@@ -52,15 +52,15 @@ func (aw *archiveWriter) Close() os.Error {
 }
 
 type memoryRepositoryResourceWriter struct {
-	m *memoryRepositoryPackageWriter
+	m    *memoryRepositoryPackageWriter
 	path string
 }
 
 func NewMemoryRepository() Repository {
-	return &memoryRepository{make(map[string] *memoryPackage)}
+	return &memoryRepository{make(map[string]*memoryPackage)}
 }
 
-func (m *memoryRepository) ListPackages() (<-chan Descriptor) {
+func (m *memoryRepository) ListPackages() <-chan Descriptor {
 	c := make(chan Descriptor, 100)
 	go func() {
 		for name, _ := range m.packages {
@@ -76,7 +76,7 @@ func (m *memoryRepository) NewPackageReader(packageName PackageName, versionName
 	key := makeKey(packageName, versionName)
 	pkg, ok := m.packages[key]
 	if !ok {
-		return nil//, os.NewError("package not found: " + key)
+		return nil //, os.NewError("package not found: " + key)
 	}
 	return &memoryRepositoryPackageReader{m, pkg}
 }
@@ -98,7 +98,7 @@ func (m *memoryRepository) NewPackageWriter(packageName PackageName, versionName
 	if !ok {
 		pkg = &memoryPackage{nil, nil}
 		m.packages[key] = pkg
-//		return nil//, os.NewError("package not found: " + key)
+		//return nil//, os.NewError("package not found: " + key)
 	}
 	return &memoryRepositoryPackageWriter{m, pkg}, nil
 }
@@ -121,7 +121,7 @@ func makeKey(packageName PackageName, versionName VersionName) string {
 	return string(packageName) + "/" + string(versionName)
 }
 
-func (m *memoryRepositoryResourceWriter) Write(bytes []byte) (int,os.Error) {
+func (m *memoryRepositoryResourceWriter) Write(bytes []byte) (int, os.Error) {
 	return 0, nil
 }
 

@@ -8,11 +8,11 @@ type Settings struct {
 }
 
 type RepoEntry struct {
-	alias string
+	alias    string
 	location string
 }
 
-func NewSettings() *Settings{
+func NewSettings() *Settings {
 	return &Settings{make([]RepoEntry, 0, 100)}
 }
 
@@ -31,9 +31,9 @@ func (s *Settings) Load(fs FileSystem) {
 			continue
 		}
 		pos := len(s.repos)
-		s.repos = s.repos[0:pos+1]
-		s.repos[pos] = RepoEntry{parts[0],parts[1]}
-	}	
+		s.repos = s.repos[0 : pos+1]
+		s.repos[pos] = RepoEntry{parts[0], parts[1]}
+	}
 }
 
 func (s *Settings) Save(fs FileSystem) {
@@ -49,6 +49,6 @@ func (s *Settings) Save(fs FileSystem) {
 
 func (s *Settings) AddRepository(alias string, location string) {
 	pos := len(s.repos)
-	s.repos = s.repos[0:pos+1]
-	s.repos[pos] = RepoEntry{alias,location}
+	s.repos = s.repos[0 : pos+1]
+	s.repos[pos] = RepoEntry{alias, location}
 }

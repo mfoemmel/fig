@@ -22,8 +22,8 @@ func TestPublishMissingPackageFile(t *testing.T) {
 }
 
 func TestPublish(t *testing.T) {
-	local := 
-`package foo/1.2.3
+	local :=
+		`package foo/1.2.3
 config default
   set FOO=BAR
 end
@@ -38,13 +38,13 @@ end
 		t.Fatal(err)
 	}
 
-	expected := NewPackageBuilder("foo","1.2.3").Name("foo", "1.2.3").Config("default").Set("FOO","BAR").End().Build()
+	expected := NewPackageBuilder("foo", "1.2.3").Name("foo", "1.2.3").Config("default").Set("FOO", "BAR").End().Build()
 	checkPackage(t, expected, pkg)
 }
 
 func TestPublishWithResource(t *testing.T) {
-	local := 
-`package foo/1.2.3
+	local :=
+		`package foo/1.2.3
 resource foo.txt
 config default
   set FOO=BAR
@@ -62,10 +62,10 @@ end
 		t.Fatal(err)
 	}
 
-	expected := NewPackageBuilder("foo","1.2.3").Name("foo", "1.2.3").
+	expected := NewPackageBuilder("foo", "1.2.3").Name("foo", "1.2.3").
 		Resource("foo.txt").
 		Config("default").
-		Set("FOO","BAR").
+		Set("FOO", "BAR").
 		End().Build()
 	checkPackageStatements(t, expected.Statements, stmts)
 
@@ -97,8 +97,8 @@ end
 }
 
 func TestPublishPath(t *testing.T) {
-	local := 
-`package foo/1.2.3
+	local :=
+		`package foo/1.2.3
 
 config default
   path FOO=foo.txt
@@ -116,9 +116,9 @@ end
 		t.Fatal(err)
 	}
 
-	expected := NewPackageBuilder("foo","1.2.3").Name("foo", "1.2.3").
+	expected := NewPackageBuilder("foo", "1.2.3").Name("foo", "1.2.3").
 		Config("default").
-		Path("FOO","foo.txt").
+		Path("FOO", "foo.txt").
 		End().Build()
 	checkPackageStatements(t, expected.Statements, stmts)
 

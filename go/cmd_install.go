@@ -11,17 +11,17 @@ type InstallCommand struct {
 }
 
 func parseInstallArgs(iter *ArgIterator) (Command, os.Error) {
-        if !iter.Next() {
-                return nil, os.NewError("Please specify a package and version (e.g. foo/1.2.3)")
-        }
-	desc, err := NewParser("<arg>",[]byte(iter.Get())).descriptor()
+	if !iter.Next() {
+		return nil, os.NewError("Please specify a package and version (e.g. foo/1.2.3)")
+	}
+	desc, err := NewParser("<arg>", []byte(iter.Get())).descriptor()
 	if err != nil {
 		return nil, err
 	}
 	if desc.PackageName == "" || desc.VersionName == "" {
-                return nil, os.NewError("Please specify a package and version (e.g. foo/1.2.3)")
+		return nil, os.NewError("Please specify a package and version (e.g. foo/1.2.3)")
 	}
-        return &InstallCommand{desc.PackageName, desc.VersionName}, nil
+	return &InstallCommand{desc.PackageName, desc.VersionName}, nil
 }
 
 func (cmd *InstallCommand) Execute(ctx *Context) int {
@@ -33,14 +33,14 @@ func (cmd *InstallCommand) Execute(ctx *Context) int {
 	}
 	for _, stmt := range stmts {
 		if archiveStmt, ok := stmt.(*ArchiveStatement); ok {
-//			in, err := pkg.OpenResource(archiveStmt.Path)
+			//in, err := pkg.OpenResource(archiveStmt.Path)
 			in, err := pkg.OpenArchive()
 			println(archiveStmt.Path)
 			if err != nil {
 				panic(err)
 			}
 			defer in.Close()
-			
+
 			gr, err := gzip.NewReader(in)
 			if err != nil {
 				panic(err)
@@ -60,6 +60,6 @@ func (cmd *InstallCommand) Execute(ctx *Context) int {
 		}
 	}
 	defer pkg.Close()
-	
+
 	return 0
 }

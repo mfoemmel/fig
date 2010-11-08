@@ -35,4 +35,3 @@ func WriteFile(fs FileSystem, path string, data []byte) os.Error {
 	}
 	return nil
 }
-

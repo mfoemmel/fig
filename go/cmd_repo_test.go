@@ -3,7 +3,7 @@ package fig
 import "testing"
 
 func TestRepoArgs(t *testing.T) {
-	checkArgs(t, "fig repo add local /home/foo/fig", repoadd("local","/home/foo/fig"))
+	checkArgs(t, "fig repo add local /home/foo/fig", repoadd("local", "/home/foo/fig"))
 	checkArgs(t, "fig repo list", repolist())
 }
 

@@ -6,47 +6,46 @@ import "compress/gzip"
 import "io/ioutil"
 import "os"
 
-type PublishCommand struct {
-}
+type PublishCommand struct{}
 
 func parsePublishArgs(iter *ArgIterator) (Command, os.Error) {
 	// todo check for extra args
-        return &PublishCommand{}, nil
+	return &PublishCommand{}, nil
 }
 
 func (cmd *PublishCommand) Execute(ctx *Context) int {
 	path := "package.fig"
-	
+
 	if !ctx.fs.Exists(path) {
 		ctx.err.Write([]byte("File not found: " + path + "\n"))
 		return 1
 	}
-	
+
 	localPackage, err := ReadFile(ctx.fs, path)
 	if err != nil {
 		panic(err)
 	}
 
-	pkg, err2 := NewParser(path, localPackage).ParsePackage("","")
+	pkg, err2 := NewParser(path, localPackage).ParsePackage("", "")
 	if err2 != nil {
 		ctx.err.Write([]byte(err2.String()))
-		return 1		
+		return 1
 	}
 
 	if pkg.PackageName == "" {
 		ctx.err.Write([]byte("missing 'package' statement"))
-		return 1		
+		return 1
 	}
 
 	w, err := ctx.repo.NewPackageWriter(pkg.PackageName, pkg.VersionName)
 	if err != nil {
 		ctx.err.Write([]byte(err.String() + "\n"))
-		return 1		
+		return 1
 	}
 	w.WriteStatements(pkg.Statements)
 
 	// Set up archive stream
-	out/*, err*/ := w.OpenArchive()
+	out /*, err*/ := w.OpenArchive()
 	defer out.Close()
 
 	zout, err := gzip.NewWriter(out)
@@ -78,8 +77,8 @@ func (cmd *PublishCommand) Execute(ctx *Context) int {
 				panic(err)
 			}
 			archive.Write(tmp)
-//			archive.Flush()
-//			io.Copy(archive, in)
+			//archive.Flush()
+			//io.Copy(archive, in)
 		}
 		if config, ok := stmt.(*ConfigBlock); ok {
 			for _, configStmt := range config.Config.Statements {
@@ -90,9 +89,9 @@ func (cmd *PublishCommand) Execute(ctx *Context) int {
 						if err != nil {
 							panic(err)
 						}
-						
+
 						tmp, _ := ioutil.ReadAll(in)
-						
+
 						header := &tar.Header{}
 						header.Name = pathStmt.Value
 						header.Size = size
@@ -101,14 +100,14 @@ func (cmd *PublishCommand) Execute(ctx *Context) int {
 							panic(err)
 						}
 						archive.Write(tmp)
-					//			archive.Flush()
-//			io.Copy(archive, in)
+						//archive.Flush()
+						//io.Copy(archive, in)
 					}
 				}
 			}
 		}
 	}
-//	NewParser("package.fig", ctx.localPackage)
-//	w := ctx.repo.NewPackageWriter()
+	//NewParser("package.fig", ctx.localPackage)
+	//w := ctx.repo.NewPackageWriter()
 	return 0
 }

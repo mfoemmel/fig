@@ -5,19 +5,19 @@ import "io"
 import "os"
 
 type TreeCommand struct {
-	descriptor Descriptor	
+	descriptor Descriptor
 }
 
 func parseTreeArgs(iter *ArgIterator) (Command, os.Error) {
-        if !iter.Next() {
-                return nil, os.NewError("Please specify a descriptor (e.g. foo/1.2.3)")
-        }
+	if !iter.Next() {
+		return nil, os.NewError("Please specify a descriptor (e.g. foo/1.2.3)")
+	}
 	// todo - parser shouldn't print line/column if "source" arg is empty
-	desc, err := NewParser("<arg>",[]byte(iter.Get())).descriptor()
+	desc, err := NewParser("<arg>", []byte(iter.Get())).descriptor()
 	if err != nil {
 		return nil, err
 	}
-        return &TreeCommand{desc}, nil
+	return &TreeCommand{desc}, nil
 }
 
 func (cmd *TreeCommand) Execute(ctx *Context) int {
@@ -38,7 +38,7 @@ func (cmd *TreeCommand) visit(repo Repository, out io.Writer, indent int, parent
 	}
 	buf.Write([]byte("\n"))
 	out.Write(buf.Bytes())
-//	os.Stdout.Write(buf.Bytes())
+	//	os.Stdout.Write(buf.Bytes())
 	if descriptor.VersionName == "" {
 		return
 	}

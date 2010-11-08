@@ -4,12 +4,12 @@ import "fmt"
 import "os"
 
 type VersionConflictError struct {
-        PackageName PackageName
-        Backtraces []*Backtrace
+	PackageName PackageName
+	Backtraces  []*Backtrace
 }
 
 type CyclicDependencyError struct {
-	Cycle []Descriptor
+	Cycle     []Descriptor
 	Backtrace *Backtrace
 }
 
@@ -22,14 +22,14 @@ func (err *CyclicDependencyError) String() string {
 }
 
 type configNode struct {
-	planner *Planner
-	desc Descriptor
-	config *Config
+	planner   *Planner
+	desc      Descriptor
+	config    *Config
 	backtrace *Backtrace
 }
 
 func (node *configNode) Id() string {
-	if node == nil { 
+	if node == nil {
 		panic("nil node")
 	}
 	return string(node.desc.PackageName) + ":" + string(node.desc.ConfigName)
@@ -47,22 +47,22 @@ func (node *configNode) EachChild(f func(Node)) {
 				f(child)
 			}
 		}
-	}	
+	}
 }
 
 type packageNode struct {
-	pkg *Package
+	pkg       *Package
 	backtrace *Backtrace
-	configs map[ConfigName] *configNode
+	configs   map[ConfigName]*configNode
 }
 
 type Planner struct {
-	repo Repository
-	packages map[PackageName] *packageNode
+	repo     Repository
+	packages map[PackageName]*packageNode
 }
 
 func NewPlanner(repo Repository) *Planner {
-	return &Planner{repo,make(map[PackageName]*packageNode)}
+	return &Planner{repo, make(map[PackageName]*packageNode)}
 }
 
 func (p *Planner) Plan(desc Descriptor) ([]Descriptor, os.Error) {
@@ -98,10 +98,10 @@ func (p *Planner) visit(desc Descriptor, backtrace *Backtrace) os.Error {
 	pkgNode, exists := p.packages[desc.PackageName]
 	if exists {
 		if pkgNode.backtrace.Descriptor.VersionName != desc.VersionName {
-			return &VersionConflictError{desc.PackageName,[]*Backtrace{backtrace, pkgNode.backtrace}}
+			return &VersionConflictError{desc.PackageName, []*Backtrace{backtrace, pkgNode.backtrace}}
 		}
 	} else {
-		pkgNode = &packageNode{pkg,backtrace,make(map[ConfigName]*configNode)}
+		pkgNode = &packageNode{pkg, backtrace, make(map[ConfigName]*configNode)}
 		p.packages[desc.PackageName] = pkgNode
 	}
 

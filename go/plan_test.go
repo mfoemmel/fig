@@ -6,7 +6,7 @@ func TestNoDependencies(t *testing.T) {
 	repo := NewMemoryRepository()
 	WritePackage(repo, NewPackageBuilder("foo", "1.2.3").Config("default").End().Build())
 	planner := NewPlanner(repo)
-	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
+	configs, err := planner.Plan(NewDescriptor("foo", "1.2.3", "default"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -26,7 +26,7 @@ func TestSimpleDependency(t *testing.T) {
 	WritePackage(repo, foo)
 	WritePackage(repo, bar)
 	planner := NewPlanner(repo)
-	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
+	configs, err := planner.Plan(NewDescriptor("foo", "1.2.3", "default"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestTransitiveDependency(t *testing.T) {
 	WritePackage(repo, bar)
 	WritePackage(repo, baz)
 	planner := NewPlanner(repo)
-	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
+	configs, err := planner.Plan(NewDescriptor("foo", "1.2.3", "default"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestDiamondDependency(t *testing.T) {
 	WritePackage(repo, baz)
 	WritePackage(repo, util)
 	planner := NewPlanner(repo)
-	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
+	configs, err := planner.Plan(NewDescriptor("foo", "1.2.3", "default"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -108,7 +108,7 @@ func TestRepeatedAtDifferentDepthsDependency(t *testing.T) {
 	WritePackage(repo, baz)
 	WritePackage(repo, util)
 	planner := NewPlanner(repo)
-	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
+	configs, err := planner.Plan(NewDescriptor("foo", "1.2.3", "default"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -127,7 +127,7 @@ func TestMultipleConfigsInSamePackage(t *testing.T) {
 		Build()
 	WritePackage(repo, foo)
 	planner := NewPlanner(repo)
-	configs, err := planner.Plan(NewDescriptor("foo","1.2.3","default"))
+	configs, err := planner.Plan(NewDescriptor("foo", "1.2.3", "default"))
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -159,7 +159,7 @@ func TestCyclicDependencyTwoNodes(t *testing.T) {
 		Build()
 	WritePackage(repo, foo)
 	planner := NewPlanner(repo)
-	_, err := planner.Plan(NewDescriptor("foo","1.2.3","a"))
+	_, err := planner.Plan(NewDescriptor("foo", "1.2.3", "a"))
 	if err == nil {
 		t.Fatal("expected cyclic dependency error")
 	}
@@ -179,10 +179,9 @@ func checkDescriptors(t *testing.T, actual []Descriptor, expected []Descriptor) 
 	if len(expected) != len(actual) {
 		t.Fatalf("Expected %v, got: %v", expected, actual)
 	}
-	for  i, desc := range actual {
+	for i, desc := range actual {
 		if !desc.Equals(expected[i]) {
-			t.Fatalf("Expected %v, got: %v", expected, actual)			
+			t.Fatalf("Expected %v, got: %v", expected, actual)
 		}
 	}
 }
-

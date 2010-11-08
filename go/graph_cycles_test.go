@@ -4,7 +4,7 @@ import "container/vector"
 import "testing"
 
 type TestNode struct {
-	name  string
+	name     string
 	children *vector.Vector
 }
 
@@ -24,7 +24,9 @@ func (tn *TestNode) EachChild(f func(Node)) {
 
 func TestSingleNode(t *testing.T) {
 	cycles := FindCycles(NewTestNode("a"))
-	if len(cycles) != 0 { t.Errorf("Unexpected cycle found: %d", len(cycles)) }
+	if len(cycles) != 0 {
+		t.Errorf("Unexpected cycle found: %d", len(cycles))
+	}
 }
 
 func TestTwoNodeCycle(t *testing.T) {
@@ -33,8 +35,12 @@ func TestTwoNodeCycle(t *testing.T) {
 	a.children.Push(b)
 	b.children.Push(a)
 	cycles := FindCycles(a)
-	if len(cycles) != 1 { t.Errorf("Unexpected cycle found: %d", len(cycles)) }
-	if cycles[0].Len() != 2 { t.Errorf("Unexpected cycle size %d", cycles[0].Len()) }
+	if len(cycles) != 1 {
+		t.Errorf("Unexpected cycle found: %d", len(cycles))
+	}
+	if cycles[0].Len() != 2 {
+		t.Errorf("Unexpected cycle size %d", cycles[0].Len())
+	}
 }
 
 func TestThreeNodeCycle(t *testing.T) {
@@ -45,8 +51,12 @@ func TestThreeNodeCycle(t *testing.T) {
 	b.children.Push(c)
 	c.children.Push(a)
 	cycles := FindCycles(a)
-	if len(cycles) != 1 { t.Errorf("Unexpected cycle found: %d", len(cycles)) }
-	if cycles[0].Len() != 3 { t.Errorf("Unexpected cycle size %d", cycles[0].Len()) }
+	if len(cycles) != 1 {
+		t.Errorf("Unexpected cycle found: %d", len(cycles))
+	}
+	if cycles[0].Len() != 3 {
+		t.Errorf("Unexpected cycle size %d", cycles[0].Len())
+	}
 }
 
 func TestTwoTwoNodeCycles(t *testing.T) {
@@ -60,8 +70,12 @@ func TestTwoTwoNodeCycles(t *testing.T) {
 	d.children.Push(c)
 	a.children.Push(c)
 	cycles := FindCycles(a)
-	if len(cycles) != 2 { t.Errorf("Unexpected cycle found: %d", len(cycles)) }
-	if cycles[0].Len() != 2 { t.Errorf("Unexpected cycle size %d", cycles[0].Len()) }
+	if len(cycles) != 2 {
+		t.Errorf("Unexpected cycle found: %d", len(cycles))
+	}
+	if cycles[0].Len() != 2 {
+		t.Errorf("Unexpected cycle size %d", cycles[0].Len())
+	}
 }
 
 func TestDiamond(t *testing.T) {
@@ -74,5 +88,7 @@ func TestDiamond(t *testing.T) {
 	b.children.Push(d)
 	c.children.Push(d)
 	cycles := FindCycles(a)
-	if len(cycles) != 0 { t.Errorf("Unexpected cycle found: %d", len(cycles)) }
+	if len(cycles) != 0 {
+		t.Errorf("Unexpected cycle found: %d", len(cycles))
+	}
 }
