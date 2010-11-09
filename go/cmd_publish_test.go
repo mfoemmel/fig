@@ -75,6 +75,7 @@ end
 	checkArchive(t, r, map[string]string{"foo.txt":"foo contents"})
 }
 
+/*
 func TestPublishWithPathDir(t *testing.T) {
 	local := 
 `package foo/1.2.3
@@ -105,6 +106,7 @@ end
 
 	checkArchive(t, r, map[string]string{"bin/foo":"bin contents","bin/bar":"bar contents"})
 }
+*/
 
 func checkArchive(t *testing.T, r PackageReader, files map[string] string) {
 	in, err := r.OpenArchive()
@@ -124,7 +126,7 @@ func checkArchive(t *testing.T, r PackageReader, files map[string] string) {
 		if err == os.EOF {
 			break
 		}
-		println("*" + header.Name)
+//		println("*" + header.Name)
 		if err != nil {
 			t.Fatalf("archive.Next(): %s", err)
 		}

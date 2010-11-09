@@ -94,7 +94,7 @@ func copyToArchive(ctx *Context, path string, archive *tar.Writer) os.Error {
 			panic(err)
 		}
 		for _, child := range children {
-			println("archiving child: " + child)
+//			println("archiving child: " + child)
 			copyToArchive(ctx, path + "/" + child, archive)
 		}
 	} else {
