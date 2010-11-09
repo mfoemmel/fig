@@ -4,7 +4,7 @@ import "io"
 import "os"
 
 type Repository interface {
-	ListPackages() (<-chan Descriptor) 
+	ListPackages() <-chan Descriptor
 	NewPackageReader(PackageName, VersionName) PackageReader
 	NewPackageWriter(PackageName, VersionName) (PackageWriter, os.Error)
 }
@@ -50,4 +50,3 @@ func WriteRawPackage(repo Repository, packageName PackageName, versionName Versi
 	WritePackage(repo, pkg)
 	return nil
 }
-

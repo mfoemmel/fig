@@ -13,7 +13,7 @@ type Descriptor struct {
 }
 
 func NewDescriptor(packageName string, versionName string, configName string) Descriptor {
-	return Descriptor{PackageName(packageName),VersionName(versionName),ConfigName(configName)}
+	return Descriptor{PackageName(packageName), VersionName(versionName), ConfigName(configName)}
 }
 
 func (this Descriptor) Equals(that Descriptor) bool {

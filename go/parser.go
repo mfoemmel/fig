@@ -67,7 +67,7 @@ func (s *Parser) isVersionNameChar() bool {
 		(s.c >= '0' && s.c <= '9') ||
 		s.c == '.' ||
 		s.c == '-' ||
-		s.c == '_' 
+		s.c == '_'
 }
 
 const configNameError = "invalid character in config name, expected [a-z A-Z 0-9 . - _]"
@@ -78,7 +78,7 @@ func (s *Parser) isConfigNameChar() bool {
 		(s.c >= '0' && s.c <= '9') ||
 		s.c == '.' ||
 		s.c == '-' ||
-		s.c == '_' 
+		s.c == '_'
 }
 
 
@@ -100,10 +100,10 @@ func (s *Parser) isVariableValueChar() bool {
 	return (s.c >= 'a' && s.c <= 'z') ||
 		(s.c >= 'A' && s.c <= 'Z') ||
 		(s.c >= '0' && s.c <= '9') ||
-		s.c == '.' || 
-		s.c == '-' || 
-		s.c == '_' || 
-		s.c == '/' || 
+		s.c == '.' ||
+		s.c == '-' ||
+		s.c == '_' ||
+		s.c == '/' ||
 		s.c == '@' // TODO need to convert legacy paths properly
 }
 
@@ -113,9 +113,9 @@ func (p *Parser) isPathChar() bool {
 	return (p.c >= 'a' && p.c <= 'z') ||
 		(p.c >= 'A' && p.c <= 'Z') ||
 		(p.c >= '0' && p.c <= '9') ||
-		(p.c == '.') || 
-		(p.c == '-') || 
-		(p.c == '_') || 
+		(p.c == '.') ||
+		(p.c == '-') ||
+		(p.c == '_') ||
 		(p.c == '/') ||
 		(p.c == ':') ||
 		(p.c == '"') // TODO should parse strings correctly
@@ -130,11 +130,11 @@ func isWhitespace(c byte) bool {
 }
 
 type token struct {
-	text     string
-	row      int
-	col      int
-	length   int
-	line     string
+	text   string
+	row    int
+	col    int
+	length int
+	line   string
 }
 
 func (t *token) location() string {
@@ -152,14 +152,14 @@ func (p *Parser) ParsePackage(packageName PackageName, versionName VersionName) 
 		if stmt == nil {
 			break
 		}
-		
+
 		if name, ok := stmt.(*NameStatement); ok {
 			packageName = name.PackageName
 			versionName = name.VersionName
 		}
 
 		l := len(stmts)
-		stmts = stmts[0:l+1]
+		stmts = stmts[0 : l+1]
 		stmts[l] = stmt
 	}
 	return NewPackage(packageName, versionName, stmts), nil
@@ -226,7 +226,7 @@ func (p *Parser) ParseConfigStatements() ([]ConfigStatement, *Error) {
 			break
 		}
 		l := len(stmts)
-		stmts = stmts[0:l+1]
+		stmts = stmts[0 : l+1]
 		stmts[l] = stmt
 	}
 	return stmts, nil
@@ -435,7 +435,7 @@ func (p *Parser) path() (string, *Error) {
 	text := p.token().text
 	// need to parse quoted strings properly
 	if text[0] == '"' {
-		text = text[1:len(text)-1]
+		text = text[1 : len(text)-1]
 	}
 	return text, nil
 }
@@ -476,7 +476,7 @@ func (s *Parser) token() *token {
 
 	t := string(s.buf[s.start:s.pos])
 	col := s.start - lineStart + 1
-	s.start = s.pos	
+	s.start = s.pos
 	return &token{t, s.line, col, len(t), string(s.buf[lineStart:lineEnd])}
 }
 
@@ -497,19 +497,19 @@ func (p *Parser) lineEnd() int {
 }
 
 type Error struct {
-	source   string
-	row      int
-	col      int
-	length   int
-	message  string
-	line     string
+	source  string
+	row     int
+	col     int
+	length  int
+	message string
+	line    string
 }
 
 func (s *Parser) error(msg string, token bool) *Error {
 	lineStart := s.lineStart()
 	lineEnd := s.lineEnd()
 
-	return &Error{s.source, s.line, s.start, s.col-s.start, msg, string(s.buf[lineStart:lineEnd])}
+	return &Error{s.source, s.line, s.start, s.col - s.start, msg, string(s.buf[lineStart:lineEnd])}
 }
 
 func (s *Parser) tokenError(t *token, msg string) *Error {
@@ -519,7 +519,7 @@ func (s *Parser) tokenError(t *token, msg string) *Error {
 func (s *Parser) charError(msg string) *Error {
 	if s.c == -1 {
 		return s.error("unexpected end-of-file", false)
-	} 
+	}
 	s.next()
 
 	s.start = s.pos - 1

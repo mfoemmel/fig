@@ -7,7 +7,7 @@ import "os"
 import "strings"
 
 type memoryFileSystem struct {
-	files map[string] []byte
+	files map[string][]byte
 }
 
 type memoryFileSystemReader struct {
@@ -15,13 +15,13 @@ type memoryFileSystemReader struct {
 }
 
 type memoryFileSystemWriter struct {
-	fs *memoryFileSystem
+	fs   *memoryFileSystem
 	path string
 	data *bytes.Buffer
 }
 
 func NewMemoryFileSystem() FileSystem {
-	return &memoryFileSystem{make(map[string] []byte)}
+	return &memoryFileSystem{make(map[string][]byte)}
 }
 
 func (fs *memoryFileSystem) Exists(path string) bool {
@@ -87,4 +87,3 @@ func (w *memoryFileSystemWriter) Close() os.Error {
 	w.fs.files[w.path] = w.data.Bytes()
 	return nil
 }
-

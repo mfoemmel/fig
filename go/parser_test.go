@@ -56,7 +56,7 @@ config foo
   set FOO=BAR
 end
 `
-	expected := NewConfigBuilder("foo").Set("FOO","BAR").Build()
+	expected := NewConfigBuilder("foo").Set("FOO", "BAR").Build()
 	checkParseConfig(t, input, expected)
 }
 
@@ -67,7 +67,7 @@ config foo
   path FOO2=BAR2
 end
 `
-	expected := NewConfigBuilder("foo").Set("FOO1","BAR1").Path("FOO2","BAR2").Build() 
+	expected := NewConfigBuilder("foo").Set("FOO1", "BAR1").Path("FOO2", "BAR2").Build()
 	checkParseConfig(t, input, expected)
 }
 
@@ -111,7 +111,7 @@ func TestBadInclude(t *testing.T) {
 
 func checkParsePackage(t *testing.T, s string, expected *Package) {
 	parser := NewParser("test", []byte(s))
-	pkg, err := parser.ParsePackage("test","1.2.3")
+	pkg, err := parser.ParsePackage("test", "1.2.3")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -164,7 +164,7 @@ func checkConfig(t *testing.T, expected *Config, actual *Config) {
 }
 
 func checkConfigStatements(t *testing.T, expected []ConfigStatement, actual []ConfigStatement) {
-	if ok, msg := CompareConfigStatements(expected, actual); !ok {		
+	if ok, msg := CompareConfigStatements(expected, actual); !ok {
 		t.Error(msg)
 	}
 }
@@ -196,4 +196,3 @@ func checkError(t *testing.T, s string, message string, row int, col int, length
 	}
 	//	fmt.Println(err)
 }
-

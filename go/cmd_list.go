@@ -3,14 +3,13 @@ package fig
 import "fmt"
 import "os"
 
-type ListCommand struct {
-}
+type ListCommand struct{}
 
 func parseListArgs(iter *ArgIterator) (Command, os.Error) {
-        if iter.Next() {
-                return nil, os.NewError(fmt.Sprintf("Unexpected argument: %s", iter.Get()))
-        }
-        return &ListCommand{}, nil
+	if iter.Next() {
+		return nil, os.NewError(fmt.Sprintf("Unexpected argument: %s", iter.Get()))
+	}
+	return &ListCommand{}, nil
 }
 
 func (cmd *ListCommand) Execute(ctx *Context) int {

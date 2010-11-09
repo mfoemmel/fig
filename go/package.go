@@ -91,7 +91,7 @@ func (cb *ConfigBlock) Accept(handler PackageStatementHandler) {
 
 // Testing
 
-func ComparePackage(expected *Package, actual *Package) (bool,string) {
+func ComparePackage(expected *Package, actual *Package) (bool, string) {
 	if expected.PackageName != actual.PackageName {
 		return false, fmt.Sprintf("PackageName mismatch: %s != %s", expected.PackageName, actual.PackageName)
 	}
@@ -108,7 +108,7 @@ func ComparePackage(expected *Package, actual *Package) (bool,string) {
 	return true, ""
 }
 
-func ComparePackageStatements(expected []PackageStatement, actual []PackageStatement) (bool,string) {
+func ComparePackageStatements(expected []PackageStatement, actual []PackageStatement) (bool, string) {
 	for i, _ := range expected {
 		if ok, msg := ComparePackageStatement(expected[i], actual[i]); !ok {
 			return ok, msg
@@ -117,30 +117,30 @@ func ComparePackageStatements(expected []PackageStatement, actual []PackageState
 	return true, ""
 }
 
-func ComparePackageStatement(expected PackageStatement, actual PackageStatement) (bool,string) {
+func ComparePackageStatement(expected PackageStatement, actual PackageStatement) (bool, string) {
 	switch actual := actual.(type) {
 	case *NameStatement:
 		if actual.PackageName != expected.(*NameStatement).PackageName {
 			return false, fmt.Sprintf("Expected package name \"%s\", got \"%s\"", actual.PackageName, expected.(*NameStatement).PackageName)
-		}		
+		}
 		if actual.VersionName != expected.(*NameStatement).VersionName {
 			return false, fmt.Sprintf("Expected version name \"%s\", got \"%s\"", actual.VersionName, expected.(*NameStatement).VersionName)
-		}		
+		}
 		return true, ""
 	case *ResourceStatement:
 		if actual.Path != expected.(*ResourceStatement).Path {
 			return false, fmt.Sprintf("Expected path \"%s\", got \"%s\"", actual.Path, expected.(*ResourceStatement).Path)
-		}		
+		}
 		return true, ""
 	case *ArchiveStatement:
 		if actual.Path != expected.(*ArchiveStatement).Path {
 			return false, fmt.Sprintf("Expected path \"%s\", got \"%s\"", actual.Path, expected.(*ArchiveStatement).Path)
-		}		
+		}
 		return true, ""
 	case *ConfigBlock:
 		if ok, msg := CompareConfig(expected.(*ConfigBlock).Config, actual.Config); !ok {
 			return ok, msg
-		}		
+		}
 	default:
 		panic("unexpected package statement type")
 	}

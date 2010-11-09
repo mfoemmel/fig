@@ -9,7 +9,7 @@ import "container/vector"
 
 type Config struct {
 	ConfigName ConfigName
-	Statements  []ConfigStatement
+	Statements []ConfigStatement
 }
 
 func NewConfig(configName ConfigName, stmts []ConfigStatement) *Config {
@@ -25,7 +25,7 @@ func (config *Config) FindIncludeDescriptors() []Descriptor {
 				vec.Push(desc)
 			}
 		}
-	}	
+	}
 	descs := make([]Descriptor, vec.Len())
 	for i, _ := range descs {
 		descs[i] = vec.At(i).(Descriptor)
@@ -57,7 +57,7 @@ func NewIncludeStatement(desc Descriptor) *ModifierStatement {
 }
 
 func NewSetStatement(name string, value string) *ModifierStatement {
-	return &ModifierStatement{NewSetModifier(name,value)}
+	return &ModifierStatement{NewSetModifier(name, value)}
 }
 
 func NewPathStatement(name string, value string) *ModifierStatement {
@@ -70,13 +70,13 @@ func (stmt *ModifierStatement) Accept(handler ConfigStatementHandler) {
 
 // Testing
 
-func CompareConfig(expected *Config, actual *Config) (bool,string) {
+func CompareConfig(expected *Config, actual *Config) (bool, string) {
 	// todo compare name?
 	return CompareConfigStatements(expected.Statements, actual.Statements)
 }
 
 
-func CompareConfigStatements(expected []ConfigStatement, actual []ConfigStatement) (bool,string) {
+func CompareConfigStatements(expected []ConfigStatement, actual []ConfigStatement) (bool, string) {
 	if len(expected) != len(actual) {
 		return false, fmt.Sprintf("Expected %d modifier, got %d", len(expected), len(actual))
 	}
@@ -88,6 +88,6 @@ func CompareConfigStatements(expected []ConfigStatement, actual []ConfigStatemen
 	return true, ""
 }
 
-func CompareConfigStatement(expected ConfigStatement, actual ConfigStatement) (bool,string) {
+func CompareConfigStatement(expected ConfigStatement, actual ConfigStatement) (bool, string) {
 	return CompareModifier(expected.(*ModifierStatement).Modifier, actual.(*ModifierStatement).Modifier)
 }

@@ -23,7 +23,7 @@ func (b *Backtrace) Len() int {
 	l := 0
 	for b != nil {
 		l++
-		b = b.Parent 
+		b = b.Parent
 	}
 	return l
 }
@@ -43,7 +43,7 @@ func (b *Backtrace) String() string {
 	s := ""
 	for b != nil {
 		s += "\n    "
-		s += b.Descriptor.String() 
+		s += b.Descriptor.String()
 		b = b.Parent
 	}
 	s += "\n"

@@ -5,13 +5,13 @@ import "container/vector"
 type PackageBuilder struct {
 	packageName PackageName
 	versionName VersionName
-	statements vector.Vector
+	statements  vector.Vector
 }
 
 type ConfigBuilder struct {
 	packageBuilder *PackageBuilder
-	configName ConfigName
-	statements vector.Vector
+	configName     ConfigName
+	statements     vector.Vector
 }
 
 func NewPackageBuilder(packageName string, versionName string) *PackageBuilder {
@@ -59,12 +59,12 @@ func (configBuilder *ConfigBuilder) Path(name string, value string) *ConfigBuild
 }
 
 func (configBuilder *ConfigBuilder) Include(packageName string, versionName string, configName string) *ConfigBuilder {
-	desc := NewDescriptor(packageName,versionName,configName)
+	desc := NewDescriptor(packageName, versionName, configName)
 	configBuilder.statements.Push(NewModifierStatement(NewIncludeModifier(desc)))
 	return configBuilder
 }
 
-func (configBuilder *ConfigBuilder) Build() *Config{
+func (configBuilder *ConfigBuilder) Build() *Config {
 	statements := make([]ConfigStatement, configBuilder.statements.Len())
 	for i, statement := range configBuilder.statements {
 		statements[i] = statement.(ConfigStatement)
@@ -72,7 +72,7 @@ func (configBuilder *ConfigBuilder) Build() *Config{
 	return NewConfig(configBuilder.configName, statements)
 }
 
-func (configBuilder *ConfigBuilder) End() *PackageBuilder{
+func (configBuilder *ConfigBuilder) End() *PackageBuilder {
 	packageBuilder := configBuilder.packageBuilder
 	packageBuilder.statements.Push(NewConfigBlock(configBuilder.Build()))
 	return packageBuilder

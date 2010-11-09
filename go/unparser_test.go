@@ -4,8 +4,8 @@ import "bytes"
 import "testing"
 
 func TestUnparsePackage(t *testing.T) {
-	expected := 
-`resource foo.bar
+	expected :=
+		`resource foo.bar
 archive foo.tar.gz
 
 config default
@@ -16,28 +16,28 @@ config debug
   set DEBUG=true
 end
 `
-	input := NewPackageBuilder("foo","1.2.3").
+	input := NewPackageBuilder("foo", "1.2.3").
 		Resource("foo.bar").
 		Archive("foo.tar.gz").
-		Config("default").Set("FOO","BAR").End().
-		Config("debug").Set("DEBUG","true").End().
+		Config("default").Set("FOO", "BAR").End().
+		Config("debug").Set("DEBUG", "true").End().
 		Build()
 
 	checkUnparsePackage(t, input, expected)
 }
 
 func TestUnparseConfig(t *testing.T) {
-	expected := 
-`
+	expected :=
+		`
 config default
   set FOO=BAR
 end
 `
-	checkUnparseConfig(t, NewConfigBuilder("default").Set("FOO","BAR").Build(), expected)
+	checkUnparseConfig(t, NewConfigBuilder("default").Set("FOO", "BAR").Build(), expected)
 }
 
 func TestUnparseSetModifier(t *testing.T) {
-	checkUnparseModifier(t, NewSetModifier("FOO","BAR"), "  set FOO=BAR\n")
+	checkUnparseModifier(t, NewSetModifier("FOO", "BAR"), "  set FOO=BAR\n")
 }
 
 func TestUnparsePathModifier(t *testing.T) {
@@ -45,7 +45,7 @@ func TestUnparsePathModifier(t *testing.T) {
 }
 
 func TestUnparseIncludeModifier(t *testing.T) {
-	checkUnparseModifier(t, NewIncludeModifier(NewDescriptor("foo","1.2.3","debug")), "  include foo/1.2.3:debug\n")
+	checkUnparseModifier(t, NewIncludeModifier(NewDescriptor("foo", "1.2.3", "debug")), "  include foo/1.2.3:debug\n")
 }
 
 func checkUnparsePackage(t *testing.T, pkg *Package, expected string) {
@@ -55,7 +55,7 @@ func checkUnparsePackage(t *testing.T, pkg *Package, expected string) {
 	actual := buf.String()
 	if expected != actual {
 		t.Errorf("Expected: %s, got: %s", expected, actual)
-	}	
+	}
 }
 
 func checkUnparseConfig(t *testing.T, config *Config, expected string) {
@@ -65,7 +65,7 @@ func checkUnparseConfig(t *testing.T, config *Config, expected string) {
 	actual := buf.String()
 	if expected != actual {
 		t.Errorf("Expected: %s, got: %s", expected, actual)
-	}	
+	}
 }
 
 func checkUnparseModifier(t *testing.T, mod Modifier, expected string) {
@@ -75,5 +75,5 @@ func checkUnparseModifier(t *testing.T, mod Modifier, expected string) {
 	actual := buf.String()
 	if expected != actual {
 		t.Errorf("Expected: %s, got: %s", expected, actual)
-	}	
+	}
 }

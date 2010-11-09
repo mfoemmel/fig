@@ -7,15 +7,15 @@ type DepsCommand struct {
 }
 
 func parseDepsArgs(iter *ArgIterator) (Command, os.Error) {
-        if !iter.Next() {
-                return nil, os.NewError("Please specify a descriptor (e.g. foo/1.2.3)")
-        }
+	if !iter.Next() {
+		return nil, os.NewError("Please specify a descriptor (e.g. foo/1.2.3)")
+	}
 	// todo - parser shouldn't print line/column if "source" arg is empty
-	desc, err := NewParser("<arg>",[]byte(iter.Get())).descriptor()
+	desc, err := NewParser("<arg>", []byte(iter.Get())).descriptor()
 	if err != nil {
 		return nil, err
 	}
-        return &DepsCommand{desc}, nil
+	return &DepsCommand{desc}, nil
 }
 
 func (cmd *DepsCommand) Execute(ctx *Context) int {

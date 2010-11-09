@@ -1,7 +1,6 @@
 package fig
 
-const helpText = 
-`Fig is a cross-platform, language-agnostic package manager.
+const helpText = `Fig is a cross-platform, language-agnostic package manager.
 
 Usage: fig <command> [<args>...]
 
@@ -32,11 +31,9 @@ are options, so all of the following are valid descriptors:
 
 `
 
-type HelpCommand struct {
-}
+type HelpCommand struct{}
 
 func (cmd *HelpCommand) Execute(ctx *Context) int {
 	ctx.out.Write([]byte(helpText))
 	return 0
 }
-

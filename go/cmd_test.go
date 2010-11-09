@@ -27,7 +27,7 @@ func TestHelp(t *testing.T) {
 // Show
 //
 func TestShow(t *testing.T) {
-	checkArgs(t, "fig show test/1.2.3", show("test","1.2.3"))
+	checkArgs(t, "fig show test/1.2.3", show("test", "1.2.3"))
 }
 
 //
@@ -35,37 +35,37 @@ func TestShow(t *testing.T) {
 //
 
 func parseCommand(t *testing.T, s string) Command {
-        cmd, err := ParseArgs(strings.Split(s, " ", -1))
-        assertNil(t, err)
-        return cmd
+	cmd, err := ParseArgs(strings.Split(s, " ", -1))
+	assertNil(t, err)
+	return cmd
 }
 
 func checkArgs(t *testing.T, s string, cmd Command) {
-        assertDeepEqual(t, parseCommand(t, s), cmd)
+	assertDeepEqual(t, parseCommand(t, s), cmd)
 }
 
 func checkArgsError(t *testing.T, s string, msg string) {
-        cmd, err := ParseArgs(strings.Split(s, " ", -1))
-        assertNil(t, cmd)
-        assertEquals(t, err.String(), msg)
+	cmd, err := ParseArgs(strings.Split(s, " ", -1))
+	assertNil(t, cmd)
+	assertEquals(t, err.String(), msg)
 }
 
 func assertEquals(t *testing.T, a interface{}, b interface{}) {
-        if a != b {
-                t.Errorf("Expected: \"%v\", got: \"%v\"", a, b)
-        }
+	if a != b {
+		t.Errorf("Expected: \"%v\", got: \"%v\"", a, b)
+	}
 }
 
 func assertDeepEqual(t *testing.T, a interface{}, b interface{}) {
-        if !reflect.DeepEqual(a, b) {
-                t.Errorf("Expected: \"%v\", got: \"%v\"", a, b)
-        }
+	if !reflect.DeepEqual(a, b) {
+		t.Errorf("Expected: \"%v\", got: \"%v\"", a, b)
+	}
 }
 
 func assertNil(t *testing.T, val interface{}) {
-        if val != nil {
-                t.Fatalf("Expected <nil>, got: \"%v\"", val)
-        }
+	if val != nil {
+		t.Fatalf("Expected <nil>, got: \"%v\"", val)
+	}
 }
 
 //
@@ -77,7 +77,7 @@ func help() Command {
 }
 
 func show(packageName string, versionName string) Command {
-	return &ShowCommand{PackageName(packageName),VersionName(versionName)}
+	return &ShowCommand{PackageName(packageName), VersionName(versionName)}
 }
 
 //

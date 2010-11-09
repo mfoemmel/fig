@@ -3,8 +3,7 @@ package fig
 import "io"
 import "os"
 
-type nativeFileSystem struct {
-}
+type nativeFileSystem struct{}
 
 func NewNativeFileSystem() FileSystem {
 	return &nativeFileSystem{}

@@ -14,7 +14,7 @@ func NewFileRepository(baseDir string) Repository {
 	return &fileRepository{baseDir}
 }
 
-func (r *fileRepository) ListPackages() (<-chan Descriptor) {
+func (r *fileRepository) ListPackages() <-chan Descriptor {
 	c := make(chan Descriptor)
 	go func() {
 		reposDir, err := os.Open(r.baseDir, os.O_RDONLY, 0)
@@ -41,17 +41,16 @@ func (r *fileRepository) ListPackages() (<-chan Descriptor) {
 }
 
 type fileRepositoryPackageReader struct {
-    repos *fileRepository
-    packageName PackageName
-    versionName VersionName
+	repos       *fileRepository
+	packageName PackageName
+	versionName VersionName
 }
 
 type fileRepositoryPackageWriter struct {
-	repos *fileRepository
+	repos       *fileRepository
 	packageName PackageName
 	versionName VersionName
-	packageDir string
-
+	packageDir  string
 }
 
 func (r *fileRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.Error) {
@@ -60,7 +59,7 @@ func (r *fileRepositoryPackageReader) ReadStatements() ([]PackageStatement, os.E
 	buf, err := ioutil.ReadFile(filename)
 	// support legacy repositories
 	if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
-		filename = path.Join(packageDir, ".fig") 
+		filename = path.Join(packageDir, ".fig")
 		buf, err = ioutil.ReadFile(filename)
 	}
 	if pathErr, ok := err.(*os.PathError); ok && pathErr.Error == os.ENOENT {
@@ -92,7 +91,7 @@ func (w *fileRepositoryPackageWriter) WriteStatements(stmts []PackageStatement) 
 }
 
 func (r *fileRepository) NewPackageReader(packageName PackageName, versionName VersionName) PackageReader {
-    return &fileRepositoryPackageReader{r, packageName, versionName}
+	return &fileRepositoryPackageReader{r, packageName, versionName}
 }
 
 func (r *fileRepositoryPackageReader) Close() {

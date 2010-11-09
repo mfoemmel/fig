@@ -3,20 +3,19 @@ package fig
 import "os"
 
 type RepoAddCommand struct {
-	alias string
+	alias    string
 	location string
 }
 
-type RepoListCommand struct {
-}
+type RepoListCommand struct{}
 
 func parseRepoArgs(iter *ArgIterator) (Command, os.Error) {
 	badCommand := "Please specify one of: add, rm, list"
-        if !iter.Next() {
-                return nil, os.NewError(badCommand)
-        }
+	if !iter.Next() {
+		return nil, os.NewError(badCommand)
+	}
 	switch iter.Get() {
-	case "add": 
+	case "add":
 		if !iter.Next() {
 			return nil, os.NewError("Please specify an alias and a path to the repository")
 		}
@@ -29,8 +28,8 @@ func parseRepoArgs(iter *ArgIterator) (Command, os.Error) {
 	case "ls", "list":
 		return &RepoListCommand{}, nil
 	}
-	
-        return nil, os.NewError(badCommand)
+
+	return nil, os.NewError(badCommand)
 }
 
 func (cmd *RepoAddCommand) Execute(ctx *Context) int {
@@ -52,4 +51,3 @@ func (cmd *RepoListCommand) Execute(ctx *Context) int {
 	}
 	return 0
 }
-
