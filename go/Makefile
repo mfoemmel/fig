@@ -14,6 +14,7 @@ GOFILES=\
 	fs.go\
 	fs_mem.go\
 	fs_native.go\
+	wildcard.go\
 	graph_cycles.go\
 	graph_node.go\
 	graph_sort.go\
