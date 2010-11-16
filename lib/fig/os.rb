@@ -224,7 +224,7 @@ module Fig
     end
 
     def self.windows?
-      Config::CONFIG['host_os'] =~ /mswin/
+      Config::CONFIG['host_os'] =~ /mswin|mingw/
     end
 
     def self.unix?
