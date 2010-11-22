@@ -30,7 +30,7 @@ module Fig
     end
     
     def write(path, content)
-      File.open(path, "w") { |f| f.binmode; f << content }
+      File.open(path, "wb") { |f| f.binmode; f << content }
     end
     
     SUCCESS = 0
@@ -94,7 +94,8 @@ module Fig
       when "http"
         http = Net::HTTP.new(uri.host)
         puts "downloading #{url}"
-        File.open(path, "w") do |file|
+        File.open(path, "wb") do |file|
+          file.binmode
           http.get(uri.path) do |block|
             file.write(block)
           end
