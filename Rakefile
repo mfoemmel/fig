@@ -15,7 +15,7 @@ begin
     gem.add_dependency "net-sftp", ">= 2.0.2"
     gem.add_dependency "polyglot", ">= 0.2.9"
     gem.add_dependency "treetop", ">= 1.4.2"
-    gem.add_development_dependency "rspec", ">= 1.2.9"
+    gem.add_development_dependency "rspec", "~> 1.3"
     gem.add_development_dependency "open4", ">= 1.0.1"
     gem.files = ["bin/fig", "bin/fig-download"] + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]
     gem.executables = ["fig", "fig-download"]
