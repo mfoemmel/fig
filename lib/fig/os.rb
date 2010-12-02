@@ -104,7 +104,7 @@ module Fig
         # TODO need better way to do conditional download
         #       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
-        cmd = "fig-download #{timestamp} #{uri.path}"
+        cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
       else
         raise "Unknown protocol: #{url}"
