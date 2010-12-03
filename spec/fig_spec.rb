@@ -255,6 +255,30 @@ describe "Fig" do
     File.read("tmp/lib2/foo/hello2").should == "some other library"
   end
 
+  it "packages multiple resources with wildcards" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    FileUtils.rm_rf("tmp")
+    FileUtils.mkdir_p("tmp/lib")
+    File.open("tmp/lib/foo.jar", "w") { |f| f << "some library" }
+    File.open("tmp/lib/bar.jar", "w") { |f| f << "some other library" }
+    input = <<-END
+      resource tmp/lib/*.jar
+      config default
+        append FOOPATH=@/tmp/lib/foo.jar
+      end
+    END
+    fig('--publish foo/1.2.3', input)
+    input = <<-END
+      retrieve FOOPATH->tmp/lib2/[package]
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('-m', input)
+    File.read("tmp/lib2/foo/foo.jar").should == "some library"
+  end
+
   it "update local packages if they already exist" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
