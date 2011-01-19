@@ -180,7 +180,7 @@ module Fig
     
     def copy(source, target)
       FileUtils.mkdir_p(File.dirname(target))
-      FileUtils.copy_file(source, target)
+      FileUtils.cp_r(source, target)
     end
 
     def move_file(dir, from, to)
