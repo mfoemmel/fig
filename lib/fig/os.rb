@@ -30,7 +30,7 @@ module Fig
     end
     
     def write(path, content)
-      File.open(path, "w") { |f| f.binmode; f << content }
+      File.open(path, "wb") { |f| f.binmode; f << content }
     end
     
     SUCCESS = 0
@@ -94,7 +94,8 @@ module Fig
       when "http"
         http = Net::HTTP.new(uri.host)
         puts "downloading #{url}"
-        File.open(path, "w") do |file|
+        File.open(path, "wb") do |file|
+          file.binmode
           http.get(uri.path) do |block|
             file.write(block)
           end
@@ -103,7 +104,7 @@ module Fig
         # TODO need better way to do conditional download
         #       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
-        cmd = "fig-download #{timestamp} #{uri.path}"
+        cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
       else
         raise "Unknown protocol: #{url}"
