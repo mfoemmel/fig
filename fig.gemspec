@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{fig}
-  s.version = "0.1.21"
+  s.version = "0.1.22"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthew Foemmel"]
-  s.date = %q{2010-11-22}
+  s.date = %q{2011-01-26}
   s.description = %q{Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected).}
   s.email = %q{git@foemmel.com}
   s.executables = ["fig", "fig-download"]
