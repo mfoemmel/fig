@@ -91,6 +91,7 @@ module Fig
         end
       end
       if resources.size > 0
+        resources = expand_globs_from(resources)
         file = "resources.tar.gz"
         @os.create_archive(file, resources)
         new_package_statements.unshift(Archive.new(file))
@@ -193,6 +194,13 @@ module Fig
         delete_local_package(package_name, version_name)
         raise
       end
+    end
+
+    # 'resources' is an Array of filenames: ['tmp/foo/file1', 'tmp/foo/*.jar']
+    def expand_globs_from(resources)
+      expanded_files = []
+      resources.each {|f| expanded_files.concat(Dir.glob(f))}
+      expanded_files
     end
 
     def is_url?(url)

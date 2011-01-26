@@ -263,7 +263,7 @@ describe "Fig" do
     File.open("tmp/lib/foo.jar", "w") { |f| f << "some library" }
     File.open("tmp/lib/bar.jar", "w") { |f| f << "some other library" }
     input = <<-END
-      resource tmp/lib/*.jar
+      resource tmp/**/*.jar
       config default
         append FOOPATH=@/tmp/lib/foo.jar
       end
