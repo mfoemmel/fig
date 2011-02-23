@@ -41,7 +41,8 @@ module Fig
       begin
         uri = URI.parse(url)
       rescue 
-        raise "Unable to parse url: '#{url}'"
+        puts "Unable to parse url: '#{url}'"
+        exit 10
       end
       case uri.scheme
       when "ftp"
@@ -69,7 +70,8 @@ module Fig
         end
         packages
       else
-        raise "Protocol not supported: #{url}"
+        puts "Protocol not supported: #{url}"
+        exit 10
       end
     end
     
@@ -107,7 +109,8 @@ module Fig
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
       else
-        raise "Unknown protocol: #{url}"
+        puts "Unknown protocol: #{url}"
+        exit 10
       end
    end
     
@@ -131,7 +134,8 @@ module Fig
       when /\.zip$/
         unpack_archive(dir, path)
       else
-        raise "Unknown archive type: #{basename}"
+        puts "Unknown archive type: #{basename}"
+        exit 10
       end
     end
     
@@ -176,7 +180,12 @@ module Fig
     end
 
     def exec(dir,command)
-      Dir.chdir(dir) { raise "Command failed" unless system command }
+      Dir.chdir(dir) {
+        unless system command
+          puts "Command failed"
+          exit 10
+        end
+      }
     end
     
     def copy(source, target)
@@ -277,7 +286,8 @@ module Fig
         return false
       when NOT_FOUND
         tempfile.delete
-        raise "File not found: #{path}"
+        puts "File not found: #{path}"
+        exit 10
       when SUCCESS
         FileUtils.mv(tempfile.path, path)
         return true

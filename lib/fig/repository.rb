@@ -137,7 +137,8 @@ module Fig
         file = File.join(dir, "package.fig")
       end
       if not File.exist?(file)
-        raise "File not found: #{file}"
+        puts "Fig file not found for package: #{file}"
+        exit 10
       end
       read_package_from_file(file, package_name, version_name)
     end
@@ -190,9 +191,9 @@ module Fig
         end
         write_local_package(package_name, version_name, package)
       rescue
-        $stderr.puts "install failed, cleaning up" 
+        $stderr.puts "Install failed, cleaning up" 
         delete_local_package(package_name, version_name)
-        raise
+        exit 10
       end
     end
 

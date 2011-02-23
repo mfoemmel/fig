@@ -26,7 +26,10 @@ module Fig
 
     def register_package(package)
       name = package.package_name
-      raise "Package already exists with name: #{name}" if @packages[name]
+      if @packages[name]
+        puts "Package already exists with name: #{name}"
+        exit 10
+      end
       @packages[name] = package
     end
 
@@ -121,7 +124,8 @@ module Fig
         package = @repository.load_package(package_name, version_name || DEFAULT_VERSION_NAME)
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
-        raise "Version mismatch: #{package_name}" 
+        puts "Version mismatch: #{package_name}" 
+        exit 10
       end
       package
     end
@@ -151,7 +155,10 @@ module Fig
     def expand_arg(arg)
       arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
         package = @packages[$1]
-        raise "Package not found: #{$1}" if package.nil?
+        if package.nil?
+          puts "Package not found: #{$1}"
+          exit 10
+        end
         package.directory
       end
     end
