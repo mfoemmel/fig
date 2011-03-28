@@ -13,6 +13,13 @@ class Popen
         yield stdin, stdout, stderr
       }
     end
+  elsif Fig::OS.java?
+    require 'open3'
+    def self.popen(*cmd)
+      Open3.popen3(*cmd) { |stdin,stdout,stderr|
+        yield stdin, stdout, stderr
+      }
+    end
   else
     require 'open4'
     def self.popen(*cmd)

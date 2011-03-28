@@ -1,7 +1,7 @@
 require 'fileutils'
 # Must specify absolute path of ::Archive when using
 # this module to avoid conflicts with Fig::Package::Archive
-require 'libarchive_ruby'
+require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
 require 'uri'
 require 'net/http'
 require 'net/ssh'
@@ -235,6 +235,10 @@ module Fig
 
     def self.windows?
       Config::CONFIG['host_os'] =~ /mswin|mingw/
+    end
+
+    def self.java?
+      RUBY_PLATFORM == 'java'
     end
 
     def self.unix?
