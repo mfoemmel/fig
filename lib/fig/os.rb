@@ -203,15 +203,19 @@ module Fig
 
     # Expects files_to_archive as an Array of filenames.
     def create_archive(archive_name, files_to_archive)
-      # TODO: Need to verify files_to_archive exists.
-      ::Archive.write_open_filename(archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR) do |ar|
-        files_to_archive.each do |fn|
-          ar.new_entry do |entry|
-            entry.copy_stat(fn)
-            entry.pathname = fn
-            ar.write_header(entry)
-            if !entry.directory?
-              ar.write_data(open(fn) {|f| f.binmode; f.read })
+      if OS.java?
+        `tar czvf #{archive_name} #{files_to_archive.join(' ')}`
+      else
+        # TODO: Need to verify files_to_archive exists.
+        ::Archive.write_open_filename(archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR) do |ar|
+          files_to_archive.each do |fn|
+            ar.new_entry do |entry|
+              entry.copy_stat(fn)
+              entry.pathname = fn
+              ar.write_header(entry)
+              if !entry.directory?
+                ar.write_data(open(fn) {|f| f.binmode; f.read })
+              end
             end
           end
         end
@@ -225,9 +229,13 @@ module Fig
     # .zip
     def unpack_archive(dir, file)
       Dir.chdir(dir) do
-        ::Archive.read_open_filename(file) do |ar|
-          while entry = ar.next_header
-            ar.extract(entry)
+        if OS.java?
+          `tar xzvf #{file}`
+        else
+          ::Archive.read_open_filename(file) do |ar|
+            while entry = ar.next_header
+              ar.extract(entry)
+            end
           end
         end
       end
