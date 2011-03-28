@@ -2,6 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'rubygems'
 require 'fig/os'
+require 'rake'
 require 'fileutils'
 
 class Popen
@@ -36,7 +37,7 @@ def fig(args, input=nil)
   args = "--file - #{args}" if input
   out = nil
   err = nil
-  Popen.popen("#{FIG_EXE} #{args}") do |stdin, stdout, stderr|
+  Popen.popen("#{RUBY} #{FIG_EXE} #{args}") do |stdin, stdout, stderr|
     if input
       stdin.puts input
       stdin.close
