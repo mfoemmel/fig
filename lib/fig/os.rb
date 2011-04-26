@@ -198,7 +198,7 @@ module Fig
     end
     
     def log_info(msg)
-      puts msg
+      $stderr.puts msg
     end
 
     # Expects files_to_archive as an Array of filenames.
