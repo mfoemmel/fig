@@ -11,6 +11,7 @@ module Fig
       @variables = variables
       @retrieve_vars = {}
       @packages = {}
+      @applied_configs = {}
     end
 
     # Returns the value of an envirionment variable
@@ -34,8 +35,12 @@ module Fig
     end
 
     def apply_config(package, config_name)
+      if (@applied_configs[package.package_name] ||= []).member?(config_name)
+        return
+      end
       config = package[config_name]
       config.statements.each { |stmt| apply_config_statement(package, stmt) }
+      @applied_configs[package.package_name] << config_name
     end
 
     def execute_shell(command)
