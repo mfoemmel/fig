@@ -41,7 +41,7 @@ module Fig
       begin
         uri = URI.parse(url)
       rescue 
-        puts "Unable to parse url: '#{url}'"
+        $stderr.puts "Unable to parse url: '#{url}'"
         exit 10
       end
       case uri.scheme
@@ -70,7 +70,7 @@ module Fig
         end
         packages
       else
-        puts "Protocol not supported: #{url}"
+        $stderr.puts "Protocol not supported: #{url}"
         exit 10
       end
     end
@@ -86,7 +86,7 @@ module Fig
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
             return false
           else 
-            puts "downloading #{url}"
+            $stderr.puts "downloading #{url}"
             ftp.getbinaryfile(uri.path, path, 256*1024)
             return true
           end
@@ -95,7 +95,7 @@ module Fig
         end
       when "http"
         http = Net::HTTP.new(uri.host)
-        puts "downloading #{url}"
+        $stderr.puts "downloading #{url}"
         File.open(path, "wb") do |file|
           file.binmode
           http.get(uri.path) do |block|
@@ -109,7 +109,7 @@ module Fig
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
       else
-        puts "Unknown protocol: #{url}"
+        $stderr.puts "Unknown protocol: #{url}"
         exit 10
       end
    end
@@ -134,7 +134,7 @@ module Fig
       when /\.zip$/
         unpack_archive(dir, path)
       else
-        puts "Unknown archive type: #{basename}"
+        $stderr.puts "Unknown archive type: #{basename}"
         exit 10
       end
     end
@@ -182,7 +182,7 @@ module Fig
     def exec(dir,command)
       Dir.chdir(dir) {
         unless system command
-          puts "Command failed"
+          $stderr.puts "Command failed"
           exit 10
         end
       }
@@ -298,7 +298,7 @@ module Fig
         return false
       when NOT_FOUND
         tempfile.delete
-        puts "File not found: #{path}"
+        $stderr.puts "File not found: #{path}"
         exit 10
       when SUCCESS
         FileUtils.mv(tempfile.path, path)

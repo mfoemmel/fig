@@ -13,7 +13,7 @@ module Fig
       @statements.each do |stmt|
         return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
       end
-      puts "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
+      $stderr.puts "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
       exit 10
     end
 

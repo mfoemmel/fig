@@ -137,7 +137,7 @@ module Fig
         file = File.join(dir, "package.fig")
       end
       if not File.exist?(file)
-        puts "Fig file not found for package: #{file}"
+        $stderr.puts "Fig file not found for package: #{file}"
         exit 10
       end
       read_package_from_file(file, package_name, version_name)

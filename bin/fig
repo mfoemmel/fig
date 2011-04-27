@@ -142,12 +142,12 @@ end
 
 if options[:publish] || options[:publish_local]
   if !argv.empty?
-    puts "Unexpected arguments: #{argv.join(' ')}"
+    $stderr.puts "Unexpected arguments: #{argv.join(' ')}"
     exit 10
   end
   package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
   if package_name.nil? || version_name.nil?
-    puts "Please specify a package name and a version name"
+    $stderr.puts "Please specify a package name and a version name"
     exit 10
   end
   if not options[:modifiers].empty?
@@ -156,7 +156,7 @@ if options[:publish] || options[:publish_local]
   elsif not package.statements.empty?
     publish_statements = package.statements
   else
-    puts "Nothing to publish"
+    $stderr.puts "Nothing to publish"
     exit 1
   end
   if options[:publish]

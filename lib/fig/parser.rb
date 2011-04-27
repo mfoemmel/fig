@@ -13,7 +13,7 @@ module Fig
       input = input.gsub(/#.*$/, '')
       result = @parser.parse(" #{input} ")
       if result.nil? 
-        puts "#{directory}: #{@parser.failure_reason}"
+        $stderr.puts "#{directory}: #{@parser.failure_reason}"
         exit 10
       end
       result.to_package(package_name, version_name, directory)

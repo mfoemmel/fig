@@ -28,7 +28,7 @@ module Fig
     def register_package(package)
       name = package.package_name
       if @packages[name]
-        puts "Package already exists with name: #{name}"
+        $stderr.puts "Package already exists with name: #{name}"
         exit 10
       end
       @packages[name] = package
@@ -129,7 +129,7 @@ module Fig
         package = @repository.load_package(package_name, version_name || DEFAULT_VERSION_NAME)
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
-        puts "Version mismatch: #{package_name}" 
+        $stderr.puts "Version mismatch: #{package_name}" 
         exit 10
       end
       package
@@ -161,7 +161,7 @@ module Fig
       arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
         package = @packages[$1]
         if package.nil?
-          puts "Package not found: #{$1}"
+          $stderr.puts "Package not found: #{$1}"
           exit 10
         end
         package.directory
