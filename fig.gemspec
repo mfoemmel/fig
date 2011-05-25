@@ -5,11 +5,11 @@
 
 Gem::Specification.new do |s|
   s.name = %q{fig}
-  s.version = "0.1.26"
+  s.version = "0.1.27"
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthew Foemmel"]
-  s.date = %q{2011-04-27}
+  s.date = %q{2011-05-25}
   s.description = %q{Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected).}
   s.email = %q{git@foemmel.com}
   s.executables = ["fig", "fig-download"]
@@ -51,6 +51,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<net-sftp>, [">= 2.0.2"])
       s.add_runtime_dependency(%q<polyglot>, [">= 0.2.9"])
       s.add_runtime_dependency(%q<treetop>, [">= 1.4.2"])
+      s.add_runtime_dependency(%q<highline>, [">= 1.6.2"])
       s.add_development_dependency(%q<rspec>, ["~> 1.3"])
       s.add_development_dependency(%q<open4>, [">= 1.0.1"])
     else
@@ -59,6 +60,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<net-sftp>, [">= 2.0.2"])
       s.add_dependency(%q<polyglot>, [">= 0.2.9"])
       s.add_dependency(%q<treetop>, [">= 1.4.2"])
+      s.add_dependency(%q<highline>, [">= 1.6.2"])
       s.add_dependency(%q<rspec>, ["~> 1.3"])
       s.add_dependency(%q<open4>, [">= 1.0.1"])
     end
@@ -68,6 +70,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<net-sftp>, [">= 2.0.2"])
     s.add_dependency(%q<polyglot>, [">= 0.2.9"])
     s.add_dependency(%q<treetop>, [">= 1.4.2"])
+    s.add_dependency(%q<highline>, [">= 1.6.2"])
     s.add_dependency(%q<rspec>, ["~> 1.3"])
     s.add_dependency(%q<open4>, [">= 1.0.1"])
   end
