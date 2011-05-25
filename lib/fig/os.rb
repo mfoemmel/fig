@@ -71,7 +71,6 @@ module Fig
       when "ftp"
         ftp = Net::FTP.new(uri.host)
         ftp_login(ftp)
-        puts(uri.path)
         ftp.chdir(uri.path)
         packages = []
         ftp.retrlines('LIST -R .') do |line|
