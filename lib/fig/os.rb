@@ -34,6 +34,7 @@ module Fig
       else 
         ftp.login()
       end
+      ftp.passive = true
     end
 
     def list(dir)
@@ -71,15 +72,11 @@ module Fig
       when "ftp"
         ftp = Net::FTP.new(uri.host)
         ftp_login(ftp)
-        puts(uri.path)
         ftp.chdir(uri.path)
-        packages = []
-        ftp.retrlines('LIST -R .') do |line|
-          parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').split('/')
-          packages << parts.join('/') if parts.size == 2
-        end
+        dirs = ftp.nlst
         ftp.close
-        packages
+
+        download_ftp_list(uri, dirs)
       when "ssh"
         packages = []
         Net::SSH.start(uri.host, uri.user) do |ssh|
@@ -98,7 +95,38 @@ module Fig
         exit 10
       end
     end
-    
+
+    def download_ftp_list(uri, dirs)
+      # Run a bunch of these in parallel since they're slow as hell
+      num_threads = 16
+      threads = []
+      all_packages = []        
+      (0..num_threads-1).each { |num| all_packages[num] = [] }
+      (0..num_threads-1).each do |num|
+        threads << Thread.new do
+          packages = all_packages[num]
+          ftp = Net::FTP.new(uri.host)
+          ftp_login(ftp)
+          ftp.chdir(uri.path)
+          pos = num
+          while pos < dirs.length
+            pkg = dirs[pos]
+            begin
+              ftp.nlst(dirs[pos]).each do |ver|
+                packages << pkg + '/' + ver
+              end
+              rescue => e
+              packages << pkg + ' (' + e + ')'
+            end
+            pos += num_threads
+          end
+          ftp.close
+        end
+      end
+      threads.each { |thread| thread.join }
+      all_packages.flatten.sort
+    end
+
     def download(url, path)
       FileUtils.mkdir_p(File.dirname(path))
       uri = URI.parse(url)
