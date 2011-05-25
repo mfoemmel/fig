@@ -57,7 +57,7 @@ if options[:publish]
 #  end
 end
 
-os = OS.new
+os = OS.new(options[:login])
 repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user, options[:update], options[:update_if_missing])
 env = Environment.new(os, repos, vars)
 

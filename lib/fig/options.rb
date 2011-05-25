@@ -55,6 +55,9 @@ module Fig
         options[:archives] << Archive.new(path)
       end
 
+      options[:login] = false
+      opts.on('-l', '--login', 'login into the FTP server as a non-anonymous user') { options[:login] = true }
+
       options[:list] = false
       opts.on('--list', 'list packages in local repository') { options[:list] = true }
 

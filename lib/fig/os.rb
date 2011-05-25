@@ -7,12 +7,35 @@ require 'net/http'
 require 'net/ssh'
 require 'net/sftp'
 require 'tempfile'
+require 'highline/import'
 
 module Fig
   class NotFoundException < Exception
   end
 
   class OS
+    def initialize(login)
+      @login = login
+      @username = ENV["FIG_USERNAME"]
+      @password = ENV["FIG_PASSWORD"]
+    end
+
+    def get_username()
+      @username ||= ask("Username: ") { |q| q.echo = true }
+    end
+    
+    def get_password()
+      @password ||= ask("Password: ") { |q| q.echo = false }
+    end
+
+    def ftp_login(ftp)
+      if @login
+        ftp.login(get_username, get_password)
+      else 
+        ftp.login()
+      end
+    end
+
     def list(dir)
       Dir.entries(dir) - ['.','..']
     end
@@ -47,7 +70,8 @@ module Fig
       case uri.scheme
       when "ftp"
         ftp = Net::FTP.new(uri.host)
-        ftp.login
+        ftp_login(ftp)
+        puts(uri.path)
         ftp.chdir(uri.path)
         packages = []
         ftp.retrlines('LIST -R .') do |line|
@@ -81,7 +105,7 @@ module Fig
       case uri.scheme
       when "ftp"
         ftp = Net::FTP.new(uri.host)
-        ftp.login
+        ftp_login(ftp)
         begin
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
             return false
@@ -157,7 +181,7 @@ module Fig
         # i.e. [1,2,3] - [2,3,4] = [1]
         remote_project_dirs = remote_publish_dirs - ftp_root_dirs
         Net::FTP.open(uri.host) do |ftp|
-          ftp.login
+          ftp_login(ftp)
           # Assume that the FIG_REMOTE_URL path exists.
           ftp.chdir(ftp_root_path)
           remote_project_dirs.each do |dir|
