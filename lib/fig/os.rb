@@ -98,7 +98,7 @@ module Fig
 
     def download_ftp_list(uri, dirs)
       # Run a bunch of these in parallel since they're slow as hell
-      num_threads = 16
+      num_threads = (ENV["FIG_FTP_THREADS"] || "16").to_i
       threads = []
       all_packages = []        
       (0..num_threads-1).each { |num| all_packages[num] = [] }
