@@ -80,7 +80,7 @@ Fig also supports the following options, which don't require a fig environment. 
 
 When using the --list-remote command against an FTP server, fig uses a pool of FTP sessions to improve
 performance. By default it opens 16 connections, but that number can be overridden by setting the
-FIG_FTP_THREADS environment variable.
+`FIG_FTP_THREADS` environment variable.
 
 Examples
 ========
