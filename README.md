@@ -48,10 +48,10 @@ Fig recognizes the following options (not all are implemented yet):
     -m, --update-if-missing  Download/install packages from remote repository, if not already installed
     -l, --login              Authenticate with remote server using username/password (default is anonymous)
 
-If the --login option is supplied, fig will prompt for a username and password and use them
+If the `--login` option is supplied, fig will prompt for a username and password and use them
 to authentication against the remote server. If either the `FIG_REMOTE_USER` or `FIG_REMOTE_PASSWORD`
 environment variables are defined, fig will use those values instead of prompting the user. Even if
-both environment variables are defined, fig will not use them unless the --login option is supplied.
+both environment variables are defined, fig will not use them unless the `--login` option is supplied.
 
 ### Environment Modifiers ###
 
@@ -78,7 +78,7 @@ Fig also supports the following options, which don't require a fig environment. 
     --list           List packages in local repository   
     --list-remote    List packages in remote repository
 
-When using the --list-remote command against an FTP server, fig uses a pool of FTP sessions to improve
+When using the `--list-remote` command against an FTP server, fig uses a pool of FTP sessions to improve
 performance. By default it opens 16 connections, but that number can be overridden by setting the
 `FIG_FTP_THREADS` environment variable.
 
@@ -146,7 +146,7 @@ Configurations other than "default" can be specified using the "-c" option:
      
 ### Packages ###
 
-Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing we need to do is specify the location of the remote repository by defining the FIG_REMOTE_URL environment variable. If you just want to play around with fig, you can have it point to localhost:
+Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing we need to do is specify the location of the remote repository by defining the `FIG_REMOTE_URL` environment variable. If you just want to play around with fig, you can have it point to localhost:
 
    $ export FIG_REMOTE_URL=ssh://localhost`pwd`/remote
 
