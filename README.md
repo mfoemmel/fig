@@ -49,7 +49,7 @@ Fig recognizes the following options (not all are implemented yet):
     -l, --login              Authenticate with remote server using username/password (default is anonymous)
 
 If the --login option is supplied, fig will prompt for a username and password and use them
-to authentication against the remote server. If either the @FIG_REMOTE_USER@ or @FIG_REMOTE_PASSWORD@
+to authentication against the remote server. If either the `FIG_REMOTE_USER` or `FIG_REMOTE_PASSWORD`
 environment variables are defined, fig will use those values instead of prompting the user. Even if
 both environment variables are defined, fig will not use them unless the --login option is supplied.
 
