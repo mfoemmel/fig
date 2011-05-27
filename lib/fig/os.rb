@@ -115,8 +115,8 @@ module Fig
               ftp.nlst(dirs[pos]).each do |ver|
                 packages << pkg + '/' + ver
               end
-              rescue => e
-              packages << pkg + ' (' + e + ')'
+            rescue Net::FTPPermError
+              # ignore
             end
             pos += num_threads
           end
