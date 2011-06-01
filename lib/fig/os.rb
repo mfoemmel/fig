@@ -5,7 +5,7 @@ require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
 require 'uri'
 require 'net/http'
 require 'net/ssh'
-require 'net/sftp'
+require 'net/netrc'
 require 'tempfile'
 require 'highline/import'
 
@@ -28,8 +28,13 @@ module Fig
       @password ||= ask("Password: ") { |q| q.echo = false }
     end
 
-    def ftp_login(ftp)
+    def ftp_login(ftp, host)
       if @login
+        rc = Net::Netrc.locate(host)
+        if rc
+          @username = rc.login
+          @password = rc.password
+        end
         ftp.login(get_username, get_password)
       else 
         ftp.login()
@@ -71,7 +76,7 @@ module Fig
       case uri.scheme
       when "ftp"
         ftp = Net::FTP.new(uri.host)
-        ftp_login(ftp)
+        ftp_login(ftp, uri.host)
         ftp.chdir(uri.path)
         dirs = ftp.nlst
         ftp.close
@@ -106,7 +111,7 @@ module Fig
         threads << Thread.new do
           packages = all_packages[num]
           ftp = Net::FTP.new(uri.host)
-          ftp_login(ftp)
+          ftp_login(ftp, uri.host)
           ftp.chdir(uri.path)
           pos = num
           while pos < dirs.length
@@ -133,7 +138,7 @@ module Fig
       case uri.scheme
       when "ftp"
         ftp = Net::FTP.new(uri.host)
-        ftp_login(ftp)
+        ftp_login(ftp, uri.host)
         begin
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
             return false
@@ -209,7 +214,7 @@ module Fig
         # i.e. [1,2,3] - [2,3,4] = [1]
         remote_project_dirs = remote_publish_dirs - ftp_root_dirs
         Net::FTP.open(uri.host) do |ftp|
-          ftp_login(ftp)
+          ftp_login(ftp, uri.host)
           # Assume that the FIG_REMOTE_URL path exists.
           ftp.chdir(ftp_root_path)
           remote_project_dirs.each do |dir|
