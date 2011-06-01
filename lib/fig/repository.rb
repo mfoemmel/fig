@@ -116,6 +116,7 @@ module Fig
         end
       rescue NotFoundException
         $stderr.puts "Package not found in remote repository: #{package_name}/#{version_name}"
+        delete_local_package(package_name, version_name)
         exit 1
       end
     end
