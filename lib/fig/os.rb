@@ -247,6 +247,12 @@ module Fig
     
     def copy(source, target)
       FileUtils.mkdir_p(File.dirname(target))
+      if File.directory?(source)
+        source = source + "/."
+        FileUtils.mkdir_p(target)
+      else
+        FileUtils.mkdir_p(File.dirname(target))
+      end
       FileUtils.cp_r(source, target)
     end
 

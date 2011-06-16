@@ -146,7 +146,10 @@ module Fig
           preserved_path = file.split('//').last
           target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), preserved_path)
         else
-          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), File.basename(file))
+          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name))
+          if not File.directory?(file)
+            target = File.join(target, File.basename(file))
+          end
         end
         unless @os.exist?(target) && @os.mtime(target) >= @os.mtime(file)
           @os.log_info("retrieving #{target}")
