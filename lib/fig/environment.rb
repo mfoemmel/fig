@@ -151,10 +151,7 @@ module Fig
             target = File.join(target, File.basename(file))
           end
         end
-        unless @os.exist?(target) && @os.mtime(target) >= @os.mtime(file)
-          @os.log_info("retrieving #{target}")
-          @os.copy(file, target)
-        end
+        @os.copy(file, target, "retrieving")
         file = target
       end
       file

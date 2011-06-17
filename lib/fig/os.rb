@@ -246,15 +246,21 @@ module Fig
       }
     end
     
-    def copy(source, target)
-      FileUtils.mkdir_p(File.dirname(target))
+    def copy(source, target, msg = nil)
       if File.directory?(source)
-        source = source + "/."
         FileUtils.mkdir_p(target)
+        Dir.foreach(source) do |child|
+          if child != "." and child != ".."
+            copy(File.join(source, child), File.join(target, child), msg)
+          end
+        end
       else
-        FileUtils.mkdir_p(File.dirname(target))
+        if !FileUtils.uptodate?(target, source)
+          log_info "#{msg} #{target}" if msg
+          FileUtils.mkdir_p(File.dirname(target))
+          FileUtils.cp(source, target)
+        end
       end
-      FileUtils.cp_r(source, target)
     end
 
     def move_file(dir, from, to)
