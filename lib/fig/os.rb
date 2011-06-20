@@ -88,7 +88,7 @@ module Fig
         Net::SSH.start(uri.host, uri.user) do |ssh|
           ls = ssh.exec!("[ -d #{uri.path} ] && find #{uri.path}")
           if not ls.nil?
-            ls = ls.gsub(uri.path + "/", "").gsub(uri.path, "")
+            ls = ls.gsub(uri.path + "/", "").gsub(uri.path, "").split("\n")
             ls.each do |line|
               parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
               packages << parts.join('/') if parts.size == 2
@@ -255,7 +255,7 @@ module Fig
           end
         end
       else
-        if !FileUtils.uptodate?(target, source)
+        if !FileUtils.uptodate?(target, [source])
           log_info "#{msg} #{target}" if msg
           FileUtils.mkdir_p(File.dirname(target))
           FileUtils.cp(source, target)
