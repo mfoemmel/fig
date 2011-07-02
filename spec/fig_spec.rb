@@ -208,28 +208,35 @@ describe "Fig" do
   end
 
   it "retrieves resource that is a directory" do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf("tmp")
-    FileUtils.mkdir_p("tmp/lib")
-    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
-    # To copy the contents of a directory, instead of the directory itself,
-    # use '/.' as a suffix to the directory name in 'append'.
-    input = <<-END
-      resource tmp/lib/hello
-      config default
-        append FOOPATH=@/tmp/lib/.
+    suffixes = ["", "/", "/.", "//"]
+    suffixes.each do |suffix|
+      FileUtils.rm_rf(FIG_HOME)
+      FileUtils.rm_rf(FIG_REMOTE_DIR)
+      FileUtils.rm_rf("tmp")
+      FileUtils.mkdir_p("tmp/lib")
+      File.open("tmp/lib/hello", "w") { |f| f << "some library" }
+      # To copy the contents of a directory, instead of the directory itself,
+      # use '/.' as a suffix to the directory name in 'append'.
+      input = <<-END
+        resource tmp/lib/hello
+        config default
+          append FOOPATH=@/tmp/lib#{suffix}
+        end
+      END
+      fig('--publish foo/1.2.3', input)
+      input = <<-END
+        retrieve FOOPATH->tmp/lib2/[package]
+        config default
+           include foo/1.2.3
+        end
+      END
+      fig('-m', input)
+      if suffix == ""
+        File.read("tmp/lib2/foo/lib/hello").should == "some library"
+      else
+        File.read("tmp/lib2/foo/hello").should == "some library"
       end
-    END
-    fig('--publish foo/1.2.3', input)
-    input = <<-END
-      retrieve FOOPATH->tmp/lib2/[package]
-      config default
-        include foo/1.2.3
-      end
-    END
-    fig('-m', input)
-    File.read("tmp/lib2/foo/hello").should == "some library"
+    end
   end
 
   it "retrieve preserves the path after '//' when copying files into your project directory" do
