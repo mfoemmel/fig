@@ -10,11 +10,16 @@ begin
     gem.email = "git@foemmel.com"
     gem.homepage = "http://github.com/mfoemmel/fig"
     gem.authors = ["Matthew Foemmel"]
-    gem.add_dependency "libarchive", ">= 0.1.1"
+    if RUBY_PLATFORM == 'java'
+       gem.platform = RUBY_PLATFORM
+    end
+    gem.add_dependency "libarchive", ">= 0.1.1" unless gem.platform.to_s == 'java'
     gem.add_dependency "net-ssh", ">= 2.0.15"
-    gem.add_dependency "net-sftp", ">= 2.0.2"
+    gem.add_dependency "net-sftp", ">= 2.0.5"
+    gem.add_dependency "net-netrc", ">= 0.2.2"
     gem.add_dependency "polyglot", ">= 0.2.9"
     gem.add_dependency "treetop", ">= 1.4.2"
+    gem.add_dependency "highline", ">= 1.6.2"
     gem.add_development_dependency "rspec", "~> 1.3"
     gem.add_development_dependency "open4", ">= 1.0.1"
     gem.files = ["bin/fig", "bin/fig-download"] + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]

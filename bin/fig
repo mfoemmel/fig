@@ -57,7 +57,7 @@ if options[:publish]
 #  end
 end
 
-os = OS.new
+os = OS.new(options[:login])
 repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user, options[:update], options[:update_if_missing])
 env = Environment.new(os, repos, vars)
 
@@ -141,10 +141,14 @@ else
 end
 
 if options[:publish] || options[:publish_local]
-  raise "Unexpected arguments: #{argv.join(' ')}" if !argv.empty?
+  if !argv.empty?
+    $stderr.puts "Unexpected arguments: #{argv.join(' ')}"
+    exit 10
+  end
   package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
   if package_name.nil? || version_name.nil?
-    raise "Please specify a package name and a version name"
+    $stderr.puts "Please specify a package name and a version name"
+    exit 10
   end
   if not options[:modifiers].empty?
     publish_statements = options[:resources] + options[:archives] + [Configuration.new("default", options[:modifiers])]
@@ -152,7 +156,8 @@ if options[:publish] || options[:publish_local]
   elsif not package.statements.empty?
     publish_statements = package.statements
   else
-    fail "Nothing to publish"
+    $stderr.puts "Nothing to publish"
+    exit 1
   end
   if options[:publish]
     puts "Checking status of #{package_name}/#{version_name}..."

@@ -11,6 +11,7 @@ module Fig
       @variables = variables
       @retrieve_vars = {}
       @packages = {}
+      @applied_configs = {}
     end
 
     # Returns the value of an envirionment variable
@@ -26,13 +27,20 @@ module Fig
 
     def register_package(package)
       name = package.package_name
-      raise "Package already exists with name: #{name}" if @packages[name]
+      if @packages[name]
+        $stderr.puts "Package already exists with name: #{name}"
+        exit 10
+      end
       @packages[name] = package
     end
 
     def apply_config(package, config_name)
+      if (@applied_configs[package.package_name] ||= []).member?(config_name)
+        return
+      end
       config = package[config_name]
       config.statements.each { |stmt| apply_config_statement(package, stmt) }
+      @applied_configs[package.package_name] << config_name
     end
 
     def execute_shell(command)
@@ -121,7 +129,8 @@ module Fig
         package = @repository.load_package(package_name, version_name || DEFAULT_VERSION_NAME)
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
-        raise "Version mismatch: #{package_name}" 
+        $stderr.puts "Version mismatch: #{package_name}" 
+        exit 10
       end
       package
     end
@@ -137,12 +146,15 @@ module Fig
           preserved_path = file.split('//').last
           target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), preserved_path)
         else
-          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), File.basename(file))
+          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name))
+          # check if target ends with '/', '//', '/.', etc, in which case only
+          # copy the contents of the source directory, and not the directory itself
+          unless file =~ /\/\.?$/
+            target = File.join(target, File.basename(file))
+            puts "new target: #{target}"
+          end
         end
-        unless @os.exist?(target) && @os.mtime(target) >= @os.mtime(file)
-          @os.log_info("retrieving #{target}")
-          @os.copy(file, target)
-        end
+        @os.copy(file, target, "retrieving")
         file = target
       end
       file
@@ -151,7 +163,10 @@ module Fig
     def expand_arg(arg)
       arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
         package = @packages[$1]
-        raise "Package not found: #{$1}" if package.nil?
+        if package.nil?
+          $stderr.puts "Package not found: #{$1}"
+          exit 10
+        end
         package.directory
       end
     end

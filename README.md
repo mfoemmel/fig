@@ -1,15 +1,15 @@
 Description
 ===========
 
-Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected). 
+Fig is a utility for configuring environments and managing dependencies across a team of developers. Fig takes a list of packages and a shell command to run, creates an environment that includes those packages, then executes the shell command in that environment. The caller's environment is not affected. 
 
 An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing what environment variables should be modified when the package is included. 
 
-Developers can use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files. This ensures that all developers on a team are using the same environemnts. 
+Developers can use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files, ensuring that all developers on a team are using the same environemnts. 
 
-Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a server somewhere that is shared by a team. Fig will automatically download packages from the remote repository and install them in the local repository, when needed. 
+Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a shared server. Fig will automatically download packages from the remote repository and install them in the local repository as needed. 
 
-Fig is similar to a lot of other package/dependnency managment tools. In particular, it steals a lot of ideas from Apache Ivy and Debian APT. However, unlike Ivy, fig is meant to be lightweight (no XML, no JVM startup time), language agnostic (Java doesn't get preferential treatment), and work with executables as well as libraries. And unlike APT, fig is meant to be cross platform (Windows support is coming) and project-oriented.
+Fig is similar to a lot of other package/dependency managment tools. In particular, it steals a lot of ideas from Apache Ivy and Debian APT. However, unlike Ivy, fig is meant to be lightweight (no XML, no JVM startup time), language agnostic (Java doesn't get preferential treatment), and work with executables as well as libraries. And unlike APT, fig is cross platform and project-oriented.
 
 Installation
 ============
@@ -19,8 +19,11 @@ Fig can be installed via rubygems. The gems are hosted at [Gemcutter](http://gem
     $ gem install gemcutter
     $ gem tumble
 
-Fig also depends on a third-party library named, [libarchive](http://libarchive.rubyforge.org/). Libarchive is easily available 
-via most package management systems on Linux, FreeBSD, and OS X.  Libarchive versions greater than 2.6.0 are preferred.  If you are on Windows, the gem will install the libarchive binaries for you.
+Fig also depends on a third-party library named
+[libarchive](http://libarchive.rubyforge.org/). Libarchive is easily available
+via most package management systems on Linux, FreeBSD, and OS X.  Libarchive
+versions greater than 2.6.0 are preferred.  If you are on Windows (not Cygwin Ruby), the gem will
+install the libarchive binaries for you.
 
     [Linux - Debian / Ubuntu]
     apt-get libarchive-dev
@@ -42,12 +45,21 @@ Fig recognizes the following options (not all are implemented yet):
 
 ### Flags ###
 
-    -d, --debug   Print debug info
-        --force   Download/install packages from remote repository, even if up-to-date
-    -u, --update  Download/install packages from remote repository, if out-of-date
-    -n, --no      Automatically answer "n" for any prompt (batch mode)
-    -y, --yes     Automatically answer "y" for any prompt (batch mode)
+    -d, --debug              Print debug info
+        --force              Download/install packages from remote repository, even if up-to-date
+    -u, --update             Download/install packages from remote repository, if out-of-date
+    -m, --update-if-missing  Download/install packages from remote repository, if not already installed
+    -l, --login              Authenticate with remote server using username/password (default is anonymous)
 
+If the `--login` option is supplied, fig will look for credentials.  If
+environment variables `FIG_REMOTE_USER` and/or `FIG_REMOTE_PASSWORD` are
+defined, fig will use them instead of prompting the user.  If ~/.netrc exists,
+with an entry corresponding to the host parsed from `FIG_REMOTE_URL`, that
+entry will take precedence over `FIG_REMOTE_USER` and `FIG_REMOTE_PASSWORD`.
+If sufficient credentials are still not found, fig will prompt for whatever is
+still missing, and use the accumulated credentials to authenticate against the
+remote server.  Even if both environment variables are defined, fig will only
+use them if `--login` is given.
 
 ### Environment Modifiers ###
 
@@ -61,11 +73,8 @@ The following otpions modify the environment generated by fig:
 
 The following commands will be run in the environment created by fig:
 
-    -b, --bash                Print bash commands so user's environment can be updated (usually used with 'eval')
-    -g, --get     VARIABLE    Get value of environment variable
-    -x, --execute DESCRIPTOR  Execute command associated with specified configuration
-
-    -- COMMAND [ARGS...]      Execute arbitrary shell command
+    -g, --get VARIABLE    Get value of environment variable
+    -- COMMAND [ARGS...]  Execute arbitrary shell command
 
 ### Other Commands ###
 
@@ -74,7 +83,12 @@ Fig also supports the following options, which don't require a fig environment. 
     -?, -h, --help   Display this help text
     --publish        Upload package to the remote repository (also installs in local repository)
     --publish-local  Install package in local repository only
-    --list           List the packages installed in local repository   
+    --list           List packages in local repository   
+    --list-remote    List packages in remote repository
+
+When using the `--list-remote` command against an FTP server, fig uses a pool of FTP sessions to improve
+performance. By default it opens 16 connections, but that number can be overridden by setting the
+`FIG_FTP_THREADS` environment variable.
 
 Examples
 ========
@@ -140,9 +154,9 @@ Configurations other than "default" can be specified using the "-c" option:
      
 ### Packages ###
 
-Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing we need to do is specify the location of the remote repository by defining the FIG_REMOTE_URL environment variable. If you just want to play around with fig, you can have it point to localhost:
+Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing we need to do is specify the location of the remote repository by defining the `FIG_REMOTE_URL` environment variable. If you just want to play around with fig, you can have it point to localhost:
 
-   $ export FIG_REMOTE_URL=ssh://localhost`pwd`/remote
+    $ export FIG_REMOTE_URL=ssh://localhost\`pwd\`/remote
 
 Before we publish our package, we'll need to tell fig which files we want to include. We do this by using the "resource" statement in our "package.fig" file:
 
