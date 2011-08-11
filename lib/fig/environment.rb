@@ -151,7 +151,6 @@ module Fig
           # copy the contents of the source directory, and not the directory itself
           unless file =~ /\/\.?$/
             target = File.join(target, File.basename(file))
-            puts "new target: #{target}"
           end
         end
         @os.copy(file, target, "retrieving")

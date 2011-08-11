@@ -255,10 +255,11 @@ module Fig
           end
         end
       else
-        if !FileUtils.uptodate?(target, [source])
+        if !File.exist?(target) || File.mtime(source) != File.mtime(target)
           log_info "#{msg} #{target}" if msg
           FileUtils.mkdir_p(File.dirname(target))
           FileUtils.cp(source, target)
+          File.utime(File.atime(source), File.mtime(source), target)
         end
       end
     end
