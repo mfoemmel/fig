@@ -147,9 +147,7 @@ module Fig
           target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), preserved_path)
         else
           target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name))
-          # check if target ends with '/', '//', '/.', etc, in which case only
-          # copy the contents of the source directory, and not the directory itself
-          unless file =~ /\/\.?$/
+          if not File.directory?(file)
             target = File.join(target, File.basename(file))
           end
         end
