@@ -24,9 +24,10 @@ class Retriever
         @config.files.each do |relpath|
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
+      else
+        @config = new_config(name, version)
+        @configs[name] = @config
       end
-      @config = new_config(name, version)
-      @configs[name] = @config
     else
       @config = nil
     end
@@ -92,7 +93,7 @@ private
       end
     else
       if !File.exist?(target) || File.mtime(source) != File.mtime(target)
-        $stderr.puts "retriving #{target}"
+        $stderr.puts "retrieving #{target}"
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
         File.utime(File.atime(source), File.mtime(source), target)
