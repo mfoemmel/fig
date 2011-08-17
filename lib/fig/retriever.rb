@@ -45,8 +45,6 @@ class Retriever
       target = File.join(@base_dir, relpath)
     end
     copy(source, target)
-      
-    @config.files << relpath if @config
   end
 
   def save
@@ -107,6 +105,7 @@ private
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
       end
+      @config.files << target if @config
     end
   end
 end
