@@ -23,7 +23,7 @@ class Retriever
       @config = @configs[name]
       if @config && @config.version != version
         @config.files.each do |relpath|
-          $stderr.puts "deleting   [#{@config.name}/#{@config.version}] #{relpath}"
+          $stderr.puts "\033[31m- [#{@config.name}/#{@config.version}] #{relpath}\033[0m" 
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
         @config = nil
@@ -103,7 +103,7 @@ private
       end
     else
       if !File.exist?(target) || File.mtime(source) > File.mtime(target)
-        $stderr.puts "retrieving [#{@config.name}/#{@config.version}] #{target}"
+        $stderr.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{target}\033[0m" 
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
       end
