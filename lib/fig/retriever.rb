@@ -18,27 +18,31 @@ class Retriever
   end
 
   def with_config(name, version)
-    @config = @configs[name]
-    if @config && @config.version != version
-      @config.files.each do |relpath|
-        FileUtils.rm_f(File.join(@base_dir, relpath))
+    if name and version
+      @config = @configs[name]
+      if @config && @config.version != version
+        @config.files.each do |relpath|
+          FileUtils.rm_f(File.join(@base_dir, relpath))
+        end
       end
+      @config = new_config(name, version)
+      @configs[name] = @config
+    else
+      @config = nil
     end
-    @config = new_config(name, version)
-    @configs[name] = @config
     yield
   end
 
   def retrieve(source, relpath)
     copy(source, File.join(@base_dir, relpath))
-    @config.files << relpath
+    @config.files << relpath if @config
   end
 
   def save
     FileUtils.mkdir_p(@fig_dir)
     File.open(File.join(@fig_dir, "retrieve"), 'w') do |f|
       @configs.each do |name,config|
-        @config.files.each do |target|
+        config.files.each do |target|
           f << target << "=" << config.name << "/" << config.version << "\n"
         end
       end
@@ -65,7 +69,7 @@ private
         end
         config.files << target
       else
-        raise "parse error in .figretrieve: #{line}"
+        raise "parse error in #{file}: #{line}"
       end
     end
   end
@@ -78,17 +82,17 @@ private
     return config
   end
 
-  def copy(source, target, msg = nil)
+  def copy(source, target)
     if File.directory?(source)
       FileUtils.mkdir_p(target)
       Dir.foreach(source) do |child|
         if child != "." and child != ".."
-          copy(File.join(source, child), File.join(target, child), msg)
+          copy(File.join(source, child), File.join(target, child))
         end
       end
     else
       if !File.exist?(target) || File.mtime(source) != File.mtime(target)
-        log_info "#{msg} #{target}" if msg
+        $stderr.puts "retriving #{target}"
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
         File.utime(File.atime(source), File.mtime(source), target)

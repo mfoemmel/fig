@@ -40,10 +40,8 @@ module Fig
         return
       end
       config = package[config_name]
-      @retriever.with_config(package.package_name, package.version_name) do
-        config.statements.each { |stmt| apply_config_statement(package, stmt) }
-        @applied_configs[package.package_name] << config_name
-      end
+      config.statements.each { |stmt| apply_config_statement(package, stmt) }
+      @applied_configs[package.package_name] << config_name
     end
 
     def execute_shell(command)
@@ -154,7 +152,9 @@ module Fig
             target = File.join(target, File.basename(file))
           end
         end
-        @os.copy(file, target, "retrieving")
+        @retriever.with_config(base_package.package_name, base_package.version_name) do
+          @retriever.retrieve(file, target)
+        end
         file = target
       end
       file
