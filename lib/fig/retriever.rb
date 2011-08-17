@@ -1,4 +1,5 @@
 require 'ostruct'
+require 'set'
 
 # This class copies files from the project directories in ~/.fighome to the 
 # user's working directory. It keeps track of which files have already been copied, and which 
@@ -22,9 +23,12 @@ class Retriever
       @config = @configs[name]
       if @config && @config.version != version
         @config.files.each do |relpath|
+          $stderr.puts "deleting   [#{@config.name}/#{@config.version}] #{relpath}"
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
-      else
+        @config = nil
+      end
+      if not @config
         @config = new_config(name, version)
         @configs[name] = @config
       end
@@ -35,7 +39,13 @@ class Retriever
   end
 
   def retrieve(source, relpath)
-    copy(source, File.join(@base_dir, relpath))
+    if @base_dir == "."
+      target = relpath
+    else
+      target = File.join(@base_dir, relpath)
+    end
+    copy(source, target)
+      
     @config.files << relpath if @config
   end
 
@@ -79,7 +89,7 @@ private
     config = OpenStruct.new
     config.name = name
     config.version = version
-    config.files = []
+    config.files = Set.new()
     return config
   end
 
@@ -92,11 +102,10 @@ private
         end
       end
     else
-      if !File.exist?(target) || File.mtime(source) != File.mtime(target)
-        $stderr.puts "retrieving #{target}"
+      if !File.exist?(target) || File.mtime(source) > File.mtime(target)
+        $stderr.puts "retrieving [#{@config.name}/#{@config.version}] #{target}"
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
-        File.utime(File.atime(source), File.mtime(source), target)
       end
     end
   end

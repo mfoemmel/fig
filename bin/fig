@@ -61,6 +61,7 @@ end
 os = OS.new(options[:login])
 repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user, options[:update], options[:update_if_missing])
 retriever = Retriever.new(".")
+at_exit { retriever.save }
 env = Environment.new(os, repos, vars, retriever)
 
 options[:modifiers].each do |modifier|
@@ -137,7 +138,6 @@ if input
     direct_retrieves.each do |info|
       env.direct_retrieve(info[0], info[1], info[2])
     end
-    retriever.save
   end
 else
   package = Package.new(nil, nil, ".", [])
