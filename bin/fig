@@ -5,6 +5,7 @@ $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
 require 'rubygems'
 require 'net/ftp'
 
+require 'fig/retriever'
 require 'fig/options'
 require 'fig/environment'
 require 'fig/repository'
@@ -59,16 +60,17 @@ end
 
 os = OS.new(options[:login])
 repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user, options[:update], options[:update_if_missing])
-env = Environment.new(os, repos, vars)
+retriever = Retriever.new(".")
+env = Environment.new(os, repos, vars, retriever)
 
 options[:modifiers].each do |modifier|
   env.apply_config_statement(nil, modifier)
 end
 
-if File.exist?(".fig")
-  $stderr.puts "The '.fig' file is deprecated. Please rename to 'package.fig'"
-  exit 1
-end
+#if File.exist?(".fig")
+#  $stderr.puts "The '.fig' file is deprecated. Please rename to 'package.fig'"
+#  exit 1
+#end
 
 DEFAULT_FIG_FILE = 'package.fig'
 
@@ -135,6 +137,7 @@ if input
     direct_retrieves.each do |info|
       env.direct_retrieve(info[0], info[1], info[2])
     end
+    retriever.save
   end
 else
   package = Package.new(nil, nil, ".", [])

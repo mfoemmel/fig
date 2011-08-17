@@ -5,13 +5,14 @@ module Fig
   class Environment
     DEFAULT_VERSION_NAME = "current"
 
-    def initialize(os, repository, variables)
+    def initialize(os, repository, variables, retriever)
       @os = os
       @repository = repository
       @variables = variables
       @retrieve_vars = {}
       @packages = {}
       @applied_configs = {}
+      @retriever = retriever
     end
 
     # Returns the value of an envirionment variable
@@ -39,8 +40,10 @@ module Fig
         return
       end
       config = package[config_name]
-      config.statements.each { |stmt| apply_config_statement(package, stmt) }
-      @applied_configs[package.package_name] << config_name
+      @retriever.with_config(package.package_name, package.version_name) do
+        config.statements.each { |stmt| apply_config_statement(package, stmt) }
+        @applied_configs[package.package_name] << config_name
+      end
     end
 
     def execute_shell(command)

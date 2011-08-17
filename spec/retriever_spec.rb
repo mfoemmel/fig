@@ -5,8 +5,8 @@ describe "Retriever" do
 
     # Set up some test files
     test_dir = "tmp/retrieve-test"
+    FileUtils.rm_rf(test_dir)
     FileUtils.mkdir_p(test_dir)
-    FileUtils.rm_f(File.join(test_dir, ".figretrieve"))
 
     File.open("tmp/foo.txt", 'w') {|f| f << "FOO"}
     File.open("tmp/bar.txt", 'w') {|f| f << "BAR"}
