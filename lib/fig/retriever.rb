@@ -39,12 +39,7 @@ class Retriever
   end
 
   def retrieve(source, relpath)
-    if @base_dir == "."
-      target = relpath
-    else
-      target = File.join(@base_dir, relpath)
-    end
-    copy(source, target)
+    copy(source, relpath)
   end
 
   def save
@@ -91,21 +86,22 @@ private
     return config
   end
 
-  def copy(source, target)
+  def copy(source, relpath)
+    target = File.join(@base_dir, relpath)
     if File.directory?(source)
       FileUtils.mkdir_p(target)
       Dir.foreach(source) do |child|
         if child != "." and child != ".."
-          copy(File.join(source, child), File.join(target, child))
+          copy(File.join(source, child), File.join(relpath, child))
         end
       end
     else
       if !File.exist?(target) || File.mtime(source) > File.mtime(target)
-        $stderr.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{target}\033[0m" 
+        $stderr.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{relpath}\033[0m" 
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
       end
-      @config.files << target if @config
+      @config.files << relpath if @config
     end
   end
 end
