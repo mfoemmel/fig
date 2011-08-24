@@ -29,8 +29,9 @@ class Backtrace
     i=0
     for elem in stack
       indent=""
-      i.times { indent += " " }
+      i.times { indent += "  " }
       out.puts indent+elem
+      i += 1
     end
    end
 end

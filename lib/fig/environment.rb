@@ -43,7 +43,7 @@ module Fig
       end
       new_backtrace = Backtrace.new(backtrace, package.package_name, package.version_name, config_name)
       config = package[config_name]
-      config.statements.each { |stmt| apply_config_statement(package, stmt, backtrace) }
+      config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
       @applied_configs[package.package_name] << config_name
     end
 
@@ -54,7 +54,7 @@ module Fig
     end
 
     def execute_config(base_package, package_name, config_name, version_name, args)
-      package = lookup_package(package_name || base_package.package_name, version_name, nil)
+      package = lookup_package(package_name || base_package.package_name, version_name, Backtrace.new(nil, package_name, version_name, config_name))
       result = nil
       commands = package[config_name || "default"].commands
       with_environment do
@@ -82,7 +82,8 @@ module Fig
     end
 
     def include_config(base_package, package_name, config_name, version_name, backtrace)
-      package = lookup_package(package_name || base_package.package_name, version_name, backtrace)
+      new_backtrace = Backtrace.new(backtrace, package_name, version_name, config_name)
+      package = lookup_package(package_name || base_package.package_name, version_name, new_backtrace)
       apply_config(package, config_name || "default", backtrace)
     end
 
@@ -135,8 +136,8 @@ module Fig
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
         $stderr.puts "Version mismatch: #{package_name}" 
-        backtrace.dump($stderr)
-        package.backtrace.dump($stderr)
+        backtrace.dump($stderr) if backtrace
+        package.backtrace.dump($stderr) if package.backtrace
         exit 10
       end
       package
