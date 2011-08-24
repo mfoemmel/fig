@@ -1,14 +1,16 @@
 module Fig
   class Package
     attr_reader :package_name, :version_name, :directory, :statements
+    attr_accessor :backtrace
     
     def initialize(package_name, version_name, directory, statements) 
       @package_name = package_name
       @version_name = version_name
       @directory = directory
       @statements = statements
+      @backtrace = nil
     end
-
+    
     def [](config_name)
       @statements.each do |stmt|
         return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
@@ -41,6 +43,10 @@ module Fig
 
     def ==(other)
       @package_name == other.package_name && @version_name == other.version_name && @statements.to_yaml == other.statements.to_yaml
+    end
+
+    def to_s
+      @package_name + "/" + @version_name
     end
   end
   

@@ -65,7 +65,7 @@ at_exit { retriever.save }
 env = Environment.new(os, repos, vars, retriever)
 
 options[:modifiers].each do |modifier|
-  env.apply_config_statement(nil, modifier)
+  env.apply_config_statement(nil, modifier, nil)
 end
 
 #if File.exist?(".fig")
@@ -134,7 +134,7 @@ if input
   end
   unless options[:publish] || options[:list] || options[:publish_local]
     env.register_package(package)
-    env.apply_config(package, options[:config])
+    env.apply_config(package, options[:config], nil)
     direct_retrieves.each do |info|
       env.direct_retrieve(info[0], info[1], info[2])
     end

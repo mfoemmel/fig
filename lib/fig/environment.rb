@@ -1,3 +1,5 @@
+require 'fig/backtrace'
+
 module Fig
 
   # This class manages the program's state, including the value of all environment 
@@ -35,12 +37,13 @@ module Fig
       @packages[name] = package
     end
 
-    def apply_config(package, config_name)
+    def apply_config(package, config_name, backtrace)
       if (@applied_configs[package.package_name] ||= []).member?(config_name)
         return
       end
+      new_backtrace = Backtrace.new(backtrace, package.package_name, package.version_name, config_name)
       config = package[config_name]
-      config.statements.each { |stmt| apply_config_statement(package, stmt) }
+      config.statements.each { |stmt| apply_config_statement(package, stmt, backtrace) }
       @applied_configs[package.package_name] << config_name
     end
 
@@ -51,7 +54,7 @@ module Fig
     end
 
     def execute_config(base_package, package_name, config_name, version_name, args)
-      package = lookup_package(package_name || base_package.package_name, version_name)
+      package = lookup_package(package_name || base_package.package_name, version_name, nil)
       result = nil
       commands = package[config_name || "default"].commands
       with_environment do
@@ -63,14 +66,14 @@ module Fig
       result
     end
 
-    def apply_config_statement(base_package, statement)
+    def apply_config_statement(base_package, statement, backtrace)
       case statement
       when Path
         append_variable(base_package, statement.name, statement.value)
       when Set
         set_variable(base_package, statement.name, statement.value)
       when Include
-        include_config(base_package, statement.package_name, statement.config_name, statement.version_name)
+        include_config(base_package, statement.package_name, statement.config_name, statement.version_name, backtrace)
       when Command
         # ignore
       else
@@ -78,13 +81,13 @@ module Fig
       end
     end
 
-    def include_config(base_package, package_name, config_name, version_name)
-      package = lookup_package(package_name || base_package.package_name, version_name)
-      apply_config(package, config_name || "default")
+    def include_config(base_package, package_name, config_name, version_name, backtrace)
+      package = lookup_package(package_name || base_package.package_name, version_name, backtrace)
+      apply_config(package, config_name || "default", backtrace)
     end
 
     def direct_retrieve(package_name, source_path, target_path)
-      package = lookup_package(package_name, nil)
+      package = lookup_package(package_name, nil, nil)
       FileUtils.mkdir_p(target_path)
       FileUtils.cp_r(File.join(package.directory, source_path, '.'), target_path)
     end
@@ -124,13 +127,16 @@ module Fig
       end
     end
 
-    def lookup_package(package_name, version_name)
+    def lookup_package(package_name, version_name, backtrace)
       package = @packages[package_name]
       if package.nil?
         package = @repository.load_package(package_name, version_name || DEFAULT_VERSION_NAME)
+        package.backtrace = backtrace
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
         $stderr.puts "Version mismatch: #{package_name}" 
+        backtrace.dump($stderr)
+        package.backtrace.dump($stderr)
         exit 10
       end
       package
