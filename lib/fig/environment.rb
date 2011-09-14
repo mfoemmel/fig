@@ -42,7 +42,16 @@ module Fig
         return
       end
       new_backtrace = Backtrace.new(backtrace, package.package_name, package.version_name, config_name)
+
       config = package[config_name]
+
+      # Need to process the overrides first
+      config.statements.each do |stmt|
+        if stmt.instance_of?(Include) && stmt.override
+	  new_backtrace.add_override(stmt.package_name, stmt.version_name)
+        end
+      end
+
       config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
       @applied_configs[package.package_name] << config_name
     end
@@ -82,6 +91,13 @@ module Fig
     end
 
     def include_config(base_package, package_name, config_name, version_name, backtrace)
+      # Check to see if this include has been overridden
+      if backtrace
+        override = backtrace.get_override(package_name || base_package.package_name)
+        if override
+          version_name = override
+        end
+      end
       new_backtrace = Backtrace.new(backtrace, package_name, version_name, config_name)
       package = lookup_package(package_name || base_package.package_name, version_name, new_backtrace)
       apply_config(package, config_name || "default", backtrace)

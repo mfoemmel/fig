@@ -1,9 +1,12 @@
 class Backtrace
+  attr_reader :overrides
+
   def initialize(parent, package_name, version_name, config_name)
     @parent = parent
     @package_name = package_name
     @version_name = version_name
     @config_name = config_name || "default"
+    @overrides = {}
   end
 
   def collect(stack)
@@ -21,6 +24,16 @@ class Backtrace
       elem += ":" + @config_name
     end
     stack << elem
+  end
+
+  def add_override(package_name, version_name)
+    # Don't replace an existing override on the stack
+    return if get_override(package_name)
+    @overrides[package_name] = version_name
+  end
+
+  def get_override(package_name)
+    return @overrides[package_name] || (@parent ? @parent.get_override(package_name) : nil)
   end
 
   def dump(out)

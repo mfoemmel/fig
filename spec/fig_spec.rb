@@ -116,6 +116,49 @@ describe "Fig" do
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
+  it "allow override" do
+    FileUtils.rm_rf(FIG_HOME)
+    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    input = <<-END
+      config default
+        set FOO=foo123
+      end
+    END
+    fig('--publish foo/1.2.3', input)
+
+    input = <<-END
+      config default
+        set FOO=foo124
+      end
+    END
+    fig('--publish foo/1.2.4', input)
+
+    input = <<-END
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('--publish bar/4.5.6', input)
+
+    input = <<-END
+      config default
+        include foo/1.2.4
+      end
+    END
+    fig('--publish baz/7.8.9', input)
+
+    input = <<-END
+      config default
+        include bar/4.5.6
+	include baz/7.8.9
+	override foo/1.2.3
+      end
+    END
+    fig('--publish top/1', input)
+
+    fig('-u -i top/1 -g FOO')[0].should == 'foo123'
+  end
+
   it "publish resource to remote repository" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)

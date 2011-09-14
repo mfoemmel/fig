@@ -165,12 +165,13 @@ module Fig
   end
 
   class Include
-    attr_reader :package_name, :config_name, :version_name
+    attr_reader :package_name, :config_name, :version_name, :override
 
-    def initialize(package_name, config_name, version_name)
+    def initialize(package_name, config_name, version_name, override)
       @package_name = package_name
       @config_name = config_name
       @version_name = version_name
+      @override = override
     end
 
     def unparse(indent)
@@ -178,7 +179,11 @@ module Fig
       descriptor += @package_name if @package_name
       descriptor += "/#{@version_name}" if @version_name
       descriptor += ":#{@config_name}" if @config_name
-      "#{indent}include #{descriptor}"
+      if @override
+        return "#{indent}override #{descriptor}"
+      else
+        return "#{indent}include #{descriptor}"
+      end
     end
   end
 

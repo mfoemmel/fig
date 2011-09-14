@@ -56,7 +56,7 @@ grammar Fig
   end
 
   rule config_statement
-    include / command / path / set
+    include / override / command / path / set
   end
 
   rule include
@@ -65,7 +65,18 @@ grammar Fig
         package = descriptor.respond_to?(:package) ? descriptor.package.text_value : nil
         config = descriptor.get_config
         version = descriptor.get_version
-        Include.new(package, config, version)
+        Include.new(package, config, version, false)
+      end
+    }
+  end
+
+  rule override
+    "override" ws descriptor {
+      def to_config_statement
+        package = descriptor.respond_to?(:package) ? descriptor.package.text_value : nil
+        config = descriptor.get_config
+        version = descriptor.get_version
+        Include.new(package, config, version, true)
       end
     }
   end
