@@ -74,13 +74,13 @@ module Fig
 
       opts.on('-i', '--include PKG', 'include package in environment') do |descriptor| 
         package_name, config_name, version_name = parse_descriptor(descriptor)
-        options[:modifiers] << Include.new(package_name, config_name, version_name, false) 
+        options[:modifiers] << Include.new(package_name, config_name, version_name, {}) 
       end
 
-      opts.on('-o', '--override PKG', 'override version of included package') do |descriptor| 
-        package_name, config_name, version_name = parse_descriptor(descriptor)
-        options[:modifiers] << Include.new(package_name, config_name, version_name, true) 
-      end
+#      opts.on('-o', '--override PKG', 'override version of included package') do |descriptor| 
+#        package_name, config_name, version_name = parse_descriptor(descriptor)
+#        options[:modifiers] << Include.new(package_name, config_name, version_name, {}) 
+#      end
 
       opts.on('-s', '--set VAR=VAL', 'set environment variable') do |var_val| 
         var, val = var_val.split('=')

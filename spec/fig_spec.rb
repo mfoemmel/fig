@@ -150,8 +150,7 @@ describe "Fig" do
     input = <<-END
       config default
         include bar/4.5.6
-	include baz/7.8.9
-	override foo/1.2.3
+	include baz/7.8.9 override foo/1.2.3
       end
     END
     fig('--publish top/1', input)

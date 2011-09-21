@@ -41,17 +41,9 @@ module Fig
       if (@applied_configs[package.package_name] ||= []).member?(config_name)
         return
       end
-      new_backtrace = Backtrace.new(backtrace, package.package_name, package.version_name, config_name)
+      new_backtrace = backtrace #Backtrace.new(backtrace, package.package_name, package.version_name, config_name)
 
       config = package[config_name]
-
-      # Need to process the overrides first
-      config.statements.each do |stmt|
-        if stmt.instance_of?(Include) && stmt.override
-	  new_backtrace.add_override(stmt.package_name, stmt.version_name)
-        end
-      end
-
       config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
       @applied_configs[package.package_name] << config_name
     end
@@ -82,7 +74,7 @@ module Fig
       when Set
         set_variable(base_package, statement.name, statement.value)
       when Include
-        include_config(base_package, statement.package_name, statement.config_name, statement.version_name, backtrace)
+        include_config(base_package, statement.package_name, statement.config_name, statement.version_name, statement.overrides, backtrace)
       when Command
         # ignore
       else
@@ -90,7 +82,7 @@ module Fig
       end
     end
 
-    def include_config(base_package, package_name, config_name, version_name, backtrace)
+    def include_config(base_package, package_name, config_name, version_name, overrides, backtrace)
       # Check to see if this include has been overridden
       if backtrace
         override = backtrace.get_override(package_name || base_package.package_name)
@@ -99,8 +91,11 @@ module Fig
         end
       end
       new_backtrace = Backtrace.new(backtrace, package_name, version_name, config_name)
+      overrides.each do |override|
+        new_backtrace.add_override(override.package_name, override.version_name)
+      end
       package = lookup_package(package_name || base_package.package_name, version_name, new_backtrace)
-      apply_config(package, config_name || "default", backtrace)
+      apply_config(package, config_name || "default", new_backtrace)
     end
 
     def direct_retrieve(package_name, source_path, target_path)

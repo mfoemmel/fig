@@ -165,13 +165,13 @@ module Fig
   end
 
   class Include
-    attr_reader :package_name, :config_name, :version_name, :override
+    attr_reader :package_name, :config_name, :version_name, :overrides
 
-    def initialize(package_name, config_name, version_name, override)
+    def initialize(package_name, config_name, version_name, overrides)
       @package_name = package_name
       @config_name = config_name
       @version_name = version_name
-      @override = override
+      @overrides = overrides
     end
 
     def unparse(indent)
@@ -179,11 +179,23 @@ module Fig
       descriptor += @package_name if @package_name
       descriptor += "/#{@version_name}" if @version_name
       descriptor += ":#{@config_name}" if @config_name
-      if @override
-        return "#{indent}override #{descriptor}"
-      else
-        return "#{indent}include #{descriptor}"
+      @overrides.each do |override|
+        descriptor += override.unparse
       end
+      return "#{indent}include #{descriptor}"
+    end
+  end
+
+  class Override
+    attr_reader :package_name, :version_name
+    
+    def initialize(package_name, version_name)
+      @package_name = package_name
+      @version_name = version_name
+    end
+
+    def unparse()
+      return " override " + @package_name + "/" + @version_name
     end
   end
 
