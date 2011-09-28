@@ -99,7 +99,7 @@ private
       if !File.exist?(target) || File.mtime(source) > File.mtime(target)
         $stderr.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{relpath}\033[0m" 
         FileUtils.mkdir_p(File.dirname(target))
-        FileUtils.cp(source, target)
+        FileUtils.cp(source, target, :preserve => true)
       end
       @config.files << relpath if @config
     end

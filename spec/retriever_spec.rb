@@ -44,4 +44,23 @@ describe "Retriever" do
       File.exist?(File.join(test_dir, "baz.txt")).should == false
     end
   end
+
+  it "preserves executable bit" do
+    test_dir = "tmp/retrieve-test"
+    FileUtils.rm_rf(test_dir)
+    FileUtils.mkdir_p(test_dir)
+
+    File.open("tmp/plain", 'w') {|f| f << "plain"}
+    File.open("tmp/executable", 'w') {|f| f << "executable"}
+    FileUtils.chmod(0755, "tmp/executable")
+
+    r = Retriever.new(test_dir)
+    r.with_config("foo", "1.2.3") do
+      r.retrieve("tmp/plain", "plain")
+      r.retrieve("tmp/executable", "executable")
+
+      File.stat(File.join(test_dir, "plain")).executable?.should == false
+      File.stat(File.join(test_dir, "executable")).executable?.should == true
+    end
+  end
 end
