@@ -25,7 +25,7 @@ begin
       end
 
       gemspec.add_dependency "net-ssh", ">= 2.0.15"
-      gemspec.add_dependency "net-sftp", ">= 2.0.5"
+      gemspec.add_dependency "net-sftp", ">= 2.0.4"
       gemspec.add_dependency "net-netrc", ">= 0.2.2"
       gemspec.add_dependency "polyglot", ">= 0.2.9"
       gemspec.add_dependency "treetop", ">= 1.4.2"
