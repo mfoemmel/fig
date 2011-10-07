@@ -6,7 +6,6 @@
 Gem::Specification.new do |s|
   s.name = %q{fig18}
   s.version = "0.1.39"
-  s.platform = %q{x86_64-linux}
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthew Foemmel"]
@@ -42,7 +41,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<libarchive-static>, ["= 1.0.0"])
+      s.add_runtime_dependency(%q<libarchive-static-ruby186>, ["= 1.0.0"])
       s.add_runtime_dependency(%q<net-ssh>, [">= 2.0.15"])
       s.add_runtime_dependency(%q<net-sftp>, [">= 2.0.4"])
       s.add_runtime_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -51,7 +50,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<highline>, [">= 1.6.2"])
       s.add_development_dependency(%q<rspec>, ["~> 1.3"])
       s.add_development_dependency(%q<open4>, [">= 1.0.1"])
-      s.add_runtime_dependency(%q<libarchive-static>, ["= 1.0.0"])
+      s.add_runtime_dependency(%q<libarchive-static-ruby186>, ["= 1.0.0"])
       s.add_runtime_dependency(%q<net-ssh>, [">= 2.0.15"])
       s.add_runtime_dependency(%q<net-sftp>, [">= 2.0.4"])
       s.add_runtime_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -61,7 +60,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<rspec>, ["~> 1.3"])
       s.add_development_dependency(%q<open4>, [">= 1.0.1"])
     else
-      s.add_dependency(%q<libarchive-static>, ["= 1.0.0"])
+      s.add_dependency(%q<libarchive-static-ruby186>, ["= 1.0.0"])
       s.add_dependency(%q<net-ssh>, [">= 2.0.15"])
       s.add_dependency(%q<net-sftp>, [">= 2.0.4"])
       s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -70,7 +69,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<highline>, [">= 1.6.2"])
       s.add_dependency(%q<rspec>, ["~> 1.3"])
       s.add_dependency(%q<open4>, [">= 1.0.1"])
-      s.add_dependency(%q<libarchive-static>, ["= 1.0.0"])
+      s.add_dependency(%q<libarchive-static-ruby186>, ["= 1.0.0"])
       s.add_dependency(%q<net-ssh>, [">= 2.0.15"])
       s.add_dependency(%q<net-sftp>, [">= 2.0.4"])
       s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -81,7 +80,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<open4>, [">= 1.0.1"])
     end
   else
-    s.add_dependency(%q<libarchive-static>, ["= 1.0.0"])
+    s.add_dependency(%q<libarchive-static-ruby186>, ["= 1.0.0"])
     s.add_dependency(%q<net-ssh>, [">= 2.0.15"])
     s.add_dependency(%q<net-sftp>, [">= 2.0.4"])
     s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -90,7 +89,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<highline>, [">= 1.6.2"])
     s.add_dependency(%q<rspec>, ["~> 1.3"])
     s.add_dependency(%q<open4>, [">= 1.0.1"])
-    s.add_dependency(%q<libarchive-static>, ["= 1.0.0"])
+    s.add_dependency(%q<libarchive-static-ruby186>, ["= 1.0.0"])
     s.add_dependency(%q<net-ssh>, [">= 2.0.15"])
     s.add_dependency(%q<net-sftp>, [">= 2.0.4"])
     s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
