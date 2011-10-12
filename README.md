@@ -3,13 +3,13 @@ Description
 
 Fig is a utility for configuring environments and managing dependencies across a team of developers. Fig takes a list of packages and a shell command to run, creates an environment that includes those packages, then executes the shell command in that environment. The caller's environment is not affected. 
 
-An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing what environment variables should be modified when the package is included. 
+An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing which environment variables should be modified when the package is included.  For instance, each dependency may append its corresponding jar to CLASSPATH.
 
-Developers can use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files, ensuring that all developers on a team are using the same environemnts. 
+Developers can use package files to specify the list of dependencies to use for different tasks. This file will typically be versioned along with the rest of the source files, ensuring that all developers on a team are using the same environemnts.
 
-Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a shared server. Fig will automatically download packages from the remote repository and install them in the local repository as needed. 
+Packages exist in two places: a "local" repository in the user's home directory, and a "remote" repository on a shared server. Fig will automatically download packages from the remote repository and install them in the local repository as needed.  Fig does not contact the remote repository unless it needs to.
 
-Fig is similar to a lot of other package/dependency managment tools. In particular, it steals a lot of ideas from Apache Ivy and Debian APT. However, unlike Ivy, fig is meant to be lightweight (no XML, no JVM startup time), language agnostic (Java doesn't get preferential treatment), and work with executables as well as libraries. And unlike APT, fig is cross platform and project-oriented.
+Fig is similar to a lot of other package/dependency-management tools. In particular, it steals a lot of ideas from Apache Ivy and Debian APT. However, unlike Ivy, fig is meant to be lightweight (no XML, no JVM startup time), language agnostic (Java doesn't get preferential treatment), and work with executables as well as libraries. And unlike APT, fig is cross platform and project-oriented.
 
 Installation
 ============
