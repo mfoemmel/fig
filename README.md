@@ -85,10 +85,8 @@ Fig lets you configure environments three different ways:
 
 To get started, let's trying defining an environment variable via the command line and executing a command in the new environment. We'll set the "GREETING" variable to "Hello", then run a command that uses that variable:
 
-    $ fig -s GREETING=Hello -- echo "\$GREETING, World"
+    $ fig -s GREETING=Hello -- echo '$GREETING, World'
     Hello, World
-
-Note that you need to put a slash before the dollar sign, otherwise the shell will evaluate the environment variable before it ever gets to fig.
 
 Also note that when running fig, the original environment isn't affected:
 
@@ -98,7 +96,7 @@ Also note that when running fig, the original environment isn't affected:
 Fig also lets you append environment variables using the system-specified path separator (e.g. colon on unix, semicolon on windows). This is useful for adding directories to the PATH, LD_LIBRARY_PATH, CLASSPATH, etc. For example, let's create a "bin" directory, add a shell script to it, then include it in the PATH:
 
     $ mkdir bin
-    $ echo "echo \$GREETING, World" > bin/hello
+    $ echo 'echo $GREETING, World' > bin/hello
     $ chmod +x bin/hello
     $ fig -s GREETING=Hello -p PATH=bin -- hello
     Hello, World
