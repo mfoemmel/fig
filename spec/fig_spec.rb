@@ -92,7 +92,7 @@ describe "Fig" do
     fig('-p XYZZY=foo -g XYZZY').should == ["foo","",0]
   end
 
-  it "should ignore comments" do
+  it "ignore comments" do
     input = <<-END
       #/usr/bin/env fig
 
@@ -118,41 +118,65 @@ describe "Fig" do
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
-  it "allow override" do
+  it "allow single and multiple override" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    input = <<-END
-      config default
-        set FOO=foo123
-      end
-    END
-    fig('--publish foo/1.2.3', input)
+    [3,4,5].each do |point_ver|   # Publish some versions of foo
+      input = <<-END
+        config default
+          set FOO=foo12#{point_ver}
+        end
+      END
+      fig("--publish foo/1.2.#{point_ver}", input)
+    end
+
+    [0,1].each do |point_ver|    # Publish some versions of blah
+      input = <<-END
+        config default
+          set BLAH=bla20#{point_ver}
+        end
+      END
+      fig("--publish blah/2.0.#{point_ver}", input)
+    end
 
     input = <<-END
       config default
-        set FOO=foo124
+        include :nondefault
       end
-    END
-    fig('--publish foo/1.2.4', input)
-
-    input = <<-END
-      config default
+      config nondefault
         include foo/1.2.3
+        include blah/2.0.0
       end
     END
     fig('--publish bar/4.5.6', input)
 
     input = <<-END
+      # Multiple overrides will work for "default", even if 
+      # indirectly specified.
       config default
+        include :nondefault
+      end
+      config nondefault
         include foo/1.2.4
+        include blah/2.0.1
       end
     END
     fig('--publish baz/7.8.9', input)
 
     input = <<-END
       config default
+        include foo/1.2.5
+      end
+    END
+    fig('--publish cat/10.11.12', input)
+
+    input = <<-END
+      config default
         include bar/4.5.6
-	include baz/7.8.9 override foo/1.2.3
+        # Demonstrates the syntax for how a package overrides multiple dependencies
+        # (assuming the dependencies are resolved in a "default" config section)
+        include baz/7.8.9:default override foo/1.2.3 override blah/2.0.0
+        include cat/10.11.12 override foo/1.2.3
       end
     END
     fig('--publish top/1', input)
