@@ -64,12 +64,12 @@ def fig(args, input=nil)
 end
 
 describe "Fig" do
-  it "set environment variable from command line" do
+  it "sets environment variable from command line" do
     fig('-s FOO=BAR -g FOO')[0].should == 'BAR'
     fig('--set FOO=BAR -g FOO')[0].should == 'BAR'
   end
 
-  it "set environment variable from fig file" do
+  it "sets environment variable from fig file" do
     input = <<-END
       config default
         set FOO=BAR
@@ -78,11 +78,11 @@ describe "Fig" do
     fig('-g FOO', input)[0].should == 'BAR'
   end
 
-  it "append environment variable from command line" do
+  it "appends environment variable from command line" do
     fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}","",0]
   end
 
-  it "append environment variable from fig file" do
+  it "appends environment variable from fig file" do
     input = <<-END
       config default
         add PATH=foo
@@ -91,11 +91,11 @@ describe "Fig" do
     fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}","",0]
   end
 
-  it "append empty environment variable" do
+  it "appends empty environment variable" do
     fig('-p XYZZY=foo -g XYZZY').should == ["foo","",0]
   end
 
-  it "ignore comments" do
+  it "ignores comments" do
     input = <<-END
       #/usr/bin/env fig
 
@@ -107,7 +107,7 @@ describe "Fig" do
     fig('-g FOO', input)[0].should == 'BAR'
   end
 
-  it "publish to remote repository" do
+  it "publishes to remote repository" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     input = <<-END
@@ -121,7 +121,7 @@ describe "Fig" do
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
-  it "allow single and multiple override" do
+  it "allows single and multiple override" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     [3,4,5].each do |point_ver|   # Publish some versions of foo
@@ -187,7 +187,7 @@ describe "Fig" do
     fig('-u -i top/1 -g FOO')[0].should == 'foo123'
   end
 
-  it "publish resource to remote repository" do
+  it "publishes resource to remote repository" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     FileUtils.mkdir_p("tmp/bin")
@@ -205,7 +205,7 @@ describe "Fig" do
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
-  it "publish resource to remote repository using command line" do
+  it "publishes resource to remote repository using command line" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     FileUtils.mkdir_p("tmp/bin")
@@ -255,7 +255,7 @@ describe "Fig" do
     fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
-  it "retrieve resource" do
+  it "retrieves resource" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     FileUtils.rm_rf("tmp")
@@ -303,7 +303,7 @@ describe "Fig" do
     File.read("tmp/lib2/foo/hello").should == "some library"
   end
 
-  it "retrieve preserves the path after '//' when copying files into your project directory" do
+  it "preserves the path after '//' when copying files into your project directory while retrieving" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     FileUtils.rm_rf("tmp")
@@ -332,7 +332,7 @@ describe "Fig" do
     File.read("tmp/include2/foo/include/hello2.h").should == "another header file"
   end
 
-  it "package multiple resources" do
+  it "packages multiple resources" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     FileUtils.rm_rf("tmp")
@@ -383,7 +383,7 @@ describe "Fig" do
     File.read("tmp/lib2/foo/foo.jar").should == "some library"
   end
 
-  it "update local packages if they already exist" do
+  it "updates local packages if they already exist" do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     FileUtils.mkdir_p("tmp/bin")
