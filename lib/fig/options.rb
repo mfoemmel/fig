@@ -24,7 +24,7 @@ to $HOME/.fighome).
 EOF
       opts.on('-?', '-h','--help','display this help text') do
         puts opts
-	exit 1
+        exit 1
       end
 
       options[:modifiers] = []
