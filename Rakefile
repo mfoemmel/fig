@@ -24,33 +24,33 @@ begin
         gemspec.send("add_#{deptype}_dependency", libarchive_dep, "1.0.0") if not libarchive_dep.nil?
       end
 
-      gemspec.add_dependency "net-ssh", ">= 2.0.15"
-      gemspec.add_dependency "net-sftp", ">= 2.0.4"
-      gemspec.add_dependency "net-netrc", ">= 0.2.2"
-      gemspec.add_dependency "polyglot", ">= 0.2.9"
-      gemspec.add_dependency "treetop", ">= 1.4.2"
-      gemspec.add_dependency "highline", ">= 1.6.2"
-      gemspec.add_development_dependency "rspec", "~> 1.3"
-      gemspec.add_development_dependency "open4", ">= 1.0.1"
+      gemspec.add_dependency              "net-ssh",    ">= 2.0.15"
+      gemspec.add_dependency              "net-sftp",   ">= 2.0.4"
+      gemspec.add_dependency              "net-netrc",  ">= 0.2.2"
+      gemspec.add_dependency              "polyglot",   ">= 0.2.9"
+      gemspec.add_dependency              "treetop",    ">= 1.4.2"
+      gemspec.add_dependency              "highline",   ">= 1.6.2"
+      gemspec.add_development_dependency  "rspec",      "~> 2"
+      gemspec.add_development_dependency  "open4",      ">= 1.0.1"
       gemspec.files = ["bin/fig", "bin/fig-download"] + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]
       gemspec.executables = ["fig", "fig-download"]
     end
+
     Jeweler::GemcutterTasks.new
   end
 rescue LoadError
   puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
 end
 
-require 'spec/rake/spectask'
-Spec::Rake::SpecTask.new(:spec) do |spec|
-  spec.libs << 'lib' << 'spec'
-  spec.spec_files = FileList['spec/**/*_spec.rb']
-  spec.spec_opts << '--format nested'
-  spec.spec_opts << '--color'
+require 'rspec/core/rake_task'
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.pattern = 'spec/**/*_spec.rb'
+  spec.rspec_opts = []
+  spec.rspec_opts << '--format nested'
+  spec.rspec_opts << '--color'
 end
 
-Spec::Rake::SpecTask.new(:rcov) do |spec|
-  spec.libs << 'lib' << 'spec'
+RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
   spec.rcov = true
 end
