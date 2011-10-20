@@ -49,7 +49,7 @@ def fig(args, input=nil)
   args = "--file - #{args}" if input
   out = nil
   err = nil
-  Popen.popen("#{RUBY} #{FIG_EXE} #{args}") do |stdin, stdout, stderr|
+  Popen.popen("#{Gem::Platform::RUBY} #{FIG_EXE} #{args}") do |stdin, stdout, stderr|
     if input
       stdin.puts input
       stdin.close
