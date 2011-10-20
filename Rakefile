@@ -24,14 +24,16 @@ begin
         gemspec.send("add_#{deptype}_dependency", libarchive_dep, "1.0.0") if not libarchive_dep.nil?
       end
 
-      gemspec.add_dependency              "net-ssh",    ">= 2.0.15"
-      gemspec.add_dependency              "net-sftp",   ">= 2.0.4"
-      gemspec.add_dependency              "net-netrc",  ">= 0.2.2"
-      gemspec.add_dependency              "polyglot",   ">= 0.2.9"
-      gemspec.add_dependency              "treetop",    ">= 1.4.2"
       gemspec.add_dependency              "highline",   ">= 1.6.2"
-      gemspec.add_development_dependency  "rspec",      "~> 2"
+      gemspec.add_dependency              "net-netrc",  ">= 0.2.2"
+      gemspec.add_dependency              "net-sftp",   ">= 2.0.4"
+      gemspec.add_dependency              "net-ssh",    ">= 2.0.15"
+      gemspec.add_dependency              "polyglot",   ">= 0.2.9"
+      gemspec.add_dependency              "rdoc",       ">= 2.4.2"
+      gemspec.add_dependency              "treetop",    ">= 1.4.2"
       gemspec.add_development_dependency  "open4",      ">= 1.0.1"
+      gemspec.add_development_dependency  "rspec",      "~> 2"
+
       gemspec.files = ["bin/fig", "bin/fig-download"] + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]
       gemspec.executables = ["fig", "fig-download"]
     end
@@ -59,7 +61,7 @@ task :spec => "check_dependencies:development"
 
 task :default => :spec
 
-require 'rake/rdoctask'
+require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ""
 
