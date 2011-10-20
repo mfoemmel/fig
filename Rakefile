@@ -6,14 +6,14 @@ begin
   gems = [
     ['java',        'fig',    nil,                        ['runtime']              ], # Java
     [nil,           'fig',   'libarchive-static',         ['development','runtime']], # Linux (RHEL/Ubuntu) 1.9.2; Win 1.9.2
-    ['x86_64-linux','fig18', 'libarchive-static',         ['runtime']              ], # Linux (RHEL/Ubuntu) 1.8.6 
+    ['x86_64-linux','fig18', 'libarchive-static',         ['runtime']              ], # Linux (RHEL/Ubuntu) 1.8.6
     [nil,           'fig18', 'libarchive-static-ruby186', ['runtime']              ]  # Win 1.8.6
   ]
-   
+
   gems.each do |platform, fig_name, libarchive_dep, deptypes|
     Jeweler::Tasks.new do |gemspec|
       gemspec.name = fig_name
-      gemspec.summary = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers..}
+      gemspec.summary = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers.}
       gemspec.description = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected).}
       gemspec.email = "git@foemmel.com"
       gemspec.homepage = "http://github.com/mfoemmel/fig"

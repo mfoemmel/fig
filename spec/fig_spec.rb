@@ -154,7 +154,7 @@ describe "Fig" do
     fig('--publish bar/4.5.6', input)
 
     input = <<-END
-      # Multiple overrides will work for "default", even if 
+      # Multiple overrides will work for "default", even if
       # indirectly specified.
       config default
         include :nondefault
@@ -392,7 +392,7 @@ describe "Fig" do
     fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
     fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
     fig('-m -i foo/1.2.3 -- hello')[0].should == 'sheep'
-    
+
     File.open("tmp/bin/hello", "w") { |f| f << "echo cheese" }
     fail unless system "chmod +x tmp/bin/hello"
     fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')

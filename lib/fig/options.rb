@@ -6,7 +6,7 @@ module Fig
     # todo should use treetop for these:
     package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
     config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
-    version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil  
+    version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil
     return package_name, config_name, version_name
   end
 
@@ -25,17 +25,17 @@ EOF
       opts.on('-?', '-h','--help','display this help text') do
         puts opts
 	exit 1
-      end 
+      end
 
       options[:modifiers] = []
 
-      opts.on('-p', '--append VAR=VAL', 'append (actually, prepend) VAL to environment var VAR, delimited by separator') do |var_val| 
+      opts.on('-p', '--append VAR=VAL', 'append (actually, prepend) VAL to environment var VAR, delimited by separator') do |var_val|
         var, val = var_val.split('=')
         options[:modifiers] << Path.new(var, val)
       end
 
       options[:archives] =[]
-      opts.on('--archive FULLPATH', 'include FULLPATH archive in package (when using --publish)') do |path| 
+      opts.on('--archive FULLPATH', 'include FULLPATH archive in package (when using --publish)') do |path|
         options[:archives] << Archive.new(path)
       end
 
@@ -57,9 +57,9 @@ EOF
       options[:echo] = nil
       opts.on('-g', '--get VAR', 'print value of environment variable VAR') { |echo| options[:echo] = echo }
 
-      opts.on('-i', '--include PKG', 'include PKG (with any variable prepends) in environment') do |descriptor| 
+      opts.on('-i', '--include PKG', 'include PKG (with any variable prepends) in environment') do |descriptor|
         package_name, config_name, version_name = parse_descriptor(descriptor)
-        options[:modifiers] << Include.new(package_name, config_name, version_name, {}) 
+        options[:modifiers] << Include.new(package_name, config_name, version_name, {})
       end
 
       options[:list] = false
@@ -82,19 +82,19 @@ EOF
       options[:publish_local] = nil
       opts.on('--publish-local PKG', 'install package only in $FIG_HOME') { |publish_local| options[:publish_local] = publish_local }
 
-#      opts.on('-o', '--override PKG', 'override version of included package') do |descriptor| 
+#      opts.on('-o', '--override PKG', 'override version of included package') do |descriptor|
 #        package_name, config_name, version_name = parse_descriptor(descriptor)
-#        options[:modifiers] << Include.new(package_name, config_name, version_name, {}) 
+#        options[:modifiers] << Include.new(package_name, config_name, version_name, {})
 #      end
 
       options[:resources] =[]
-      opts.on('--resource FULLPATH', 'include FULLPATH resource in package (when using --publish)') do |path| 
-        options[:resources] << Resource.new(path) 
+      opts.on('--resource FULLPATH', 'include FULLPATH resource in package (when using --publish)') do |path|
+        options[:resources] << Resource.new(path)
       end
 
-      opts.on('-s', '--set VAR=VAL', 'set environment variable VAR to VAL') do |var_val| 
+      opts.on('-s', '--set VAR=VAL', 'set environment variable VAR to VAL') do |var_val|
         var, val = var_val.split('=')
-        options[:modifiers] << Set.new(var, val) 
+        options[:modifiers] << Set.new(var, val)
       end
 
       options[:update] = false

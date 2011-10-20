@@ -19,7 +19,7 @@ def parse_descriptor(descriptor)
   # todo should use treetop for these:
   package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
   config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
-  version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil  
+  version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil
   return package_name, config_name, version_name
 end
 
@@ -27,7 +27,7 @@ shell_command = nil
 ARGV.each_with_index do |arg, i|
   if arg == "-"
 #    $stderr.puts "Use of single dash (-) is deprecated. Use double dash (--) instead"
-#    exit 1 
+#    exit 1
   elsif arg == "--"
     shell_command = ARGV[(i+1)..-1]
     ARGV.slice!(i..-1)
@@ -44,7 +44,7 @@ remote_url = nil
 if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
   remote_url = ENV['FIG_REMOTE_URL']
   if remote_url.nil?
-    $stderr.puts "Please define the FIG_REMOTE_URL environment variable" 
+    $stderr.puts "Please define the FIG_REMOTE_URL environment variable"
     exit 1
   end
 end
@@ -53,7 +53,7 @@ remote_user = nil
 if options[:publish]
 #  remote_user = ENV['FIG_REMOTE_USER']
 #  if remote_user.nil?
-#    $stderr.puts "Please define the FIG_REMOTE_USER environment variable" 
+#    $stderr.puts "Please define the FIG_REMOTE_USER environment variable"
 #    exit 1
 #  end
 end
@@ -93,7 +93,7 @@ end
 
 options[:cleans].each do |descriptor|
   package_name, version_name = descriptor.split('/')
-  repos.clean(package_name, version_name)    
+  repos.clean(package_name, version_name)
 end
 
 if options[:list]
@@ -164,7 +164,7 @@ if options[:publish] || options[:publish_local]
   end
   if options[:publish]
     puts "Checking status of #{package_name}/#{version_name}..."
-    if repos.list_remote_packages.include?("#{package_name}/#{version_name}") 
+    if repos.list_remote_packages.include?("#{package_name}/#{version_name}")
       puts "#{package_name}/#{version_name} has already been published"
       if not options[:force]
         puts "Use the --force option if you really want to overwrite, or us --publish-local for testing"

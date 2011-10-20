@@ -20,7 +20,7 @@ module Fig
       end
     end
 
-    def clean(package_name, version_name) 
+    def clean(package_name, version_name)
       dir = File.join(@local_repository_dir, package_name)
       dir = File.join(dir, version_name) if version_name
       FileUtils.rm_rf(dir)
@@ -42,13 +42,13 @@ module Fig
       @os.download_list(@remote_repository_url)
     end
 
-    def publish_package(package_statements, package_name, version_name, local_only) 
+    def publish_package(package_statements, package_name, version_name, local_only)
       temp_dir = temp_dir_for_package(package_name, version_name)
       @os.clear_directory(temp_dir)
       local_dir = local_dir_for_package(package_name, version_name)
       @os.clear_directory(local_dir)
       fig_file = File.join(temp_dir, ".fig")
-      content = bundle_resources(package_statements).map do |statement| 
+      content = bundle_resources(package_statements).map do |statement|
         if statement.is_a?(Publish)
           nil
         elsif statement.is_a?(Archive) || statement.is_a?(Resource)
@@ -124,7 +124,7 @@ module Fig
     def read_local_package(package_name, version_name)
       dir = local_dir_for_package(package_name, version_name)
       read_package_from_directory(dir, package_name, version_name)
-    end 
+    end
 
     def read_remote_package(package_name, version_name)
       url = remote_fig_file_for_package(package_name, version_name)
@@ -146,7 +146,7 @@ module Fig
 
     def read_package_from_file(file_name, package_name, version_name)
       if not @os.exist?(file_name)
-        $stderr.puts "Package not found: #{package_name}/#{version_name}" 
+        $stderr.puts "Package not found: #{package_name}/#{version_name}"
         exit 1
       end
       modified_time = @os.mtime(file_name)
@@ -192,7 +192,7 @@ module Fig
         end
         write_local_package(package_name, version_name, package)
       rescue
-        $stderr.puts "Install failed, cleaning up" 
+        $stderr.puts "Install failed, cleaning up"
         delete_local_package(package_name, version_name)
         exit 10
       end
@@ -220,7 +220,7 @@ module Fig
 
     def remote_fig_file_for_package(package_name, version_name)
       "#{@remote_repository_url}/#{package_name}/#{version_name}/.fig"
-    end  
+    end
 
     def local_fig_file_for_package(package_name, version_name)
       File.join(local_dir_for_package(package_name, version_name), ".fig")

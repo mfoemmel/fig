@@ -2,15 +2,15 @@ module Fig
   class Package
     attr_reader :package_name, :version_name, :directory, :statements
     attr_accessor :backtrace
-    
-    def initialize(package_name, version_name, directory, statements) 
+
+    def initialize(package_name, version_name, directory, statements)
       @package_name = package_name
       @version_name = version_name
       @directory = directory
       @statements = statements
       @backtrace = nil
     end
-    
+
     def [](config_name)
       @statements.each do |stmt|
         return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
@@ -32,11 +32,11 @@ module Fig
     def archive_urls
       @statements.select{|s| s.is_a?(Archive)}.map{|s|s.url}
     end
-    
+
     def resource_urls
       @statements.select{|s| s.is_a?(Resource)}.map{|s|s.url}
     end
-    
+
     def unparse
       @statements.map { |statement| statement.unparse('') }.join("\n")
     end
@@ -49,31 +49,31 @@ module Fig
       @package_name + "/" + @version_name
     end
   end
-  
+
   class Archive
     attr_reader :url
-    
+
     def initialize(url)
       @url = url
     end
-    
+
     def unparse(indent)
       "#{indent}archive \"#{url}\""
     end
   end
-  
+
   class Resource
     attr_reader :url
-    
+
     def initialize(url)
       @url = url
     end
-    
+
     def unparse(indent)
       "#{indent}resource #{url}"
     end
   end
-  
+
   class Retrieve
     attr_reader :var, :path
 
@@ -94,7 +94,7 @@ module Fig
       @local_name = local_name
       @remote_name = remote_name
     end
-    
+
     def unparse(indent)
       "#{indent}publish #{@local_name}->#{@remote_name}"
     end
@@ -110,9 +110,9 @@ module Fig
       body = @statements.map { |statement| statement.unparse(indent+'  ') }.join("\n")
       suffix = "#{indent}end"
       return [prefix, body, suffix].join("\n")
-    end 
+    end
   end
-  
+
   class Configuration
     attr_reader :name, :statements
 
@@ -145,7 +145,7 @@ module Fig
       @name = name
       @value = value
     end
-  
+
     def unparse(indent)
       "#{indent}append #{name}=#{value}"
     end
@@ -158,7 +158,7 @@ module Fig
       @name = name
       @value = value
     end
-  
+
     def unparse(indent)
       "#{indent}set #{name}=#{value}"
     end
@@ -188,7 +188,7 @@ module Fig
 
   class Override
     attr_reader :package_name, :version_name
-    
+
     def initialize(package_name, version_name)
       @package_name = package_name
       @version_name = version_name
@@ -216,5 +216,5 @@ end
 def unparse_statements(indent, prefix, statements, suffix)
   body = @statements.map { |statement| statement.unparse(indent+'  ') }.join("\n")
   return ["\n#{indent}#{prefix}", body, "#{indent}#{suffix}"].join("\n")
-end   
+end
 

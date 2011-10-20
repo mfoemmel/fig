@@ -2,7 +2,7 @@ require 'fig/backtrace'
 
 module Fig
 
-  # This class manages the program's state, including the value of all environment 
+  # This class manages the program's state, including the value of all environment
   # variables, and which packages have already been applied
   class Environment
     DEFAULT_VERSION_NAME = "current"
@@ -23,7 +23,7 @@ module Fig
     end
 
     # Indicates that the values from a particular envrionment variable path should
-    # be copied to a local directory 
+    # be copied to a local directory
     def add_retrieve(name, path)
       @retrieve_vars[name] = path
     end
@@ -104,7 +104,7 @@ module Fig
       FileUtils.cp_r(File.join(package.directory, source_path, '.'), target_path)
     end
 
-    private 
+    private
 
     def set_variable(base_package, name, value)
       @variables[name] = expand_value(base_package, name, value)
@@ -146,7 +146,7 @@ module Fig
         package.backtrace = backtrace
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
-        $stderr.puts "Version mismatch: #{package_name}" 
+        $stderr.puts "Version mismatch: #{package_name}"
         backtrace.dump($stderr) if backtrace
         package.backtrace.dump($stderr) if package.backtrace
         exit 10

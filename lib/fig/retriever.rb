@@ -1,11 +1,11 @@
 require 'ostruct'
 require 'set'
 
-# This class copies files from the project directories in ~/.fighome to the 
-# user's working directory. It keeps track of which files have already been copied, and which 
+# This class copies files from the project directories in ~/.fighome to the
+# user's working directory. It keeps track of which files have already been copied, and which
 # package/versions they came from, and deletes files as necessary to ensure that
-# we never have files from two different versions of the same package in the user's 
-# working directory. 
+# we never have files from two different versions of the same package in the user's
+# working directory.
 class Retriever
   def initialize(base_dir)
     @base_dir = base_dir
@@ -23,7 +23,7 @@ class Retriever
       @config = @configs[name]
       if @config && @config.version != version
         @config.files.each do |relpath|
-          $stderr.puts "\033[31m- [#{@config.name}/#{@config.version}] #{relpath}\033[0m" 
+          $stderr.puts "\033[31m- [#{@config.name}/#{@config.version}] #{relpath}\033[0m"
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
         @config = nil
@@ -78,7 +78,7 @@ private
     end
   end
 
-  def new_config(name, version) 
+  def new_config(name, version)
     config = OpenStruct.new
     config.name = name
     config.version = version
@@ -97,7 +97,7 @@ private
       end
     else
       if !File.exist?(target) || File.mtime(source) > File.mtime(target)
-        $stderr.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{relpath}\033[0m" 
+        $stderr.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{relpath}\033[0m"
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target, :preserve => true)
       end

@@ -24,7 +24,7 @@ module Fig
     def get_username()
       @username ||= ask("Username: ") { |q| q.echo = true }
     end
-    
+
     def get_password()
       @password ||= ask("Password: ") { |q| q.echo = false }
     end
@@ -37,7 +37,7 @@ module Fig
           @password = rc.password
         end
         ftp.login(get_username, get_password)
-      else 
+      else
         ftp.login()
       end
       ftp.passive = true
@@ -46,31 +46,31 @@ module Fig
     def list(dir)
       Dir.entries(dir) - ['.','..']
     end
-    
+
     def exist?(path)
       File.exist?(path)
     end
-    
+
     def mtime(path)
       File.mtime(path)
     end
-    
+
     def read(path)
       File.read(path)
     end
-    
+
     def write(path, content)
       File.open(path, "wb") { |f| f.binmode; f << content }
     end
-    
+
     SUCCESS = 0
     NOT_MODIFIED = 3
     NOT_FOUND = 4
-    
+
     def download_list(url)
       begin
         uri = URI.parse(url)
-      rescue 
+      rescue
         $stderr.puts "Unable to parse url: '#{url}'"
         exit 10
       end
@@ -106,7 +106,7 @@ module Fig
       # Run a bunch of these in parallel since they're slow as hell
       num_threads = (ENV["FIG_FTP_THREADS"] || "16").to_i
       threads = []
-      all_packages = []        
+      all_packages = []
       (0..num_threads-1).each { |num| all_packages[num] = [] }
       (0..num_threads-1).each do |num|
         threads << Thread.new do
@@ -143,7 +143,7 @@ module Fig
         begin
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
             return false
-          else 
+          else
             $stderr.puts "downloading #{url}"
             ftp.getbinaryfile(uri.path, path, 256*1024)
             return true
@@ -163,7 +163,7 @@ module Fig
       when "ssh"
         # TODO need better way to do conditional download
         #       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
-        timestamp = File.exist?(path) ? File.mtime(path).to_i : 0 
+        timestamp = File.exist?(path) ? File.mtime(path).to_i : 0
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
       else
@@ -171,12 +171,12 @@ module Fig
         exit 10
       end
    end
-    
+
     def download_resource(url, dir)
       FileUtils.mkdir_p(dir)
       download(url, File.join(dir, URI.parse(url).path.split('/').last))
     end
-    
+
     def download_archive(url, dir)
       FileUtils.mkdir_p(dir)
       basename = URI.parse(url).path.split('/').last
@@ -196,7 +196,7 @@ module Fig
         exit 10
       end
     end
-    
+
     def upload(local_file, remote_file, user)
       puts "uploading #{local_file} to #{remote_file}"
       uri = URI.parse(remote_file)
@@ -231,7 +231,7 @@ module Fig
         end
       end
     end
-    
+
     def clear_directory(dir)
       FileUtils.rm_rf(dir)
       FileUtils.mkdir_p(dir)
@@ -245,7 +245,7 @@ module Fig
         end
       }
     end
-    
+
     def copy(source, target, msg = nil)
       if File.directory?(source)
         FileUtils.mkdir_p(target)
@@ -267,7 +267,7 @@ module Fig
     def move_file(dir, from, to)
       Dir.chdir(dir) { FileUtils.mv(from, to, :force => true) }
     end
-    
+
     def log_info(msg)
       $stderr.puts msg
     end

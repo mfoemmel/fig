@@ -1,7 +1,7 @@
 Description
 ===========
 
-Fig is a utility for configuring environments and managing dependencies across a team of developers. Fig takes a list of packages and a shell command to run, creates an environment that includes those packages, then executes the shell command in that environment. The caller's environment is not affected. 
+Fig is a utility for configuring environments and managing dependencies across a team of developers. Fig takes a list of packages and a shell command to run, creates an environment that includes those packages, then executes the shell command in that environment. The caller's environment is not affected.
 
 An "environment" in fig is just a set of environment variables. A "package" is a collection of files, plus some metadata describing which environment variables should be modified when the package is included.  For instance, each dependency may append its corresponding jar to CLASSPATH.
 
@@ -65,7 +65,7 @@ Fig also supports the following options, which don't require a fig environment. 
     -?, -h, --help   Display this help text
     --publish        Upload package to the remote repository (also installs in local repository)
     --publish-local  Install package in local repository only
-    --list           List packages in local repository   
+    --list           List packages in local repository
     --list-remote    List packages in remote repository
 
 When using the `--list-remote` command against an FTP server, fig uses a pool of FTP sessions to improve
@@ -104,12 +104,12 @@ Fig also lets you append environment variables using the system-specified path s
 ### Fig Files ###
 
 You can also specify environment modifiers in files. Fig looks for a file called "package.fig" in the current directory, and automatically processes it. So we can implement the previous example by creating this "package.fig" file:
-        
+
     config default
       set GREETING=Hello
       append PATH=@/bin
     end
-    
+
 The '@' symbol in a given package.fig file (or in a published dependency's .fig file) represents that file's directory (this example would still work if we just used "bin", but later on when we publish our project to the shared repository we'll definitely need the '@'). Then we can just run:
 
     $ fig -- hello
@@ -117,7 +117,7 @@ The '@' symbol in a given package.fig file (or in a published dependency's .fig 
 
 A single fig file can have multiple configurations:
 
-    config default 
+    config default
       set GREETING=Hello
       append PATH=@/bin
     end
@@ -131,7 +131,7 @@ Configurations other than "default" can be specified using the "-c" option:
 
     $ fig -c french -- hello
     Bonjour, World
-     
+
 ### Packages ###
 
 Now let's say we want to share our little script with the rest of the team by bundling it into a package. The first thing we need to do is specify the location of the remote repository by defining the `FIG_REMOTE_URL` environment variable. If you just want to play around with fig, you can have it point to localhost:
@@ -154,7 +154,7 @@ The "hello/1.0.0" string represents the name of the package and the version numb
     $ fig -u -i hello/1.0.0 -- hello
     ...downloading files...
     Hello, World
-		
+
 The "-u" (or "--update") option tells fig to check the remote repository for packages if they aren't already installed locally (fig will never make any network connections unless this option is specified). Once the packages are downloaded, we can run the same command without the "-u" option:
 
     $ fig -i hello/1.0.0 -- hello
@@ -179,7 +179,7 @@ Then:
 
     $ mkdir lib
     $ echo "print 'hello'" > lib/hello.foo
-    $ fig --publish hello-lib/3.2.1    
+    $ fig --publish hello-lib/3.2.1
 
 Now we'll move to a different directory (or delete the current "package.fig" file) and create a new "package.fig" file:
 

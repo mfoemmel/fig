@@ -107,7 +107,7 @@ grammar Fig
   end
 
   rule descriptor
-    ((package:package_name ("/" version:version_name)? (":" config:config_name)? ws) / 
+    ((package:package_name ("/" version:version_name)? (":" config:config_name)? ws) /
     (":" config:config_name ws)) {
       def get_version
         elements.each do |element|
