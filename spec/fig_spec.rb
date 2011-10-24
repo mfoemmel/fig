@@ -399,4 +399,13 @@ describe "Fig" do
     fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
     fig('-m -i foo/1.2.3 -- hello')[0].should == 'cheese'
   end
+
+  it "prints the version number" do
+    %w/-v --version/.each do |option| 
+      (out, err, exitstatus) = fig(option)
+      exitstatus.should == 0
+      err.should == ''
+      out.should =~ / \d+ \. \d+ \. \d+ /x
+    end
+  end
 end

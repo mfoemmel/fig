@@ -26,6 +26,26 @@ EOF
         puts opts
         puts "\n    --  end of fig options; everything following is a command to run in the fig environment\n\n"
         exit 1
+      end 
+
+      opts.on('-v', '--version', 'Print fig version') do
+        line = nil
+
+        begin
+          File.open("#{File.expand_path(File.dirname(__FILE__) + "/../../VERSION")}") { |file| line = file.gets }
+        rescue
+          STDERR.puts 'Could not retrieve version number. Something has mucked with your gem install.'
+          exit 1
+        end
+        
+        if line !~ /\d+\.\d+\.\d+/
+          STDERR.puts %Q<"#{line}" does not look like a version number. Something has mucked with your gem install.>
+          exit 1
+        end
+
+        puts File.basename($0) + ' v' + line
+
+        exit 0
       end
 
       options[:modifiers] = []
