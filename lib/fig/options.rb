@@ -26,7 +26,7 @@ EOF
         puts opts
         puts "\n    --  end of fig options; everything following is a command to run in the fig environment\n\n"
         exit 1
-      end
+      end 
 
       options[:modifiers] = []
 
