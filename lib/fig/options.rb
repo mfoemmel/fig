@@ -24,8 +24,9 @@ to $HOME/.fighome).
 EOF
       opts.on('-?', '-h','--help','display this help text') do
         puts opts
+        puts "\n    --  end of fig options; everything following is a command to run in the fig environment\n\n"
         exit 1
-      end
+      end 
 
       options[:modifiers] = []
 
@@ -98,10 +99,10 @@ EOF
       end
 
       options[:update] = false
-      opts.on('-u', '--update', 'check remote repo for updates') { options[:update] = true; options[:retrieve] = true }
+      opts.on('-u', '--update', 'check remote repo for updates and download to $FIG_HOME as necessary') { options[:update] = true; options[:retrieve] = true }
 
       options[:update_if_missing] = false
-      opts.on('-m', '--update-if-missing', 'check for updates only if package is missing from $FIG_HOME') { options[:update_if_missing] = true; options[:retrieve] = true }
+      opts.on('-m', '--update-if-missing', 'check remote repo for updates only if package missing from $FIG_HOME') { options[:update_if_missing] = true; options[:retrieve] = true }
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path("~/.fighome")
     end
