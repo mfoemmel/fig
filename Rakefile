@@ -59,6 +59,10 @@ end
 
 task :spec => "check_dependencies:development"
 
+task :spec do
+  rm_rf './.fig'
+end
+
 task :default => :spec
 
 require 'rdoc/task'
