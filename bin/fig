@@ -187,4 +187,8 @@ elsif argv[0]
   env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
 elsif input
   env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
+else
+  $stderr.puts USAGE 
+  $stderr.puts %q<Run "fig --help" for a full list of commands.>
+  exit 1
 end

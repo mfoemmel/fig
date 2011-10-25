@@ -10,11 +10,7 @@ module Fig
     return package_name, config_name, version_name
   end
 
-  def parse_options(argv)
-    options = {}
-
-    parser = OptionParser.new do |opts|
-      opts.banner = <<EOF
+  USAGE = <<EOF
 
 Usage: fig [--debug] [--update] [--config <config>] [--get <var> | --list | <package> | -- <command>]
 
@@ -22,10 +18,16 @@ Relevant env vars: FIG_REMOTE_URL (required), FIG_HOME (path to local repository
 to $HOME/.fighome).
 
 EOF
+
+  def parse_options(argv)
+    options = {}
+
+    parser = OptionParser.new do |opts|
+      opts.banner = USAGE
       opts.on('-?', '-h','--help','display this help text') do
-        puts opts
+        puts opts.help
         puts "\n    --  end of fig options; everything following is a command to run in the fig environment\n\n"
-        exit 1
+        exit 0
       end 
 
       opts.on('-v', '--version', 'Print fig version') do
@@ -34,12 +36,12 @@ EOF
         begin
           File.open("#{File.expand_path(File.dirname(__FILE__) + "/../../VERSION")}") { |file| line = file.gets }
         rescue
-          STDERR.puts 'Could not retrieve version number. Something has mucked with your gem install.'
+          $stderr.puts 'Could not retrieve version number. Something has mucked with your gem install.'
           exit 1
         end
         
         if line !~ /\d+\.\d+\.\d+/
-          STDERR.puts %Q<"#{line}" does not look like a version number. Something has mucked with your gem install.>
+          $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your gem install.>
           exit 1
         end
 
@@ -49,13 +51,12 @@ EOF
       end
 
       options[:modifiers] = []
-
       opts.on('-p', '--append VAR=VAL', 'append (actually, prepend) VAL to environment var VAR, delimited by separator') do |var_val|
         var, val = var_val.split('=')
         options[:modifiers] << Path.new(var, val)
       end
 
-      options[:archives] =[]
+      options[:archives] = []
       opts.on('--archive FULLPATH', 'include FULLPATH archive in package (when using --publish)') do |path|
         options[:archives] << Archive.new(path)
       end
@@ -128,6 +129,12 @@ EOF
     end
 
     parser.parse!(argv)
+
+#    if !options[:publish] && !options[:publish_local] && argv.empty?   
+#      parser.warn 'Command required!'
+#      $stderr.puts parser.help
+#      exit 1
+#    end
 
     return options, argv
   end
