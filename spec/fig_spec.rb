@@ -56,9 +56,6 @@ def fig(args, input=nil)
     end
     err = stderr.read.strip
     out = stdout.read.strip
-    if err != ''
-      $stderr.puts err
-    end
   end
   return out, err, $?.exitstatus
 end
