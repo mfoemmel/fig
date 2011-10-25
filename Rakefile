@@ -15,33 +15,33 @@ begin
       gemspec.name = fig_name
       gemspec.summary = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers.}
       gemspec.description = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers. You give it a list of packages and a shell command to run; it creates an environment that includes those packages, then executes the shell command in it (the caller's environment is not affected).}
-      gemspec.email = "git@foemmel.com"
-      gemspec.homepage = "http://github.com/mfoemmel/fig"
-      gemspec.authors = ["Matthew Foemmel"]
+      gemspec.email = 'git@foemmel.com'
+      gemspec.homepage = 'http://github.com/mfoemmel/fig'
+      gemspec.authors = ['Matthew Foemmel']
       gemspec.platform = platform if not platform.nil?
 
       deptypes.each do |deptype|
-        gemspec.send("add_#{deptype}_dependency", libarchive_dep, "1.0.0") if not libarchive_dep.nil?
+        gemspec.send("add_#{deptype}_dependency", libarchive_dep, '1.0.0') if not libarchive_dep.nil?
       end
 
-      gemspec.add_dependency              "highline",   ">= 1.6.2"
-      gemspec.add_dependency              "net-netrc",  ">= 0.2.2"
-      gemspec.add_dependency              "net-sftp",   ">= 2.0.4"
-      gemspec.add_dependency              "net-ssh",    ">= 2.0.15"
-      gemspec.add_dependency              "polyglot",   ">= 0.2.9"
-      gemspec.add_dependency              "rdoc",       ">= 2.4.2"
-      gemspec.add_dependency              "treetop",    ">= 1.4.2"
-      gemspec.add_development_dependency  "open4",      ">= 1.0.1"
-      gemspec.add_development_dependency  "rspec",      "~> 2"
+      gemspec.add_dependency              'highline',   '>= 1.6.2'
+      gemspec.add_dependency              'net-netrc',  '>= 0.2.2'
+      gemspec.add_dependency              'net-sftp',   '>= 2.0.4'
+      gemspec.add_dependency              'net-ssh',    '>= 2.0.15'
+      gemspec.add_dependency              'polyglot',   '>= 0.2.9'
+      gemspec.add_dependency              'rdoc',       '>= 2.4.2'
+      gemspec.add_dependency              'treetop',    '>= 1.4.2'
+      gemspec.add_development_dependency  'open4',      '>= 1.0.1'
+      gemspec.add_development_dependency  'rspec',      '~> 2'
 
-      gemspec.files = %w<bin/fig bin/fig-download VERSION> + Dir["lib/**/*.rb"] + Dir["lib/**/*.treetop"]
-      gemspec.executables = ["fig", "fig-download"]
+      gemspec.files = %w<bin/fig bin/fig-download VERSION> + Dir['lib/**/*.rb'] + Dir['lib/**/*.treetop']
+      gemspec.executables = ['fig', 'fig-download']
     end
 
     Jeweler::GemcutterTasks.new
   end
 rescue LoadError
-  puts "Jeweler (or a dependency) not available. Install it with: gem install jeweler"
+  puts 'Jeweler (or a dependency) not available. Install it with: gem install jeweler'
 end
 
 require 'rspec/core/rake_task'
@@ -57,7 +57,7 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
-task :spec => "check_dependencies:development"
+task :spec => 'check_dependencies:development'
 
 task :spec do
   rm_rf './.fig'
@@ -67,7 +67,7 @@ task :default => :spec
 
 require 'rdoc/task'
 Rake::RDocTask.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ""
+  version = File.exist?('VERSION') ? File.read('VERSION') : ''
 
   rdoc.rdoc_dir = 'rdoc'
   rdoc.title = "fig #{version}"
@@ -76,12 +76,12 @@ Rake::RDocTask.new do |rdoc|
 end
 
 task :clean do
-    rm_rf "./tmp"
-    rm "./resources.tar.gz"
+    rm_rf './tmp'
+    rm './resources.tar.gz'
 end
 
-desc "Build and install the Fig gem for local testing."
+desc 'Build and install the Fig gem for local testing.'
 task :p do
-  sh "rake build"
-  sh "sudo gem install pkg/*.gem"
+  sh 'rake build'
+  sh 'sudo gem install pkg/*.gem'
 end

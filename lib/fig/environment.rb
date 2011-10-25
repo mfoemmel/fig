@@ -5,7 +5,7 @@ module Fig
   # This class manages the program's state, including the value of all environment
   # variables, and which packages have already been applied
   class Environment
-    DEFAULT_VERSION_NAME = "current"
+    DEFAULT_VERSION_NAME = 'current'
 
     def initialize(os, repository, variables, retriever)
       @os = os
@@ -57,11 +57,11 @@ module Fig
     def execute_config(base_package, package_name, config_name, version_name, args)
       package = lookup_package(package_name || base_package.package_name, version_name, Backtrace.new(nil, package_name, version_name, config_name))
       result = nil
-      commands = package[config_name || "default"].commands
+      commands = package[config_name || 'default'].commands
       with_environment do
         # todo nil check
         commands.each do |command|
-          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub("@",package.directory).split(" ")
+          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@',package.directory).split(' ')
         end
       end
       result
@@ -95,7 +95,7 @@ module Fig
         new_backtrace.add_override(override.package_name, override.version_name)
       end
       package = lookup_package(package_name || base_package.package_name, version_name, new_backtrace)
-      apply_config(package, config_name || "default", new_backtrace)
+      apply_config(package, config_name || 'default', new_backtrace)
     end
 
     def direct_retrieve(package_name, source_path, target_path)

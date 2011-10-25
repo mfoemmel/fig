@@ -46,7 +46,7 @@ module Fig
     end
 
     def to_s
-      @package_name + "/" + @version_name
+      @package_name + '/' + @version_name
     end
   end
 
@@ -58,7 +58,7 @@ module Fig
     end
 
     def unparse(indent)
-      "#{indent}archive \"#{url}\""
+      %Q<#{indent}archive "#{url}">
     end
   end
 
@@ -127,14 +127,11 @@ module Fig
 
     def commands
       result = statements.select { |statement| statement.is_a?(Command) }
-#      if result.empty?
-#        raise "No commands found for config: #{@name}"
-#      end
       result
     end
 
     def unparse(indent)
-      unparse_statements(indent, "config #{@name}", @statements, "end")
+      unparse_statements(indent, "config #{@name}", @statements, 'end')
     end
   end
 
@@ -175,7 +172,7 @@ module Fig
     end
 
     def unparse(indent)
-      descriptor = ""
+      descriptor = ''
       descriptor += @package_name if @package_name
       descriptor += "/#{@version_name}" if @version_name
       descriptor += ":#{@config_name}" if @config_name
@@ -195,7 +192,7 @@ module Fig
     end
 
     def unparse()
-      return " override " + @package_name + "/" + @version_name
+      return ' override ' + @package_name + '/' + @version_name
     end
   end
 
@@ -207,7 +204,7 @@ module Fig
     end
 
     def unparse(indent)
-      "#{indent}command \"#{@command}\""
+      %Q<#{indent}command "#{@command}">
     end
   end
 

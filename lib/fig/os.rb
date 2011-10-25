@@ -17,16 +17,16 @@ module Fig
   class OS
     def initialize(login)
       @login = login
-      @username = ENV["FIG_USERNAME"]
-      @password = ENV["FIG_PASSWORD"]
+      @username = ENV['FIG_USERNAME']
+      @password = ENV['FIG_PASSWORD']
     end
 
     def get_username()
-      @username ||= ask("Username: ") { |q| q.echo = true }
+      @username ||= ask('Username: ') { |q| q.echo = true }
     end
 
     def get_password()
-      @password ||= ask("Password: ") { |q| q.echo = false }
+      @password ||= ask('Password: ') { |q| q.echo = false }
     end
 
     def ftp_login(ftp, host)
@@ -60,7 +60,7 @@ module Fig
     end
 
     def write(path, content)
-      File.open(path, "wb") { |f| f.binmode; f << content }
+      File.open(path, 'wb') { |f| f.binmode; f << content }
     end
 
     SUCCESS = 0
@@ -71,11 +71,11 @@ module Fig
       begin
         uri = URI.parse(url)
       rescue
-        $stderr.puts "Unable to parse url: '#{url}'"
+        $stderr.puts %Q<Unable to parse url: "#{url}">
         exit 10
       end
       case uri.scheme
-      when "ftp"
+      when 'ftp'
         ftp = Net::FTP.new(uri.host)
         ftp_login(ftp, uri.host)
         ftp.chdir(uri.path)
@@ -83,12 +83,12 @@ module Fig
         ftp.close
 
         download_ftp_list(uri, dirs)
-      when "ssh"
+      when 'ssh'
         packages = []
         Net::SSH.start(uri.host, uri.user) do |ssh|
           ls = ssh.exec!("[ -d #{uri.path} ] && find #{uri.path}")
           if not ls.nil?
-            ls = ls.gsub(uri.path + "/", "").gsub(uri.path, "").split("\n")
+            ls = ls.gsub(uri.path + '/', '').gsub(uri.path, '').split("\n")
             ls.each do |line|
               parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
               packages << parts.join('/') if parts.size == 2
@@ -104,7 +104,7 @@ module Fig
 
     def download_ftp_list(uri, dirs)
       # Run a bunch of these in parallel since they're slow as hell
-      num_threads = (ENV["FIG_FTP_THREADS"] || "16").to_i
+      num_threads = (ENV['FIG_FTP_THREADS'] || '16').to_i
       threads = []
       all_packages = []
       (0..num_threads-1).each { |num| all_packages[num] = [] }
@@ -137,7 +137,7 @@ module Fig
       FileUtils.mkdir_p(File.dirname(path))
       uri = URI.parse(url)
       case uri.scheme
-      when "ftp"
+      when 'ftp'
         ftp = Net::FTP.new(uri.host)
         ftp_login(ftp, uri.host)
         begin
@@ -151,18 +151,17 @@ module Fig
         rescue Net::FTPPermError
           raise NotFoundException.new
         end
-      when "http"
+      when 'http'
         http = Net::HTTP.new(uri.host)
         $stderr.puts "downloading #{url}"
-        File.open(path, "wb") do |file|
+        File.open(path, 'wb') do |file|
           file.binmode
           http.get(uri.path) do |block|
             file.write(block)
           end
         end
-      when "ssh"
+      when 'ssh'
         # TODO need better way to do conditional download
-        #       timestamp = `ssh #{uri.user + '@' if uri.user}#{uri.host} "ruby -e 'puts File.mtime(\\"#{uri.path}\\").to_i'"`.to_i
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
@@ -201,16 +200,16 @@ module Fig
       puts "uploading #{local_file} to #{remote_file}"
       uri = URI.parse(remote_file)
       case uri.scheme
-      when "ssh"
+      when 'ssh'
         ssh_upload(uri.user, uri.host, local_file, remote_file)
-      when "ftp"
+      when 'ftp'
         #      fail unless system "curl -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
        require 'net/ftp'
-        ftp_uri = URI.parse(ENV["FIG_REMOTE_URL"])
+        ftp_uri = URI.parse(ENV['FIG_REMOTE_URL'])
         ftp_root_path = ftp_uri.path
-        ftp_root_dirs = ftp_uri.path.split("/")
-        remote_publish_path = uri.path[0, uri.path.rindex("/")]
-        remote_publish_dirs = remote_publish_path.split("/")
+        ftp_root_dirs = ftp_uri.path.split('/')
+        remote_publish_path = uri.path[0, uri.path.rindex('/')]
+        remote_publish_dirs = remote_publish_path.split('/')
         # Use array subtraction to deduce which project/version folder to upload to,
         # i.e. [1,2,3] - [2,3,4] = [1]
         remote_project_dirs = remote_publish_dirs - ftp_root_dirs
@@ -240,7 +239,7 @@ module Fig
     def exec(dir,command)
       Dir.chdir(dir) {
         unless system command
-          $stderr.puts "Command failed"
+          $stderr.puts 'Command failed'
           exit 10
         end
       }
@@ -250,7 +249,7 @@ module Fig
       if File.directory?(source)
         FileUtils.mkdir_p(target)
         Dir.foreach(source) do |child|
-          if child != "." and child != ".."
+          if child != '.' and child != '..'
             copy(File.join(source, child), File.join(target, child), msg)
           end
         end
@@ -339,8 +338,8 @@ module Fig
     end
 
     def shell_exec_windows(cmd)
-      #command = ["C:/WINDOWS/system32/cmd.exe", "/C", "call"] + cmd
-      command = ["cmd.exe", "/C"] + cmd
+      #command = ['C:/WINDOWS/system32/cmd.exe', '/C', 'call'] + cmd
+      command = ['cmd.exe', '/C'] + cmd
       command = command.join(' ')
       Kernel.exec(command)
     end
@@ -349,13 +348,13 @@ module Fig
     # cmd = The command to be run on the remote host.
     def ssh_download(user, host, path, cmd)
       return_code = nil
-      tempfile = Tempfile.new("tmp")
+      tempfile = Tempfile.new('tmp')
       Net::SSH.start(host, user) do |ssh|
         ssh.open_channel do |channel|
           channel.exec(cmd)
           channel.on_data() { |ch, data| tempfile << data }
           channel.on_extended_data() { |ch, type, data| $stderr.puts "SSH Download ERROR: #{data}" }
-          channel.on_request("exit-status") { |ch, request|
+          channel.on_request('exit-status') { |ch, request|
             return_code = request.read_long
           }
         end

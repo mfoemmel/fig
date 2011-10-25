@@ -42,7 +42,7 @@ FileUtils.mkdir_p(FIG_REMOTE_DIR)
 ENV['FIG_REMOTE_URL'] = "ssh://#{ENV['USER']}@localhost#{FIG_REMOTE_DIR}"
 
 FIG_BIN = File.expand_path(File.dirname(__FILE__) + '/../bin')
-ENV['PATH'] = FIG_BIN + ":" + ENV['PATH']  # To find the correct fig-download
+ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
 FIG_EXE = "#{FIG_BIN}/fig"
 
 def fig(args, input=nil)
@@ -56,20 +56,20 @@ def fig(args, input=nil)
     end
     err = stderr.read.strip
     out = stdout.read.strip
-    if err != ""
+    if err != ''
       $stderr.puts err
     end
   end
   return out, err, $?.exitstatus
 end
 
-describe "Fig" do
-  it "sets environment variable from command line" do
+describe 'Fig' do
+  it 'sets environment variable from command line' do
     fig('-s FOO=BAR -g FOO')[0].should == 'BAR'
     fig('--set FOO=BAR -g FOO')[0].should == 'BAR'
   end
 
-  it "sets environment variable from fig file" do
+  it 'sets environment variable from fig file' do
     input = <<-END
       config default
         set FOO=BAR
@@ -78,24 +78,24 @@ describe "Fig" do
     fig('-g FOO', input)[0].should == 'BAR'
   end
 
-  it "appends environment variable from command line" do
-    fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}","",0]
+  it 'appends environment variable from command line' do
+    fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
   end
 
-  it "appends environment variable from fig file" do
+  it 'appends environment variable from fig file' do
     input = <<-END
       config default
         add PATH=foo
       end
     END
-    fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}","",0]
+    fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
   end
 
-  it "appends empty environment variable" do
-    fig('-p XYZZY=foo -g XYZZY').should == ["foo","",0]
+  it 'appends empty environment variable' do
+    fig('-p XYZZY=foo -g XYZZY').should == ['foo', '', 0]
   end
 
-  it "ignores comments" do
+  it 'ignores comments' do
     input = <<-END
       #/usr/bin/env fig
 
@@ -107,7 +107,7 @@ describe "Fig" do
     fig('-g FOO', input)[0].should == 'BAR'
   end
 
-  it "publishes to remote repository" do
+  it 'publishes to remote repository' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     input = <<-END
@@ -116,12 +116,12 @@ describe "Fig" do
       end
     END
     fig('--publish foo/1.2.3', input)
-    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
-    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+    fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
   end
 
-  it "allows single and multiple override" do
+  it 'allows single and multiple override' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     [3,4,5].each do |point_ver|   # Publish some versions of foo
@@ -154,7 +154,7 @@ describe "Fig" do
     fig('--publish bar/4.5.6', input)
 
     input = <<-END
-      # Multiple overrides will work for "default", even if
+      # Multiple overrides will work for 'default', even if
       # indirectly specified.
       config default
         include :nondefault
@@ -177,7 +177,7 @@ describe "Fig" do
       config default
         include bar/4.5.6
         # Demonstrates the syntax for how a package overrides multiple dependencies
-        # (assuming the dependencies are resolved in a "default" config section)
+        # (assuming the dependencies are resolved in a 'default' config section)
         include baz/7.8.9:default override foo/1.2.3 override blah/2.0.0
         include cat/10.11.12 override foo/1.2.3
       end
@@ -187,12 +187,12 @@ describe "Fig" do
     fig('-u -i top/1 -g FOO')[0].should == 'foo123'
   end
 
-  it "publishes resource to remote repository" do
+  it 'publishes resource to remote repository' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.mkdir_p("tmp/bin")
-    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
-    fail unless system "chmod +x tmp/bin/hello"
+    FileUtils.mkdir_p('tmp/bin')
+    File.open('tmp/bin/hello', 'w') { |f| f << 'echo bar' }
+    fail unless system 'chmod +x tmp/bin/hello'
     input = <<-END
       resource tmp/bin/hello
       config default
@@ -200,24 +200,24 @@ describe "Fig" do
       end
     END
     fig('--publish foo/1.2.3', input)
-    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
-    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+    fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
-  it "publishes resource to remote repository using command line" do
+  it 'publishes resource to remote repository using command line' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.mkdir_p("tmp/bin")
-    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
-    fail unless system "chmod +x tmp/bin/hello"
+    FileUtils.mkdir_p('tmp/bin')
+    File.open('tmp/bin/hello', 'w') { |f| f << 'echo bar' }
+    fail unless system 'chmod +x tmp/bin/hello'
     fig('--publish foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
-    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
-    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+    fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
-  it "refuses to overwrite existing version in remote repository without being forced" do
+  it 'refuses to overwrite existing version in remote repository without being forced' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
     input = <<-END
@@ -226,8 +226,8 @@ describe "Fig" do
       end
     END
     fig('--publish foo/1.2.3', input)
-    fail unless File.exists? FIG_HOME + "/repos/foo/1.2.3/.fig"
-    fail unless File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+    fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'SHEEP'
 
     input = <<-END
@@ -244,23 +244,23 @@ describe "Fig" do
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'CHEESE'
   end
 
-  it "publishes to the local repo only when told to" do
+  it 'publishes to the local repo only when told to' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.mkdir_p("tmp/bin")
-    File.open("tmp/bin/hello", "w") { |f| f << "echo bar" }
-    fail unless system "chmod +x tmp/bin/hello"
+    FileUtils.mkdir_p('tmp/bin')
+    File.open('tmp/bin/hello', 'w') { |f| f << 'echo bar' }
+    fail unless system 'chmod +x tmp/bin/hello'
     fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
-    fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
   end
 
-  it "retrieves resource" do
+  it 'retrieves resource' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf("tmp")
-    FileUtils.mkdir_p("tmp/lib")
-    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
+    FileUtils.rm_rf('tmp')
+    FileUtils.mkdir_p('tmp/lib')
+    File.open('tmp/lib/hello', 'w') { |f| f << 'some library' }
     input = <<-END
       resource tmp/lib/hello
       config default
@@ -275,15 +275,15 @@ describe "Fig" do
       end
     END
     fig('-m', input)
-    File.read("tmp/lib2/foo/hello").should == "some library"
+    File.read('tmp/lib2/foo/hello').should == 'some library'
   end
 
-  it "retrieves resource that is a directory" do
+  it 'retrieves resource that is a directory' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf("tmp")
-    FileUtils.mkdir_p("tmp/lib")
-    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
+    FileUtils.rm_rf('tmp')
+    FileUtils.mkdir_p('tmp/lib')
+    File.open('tmp/lib/hello', 'w') { |f| f << 'some library' }
     # To copy the contents of a directory, instead of the directory itself,
     # use '/.' as a suffix to the directory name in 'append'.
     input = <<-END
@@ -300,16 +300,16 @@ describe "Fig" do
       end
     END
     fig('-m', input)
-    File.read("tmp/lib2/foo/hello").should == "some library"
+    File.read('tmp/lib2/foo/hello').should == 'some library'
   end
 
-  it "preserves the path after '//' when copying files into your project directory while retrieving" do
+  it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf("tmp")
-    FileUtils.mkdir_p("tmp/include")
-    File.open("tmp/include/hello.h", "w") { |f| f << "a header file" }
-    File.open("tmp/include/hello2.h", "w") { |f| f << "another header file" }
+    FileUtils.rm_rf('tmp')
+    FileUtils.mkdir_p('tmp/include')
+    File.open('tmp/include/hello.h', 'w') { |f| f << 'a header file' }
+    File.open('tmp/include/hello2.h', 'w') { |f| f << 'another header file' }
     input = <<-END
       resource tmp/include/hello.h
       resource tmp/include/hello2.h
@@ -328,17 +328,17 @@ describe "Fig" do
     END
     fig('-u', input)
 
-    File.read("tmp/include2/foo/include/hello.h").should == "a header file"
-    File.read("tmp/include2/foo/include/hello2.h").should == "another header file"
+    File.read('tmp/include2/foo/include/hello.h').should == 'a header file'
+    File.read('tmp/include2/foo/include/hello2.h').should == 'another header file'
   end
 
-  it "packages multiple resources" do
+  it 'packages multiple resources' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf("tmp")
-    FileUtils.mkdir_p("tmp/lib")
-    File.open("tmp/lib/hello", "w") { |f| f << "some library" }
-    File.open("tmp/lib/hello2", "w") { |f| f << "some other library" }
+    FileUtils.rm_rf('tmp')
+    FileUtils.mkdir_p('tmp/lib')
+    File.open('tmp/lib/hello', 'w') { |f| f << 'some library' }
+    File.open('tmp/lib/hello2', 'w') { |f| f << 'some other library' }
     input = <<-END
       resource tmp/lib/hello
       resource tmp/lib/hello2
@@ -355,17 +355,17 @@ describe "Fig" do
       end
     END
     fig('-m', input)
-    File.read("tmp/lib2/foo/hello").should == "some library"
-    File.read("tmp/lib2/foo/hello2").should == "some other library"
+    File.read('tmp/lib2/foo/hello').should == 'some library'
+    File.read('tmp/lib2/foo/hello2').should == 'some other library'
   end
 
-  it "packages multiple resources with wildcards" do
+  it 'packages multiple resources with wildcards' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf("tmp")
-    FileUtils.mkdir_p("tmp/lib")
-    File.open("tmp/lib/foo.jar", "w") { |f| f << "some library" }
-    File.open("tmp/lib/bar.jar", "w") { |f| f << "some other library" }
+    FileUtils.rm_rf('tmp')
+    FileUtils.mkdir_p('tmp/lib')
+    File.open('tmp/lib/foo.jar', 'w') { |f| f << 'some library' }
+    File.open('tmp/lib/bar.jar', 'w') { |f| f << 'some other library' }
     input = <<-END
       resource tmp/**/*.jar
       config default
@@ -380,27 +380,27 @@ describe "Fig" do
       end
     END
     fig('-m', input)
-    File.read("tmp/lib2/foo/foo.jar").should == "some library"
+    File.read('tmp/lib2/foo/foo.jar').should == 'some library'
   end
 
-  it "updates local packages if they already exist" do
+  it 'updates local packages if they already exist' do
     FileUtils.rm_rf(FIG_HOME)
     FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.mkdir_p("tmp/bin")
-    File.open("tmp/bin/hello", "w") { |f| f << "echo sheep" }
-    fail unless system "chmod +x tmp/bin/hello"
+    FileUtils.mkdir_p('tmp/bin')
+    File.open('tmp/bin/hello', 'w') { |f| f << 'echo sheep' }
+    fail unless system 'chmod +x tmp/bin/hello'
     fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
-    fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-m -i foo/1.2.3 -- hello')[0].should == 'sheep'
 
-    File.open("tmp/bin/hello", "w") { |f| f << "echo cheese" }
-    fail unless system "chmod +x tmp/bin/hello"
+    File.open('tmp/bin/hello', 'w') { |f| f << 'echo cheese' }
+    fail unless system 'chmod +x tmp/bin/hello'
     fig('--publish-local foo/1.2.3 --resource tmp/bin/hello --append PATH=@/tmp/bin')
-    fail if File.exists? FIG_REMOTE_DIR + "/foo/1.2.3/.fig"
+    fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
     fig('-m -i foo/1.2.3 -- hello')[0].should == 'cheese'
   end
 
-  it "prints the version number" do
+  it 'prints the version number' do
     %w/-v --version/.each do |option| 
       (out, err, exitstatus) = fig(option)
       exitstatus.should == 0

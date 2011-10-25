@@ -10,9 +10,9 @@ class Retriever
   def initialize(base_dir)
     @base_dir = base_dir
     @configs = {}
-    @fig_dir = File.join(@base_dir, ".fig")
+    @fig_dir = File.join(@base_dir, '.fig')
 
-    file = File.join(@fig_dir, "retrieve")
+    file = File.join(@fig_dir, 'retrieve')
     if File.exist?(file)
       load(file)
     end
@@ -44,10 +44,10 @@ class Retriever
 
   def save
     FileUtils.mkdir_p(@fig_dir)
-    File.open(File.join(@fig_dir, "retrieve"), 'w') do |f|
+    File.open(File.join(@fig_dir, 'retrieve'), 'w') do |f|
       @configs.each do |name,config|
         config.files.each do |target|
-          f << target << "=" << config.name << "/" << config.version << "\n"
+          f << target << '=' << config.name << '/' << config.version << "\n"
         end
       end
     end
@@ -65,7 +65,7 @@ private
         config = @configs[config_name]
         if config
           if config.version != config_version
-            raise "version mismatch in .figretrieve"
+            raise 'version mismatch in .figretrieve'
           end
         else
           config = new_config(config_name, config_version)
@@ -91,7 +91,7 @@ private
     if File.directory?(source)
       FileUtils.mkdir_p(target)
       Dir.foreach(source) do |child|
-        if child != "." and child != ".."
+        if child != '.' and child != '..'
           copy(File.join(source, child), File.join(relpath, child))
         end
       end

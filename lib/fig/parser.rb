@@ -18,10 +18,5 @@ module Fig
       end
       result.to_package(package_name, version_name, directory)
     end
-
-#    def parse_descriptor(descriptor)
-#      puts @parser.methods.sort
-#    end
   end
-
 end

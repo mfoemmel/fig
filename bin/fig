@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), "..", "lib"))
+$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
 
 require 'rubygems'
 require 'net/ftp'
@@ -25,10 +25,7 @@ end
 
 shell_command = nil
 ARGV.each_with_index do |arg, i|
-  if arg == "-"
-#    $stderr.puts "Use of single dash (-) is deprecated. Use double dash (--) instead"
-#    exit 1
-  elsif arg == "--"
+  if arg == '--'
     shell_command = ARGV[(i+1)..-1]
     ARGV.slice!(i..-1)
     break
@@ -44,34 +41,29 @@ remote_url = nil
 if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
   remote_url = ENV['FIG_REMOTE_URL']
   if remote_url.nil?
-    $stderr.puts "Please define the FIG_REMOTE_URL environment variable"
+    $stderr.puts 'Please define the FIG_REMOTE_URL environment variable'
     exit 1
   end
 end
 
 remote_user = nil
-if options[:publish]
-#  remote_user = ENV['FIG_REMOTE_USER']
-#  if remote_user.nil?
-#    $stderr.puts "Please define the FIG_REMOTE_USER environment variable"
-#    exit 1
-#  end
-end
 
 os = OS.new(options[:login])
-repos = Repository.new(os, File.expand_path(File.join(options[:home], 'repos')), remote_url, remote_user, options[:update], options[:update_if_missing])
-retriever = Retriever.new(".")
+repos = Repository.new(
+  os,
+  File.expand_path(File.join(options[:home], 'repos')),
+  remote_url,
+  remote_user,
+  options[:update],
+  options[:update_if_missing]
+)
+retriever = Retriever.new('.')
 at_exit { retriever.save }
 env = Environment.new(os, repos, vars, retriever)
 
 options[:modifiers].each do |modifier|
   env.apply_config_statement(nil, modifier, nil)
 end
-
-#if File.exist?(".fig")
-#  $stderr.puts "The '.fig' file is deprecated. Please rename to 'package.fig'"
-#  exit 1
-#end
 
 DEFAULT_FIG_FILE = 'package.fig'
 
@@ -121,7 +113,7 @@ if not options[:list_configs].empty?
 end
 
 if input
-  package = Parser.new.parse_package(nil, nil, ".", input)
+  package = Parser.new.parse_package(nil, nil, '.', input)
   direct_retrieves=[]
   if options[:retrieve]
     package.retrieves.each do |var, path|
@@ -140,26 +132,26 @@ if input
     end
   end
 else
-  package = Package.new(nil, nil, ".", [])
+  package = Package.new(nil, nil, '.', [])
 end
 
 if options[:publish] || options[:publish_local]
   if !argv.empty?
-    $stderr.puts "Unexpected arguments: #{argv.join(' ')}"
+    $stderr.puts %Q<Unexpected arguments: #{argv.join(' ')}>
     exit 10
   end
   package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
   if package_name.nil? || version_name.nil?
-    $stderr.puts "Please specify a package name and a version name"
+    $stderr.puts 'Please specify a package name and a version name'
     exit 10
   end
   if not options[:modifiers].empty?
-    publish_statements = options[:resources] + options[:archives] + [Configuration.new("default", options[:modifiers])]
-    publish_statements << Publish.new("default","default")
+    publish_statements = options[:resources] + options[:archives] + [Configuration.new('default', options[:modifiers])]
+    publish_statements << Publish.new('default','default')
   elsif not package.statements.empty?
     publish_statements = package.statements
   else
-    $stderr.puts "Nothing to publish"
+    $stderr.puts 'Nothing to publish'
     exit 1
   end
   if options[:publish]
@@ -167,10 +159,10 @@ if options[:publish] || options[:publish_local]
     if repos.list_remote_packages.include?("#{package_name}/#{version_name}")
       puts "#{package_name}/#{version_name} has already been published"
       if not options[:force]
-        puts "Use the --force option if you really want to overwrite, or us --publish-local for testing"
+        puts 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
         exit 1
       else
-        puts "Overwriting..."
+        puts 'Overwriting...'
       end
     end
   end
@@ -188,7 +180,7 @@ elsif argv[0]
 elsif input
   env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
 else
-  $stderr.puts USAGE 
+  $stderr.puts USAGE
   $stderr.puts %q<Run "fig --help" for a full list of commands.>
   exit 1
 end

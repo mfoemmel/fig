@@ -22,12 +22,12 @@ EOF
 
     def self.with_generated_batch_script(cmd)
       command = cmd.join(' ')
-      template = ERB.new(BATCH_SCRIPT_TEMPLATE, 0, "%")
+      template = ERB.new(BATCH_SCRIPT_TEMPLATE, 0, '%')
       output = template.result(binding)
       begin
-        tf = File.new("C:/tmp/fig_command.bat", "w")
+        tf = File.new('C:/tmp/fig_command.bat', 'w')
         FileUtils.chmod(0755, tf.path)
-        File.open(tf.path, "w") do |fh|
+        File.open(tf.path, 'w') do |fh|
           fh.puts output
         end
         tf.close

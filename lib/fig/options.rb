@@ -34,7 +34,7 @@ EOF
         line = nil
 
         begin
-          File.open("#{File.expand_path(File.dirname(__FILE__) + "/../../VERSION")}") { |file| line = file.gets }
+          File.open("#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}") { |file| line = file.gets }
         rescue
           $stderr.puts 'Could not retrieve version number. Something has mucked with your gem install.'
           exit 1
@@ -64,14 +64,14 @@ EOF
       options[:cleans] = []
       opts.on('--clean PKG', 'remove package from $FIG_HOME') { |descriptor| options[:cleans] <<  descriptor }
 
-      options[:config] = "default"
-      opts.on('-c', '--config CFG', "apply configuration CFG, default is 'default'") { |config| options[:config] = config }
+      options[:config] = 'default'
+      opts.on('-c', '--config CFG', %q<apply configuration CFG, default is 'default'>) { |config| options[:config] = config }
 
       options[:debug] = false
       opts.on('-d', '--debug', 'print debug info') { options[:debug] = true }
 
       options[:input] = nil
-      opts.on('--file FILE', "read fig file FILE. Use '-' for stdin. See also --no-file") { |path| options[:input] = path }
+      opts.on('--file FILE', %q<read fig file FILE. Use '-' for stdin. See also --no-file>) { |path| options[:input] = path }
 
       options[:force] = nil
       opts.on('--force', 'force-overwrite existing version of a package to the remote repo') { |force| options[:force] = force }
@@ -104,11 +104,6 @@ EOF
       options[:publish_local] = nil
       opts.on('--publish-local PKG', 'install package only in $FIG_HOME') { |publish_local| options[:publish_local] = publish_local }
 
-#      opts.on('-o', '--override PKG', 'override version of included package') do |descriptor|
-#        package_name, config_name, version_name = parse_descriptor(descriptor)
-#        options[:modifiers] << Include.new(package_name, config_name, version_name, {})
-#      end
-
       options[:resources] =[]
       opts.on('--resource FULLPATH', 'include FULLPATH resource in package (when using --publish)') do |path|
         options[:resources] << Resource.new(path)
@@ -125,16 +120,10 @@ EOF
       options[:update_if_missing] = false
       opts.on('-m', '--update-if-missing', 'check remote repo for updates only if package missing from $FIG_HOME') { options[:update_if_missing] = true; options[:retrieve] = true }
 
-      options[:home] = ENV['FIG_HOME'] || File.expand_path("~/.fighome")
+      options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
     end
 
     parser.parse!(argv)
-
-#    if !options[:publish] && !options[:publish_local] && argv.empty?   
-#      parser.warn 'Command required!'
-#      $stderr.puts parser.help
-#      exit 1
-#    end
 
     return options, argv
   end

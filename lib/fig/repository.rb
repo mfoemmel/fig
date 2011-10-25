@@ -47,7 +47,7 @@ module Fig
       @os.clear_directory(temp_dir)
       local_dir = local_dir_for_package(package_name, version_name)
       @os.clear_directory(local_dir)
-      fig_file = File.join(temp_dir, ".fig")
+      fig_file = File.join(temp_dir, '.fig')
       content = bundle_resources(package_statements).map do |statement|
         if statement.is_a?(Publish)
           nil
@@ -56,7 +56,7 @@ module Fig
             archive_name = statement.url
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
           else
-            archive_name = statement.url.split("/").last
+            archive_name = statement.url.split('/').last
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
           end
           if is_url?(statement.url)
@@ -66,7 +66,7 @@ module Fig
             archive_local = statement.url
           end
           @os.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
-          @os.copy(archive_local, local_dir + "/" + archive_name)
+          @os.copy(archive_local, local_dir + '/' + archive_name)
           if statement.is_a?(Archive)
             @os.unpack_archive(local_dir, archive_name)
           end
@@ -92,7 +92,7 @@ module Fig
       end
       if resources.size > 0
         resources = expand_globs_from(resources)
-        file = "resources.tar.gz"
+        file = 'resources.tar.gz'
         @os.create_archive(file, resources)
         new_package_statements.unshift(Archive.new(file))
         at_exit { File.delete(file) }
@@ -133,9 +133,9 @@ module Fig
     end
 
     def read_package_from_directory(dir, package_name, version_name)
-      file = File.join(dir, ".fig")
+      file = File.join(dir, '.fig')
       if not File.exist?(file)
-        file = File.join(dir, "package.fig")
+        file = File.join(dir, 'package.fig')
       end
       if not File.exist?(file)
         $stderr.puts "Fig file not found for package: #{file}"
@@ -174,13 +174,13 @@ module Fig
         @os.clear_directory(temp_dir)
         package.archive_urls.each do |archive_url|
           if not is_url?(archive_url)
-            archive_url = remote_dir_for_package(package_name, version_name) + "/" + archive_url
+            archive_url = remote_dir_for_package(package_name, version_name) + '/' + archive_url
           end
           @os.download_archive(archive_url, File.join(temp_dir))
         end
         package.resource_urls.each do |resource_url|
           if not is_url?(resource_url)
-            resource_url = remote_dir_for_package(package_name, version_name) + "/" + resource_url
+            resource_url = remote_dir_for_package(package_name, version_name) + '/' + resource_url
           end
           @os.download_resource(resource_url, File.join(temp_dir))
         end
@@ -188,11 +188,11 @@ module Fig
         @os.clear_directory(local_dir)
         # some packages contain no files, only a fig file.
         if not (package.archive_urls.empty? && package.resource_urls.empty?)
-          FileUtils.mv(Dir.glob(File.join(temp_dir, "*")), local_dir)
+          FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
         end
         write_local_package(package_name, version_name, package)
       rescue
-        $stderr.puts "Install failed, cleaning up"
+        $stderr.puts 'Install failed, cleaning up'
         delete_local_package(package_name, version_name)
         exit 10
       end
@@ -223,7 +223,7 @@ module Fig
     end
 
     def local_fig_file_for_package(package_name, version_name)
-      File.join(local_dir_for_package(package_name, version_name), ".fig")
+      File.join(local_dir_for_package(package_name, version_name), '.fig')
     end
 
     def remote_dir_for_package(package_name, version_name)
@@ -231,7 +231,7 @@ module Fig
     end
 
     def temp_dir_for_package(package_name, version_name)
-      File.join(@local_repository_dir, "tmp")
+      File.join(@local_repository_dir, 'tmp')
     end
 
     def package_missing?(package_name, version_name)
