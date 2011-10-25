@@ -41,7 +41,7 @@ remote_url = nil
 if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
   remote_url = ENV['FIG_REMOTE_URL']
   if remote_url.nil?
-    $stderr.puts 'Please define the FIG_REMOTE_URL environment variable'
+    $stderr.puts 'Please define the FIG_REMOTE_URL environment variable.'
     exit 1
   end
 end
@@ -78,7 +78,7 @@ else
   if os.exist?(options[:input])
     input = os.read(options[:input])
   else
-    $stderr.puts "File not found: #{options[:input]}"
+    $stderr.puts %Q<File not found: "#{options[:input]}".>
     exit 1
   end
 end
@@ -142,7 +142,7 @@ if options[:publish] || options[:publish_local]
   end
   package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
   if package_name.nil? || version_name.nil?
-    $stderr.puts 'Please specify a package name and a version name'
+    $stderr.puts 'Please specify a package name and a version name.'
     exit 10
   end
   if not options[:modifiers].empty?
@@ -151,13 +151,13 @@ if options[:publish] || options[:publish_local]
   elsif not package.statements.empty?
     publish_statements = package.statements
   else
-    $stderr.puts 'Nothing to publish'
+    $stderr.puts 'Nothing to publish.'
     exit 1
   end
   if options[:publish]
     puts "Checking status of #{package_name}/#{version_name}..."
     if repos.list_remote_packages.include?("#{package_name}/#{version_name}")
-      puts "#{package_name}/#{version_name} has already been published"
+      puts "#{package_name}/#{version_name} has already been published."
       if not options[:force]
         puts 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
         exit 1
@@ -166,7 +166,7 @@ if options[:publish] || options[:publish_local]
       end
     end
   end
-  puts "Publishing #{package_name}/#{version_name}"
+  puts "Publishing #{package_name}/#{version_name}."
   repos.publish_package(publish_statements, package_name, version_name, options[:publish_local])
 elsif options[:echo]
   puts env[options[:echo]]

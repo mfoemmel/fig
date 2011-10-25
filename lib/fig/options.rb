@@ -26,7 +26,7 @@ EOF
       opts.banner = USAGE
       opts.on('-?', '-h','--help','display this help text') do
         puts opts.help
-        puts "\n    --  end of fig options; everything following is a command to run in the fig environment\n\n"
+        puts "\n    --  end of fig options; everything following is a command to run in the fig environment.\n\n"
         exit 0
       end 
 
@@ -39,7 +39,7 @@ EOF
           $stderr.puts 'Could not retrieve version number. Something has mucked with your gem install.'
           exit 1
         end
-        
+
         if line !~ /\d+\.\d+\.\d+/
           $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your gem install.>
           exit 1

@@ -31,7 +31,7 @@ module Fig
     def register_package(package)
       name = package.package_name
       if @packages[name]
-        $stderr.puts "Package already exists with name: #{name}"
+        $stderr.puts %Q<There is already a package with the name "#{name}".>
         exit 10
       end
       @packages[name] = package

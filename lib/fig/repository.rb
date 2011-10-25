@@ -192,7 +192,7 @@ module Fig
         end
         write_local_package(package_name, version_name, package)
       rescue
-        $stderr.puts 'Install failed, cleaning up'
+        $stderr.puts 'Install failed, cleaning up.'
         delete_local_package(package_name, version_name)
         exit 10
       end
