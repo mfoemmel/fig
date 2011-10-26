@@ -87,7 +87,6 @@ options[:cleans].each do |descriptor|
   package_name, version_name = descriptor.split('/')
   repos.clean(package_name, version_name)
 end
-
 if options[:list]
   repos.list_packages.sort.each do |item|
     puts item
@@ -179,7 +178,7 @@ elsif argv[0]
   env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
 elsif input
   env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
-else
+elsif !repos.updating?
   $stderr.puts USAGE
   $stderr.puts %q<Run "fig --help" for a full list of commands.>
   exit 1

@@ -107,6 +107,10 @@ module Fig
       read_local_package(package_name, version_name)
     end
 
+    def updating?
+      return @update || @update_if_missing
+    end
+
     def update_package(package_name, version_name)
       remote_fig_file = remote_fig_file_for_package(package_name, version_name)
       local_fig_file = local_fig_file_for_package(package_name, version_name)
