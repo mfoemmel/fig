@@ -1,3 +1,4 @@
+require 'log4r'
 require 'ostruct'
 require 'set'
 
@@ -7,9 +8,8 @@ require 'set'
 # we never have files from two different versions of the same package in the user's
 # working directory.
 class Retriever
-  def initialize(base_dir, trace_destination = $stderr)
+  def initialize(base_dir)
     @base_dir = base_dir
-    @trace_destination = trace_destination
     @configs = {}
     @fig_dir = File.join(@base_dir, '.fig')
 
@@ -24,7 +24,7 @@ class Retriever
       @config = @configs[name]
       if @config && @config.version != version
         @config.files.each do |relpath|
-          @trace_destination.puts "\033[31m- [#{@config.name}/#{@config.version}] #{relpath}\033[0m"
+          Log4r::Logger['fig'].info "- [#{@config.name}/#{@config.version}] #{relpath}"
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
         @config = nil
@@ -98,7 +98,7 @@ private
       end
     else
       if !File.exist?(target) || File.mtime(source) > File.mtime(target)
-        @trace_destination.puts "\033[32m+ [#{@config.name}/#{@config.version}] #{relpath}\033[0m"
+        Log4r::Logger['fig'].info "+ [#{@config.name}/#{@config.version}] #{relpath}"
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target, :preserve => true)
       end

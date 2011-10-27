@@ -9,6 +9,7 @@ require 'log4r'
 require 'fig/retriever'
 require 'fig/options'
 require 'fig/environment'
+require 'fig/logging'
 require 'fig/repository'
 require 'fig/os'
 require 'fig/parser'
@@ -35,7 +36,8 @@ end
 
 options, argv = parse_options(ARGV)
 
-logger = Log4r::Logger.new('fig')
+Fig::Logging.initialize_logging()
+logger = Log4r::Logger['fig']
 
 vars = {}
 ENV.each {|key,value| vars[key]=value }

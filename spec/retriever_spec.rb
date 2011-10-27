@@ -1,5 +1,4 @@
 require 'fig/retriever'
-require 'stringio'
 
 describe 'Retriever' do
   it 'retrieves single file' do
@@ -14,9 +13,7 @@ describe 'Retriever' do
     File.open('tmp/baz.txt', 'w') {|f| f << 'BAZ'}
 
     # Retrieve files A and B
-    #
-    # Use a StringIO object as a platform agnostic /dev/null.
-    r = Retriever.new(test_dir, StringIO.new)
+    r = Retriever.new(test_dir)
     r.with_config('foo', '1.2.3') do
       r.retrieve('tmp/foo.txt', 'foo.txt')
       r.retrieve('tmp/bar.txt', 'bar.txt')
@@ -35,7 +32,7 @@ describe 'Retriever' do
 
     # Save and reload
     r.save
-    r = Retriever.new(test_dir, StringIO.new)
+    r = Retriever.new(test_dir)
 
     # Switch back to original version
     r.with_config('foo', '1.2.3') do
@@ -57,7 +54,7 @@ describe 'Retriever' do
     File.open('tmp/executable', 'w') {|f| f << 'executable'}
     FileUtils.chmod(0755, 'tmp/executable')
 
-    r = Retriever.new(test_dir, StringIO.new)
+    r = Retriever.new(test_dir)
     r.with_config('foo', '1.2.3') do
       r.retrieve('tmp/plain', 'plain')
       r.retrieve('tmp/executable', 'executable')
