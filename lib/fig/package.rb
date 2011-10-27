@@ -1,3 +1,5 @@
+require 'log4r'
+
 module Fig
   class Package
     attr_reader :package_name, :version_name, :directory, :statements
@@ -15,7 +17,7 @@ module Fig
       @statements.each do |stmt|
         return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
       end
-      $stderr.puts "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
+      Log4r::Logger['fig'].fatal "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
       exit 10
     end
 

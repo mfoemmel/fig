@@ -1,3 +1,4 @@
+require 'log4r'
 require 'polyglot'
 require 'treetop'
 
@@ -13,7 +14,7 @@ module Fig
       input = input.gsub(/#.*$/, '')
       result = @parser.parse(" #{input} ")
       if result.nil?
-        $stderr.puts "#{directory}: #{@parser.failure_reason}"
+        Log4r::Logger['fig'].fatal "#{directory}: #{@parser.failure_reason}"
         exit 10
       end
       result.to_package(package_name, version_name, directory)

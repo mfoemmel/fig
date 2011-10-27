@@ -4,6 +4,7 @@ $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
 
 require 'rubygems'
 require 'net/ftp'
+require 'log4r'
 
 require 'fig/retriever'
 require 'fig/options'
@@ -33,6 +34,8 @@ ARGV.each_with_index do |arg, i|
 end
 
 options, argv = parse_options(ARGV)
+
+logger = Log4r::Logger.new('fig')
 
 vars = {}
 ENV.each {|key,value| vars[key]=value }
@@ -87,7 +90,6 @@ options[:cleans].each do |descriptor|
   package_name, version_name = descriptor.split('/')
   repos.clean(package_name, version_name)
 end
-
 if options[:list]
   repos.list_packages.sort.each do |item|
     puts item
@@ -155,18 +157,18 @@ if options[:publish] || options[:publish_local]
     exit 1
   end
   if options[:publish]
-    puts "Checking status of #{package_name}/#{version_name}..."
+    logger.info "Checking status of #{package_name}/#{version_name}..."
     if repos.list_remote_packages.include?("#{package_name}/#{version_name}")
-      puts "#{package_name}/#{version_name} has already been published."
+      logger.info "#{package_name}/#{version_name} has already been published."
       if not options[:force]
-        puts 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
+        logger.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
         exit 1
       else
-        puts 'Overwriting...'
+        logger.info 'Overwriting...'
       end
     end
   end
-  puts "Publishing #{package_name}/#{version_name}."
+  logger.info "Publishing #{package_name}/#{version_name}."
   repos.publish_package(publish_statements, package_name, version_name, options[:publish_local])
 elsif options[:echo]
   puts env[options[:echo]]
@@ -179,7 +181,7 @@ elsif argv[0]
   env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
 elsif input
   env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
-else
+elsif !repos.updating?
   $stderr.puts USAGE
   $stderr.puts %q<Run "fig --help" for a full list of commands.>
   exit 1
