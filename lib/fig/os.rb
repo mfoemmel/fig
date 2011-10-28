@@ -149,7 +149,8 @@ module Fig
             ftp.getbinaryfile(uri.path, path, 256*1024)
             return true
           end
-        rescue Net::FTPPermError
+        rescue Net::FTPPermError => e
+          Log4r::Logger['fig'].warn e
           raise NotFoundException.new
         end
       when 'http'
@@ -164,6 +165,7 @@ module Fig
       when 'ssh'
         # TODO need better way to do conditional download
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0
+        # Requires that remote installation of fig be at the same location as the local machine.
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         ssh_download(uri.user, uri.host, path, cmd)
       else
