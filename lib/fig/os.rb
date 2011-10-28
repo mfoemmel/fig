@@ -143,9 +143,10 @@ module Fig
         ftp_login(ftp, uri.host)
         begin
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
+            Log4r::Logger['fig'].debug "#{path} is up to date."
             return false
           else
-            Log4r::Logger['fig'].info "downloading #{url}"
+            log_download(url, path)
             ftp.getbinaryfile(uri.path, path, 256*1024)
             return true
           end
@@ -155,7 +156,7 @@ module Fig
         end
       when 'http'
         http = Net::HTTP.new(uri.host)
-        Log4r::Logger['fig'].info "downloading #{url}"
+        log_download(url, path)
         File.open(path, 'wb') do |file|
           file.binmode
           http.get(uri.path) do |block|
@@ -167,6 +168,7 @@ module Fig
         timestamp = File.exist?(path) ? File.mtime(path).to_i : 0
         # Requires that remote installation of fig be at the same location as the local machine.
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
+        log_download(url, path)
         ssh_download(uri.user, uri.host, path, cmd)
       else
         Log4r::Logger['fig'].fatal "Unknown protocol: #{url}"
@@ -394,5 +396,10 @@ module Fig
       end
     end
 
+    private
+
+    def log_download(url, path)
+      Log4r::Logger['fig'].info "Downloading #{url} to #{path}."
+    end
   end
 end
