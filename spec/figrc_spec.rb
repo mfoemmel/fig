@@ -1,4 +1,3 @@
-
 require 'stringio'
 require 'tempfile'
 
@@ -31,4 +30,8 @@ describe 'FigRC' do
     configuration['foo'].should == 'bar'
   end
 
+  it 'handles no repository config and no override specified' do
+    configuration = Fig::FigRC.find(nil,nil)
+    configuration.should_not == nil
+  end
 end

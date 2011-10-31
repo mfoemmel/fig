@@ -9,6 +9,7 @@ require 'log4r'
 require 'fig/retriever'
 require 'fig/options'
 require 'fig/environment'
+require 'fig/figrc'
 require 'fig/logging'
 require 'fig/repository'
 require 'fig/os'
@@ -35,6 +36,8 @@ ARGV.each_with_index do |arg, i|
 end
 
 options, argv = parse_options(ARGV)
+
+configuration = Fig::FigRC.find(nil,options[:figrc])
 
 Fig::Logging.initialize_logging()
 logger = Log4r::Logger['fig']

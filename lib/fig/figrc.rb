@@ -7,13 +7,14 @@ module Fig
     def self.find(retriever, override_path)
       # 1) pull from override path
       # 2) look in remote repo (using Retriever)
-      Fig::ApplicationConfiguration.new(
+      return ApplicationConfiguration.new(nil) if override_path.nil?
+      ApplicationConfiguration.new(
         JSON.parse(File::open(override_path).read)
       )
     end
 
     def self.load_from_handle(handle)
-      Fig::ApplicationConfiguration.new(
+      ApplicationConfiguration.new(
         JSON.parse(handle.read)
       )
     end
