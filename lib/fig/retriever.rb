@@ -19,7 +19,7 @@ class Retriever
     end
   end
 
-  def with_config(name, version)
+  def with_package_config(name, version)
     if name and version
       @config = @configs[name]
       if @config && @config.version != version

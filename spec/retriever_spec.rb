@@ -14,7 +14,7 @@ describe 'Retriever' do
 
     # Retrieve files A and B
     r = Retriever.new(test_dir)
-    r.with_config('foo', '1.2.3') do
+    r.with_package_config('foo', '1.2.3') do
       r.retrieve('tmp/foo.txt', 'foo.txt')
       r.retrieve('tmp/bar.txt', 'bar.txt')
       File.read(File.join(test_dir, 'foo.txt')).should == 'FOO'
@@ -22,7 +22,7 @@ describe 'Retriever' do
     end
 
     # Retrieve files B and C for a different version
-    r.with_config('foo', '4.5.6') do
+    r.with_package_config('foo', '4.5.6') do
       r.retrieve('tmp/bar.txt', 'bar.txt')
       r.retrieve('tmp/baz.txt', 'baz.txt')
       File.read(File.join(test_dir, 'bar.txt')).should == 'BAR'
@@ -35,7 +35,7 @@ describe 'Retriever' do
     r = Retriever.new(test_dir)
 
     # Switch back to original version
-    r.with_config('foo', '1.2.3') do
+    r.with_package_config('foo', '1.2.3') do
       r.retrieve('tmp/foo.txt', 'foo.txt')
       r.retrieve('tmp/bar.txt', 'bar.txt')
 
@@ -55,7 +55,7 @@ describe 'Retriever' do
     FileUtils.chmod(0755, 'tmp/executable')
 
     r = Retriever.new(test_dir)
-    r.with_config('foo', '1.2.3') do
+    r.with_package_config('foo', '1.2.3') do
       r.retrieve('tmp/plain', 'plain')
       r.retrieve('tmp/executable', 'executable')
 
