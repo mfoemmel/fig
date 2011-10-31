@@ -120,6 +120,8 @@ EOF
       options[:update_if_missing] = false
       opts.on('-m', '--update-if-missing', 'check remote repo for updates only if package missing from $FIG_HOME') { options[:update_if_missing] = true; options[:retrieve] = true }
 
+      opts.on('--figrc PATH', 'use PATH file as .rc file for Fig') { |path| options[:figrc] = path }
+
       options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
     end
 
