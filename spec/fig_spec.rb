@@ -33,17 +33,7 @@ class Popen
   end
 end
 
-FIG_HOME = File.expand_path(File.dirname(__FILE__) + '/../tmp/fighome')
-FileUtils.mkdir_p(FIG_HOME)
-ENV['FIG_HOME'] = FIG_HOME
-
-FIG_REMOTE_DIR = File.expand_path(File.dirname(__FILE__) + '/../tmp/remote')
-FileUtils.mkdir_p(FIG_REMOTE_DIR)
-ENV['FIG_REMOTE_URL'] = "ssh://#{ENV['USER']}@localhost#{FIG_REMOTE_DIR}"
-
-FIG_BIN = File.expand_path(File.dirname(__FILE__) + '/../bin')
-ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
-FIG_EXE = "#{FIG_BIN}/fig"
+setup_repository
 
 def fig(args, input=nil)
   args = "--file - #{args}" if input

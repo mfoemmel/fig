@@ -6,6 +6,8 @@ require 'fig/retriever'
 
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
+setup_repository()
+
 describe 'FigRC' do
   it 'parses an application configuration file(handle)' do
     configuration = Fig::FigRC.load_from_handle(
