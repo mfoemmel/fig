@@ -30,7 +30,7 @@ class Retriever
         @config = nil
       end
       if not @config
-        @config = new_config(name, version)
+        @config = new_package_config(name, version)
         @configs[name] = @config
       end
     else
@@ -69,7 +69,7 @@ private
             raise 'version mismatch in .figretrieve'
           end
         else
-          config = new_config(config_name, config_version)
+          config = new_package_config(config_name, config_version)
           @configs[config_name] = config
         end
         config.files << target
@@ -79,7 +79,7 @@ private
     end
   end
 
-  def new_config(name, version)
+  def new_package_config(name, version)
     config = OpenStruct.new
     config.name = name
     config.version = version
