@@ -103,7 +103,8 @@ module Fig
     end
 
     def load_package(package_name, version_name)
-      Log4r::Logger['fig'].debug "Considering #{package_name}/#{version_name}."
+      # TODO configure logging
+      #Log4r::Logger['fig'].debug "Considering #{package_name}/#{version_name}."
       if @update || (@update_if_missing && package_missing?(package_name, version_name))
         update_package(package_name, version_name)
       end

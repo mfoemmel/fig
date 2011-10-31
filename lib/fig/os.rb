@@ -399,7 +399,8 @@ module Fig
     private
 
     def log_download(url, path)
-      Log4r::Logger['fig'].info "Downloading #{url} to #{path}."
+      # TODO configure logging
+      #Log4r::Logger['fig'].info "Downloading #{url} to #{path}."
     end
   end
 end
