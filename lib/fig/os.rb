@@ -373,8 +373,7 @@ module Fig
         return false
       when NOT_FOUND
         tempfile.delete
-        Log4r::Logger['fig'].fatal "File not found: #{path}"
-        exit 10
+        raise NotFoundException.new
       when SUCCESS
         FileUtils.mv(tempfile.path, path)
         return true

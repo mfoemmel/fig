@@ -37,8 +37,6 @@ end
 
 options, argv = parse_options(ARGV)
 
-configuration = Fig::FigRC.find(nil,options[:figrc])
-
 Fig::Logging.initialize_logging()
 logger = Log4r::Logger['fig']
 
@@ -53,6 +51,8 @@ if options[:update] || options[:publish] || options[:update_if_missing] || optio
     exit 1
   end
 end
+
+configuration = Fig::FigRC.find(options[:figrc],remote_url,options[:login],options[:home])
 
 remote_user = nil
 

@@ -20,9 +20,10 @@ def setup_repository()
 
   self.class.const_set(:FIG_REMOTE_DIR, File.expand_path(File.dirname(__FILE__) + '/../tmp/remote'))
   FileUtils.mkdir_p(FIG_REMOTE_DIR)
-  ENV['FIG_REMOTE_URL'] = "ssh://#{ENV['USER']}@localhost#{FIG_REMOTE_DIR}"
+  FileUtils.mkdir_p(File.join(FIG_REMOTE_DIR,'_meta'))
+  ENV['FIG_REMOTE_URL'] = %Q<ssh://#{ENV['USER']}@localhost#{FIG_REMOTE_DIR}>
 
   self.class.const_set(:FIG_BIN, File.expand_path(File.dirname(__FILE__) + '/../bin'))
   ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
-  self.class.const_set(:FIG_EXE, "#{FIG_BIN}/fig")
+  self.class.const_set(:FIG_EXE, %Q<#{FIG_BIN}/fig>)
 end
