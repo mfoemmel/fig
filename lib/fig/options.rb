@@ -19,6 +19,9 @@ to $HOME/.fighome).
 
 EOF
 
+  LOG_LEVELS = %w[ off fatal error warn info debug all ]
+  LOG_ALIASES = { 'warning' => 'warn' }
+
   def parse_options(argv)
     options = {}
 
@@ -121,6 +124,9 @@ EOF
       opts.on('-m', '--update-if-missing', 'check remote repo for updates only if package missing from $FIG_HOME') { options[:update_if_missing] = true; options[:retrieve] = true }
 
       opts.on('--figrc PATH', 'use PATH file as .rc file for Fig') { |path| options[:figrc] = path }
+
+      level_list = LOG_LEVELS.join(', ')
+      opts.on('--log-level LEVEL', LOG_LEVELS, LOG_ALIASES, 'set logging level to LEVEL', "  (#{level_list})") { |log_level| options[:log_level] = log_level }
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
     end

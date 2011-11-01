@@ -9,7 +9,7 @@ require 'fig'
 require 'fig/logging'
 
 STRING_IO = StringIO.new
-Fig::Logging.initialize_logging(nil, true)
+Fig::Logging.initialize_logging(nil, 'off', true)
 Log4r::Logger['fig'].add( Log4r::IOOutputter.new('fig', STRING_IO) )
 
 def setup_repository()

@@ -37,7 +37,7 @@ end
 
 options, argv = parse_options(ARGV)
 
-Fig::Logging.initialize_logging()
+Fig::Logging.initialize_logging(nil,options[:log_level])
 logger = Log4r::Logger['fig']
 
 vars = {}
