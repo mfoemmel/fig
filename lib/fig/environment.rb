@@ -1,7 +1,7 @@
-require 'log4r'
 require 'stringio'
 
 require 'fig/backtrace'
+require 'fig/logging'
 
 module Fig
 
@@ -34,7 +34,7 @@ module Fig
     def register_package(package)
       name = package.package_name
       if @packages[name]
-        Log4r::Logger['fig'].fatal %Q<There is already a package with the name "#{name}".>
+        Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
         exit 10
       end
       @packages[name] = package
@@ -153,7 +153,7 @@ module Fig
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
         stacktrace = string_handle.to_s
-        Log4r::Logger['fig'].fatal "Version mismatch: #{package_name}" + stacktrace.empty? ? '' : "\n#{stacktrace}"
+        Fig::Logging.fatal "Version mismatch: #{package_name}" + stacktrace.empty? ? '' : "\n#{stacktrace}"
         exit 10
       end
       package
@@ -187,7 +187,7 @@ module Fig
       arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
         package = @packages[$1]
         if package.nil?
-          Log4r::Logger['fig'].fatal "Package not found: #{$1}"
+          Fig::Logging.fatal "Package not found: #{$1}"
           exit 10
         end
         package.directory

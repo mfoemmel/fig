@@ -1,5 +1,5 @@
-require 'log4r'
 
+require 'fig/logging'
 require 'fig/parser'
 
 module Fig
@@ -103,7 +103,7 @@ module Fig
     end
 
     def load_package(package_name, version_name)
-      Log4r::Logger['fig'].debug "Considering #{package_name}/#{version_name}."
+      Logging.debug "Considering #{package_name}/#{version_name}."
       if @update || (@update_if_missing && package_missing?(package_name, version_name))
         update_package(package_name, version_name)
       end
@@ -122,7 +122,7 @@ module Fig
           install_package(package_name, version_name)
         end
       rescue NotFoundException
-        Log4r::Logger['fig'].fatal "Package not found in remote repository: #{package_name}/#{version_name}"
+        Logging.fatal "Package not found in remote repository: #{package_name}/#{version_name}"
         delete_local_package(package_name, version_name)
         exit 1
       end
@@ -145,7 +145,7 @@ module Fig
         file = File.join(dir, 'package.fig')
       end
       if not File.exist?(file)
-        Log4r::Logger['fig'].fatal "Fig file not found for package: #{file}"
+        Logging.fatal "Fig file not found for package: #{file}"
         exit 10
       end
       read_package_from_file(file, package_name, version_name)
@@ -153,7 +153,7 @@ module Fig
 
     def read_package_from_file(file_name, package_name, version_name)
       if not @os.exist?(file_name)
-        Log4r::Logger['fig'].fatal "Package not found: #{package_name}/#{version_name}"
+        Logging.fatal "Package not found: #{package_name}/#{version_name}"
         exit 1
       end
       modified_time = @os.mtime(file_name)
@@ -165,7 +165,7 @@ module Fig
       descriptor = "#{package_name}/#{version_name}"
       dir = @overrides[descriptor]
       if dir
-        Log4r::Logger['fig'].info "override: #{descriptor}=#{dir}"
+        Logging.info "override: #{descriptor}=#{dir}"
       else
         dir = File.join(@local_repository_dir, package_name, version_name)
       end
@@ -199,7 +199,7 @@ module Fig
         end
         write_local_package(package_name, version_name, package)
       rescue
-        Log4r::Logger['fig'].fatal 'Install failed, cleaning up.'
+        Logging.fatal 'Install failed, cleaning up.'
         delete_local_package(package_name, version_name)
         exit 10
       end

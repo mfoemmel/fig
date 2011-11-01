@@ -2,7 +2,6 @@ require 'fileutils'
 # Must specify absolute path of ::Archive when using
 # this module to avoid conflicts with Fig::Package::Archive
 require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
-require 'log4r'
 require 'uri'
 require 'net/http'
 require 'net/ssh'
@@ -10,6 +9,8 @@ require 'net/sftp'
 require 'net/netrc'
 require 'tempfile'
 require 'highline/import'
+
+require 'fig/logging'
 
 module Fig
   class NotFoundException < Exception
@@ -72,7 +73,7 @@ module Fig
       begin
         uri = URI.parse(url)
       rescue
-        Log4r::Logger['fig'].fatal %Q<Unable to parse url: "#{url}">
+        Logging.fatal %Q<Unable to parse url: "#{url}">
         exit 10
       end
       case uri.scheme
@@ -98,7 +99,7 @@ module Fig
         end
         packages
       else
-        Log4r::Logger['fig'].fatal "Protocol not supported: #{url}"
+        Logging.fatal "Protocol not supported: #{url}"
         exit 10
       end
     end
@@ -143,7 +144,7 @@ module Fig
         ftp_login(ftp, uri.host)
         begin
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
-            Log4r::Logger['fig'].debug "#{path} is up to date."
+            Logging.debug "#{path} is up to date."
             return false
           else
             log_download(url, path)
@@ -151,7 +152,7 @@ module Fig
             return true
           end
         rescue Net::FTPPermError => e
-          Log4r::Logger['fig'].warn e
+          Logging.warn e
           raise NotFoundException.new
         end
       when 'http'
@@ -171,7 +172,7 @@ module Fig
         log_download(url, path)
         ssh_download(uri.user, uri.host, path, cmd)
       else
-        Log4r::Logger['fig'].fatal "Unknown protocol: #{url}"
+        Logging.fatal "Unknown protocol: #{url}"
         exit 10
       end
    end
@@ -196,13 +197,13 @@ module Fig
       when /\.zip$/
         unpack_archive(dir, path)
       else
-        Log4r::Logger['fig'].fatal "Unknown archive type: #{basename}"
+        Logging.fatal "Unknown archive type: #{basename}"
         exit 10
       end
     end
 
     def upload(local_file, remote_file, user)
-      Log4r::Logger['fig'].info "uploading #{local_file} to #{remote_file}"
+      Logging.info "uploading #{local_file} to #{remote_file}"
       uri = URI.parse(remote_file)
       case uri.scheme
       when 'ssh'
@@ -244,7 +245,7 @@ module Fig
     def exec(dir,command)
       Dir.chdir(dir) {
         unless system command
-          Log4r::Logger['fig'].fatal 'Command failed'
+          Logging.fatal 'Command failed'
           exit 10
         end
       }
@@ -273,7 +274,7 @@ module Fig
     end
 
     def log_info(msg)
-      Log4r::Logger['fig'].info msg
+      Logging.info msg
     end
 
     # Expects files_to_archive as an Array of filenames.
@@ -358,7 +359,7 @@ module Fig
         ssh.open_channel do |channel|
           channel.exec(cmd)
           channel.on_data() { |ch, data| tempfile << data }
-          channel.on_extended_data() { |ch, type, data| Log4r::Logger['fig'].error "SSH Download ERROR: #{data}" }
+          channel.on_extended_data() { |ch, type, data| Logging.error "SSH Download ERROR: #{data}" }
           channel.on_request('exit-status') { |ch, request|
             return_code = request.read_long
           }
@@ -379,7 +380,7 @@ module Fig
         return true
       else
         tempfile.delete
-        Log4r::Logger['fig'].fatal "Unable to download file: #{return_code}"
+        Logging.fatal "Unable to download file: #{return_code}"
         exit 1
       end
     end
@@ -398,7 +399,7 @@ module Fig
     private
 
     def log_download(url, path)
-      Log4r::Logger['fig'].info "Downloading #{url} to #{path}."
+      Logging.info "Downloading #{url} to #{path}."
     end
   end
 end

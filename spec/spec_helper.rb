@@ -1,16 +1,12 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-require 'log4r'
-require 'stringio'
 require 'fileutils'
 
 require 'fig'
 require 'fig/logging'
 
-STRING_IO = StringIO.new
-Fig::Logging.initialize_logging(nil, 'off', true)
-Log4r::Logger['fig'].add( Log4r::IOOutputter.new('fig', STRING_IO) )
+Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
 def setup_repository()
   return if self.class.const_defined? :FIG_HOME

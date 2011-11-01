@@ -37,8 +37,7 @@ end
 
 options, argv = parse_options(ARGV)
 
-Fig::Logging.initialize_logging(nil,options[:log_level])
-logger = Log4r::Logger['fig']
+Fig::Logging.initialize_pre_configuration(options[:log_level])
 
 vars = {}
 ENV.each {|key,value| vars[key]=value }
@@ -53,6 +52,8 @@ if options[:update] || options[:publish] || options[:update_if_missing] || optio
 end
 
 configuration = Fig::FigRC.find(options[:figrc],remote_url,options[:login],options[:home])
+
+Fig::Logging.initialize_post_configuration(nil,options[:log_level])
 
 remote_user = nil
 
@@ -162,18 +163,18 @@ if options[:publish] || options[:publish_local]
     exit 1
   end
   if options[:publish]
-    logger.info "Checking status of #{package_name}/#{version_name}..."
+    Fig::Logging.info "Checking status of #{package_name}/#{version_name}..."
     if repos.list_remote_packages.include?("#{package_name}/#{version_name}")
-      logger.info "#{package_name}/#{version_name} has already been published."
+      Fig::Logging.info "#{package_name}/#{version_name} has already been published."
       if not options[:force]
-        logger.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
+        Fig::Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
         exit 1
       else
-        logger.info 'Overwriting...'
+        Fig::Logging.info 'Overwriting...'
       end
     end
   end
-  logger.info "Publishing #{package_name}/#{version_name}."
+  Fig::Logging.info "Publishing #{package_name}/#{version_name}."
   repos.publish_package(publish_statements, package_name, version_name, options[:publish_local])
 elsif options[:echo]
   puts env[options[:echo]]

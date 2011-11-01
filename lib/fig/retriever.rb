@@ -1,6 +1,7 @@
-require 'log4r'
 require 'ostruct'
 require 'set'
+
+require 'fig/logging'
 
 # This class copies files from the project directories in ~/.fighome to the
 # user's working directory. It keeps track of which files have already been copied, and which
@@ -24,7 +25,7 @@ class Retriever
       @config = @configs[name]
       if @config && @config.version != version
         @config.files.each do |relpath|
-          Log4r::Logger['fig'].info "- [#{@config.name}/#{@config.version}] #{relpath}"
+          Fig::Logging.info "- [#{@config.name}/#{@config.version}] #{relpath}"
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
         @config = nil
@@ -88,7 +89,6 @@ private
   end
 
   def copy(source, relpath)
-    logger = Log4r::Logger['fig']
     target = File.join(@base_dir, relpath)
     if File.directory?(source)
       FileUtils.mkdir_p(target)
@@ -96,16 +96,16 @@ private
         if child != '.' and child != '..'
           source_file = File.join(source, child)
           target_file = File.join(relpath, child)
-          logger.debug "Copying #{source_file} to #{target_file}."
+          Fig::Logging.debug "Copying #{source_file} to #{target_file}."
           copy(source_file, target_file)
         end
       end
     else
       if !File.exist?(target) || File.mtime(source) > File.mtime(target)
-        if logger.debug?
-          logger.debug "Copying package [#{@config.name}/#{@config.version}] from #{source} to #{target}."
+        if Fig::Logging.debug?
+          Fig::Logging.debug "Copying package [#{@config.name}/#{@config.version}] from #{source} to #{target}."
         else
-          logger.info "+ [#{@config.name}/#{@config.version}] #{relpath}"
+          Fig::Logging.info "+ [#{@config.name}/#{@config.version}] #{relpath}"
         end
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target, :preserve => true)
