@@ -37,12 +37,13 @@ describe 'FigRC' do
     configuration['foo'].should == 'loaded from handle'
   end
 
-  it 'handles override paths' do
+  it 'handles override path with a remote repository' do
     tempfile = create_override_file('loaded as override')
 
-    r = Retriever.new('does not exist')
-    configuration = Fig::FigRC.find( tempfile.path, r, true, ENV['FIG_HOME'] )
+    file_handle = create_remote_config("loaded from repository (shouldn't be)")
+    configuration = Fig::FigRC.find( tempfile.path, ENV['FIG_REMOTE_URL'], true, ENV['FIG_HOME'] )
     tempfile.unlink
+    File.unlink(file_handle.path)
 
     configuration['foo'].should == 'loaded as override'
   end
