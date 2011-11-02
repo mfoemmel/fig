@@ -61,7 +61,7 @@ module Fig
             archive_name = statement.url.split('/').last
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
           end
-          if is_url?(statement.url)
+          if is_url_with_access?(statement.url)
             archive_local = File.join(temp_dir, archive_name)
             @os.download(statement.url, archive_local)
           else
@@ -214,6 +214,12 @@ module Fig
 
     def is_url?(url)
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
+    end
+
+    def is_url_with_access?(url)
+      return false if not is_url?(url)
+      raise URLAccessException.new(url) if not ApplicationConfiguration.url_access_allowed?(url)
+      return true
     end
 
     def delete_local_package(package_name, version_name)

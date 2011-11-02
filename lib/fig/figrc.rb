@@ -8,7 +8,7 @@ REPOSITORY_CONFIGURATION = '_meta/figrc'
 module Fig
   class FigRC
     def self.find(override_path, repository_url, login, home)
-      configuration = ApplicationConfiguration.new()
+      configuration = ApplicationConfiguration.new(repository_url)
       if not override_path.nil?
         configuration.push_dataset(JSON.parse(File::open(override_path).read))
       end
@@ -36,11 +36,6 @@ module Fig
 
     end
 
-    def self.load_from_handle(handle)
-      configuration = ApplicationConfiguration.new()
-      configuration.push_dataset(JSON.parse(handle.read))
-      return configuration
-    end
   end
 end
 

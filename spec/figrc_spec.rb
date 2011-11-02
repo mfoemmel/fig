@@ -34,17 +34,6 @@ def create_remote_config(foo, bar = nil)
 end
 
 describe 'FigRC' do
-  it 'parses an application configuration file(handle)' do
-    configuration = Fig::FigRC.load_from_handle(
-      StringIO.new(
-        %q<
-          { "foo": "loaded from handle" }
-        >
-      )
-    )
-    configuration['foo'].should == 'loaded from handle'
-  end
-
   it 'handles override path with a remote repository' do
     tempfile = create_override_file('loaded as override')
 
