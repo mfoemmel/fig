@@ -3,12 +3,19 @@ require 'fig/logging'
 require 'fig/parser'
 
 module Fig
+  class URLAccessException < Exception
+    def initialize(url)
+      @url = url
+    end
+  end
+
   class Repository
-    def initialize(os, local_repository_dir, remote_repository_url, remote_repository_user=nil, update=false, update_if_missing=true)
+    def initialize(os, local_repository_dir, remote_repository_url, application_config, remote_repository_user=nil, update=false, update_if_missing=true)
       @os = os
       @local_repository_dir = local_repository_dir
       @remote_repository_url = remote_repository_url
       @remote_repository_user = remote_repository_user
+      @application_config = application_config
       @update = update
       @update_if_missing = update_if_missing
       @parser = Parser.new
@@ -61,7 +68,7 @@ module Fig
             archive_name = statement.url.split('/').last
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
           end
-          if is_url?(statement.url)
+          if is_url_with_access?(statement.url)
             archive_local = File.join(temp_dir, archive_name)
             @os.download(statement.url, archive_local)
           else
@@ -214,6 +221,12 @@ module Fig
 
     def is_url?(url)
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
+    end
+
+    def is_url_with_access?(url)
+      return false if not is_url?(url)
+      raise URLAccessException.new(url) if not @application_config.url_access_allowed?(url)
+      return true
     end
 
     def delete_local_package(package_name, version_name)
