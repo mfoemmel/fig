@@ -3,6 +3,12 @@ require 'fig/logging'
 require 'fig/parser'
 
 module Fig
+  class URLAccessException < Exception
+    def initialize(url)
+      @url = url
+    end
+  end
+
   class Repository
     def initialize(os, local_repository_dir, remote_repository_url, application_config, remote_repository_user=nil, update=false, update_if_missing=true)
       @os = os
