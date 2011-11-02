@@ -62,6 +62,7 @@ repos = Repository.new(
   os,
   File.expand_path(File.join(options[:home], 'repos')),
   remote_url,
+  configuration,
   remote_user,
   options[:update],
   options[:update_if_missing]

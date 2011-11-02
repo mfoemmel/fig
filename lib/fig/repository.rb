@@ -4,11 +4,12 @@ require 'fig/parser'
 
 module Fig
   class Repository
-    def initialize(os, local_repository_dir, remote_repository_url, remote_repository_user=nil, update=false, update_if_missing=true)
+    def initialize(os, local_repository_dir, remote_repository_url, application_config, remote_repository_user=nil, update=false, update_if_missing=true)
       @os = os
       @local_repository_dir = local_repository_dir
       @remote_repository_url = remote_repository_url
       @remote_repository_user = remote_repository_user
+      @application_config = application_config
       @update = update
       @update_if_missing = update_if_missing
       @parser = Parser.new
@@ -218,7 +219,7 @@ module Fig
 
     def is_url_with_access?(url)
       return false if not is_url?(url)
-      raise URLAccessException.new(url) if not ApplicationConfiguration.url_access_allowed?(url)
+      raise URLAccessException.new(url) if not @application_config.url_access_allowed?(url)
       return true
     end
 
