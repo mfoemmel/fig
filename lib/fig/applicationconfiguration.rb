@@ -2,16 +2,24 @@
 module Fig
   class ApplicationConfiguration
     def [](key)
-      @data[key]
-    end
-
-    def []=(key, value)
-      @data[key] = value
+      @data.each do |dataset|
+        if dataset.has_key?(key)
+          return dataset[key]
+        end
+      end
       return nil
     end
 
-    def initialize(data)
-      @data = data
+    def push_dataset(dataset)
+      @data.push(dataset)
+    end
+
+    def unshift_dataset(dataset)
+      @data.unshift(dataset)
+    end
+
+    def initialize()
+      @data = []
     end
   end
 end
