@@ -39,40 +39,40 @@ module Fig::Logging
     return
   end
 
-  def self.fatal(*message)
-    @@logger.fatal message
+  def self.fatal(data = nil, propagated = nil)
+    @@logger.fatal data, propagated
   end
 
   def self.fatal?()
     return @@logger.fatal?
   end
 
-  def self.error(*message)
-    @@logger.error message
+  def self.error(data = nil, propagated = nil)
+    @@logger.error data, propagated
   end
 
   def self.error?()
     return @@logger.error?
   end
 
-  def self.warn(*message)
-    @@logger.warn message
+  def self.warn(data = nil, propagated = nil)
+    @@logger.warn data, propagated
   end
 
   def self.warn?()
     return @@logger.warn?
   end
 
-  def self.info(*message)
-    @@logger.info message
+  def self.info(data = nil, propagated = nil)
+    @@logger.info data, propagated
   end
 
   def self.info?()
     return @@logger.info?
   end
 
-  def self.debug(*message)
-    @@logger.debug message
+  def self.debug(data = nil, propagated = nil)
+    @@logger.debug data, propagated
   end
 
   def self.debug?()

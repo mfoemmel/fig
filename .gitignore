@@ -11,7 +11,7 @@ tmtags
 .\#*
 
 ## VIM
-*.sw[op]
+*.sw[nop]
 *~
 
 ## NetBeans
