@@ -203,7 +203,7 @@ module Fig
     end
 
     def upload(local_file, remote_file, user)
-      Logging.info "uploading #{local_file} to #{remote_file}"
+      Logging.debug "Uploading #{local_file} to #{remote_file}."
       uri = URI.parse(remote_file)
       case uri.scheme
       when 'ssh'
@@ -399,7 +399,7 @@ module Fig
     private
 
     def log_download(url, path)
-      Logging.info "Downloading #{url} to #{path}."
+      Logging.debug "Downloading #{url} to #{path}."
     end
   end
 end
