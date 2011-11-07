@@ -29,7 +29,14 @@ module Fig::Logging
     @@logger = Log4r::Logger.new('fig')
 
     if config_file
-      raise NotImplementedError, %q<Haven't handled config files yet.>
+      case config_file
+        when / [.] xml \z /x
+          puts 'Would configure as xml'
+        when / [.] ya?ml \z /x
+          raise NotImplementedError, %q<Haven't handled yaml files yet.>
+        else
+          raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
+      end
     elsif not suppress_default_configuration
       setup_default_outputter(@@logger)
     end
