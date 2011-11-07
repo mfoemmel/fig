@@ -7,7 +7,9 @@ require 'fig/log4rconfigerror'
 module Fig; end
 
 module Fig::Logging
-  @@logger = Log4r::Logger.new('initial')
+  if not Log4r::Logger['initial']
+    @@logger = Log4r::Logger.new('initial')
+  end
 
   STRING_TO_LEVEL_MAPPING = {
     'off'   => Log4r::OFF,
@@ -31,8 +33,6 @@ module Fig::Logging
     log_level = nil,
     suppress_default_configuration = false
   )
-    @@logger = Log4r::Logger.new('fig')
-
     if config_file
       begin
         case config_file
@@ -43,12 +43,24 @@ module Fig::Logging
           else
             raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
         end
-      rescue Log4r::ConfigError => exception
+
+        if Log4r::Logger['fig'].nil?
+          $stderr.puts %q<A value was provided for --log-config but no "fig" logger was defined.>
+        end
+      rescue Log4r::ConfigError, ArgumentError => exception
         raise Log4rConfigError.new(config_file, exception)
       end
-    elsif not suppress_default_configuration
+    end
+
+    if not config_file and not suppress_default_configuration
       assign_log_level(@@logger, 'info')
       setup_default_outputter(@@logger)
+    end
+
+    if Log4r::Logger['fig'].nil?
+      @@logger = Log4r::Logger.new('fig')
+    else
+      @@logger = Log4r::Logger['fig']
     end
 
     assign_log_level(@@logger, log_level)
