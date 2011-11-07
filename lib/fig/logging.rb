@@ -1,9 +1,12 @@
 require 'log4r'
+require 'log4r/configurator'
+
+require 'fig/configfileformaterror'
+require 'fig/log4rconfigerror'
 
 module Fig; end
 
 module Fig::Logging
-
   @@logger = Log4r::Logger.new('initial')
 
   STRING_TO_LEVEL_MAPPING = {
@@ -16,7 +19,9 @@ module Fig::Logging
     'all'   => Log4r::ALL
   }
 
-  def self.initialize_pre_configuration(log_level=nil)
+  def self.initialize_pre_configuration(log_level = nil)
+    log_level ||= 'info'
+
     assign_log_level(@@logger, log_level)
     setup_default_outputter(@@logger)
   end
@@ -29,15 +34,20 @@ module Fig::Logging
     @@logger = Log4r::Logger.new('fig')
 
     if config_file
-      case config_file
-        when / [.] xml \z /x
-          puts 'Would configure as xml'
-        when / [.] ya?ml \z /x
-          raise NotImplementedError, %q<Haven't handled yaml files yet.>
-        else
-          raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
+      begin
+        case config_file
+          when / [.] xml \z /x
+            Log4r::Configurator.load_xml_file(config_file)
+          when / [.] ya?ml \z /x
+            raise NotImplementedError, %q<Haven't handled yaml files yet.>
+          else
+            raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
+        end
+      rescue Log4r::ConfigError => exception
+        raise Log4rConfigError.new(config_file, exception)
       end
     elsif not suppress_default_configuration
+      assign_log_level(@@logger, 'info')
       setup_default_outputter(@@logger)
     end
 
@@ -90,7 +100,9 @@ module Fig::Logging
 
   def self.assign_log_level(logger, level)
     return if level.nil?
+
     logger.level = STRING_TO_LEVEL_MAPPING[level]
+
     return
   end
 
@@ -98,5 +110,7 @@ module Fig::Logging
     outputter = Log4r::Outputter.stdout
     logger.add outputter
     outputter.formatter = Log4r::PatternFormatter.new :pattern => '%M'
+
+    return
   end
 end
