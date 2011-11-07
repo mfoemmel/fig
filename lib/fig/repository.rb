@@ -1,14 +1,9 @@
-
 require 'fig/logging'
+require 'fig/notfounderror'
 require 'fig/parser'
+require 'fig/urlaccesserror'
 
 module Fig
-  class URLAccessException < Exception
-    def initialize(url)
-      @url = url
-    end
-  end
-
   class Repository
     def initialize(os, local_repository_dir, remote_repository_url, application_config, remote_repository_user=nil, update=false, update_if_missing=true)
       @os = os
@@ -128,7 +123,7 @@ module Fig
         if @os.download(remote_fig_file, local_fig_file)
           install_package(package_name, version_name)
         end
-      rescue NotFoundException
+      rescue NotFoundError
         Logging.fatal "Package not found in remote repository: #{package_name}/#{version_name}"
         delete_local_package(package_name, version_name)
         exit 1
@@ -225,7 +220,7 @@ module Fig
 
     def is_url_with_access?(url)
       return false if not is_url?(url)
-      raise URLAccessException.new(url) if not @application_config.url_access_allowed?(url)
+      raise URLAccessError.new(url) if not @application_config.url_access_allowed?(url)
       return true
     end
 
