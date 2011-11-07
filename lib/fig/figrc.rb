@@ -29,7 +29,7 @@ module Fig
       begin
         os.download( figrc_url, repo_figrc_path )
         exists = true
-      rescue NotFoundException => e
+      rescue NotFoundError => e
         exists = false
       end
 

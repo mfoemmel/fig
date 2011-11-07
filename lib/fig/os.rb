@@ -11,11 +11,9 @@ require 'tempfile'
 require 'highline/import'
 
 require 'fig/logging'
+require 'fig/notfounderror'
 
 module Fig
-  class NotFoundException < Exception
-  end
-
   class OS
     def initialize(login)
       @login = login
@@ -153,7 +151,7 @@ module Fig
           end
         rescue Net::FTPPermError => e
           Logging.warn e
-          raise NotFoundException.new
+          raise NotFoundError.new
         end
       when 'http'
         http = Net::HTTP.new(uri.host)
@@ -374,7 +372,7 @@ module Fig
         return false
       when NOT_FOUND
         tempfile.delete
-        raise NotFoundException.new
+        raise NotFoundError.new
       when SUCCESS
         FileUtils.mv(tempfile.path, path)
         return true

@@ -22,6 +22,8 @@ EOF
   LOG_LEVELS = %w[ off fatal error warn info debug all ]
   LOG_ALIASES = { 'warning' => 'warn' }
 
+  # Returns hash of option values, the remainders of argv, and an exit code if
+  # full program processing occured in this method, otherwise nil.
   def parse_options(argv)
     options = {}
 
@@ -30,8 +32,8 @@ EOF
       opts.on('-?', '-h','--help','display this help text') do
         puts opts.help
         puts "\n    --  end of fig options; everything following is a command to run in the fig environment.\n\n"
-        exit 0
-      end 
+        return nil, nil, 0
+      end
 
       opts.on('-v', '--version', 'Print fig version') do
         line = nil
@@ -40,17 +42,17 @@ EOF
           File.open("#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}") { |file| line = file.gets }
         rescue
           $stderr.puts 'Could not retrieve version number. Something has mucked with your gem install.'
-          exit 1
+          return nil, nil, 1
         end
 
         if line !~ /\d+\.\d+\.\d+/
           $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your gem install.>
-          exit 1
+          return nil, nil, 1
         end
 
         puts File.basename($0) + ' v' + line
 
-        exit 0
+        return nil, nil, 0
       end
 
       options[:modifiers] = []
@@ -125,14 +127,17 @@ EOF
 
       opts.on('--figrc PATH', 'use PATH file as .rc file for Fig') { |path| options[:figrc] = path }
 
+      opts.on('--log-config PATH', 'use PATH file as configuration for Log4r') { |path| options[:log_config] = path }
+
       level_list = LOG_LEVELS.join(', ')
       opts.on('--log-level LEVEL', LOG_LEVELS, LOG_ALIASES, 'set logging level to LEVEL', "  (#{level_list})") { |log_level| options[:log_level] = log_level }
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
     end
 
+# Need to catch the exception thrown from parser and retranslate into a fig exception
     parser.parse!(argv)
 
-    return options, argv
+    return options, argv, nil
   end
 end
