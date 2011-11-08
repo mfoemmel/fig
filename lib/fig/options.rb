@@ -39,7 +39,11 @@ EOF
         line = nil
 
         begin
-          File.open("#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}") { |file| line = file.gets }
+          File.open(
+            "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
+          ) do |file|
+            line = file.gets
+          end
         rescue
           $stderr.puts 'Could not retrieve version number. Something has mucked with your gem install.'
           return nil, nil, 1
@@ -56,86 +60,180 @@ EOF
       end
 
       options[:modifiers] = []
-      opts.on('-p', '--append VAR=VAL', 'append (actually, prepend) VAL to environment var VAR, delimited by separator') do |var_val|
+      opts.on(
+        '-p',
+        '--append VAR=VAL',
+        'append (actually, prepend) VAL to environment var VAR, delimited by separator'
+      ) do |var_val|
         var, val = var_val.split('=')
         options[:modifiers] << Path.new(var, val)
       end
 
       options[:archives] = []
-      opts.on('--archive FULLPATH', 'include FULLPATH archive in package (when using --publish)') do |path|
+      opts.on(
+        '--archive FULLPATH',
+        'include FULLPATH archive in package (when using --publish)'
+      ) do |path|
         options[:archives] << Archive.new(path)
       end
 
       options[:cleans] = []
-      opts.on('--clean PKG', 'remove package from $FIG_HOME') { |descriptor| options[:cleans] <<  descriptor }
+      opts.on('--clean PKG', 'remove package from $FIG_HOME') do |descriptor|
+        options[:cleans] << descriptor
+      end
 
       options[:config] = 'default'
-      opts.on('-c', '--config CFG', %q<apply configuration CFG, default is 'default'>) { |config| options[:config] = config }
+      opts.on(
+        '-c',
+        '--config CFG',
+        %q<apply configuration CFG, default is 'default'>
+      ) do |config|
+        options[:config] = config
+      end
 
       options[:debug] = false
-      opts.on('-d', '--debug', 'print debug info') { options[:debug] = true }
+      opts.on('-d', '--debug', 'print debug info') do
+        options[:debug] = true
+      end
 
       options[:input] = nil
-      opts.on('--file FILE', %q<read fig file FILE. Use '-' for stdin. See also --no-file>) { |path| options[:input] = path }
+      opts.on(
+        '--file FILE',
+        %q<read fig file FILE. Use '-' for stdin. See also --no-file>
+      ) do |path|
+        options[:input] = path
+      end
 
       options[:force] = nil
-      opts.on('--force', 'force-overwrite existing version of a package to the remote repo') { |force| options[:force] = force }
+      opts.on(
+        '--force',
+        'force-overwrite existing version of a package to the remote repo'
+      ) do |force|
+        options[:force] = force
+      end
 
       options[:echo] = nil
-      opts.on('-g', '--get VAR', 'print value of environment variable VAR') { |echo| options[:echo] = echo }
+      opts.on(
+        '-g',
+        '--get VAR',
+        'print value of environment variable VAR'
+      ) do |echo|
+        options[:echo] = echo
+      end
 
-      opts.on('-i', '--include PKG', 'include PKG (with any variable prepends) in environment') do |descriptor|
+      opts.on(
+        '-i',
+        '--include PKG',
+        'include PKG (with any variable prepends) in environment'
+      ) do |descriptor|
         package_name, config_name, version_name = parse_descriptor(descriptor)
         options[:modifiers] << Include.new(package_name, config_name, version_name, {})
       end
 
       options[:list] = false
-      opts.on('--list', 'list packages in $FIG_HOME') { options[:list] = true }
+      opts.on('--list', 'list packages in $FIG_HOME') do
+        options[:list] = true
+      end
 
       options[:list_configs] = []
-      opts.on('--list-configs PKG', 'list configurations in package') { |descriptor| options[:list_configs] << descriptor }
+      opts.on(
+        '--list-configs PKG', 'list configurations in package'
+      ) do |descriptor|
+        options[:list_configs] << descriptor
+      end
 
       options[:list_remote] = false
-      opts.on('--list-remote', 'list packages in remote repo') { options[:list_remote] = true }
+      opts.on('--list-remote', 'list packages in remote repo') do
+        options[:list_remote] = true
+      end
 
       options[:login] = false
-      opts.on('-l', '--login', 'login to remote repo as a non-anonymous user') { options[:login] = true }
+      opts.on(
+        '-l', '--login', 'login to remote repo as a non-anonymous user'
+      ) do
+        options[:login] = true
+      end
 
-      opts.on('--no-file', 'ignore package.fig file in current directory') { |path| options[:input] = :none }
+      opts.on(
+        '--no-file', 'ignore package.fig file in current directory'
+      ) do |path|
+        options[:input] = :none
+      end
 
       options[:publish] = nil
-      opts.on('--publish PKG', 'install PKG in $FIG_HOME and in remote repo') { |publish| options[:publish] = publish }
+      opts.on(
+        '--publish PKG', 'install PKG in $FIG_HOME and in remote repo'
+      ) do |publish|
+        options[:publish] = publish
+      end
 
       options[:publish_local] = nil
-      opts.on('--publish-local PKG', 'install package only in $FIG_HOME') { |publish_local| options[:publish_local] = publish_local }
+      opts.on(
+        '--publish-local PKG', 'install package only in $FIG_HOME'
+      ) do |publish_local|
+        options[:publish_local] = publish_local
+      end
 
       options[:resources] =[]
-      opts.on('--resource FULLPATH', 'include FULLPATH resource in package (when using --publish)') do |path|
+      opts.on(
+        '--resource FULLPATH',
+        'include FULLPATH resource in package (when using --publish)'
+      ) do |path|
         options[:resources] << Resource.new(path)
       end
 
-      opts.on('-s', '--set VAR=VAL', 'set environment variable VAR to VAL') do |var_val|
+      opts.on(
+        '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
+      ) do |var_val|
         var, val = var_val.split('=')
         options[:modifiers] << Set.new(var, val)
       end
 
       options[:update] = false
-      opts.on('-u', '--update', 'check remote repo for updates and download to $FIG_HOME as necessary') { options[:update] = true; options[:retrieve] = true }
+      opts.on(
+        '-u',
+        '--update',
+        'check remote repo for updates and download to $FIG_HOME as necessary'
+      ) do
+        options[:update] = true; options[:retrieve] = true
+      end
 
       options[:update_if_missing] = false
-      opts.on('-m', '--update-if-missing', 'check remote repo for updates only if package missing from $FIG_HOME') { options[:update_if_missing] = true; options[:retrieve] = true }
+      opts.on(
+        '-m',
+        '--update-if-missing',
+        'check remote repo for updates only if package missing from $FIG_HOME'
+      ) do
+        options[:update_if_missing] = true; options[:retrieve] = true
+      end
 
-      opts.on('--figrc PATH', 'use PATH file as .rc file for Fig') { |path| options[:figrc] = path }
+      opts.on(
+        '--figrc PATH', 'use PATH file as .rc file for Fig'
+      ) do |path|
+        options[:figrc] = path
+      end
 
-      opts.on('--log-config PATH', 'use PATH file as configuration for Log4r') { |path| options[:log_config] = path }
+      opts.on(
+        '--log-config PATH', 'use PATH file as configuration for Log4r'
+      ) do |path|
+        options[:log_config] = path
+      end
 
       level_list = LOG_LEVELS.join(', ')
-      opts.on('--log-level LEVEL', LOG_LEVELS, LOG_ALIASES, 'set logging level to LEVEL', "  (#{level_list})") { |log_level| options[:log_level] = log_level }
+      opts.on(
+        '--log-level LEVEL',
+        LOG_LEVELS,
+        LOG_ALIASES,
+        'set logging level to LEVEL',
+        "  (#{level_list})"
+      ) do |log_level|
+        options[:log_level] = log_level
+      end
 
       options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
     end
 
-# Need to catch the exception thrown from parser and retranslate into a fig exception
+    # Need to catch the exception thrown from parser and retranslate into a fig exception
     parser.parse!(argv)
 
     return options, argv, nil
