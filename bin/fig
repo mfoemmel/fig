@@ -12,11 +12,15 @@ def run
   begin
     return_code = run_fig
     return return_code
-  rescue URLAccessError => e
-    $stderr.puts "Access to #{e.url} not allowed."
+  rescue URLAccessError => exception
+    $stderr.puts "Access to #{exception.url} not allowed."
     return 1
-  rescue UserInputError => e
-    $stderr.puts e.to_s
+  rescue UserInputError => exception
+    # If there's no message, we assume that the cause has already been logged.
+    if not exception.message.nil?
+      $stderr.puts exception.to_s
+    end
+
     return 1
   end
 end

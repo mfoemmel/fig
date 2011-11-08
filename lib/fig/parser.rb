@@ -3,6 +3,7 @@ require 'treetop'
 
 require 'fig/grammar'
 require 'fig/logging'
+require 'fig/packageerror'
 
 module Fig
   class Parser
@@ -15,7 +16,7 @@ module Fig
       result = @parser.parse(" #{input} ")
       if result.nil?
         Fig::Logging.fatal "#{directory}: #{@parser.failure_reason}"
-        exit 10
+        raise PackageError.new
       end
       result.to_package(package_name, version_name, directory)
     end

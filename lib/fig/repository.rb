@@ -1,6 +1,7 @@
 require 'fig/logging'
 require 'fig/notfounderror'
 require 'fig/parser'
+require 'fig/repositoryerror'
 require 'fig/urlaccesserror'
 
 module Fig
@@ -126,7 +127,7 @@ module Fig
       rescue NotFoundError
         Logging.fatal "Package not found in remote repository: #{package_name}/#{version_name}"
         delete_local_package(package_name, version_name)
-        exit 1
+        raise RepositoryError.new
       end
     end
 
@@ -148,7 +149,7 @@ module Fig
       end
       if not File.exist?(file)
         Logging.fatal "Fig file not found for package: #{file}"
-        exit 10
+        raise RepositoryError.new
       end
       read_package_from_file(file, package_name, version_name)
     end
@@ -156,7 +157,7 @@ module Fig
     def read_package_from_file(file_name, package_name, version_name)
       if not @os.exist?(file_name)
         Logging.fatal "Package not found: #{package_name}/#{version_name}"
-        exit 1
+        raise RepositoryError.new
       end
       modified_time = @os.mtime(file_name)
       content = @os.read(file_name)
@@ -203,7 +204,7 @@ module Fig
       rescue
         Logging.fatal 'Install failed, cleaning up.'
         delete_local_package(package_name, version_name)
-        exit 10
+        raise RepositoryError.new
       end
     end
 

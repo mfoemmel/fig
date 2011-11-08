@@ -11,6 +11,7 @@ require 'tempfile'
 require 'highline/import'
 
 require 'fig/logging'
+require 'fig/networkerror'
 require 'fig/notfounderror'
 
 module Fig
@@ -72,7 +73,7 @@ module Fig
         uri = URI.parse(url)
       rescue
         Logging.fatal %Q<Unable to parse url: "#{url}">
-        exit 10
+        raise NetworkError.new
       end
       case uri.scheme
       when 'ftp'
@@ -98,7 +99,7 @@ module Fig
         packages
       else
         Logging.fatal "Protocol not supported: #{url}"
-        exit 10
+        raise NetworkError.new
       end
     end
 
@@ -171,9 +172,9 @@ module Fig
         ssh_download(uri.user, uri.host, path, cmd)
       else
         Logging.fatal "Unknown protocol: #{url}"
-        exit 10
+        raise NetworkError.new
       end
-   end
+    end
 
     def download_resource(url, dir)
       FileUtils.mkdir_p(dir)
@@ -196,7 +197,7 @@ module Fig
         unpack_archive(dir, path)
       else
         Logging.fatal "Unknown archive type: #{basename}"
-        exit 10
+        raise NetworkError.new
       end
     end
 
@@ -238,15 +239,6 @@ module Fig
     def clear_directory(dir)
       FileUtils.rm_rf(dir)
       FileUtils.mkdir_p(dir)
-    end
-
-    def exec(dir,command)
-      Dir.chdir(dir) {
-        unless system command
-          Logging.fatal 'Command failed'
-          exit 10
-        end
-      }
     end
 
     def copy(source, target, msg = nil)
@@ -378,8 +370,8 @@ module Fig
         return true
       else
         tempfile.delete
-        Logging.fatal "Unable to download file: #{return_code}"
-        exit 1
+        Logging.fatal "Unable to download file #{path}: #{return_code}"
+        raise NetworkError.new
       end
     end
 

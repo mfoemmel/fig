@@ -2,6 +2,7 @@ require 'stringio'
 
 require 'fig/backtrace'
 require 'fig/logging'
+require 'fig/repositoryerror'
 
 module Fig
   # This class manages the program's state, including the value of all
@@ -34,7 +35,7 @@ module Fig
       name = package.package_name
       if @packages[name]
         Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
-        exit 10
+        raise RepositoryError.new
       end
       @packages[name] = package
     end
@@ -155,7 +156,7 @@ module Fig
         Fig::Logging.fatal                      \
             "Version mismatch: #{package_name}" \
           + stacktrace.empty? ? '' : "\n#{stacktrace}"
-        exit 10
+        raise RepositoryError.new
       end
       package
     end
@@ -202,7 +203,7 @@ module Fig
         package = @packages[$1]
         if package.nil?
           Fig::Logging.fatal "Package not found: #{$1}"
-          exit 10
+          raise RepositoryError.new
         end
         package.directory
       end

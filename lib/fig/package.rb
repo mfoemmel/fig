@@ -1,4 +1,5 @@
 require 'fig/logging'
+require 'fig/packageerror'
 
 module Fig
   class Package
@@ -18,7 +19,7 @@ module Fig
         return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
       end
       Fig::Logging.fatal "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
-      exit 10
+      raise PackageError.new
     end
 
     def configs
