@@ -1,0 +1,41 @@
+v0.1.xx
+
+  - Supports configuration via rc files in JSON format.  These can be (in
+    ascending order of priority of values):
+      - in the repository under "_meta/figrc"
+      - in your home directory in ".figrc"
+      - specified on the command-line via the "--figrc" option
+
+    Note that values from all the above locations will be merged into a
+    single, net application configuration.  E.g. if
+    <repository>/_meta/figrc contains
+
+      {"a" => 5, "b" => 7"}
+
+    and ~/.figrc contains
+
+      {"a" => 37}
+
+    then Fig will see a value for "a" of 37 and a value for "b" of 7.
+
+    Processing of ~/.figrc can be suppressed via the "--no-figrc" option.
+
+  - Supports logging via log4r. Configure via "log configuration" in the rc
+    files or via the "--log-config" and "--log-level" command-line options.
+    The configuration files must be in XML or YAML format in a way supported
+    by log4r and contain configuration for a "fig" logger.  The "--log-level"
+    will override any value found in the configuration files.
+
+  - Added additional messages about activity including file download source
+    and destination.  Try "--log-level debug".  Suggestions about changes to
+    levels that are supported, which levels messages are emitted at, and any
+    additional desired logging are welcome.
+
+  - Supports "-v/--version" to emit the Fig version.
+
+  - No longer silently does nothing when no arguments are specified.
+
+  - Start of support for restricting URLs in package.fig files via a URL
+    whitelist; not complete yet and will likely change.
+
+  - RSpec usage has been upgraded to v2.
