@@ -1,10 +1,15 @@
 require 'log4r'
+require 'log4r/configurator'
+
+require 'fig/configfileformaterror'
+require 'fig/log4rconfigerror'
 
 module Fig; end
 
 module Fig::Logging
-
-  @@logger = Log4r::Logger.new('initial')
+  if not Log4r::Logger['initial']
+    @@logger = Log4r::Logger.new('initial')
+  end
 
   STRING_TO_LEVEL_MAPPING = {
     'off'   => Log4r::OFF,
@@ -16,7 +21,9 @@ module Fig::Logging
     'all'   => Log4r::ALL
   }
 
-  def self.initialize_pre_configuration(log_level=nil)
+  def self.initialize_pre_configuration(log_level = nil)
+    log_level ||= 'info'
+
     assign_log_level(@@logger, log_level)
     setup_default_outputter(@@logger)
   end
@@ -26,19 +33,34 @@ module Fig::Logging
     log_level = nil,
     suppress_default_configuration = false
   )
-    @@logger = Log4r::Logger.new('fig')
-
     if config_file
-      case config_file
-        when / [.] xml \z /x
-          puts 'Would configure as xml'
-        when / [.] ya?ml \z /x
-          raise NotImplementedError, %q<Haven't handled yaml files yet.>
-        else
-          raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
+      begin
+        case config_file
+          when / [.] xml \z /x
+            Log4r::Configurator.load_xml_file(config_file)
+          when / [.] ya?ml \z /x
+            raise NotImplementedError, %q<Haven't handled yaml files yet.>
+          else
+            raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
+        end
+
+        if Log4r::Logger['fig'].nil?
+          $stderr.puts %q<A value was provided for --log-config but no "fig" logger was defined.>
+        end
+      rescue Log4r::ConfigError, ArgumentError => exception
+        raise Log4rConfigError.new(config_file, exception)
       end
-    elsif not suppress_default_configuration
+    end
+
+    if not config_file and not suppress_default_configuration
+      assign_log_level(@@logger, 'info')
       setup_default_outputter(@@logger)
+    end
+
+    if Log4r::Logger['fig'].nil?
+      @@logger = Log4r::Logger.new('fig')
+    else
+      @@logger = Log4r::Logger['fig']
     end
 
     assign_log_level(@@logger, log_level)
@@ -90,7 +112,9 @@ module Fig::Logging
 
   def self.assign_log_level(logger, level)
     return if level.nil?
+
     logger.level = STRING_TO_LEVEL_MAPPING[level]
+
     return
   end
 
@@ -98,5 +122,7 @@ module Fig::Logging
     outputter = Log4r::Outputter.stdout
     logger.add outputter
     outputter.formatter = Log4r::PatternFormatter.new :pattern => '%M'
+
+    return
   end
 end
