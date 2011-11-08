@@ -110,10 +110,12 @@ module Fig::Logging
 
   private
 
-  def self.assign_log_level(logger, level)
-    return if level.nil?
+  def self.assign_log_level(logger, string_level)
+    return if string_level.nil?
 
-    logger.level = STRING_TO_LEVEL_MAPPING[level]
+    level = STRING_TO_LEVEL_MAPPING[string_level.downcase]
+    logger.level = level
+    logger.outputters.each { | outputter | outputter.level = level }
 
     return
   end
