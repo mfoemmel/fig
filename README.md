@@ -50,6 +50,7 @@ Fig recognizes the following options:
 ### Flags ###
 
     -?, -h, --help                   display this help text
+    -v, --version                    Print fig version
     -p, --append VAR=VAL             append (actually, prepend) VAL to environment var VAR, delimited by separator
         --archive FULLPATH           include FULLPATH archive in package (when using --publish)
         --clean PKG                  remove package from $FIG_HOME
@@ -70,8 +71,13 @@ Fig recognizes the following options:
     -s, --set VAR=VAL                set environment variable VAR to VAL
     -u, --update                     check remote repo for updates and download to $FIG_HOME as necessary
     -m, --update-if-missing          check remote repo for updates only if package missing from $FIG_HOME
+        --figrc PATH                 use PATH file as .rc file for Fig
+        --no-figrc                   ignore ~/.figrc
+        --log-config PATH            use PATH file as configuration for Log4r
+        --log-level LEVEL            set logging level to LEVEL
+                                       (off, fatal, error, warn, info, debug, all)
 
-    --  end of fig options; everything following is a command to run in the fig environment
+    --  end of fig options; everything following is a command to run in the fig environment.
 
 Some of these options may also be expressed as statements in a package.fig file.  For instance,
 `--append`, `--archive`, `--resource`, `include`.
