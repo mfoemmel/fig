@@ -21,7 +21,7 @@ begin
       gemspec.platform = platform if not platform.nil?
 
       deptypes.each do |deptype|
-        gemspec.send("add_#{deptype}_dependency", libarchive_dep, '1.0.0') if not libarchive_dep.nil?
+        gemspec.send("add_#{deptype}_dependency", libarchive_dep, '>= 1.0.0') if not libarchive_dep.nil?
       end
 
       gemspec.add_dependency              'highline',   '>= 1.6.2'
