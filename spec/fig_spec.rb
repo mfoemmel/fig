@@ -37,6 +37,7 @@ setup_repository
 
 def fig(args, input=nil)
   args = "--log-level warn #{args}"
+  args = "--no-figrc #{args}"
   args = "--file - #{args}" if input
   out = nil
   err = nil

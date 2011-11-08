@@ -49,11 +49,17 @@ module Fig
       remote_url = ENV['FIG_REMOTE_URL']
       if remote_url.nil?
         $stderr.puts 'Please define the FIG_REMOTE_URL environment variable.'
-        exit 1
+        return 1
       end
     end
 
-    configuration = FigRC.find(options[:figrc], remote_url, options[:login], options[:home])
+    configuration = FigRC.find(
+      options[:figrc],
+      remote_url,
+      options[:login],
+      options[:home],
+      options[:no_figrc]
+    )
 
     Logging.initialize_post_configuration(options[:log_config] || configuration['log configuration'], options[:log_level])
 

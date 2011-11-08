@@ -1,7 +1,7 @@
 require 'log4r'
 require 'log4r/configurator'
 
-require 'fig/configfileformaterror'
+require 'fig/configfileerror'
 require 'fig/log4rconfigerror'
 
 module Fig; end
@@ -41,7 +41,7 @@ module Fig::Logging
           when / [.] ya?ml \z /x
             raise NotImplementedError, %q<Haven't handled yaml files yet.>
           else
-            raise ConfigFileFormatError, %Q<Don't know what format #{config_file} is in.>
+            raise ConfigFileError, %Q<Don't know what format #{config_file} is in.>, config_file
         end
 
         if Log4r::Logger['fig'].nil?

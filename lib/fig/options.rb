@@ -213,6 +213,8 @@ EOF
         options[:figrc] = path
       end
 
+      opts.on('--no-figrc', 'ignore ~/.figrc') { options[:no_figrc] = true }
+
       opts.on(
         '--log-config PATH', 'use PATH file as configuration for Log4r'
       ) do |path|
