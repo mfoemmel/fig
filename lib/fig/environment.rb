@@ -4,9 +4,8 @@ require 'fig/backtrace'
 require 'fig/logging'
 
 module Fig
-
-  # This class manages the program's state, including the value of all environment
-  # variables, and which packages have already been applied
+  # This class manages the program's state, including the value of all
+  # environment variables, and which packages have already been applied.
   class Environment
     DEFAULT_VERSION_NAME = 'current'
 
@@ -25,8 +24,8 @@ module Fig
       @variables[name]
     end
 
-    # Indicates that the values from a particular envrionment variable path should
-    # be copied to a local directory
+    # Indicates that the values from a particular envrionment variable path
+
     def add_retrieve(name, path)
       @retrieve_vars[name] = path
     end
@@ -44,7 +43,7 @@ module Fig
       if (@applied_configs[package.package_name] ||= []).member?(config_name)
         return
       end
-      new_backtrace = backtrace #Backtrace.new(backtrace, package.package_name, package.version_name, config_name)
+      new_backtrace = backtrace
 
       config = package[config_name]
       config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
@@ -62,7 +61,7 @@ module Fig
       result = nil
       commands = package[config_name || 'default'].commands
       with_environment do
-        # todo nil check
+        # TODO nil check
         commands.each do |command|
           result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@',package.directory).split(' ')
         end
@@ -86,7 +85,7 @@ module Fig
     end
 
     def include_config(base_package, package_name, config_name, version_name, overrides, backtrace)
-      # Check to see if this include has been overridden
+      # Check to see if this include has been overridden.
       if backtrace
         override = backtrace.get_override(package_name || base_package.package_name)
         if override
@@ -153,7 +152,9 @@ module Fig
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
         stacktrace = string_handle.to_s
-        Fig::Logging.fatal "Version mismatch: #{package_name}" + stacktrace.empty? ? '' : "\n#{stacktrace}"
+        Fig::Logging.fatal                      \
+            "Version mismatch: #{package_name}" \
+          + stacktrace.empty? ? '' : "\n#{stacktrace}"
         exit 10
       end
       package
@@ -164,18 +165,31 @@ module Fig
       return value unless base_package && base_package.package_name
       file = value.gsub(/\@/, base_package.directory)
       if @retrieve_vars.member?(name)
-        # A '//' in the source file's path tells us to preserve path information
-        # after the '//' when doing a retrieve.
+        # A '//' in the source file's path tells us to preserve path
+        # information after the '//' when doing a retrieve.
         if file.split('//').size > 1
           preserved_path = file.split('//').last
-          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name), preserved_path)
+          target = File.join(
+            @retrieve_vars[name].gsub(
+              /\[package\]/,
+              base_package.package_name
+            ),
+            preserved_path
+          )
         else
-          target = File.join(@retrieve_vars[name].gsub(/\[package\]/, base_package.package_name))
+          target = File.join(
+            @retrieve_vars[name].gsub(
+              /\[package\]/,
+              base_package.package_name
+            )
+          )
           if not File.directory?(file)
             target = File.join(target, File.basename(file))
           end
         end
-        @retriever.with_package_config(base_package.package_name, base_package.version_name) do
+        @retriever.with_package_config(
+          base_package.package_name, base_package.version_name
+        ) do
           @retriever.retrieve(file, target)
         end
         file = target
