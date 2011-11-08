@@ -35,7 +35,10 @@ begin
       gemspec.add_development_dependency  'open4',      '>= 1.0.1'
       gemspec.add_development_dependency  'rspec',      '~> 2'
 
-      gemspec.files = %w<bin/fig bin/fig-download VERSION> + Dir['lib/**/*.rb'] + Dir['lib/**/*.treetop']
+      gemspec.files =
+          %w<bin/fig bin/fig-download VERSION Changes> \
+        + Dir['lib/**/*.rb']                           \
+        + Dir['lib/**/*.treetop']
       gemspec.executables = ['fig', 'fig-download']
     end
 
