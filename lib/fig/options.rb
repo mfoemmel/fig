@@ -208,7 +208,7 @@ EOF
       end
 
       opts.on(
-        '--figrc PATH', 'use PATH file as .rc file for Fig'
+        '--figrc PATH', 'add PATH to configuration used for Fig'
       ) do |path|
         options[:figrc] = path
       end
