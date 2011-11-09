@@ -24,17 +24,17 @@ module Fig
     return package_name, config_name, version_name
   end
 
-  def run_fig
+  def run_fig(argv)
     shell_command = nil
-    ARGV.each_with_index do |arg, i|
+    argv.each_with_index do |arg, i|
       if arg == '--'
-        shell_command = ARGV[(i+1)..-1]
-        ARGV.slice!(i..-1)
+        shell_command = argv[(i+1)..-1]
+        argv.slice!(i..-1)
         break
       end
     end
 
-    options, argv, exit_value = parse_options(ARGV)
+    options, argv, exit_value = parse_options(argv)
     if not exit_value.nil?
       return exit_value
     end
@@ -201,5 +201,22 @@ module Fig
     end
 
     return 0
+  end
+
+  def run_with_exception_handling(argv)
+    begin
+      return_code = run_fig(argv)
+      return return_code
+    rescue URLAccessError => exception
+      $stderr.puts "Access to #{exception.url} not allowed."
+      return 1
+    rescue UserInputError => exception
+      # If there's no message, we assume that the cause has already been logged.
+      if not exception.message.nil?
+        $stderr.puts exception.to_s
+      end
+
+      return 1
+    end
   end
 end
