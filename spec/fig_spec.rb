@@ -3,35 +3,8 @@
 
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'rubygems'
 require 'fig/os'
 require 'rake'
-require 'fileutils'
-
-class Popen
-  if Fig::OS.windows?
-    require 'win32/open3'
-    def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  elsif Fig::OS.java?
-    require 'open3'
-    def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  else
-    require 'open4'
-    def self.popen(*cmd)
-      Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  end
-end
 
 setup_repository
 

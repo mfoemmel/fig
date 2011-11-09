@@ -57,8 +57,12 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
 RSpec::Core::RakeTask.new(:rcov) do |spec|
-  spec.pattern = 'spec/**/*_spec.rb'
   spec.rcov = true
+end
+
+task :simplecov do
+  ENV['COVERAGE'] = 'true'
+  Rake::Task[:spec].invoke
 end
 
 task :spec => 'check_dependencies:development'
