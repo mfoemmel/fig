@@ -1,4 +1,8 @@
-v0.1.xx
+v0.1.41
+
+  - Release cleanup
+
+v0.1.40
 
   - Supports configuration via rc files in JSON format.  These can be (in
     ascending order of priority of values):
