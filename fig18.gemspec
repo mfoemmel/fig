@@ -6,6 +6,7 @@
 Gem::Specification.new do |s|
   s.name = %q{fig18}
   s.version = "0.1.40"
+  s.platform = %q{x86_64-linux}
 
   s.required_rubygems_version = Gem::Requirement.new(">= 0") if s.respond_to? :required_rubygems_version=
   s.authors = ["Matthew Foemmel"]
@@ -55,7 +56,7 @@ Gem::Specification.new do |s|
     s.specification_version = 3
 
     if Gem::Version.new(Gem::VERSION) >= Gem::Version.new('1.2.0') then
-      s.add_runtime_dependency(%q<libarchive-static-ruby186>, [">= 1.0.0"])
+      s.add_runtime_dependency(%q<libarchive-static>, [">= 1.0.0"])
       s.add_runtime_dependency(%q<highline>, [">= 1.6.2"])
       s.add_runtime_dependency(%q<log4r>, [">= 1.1.5"])
       s.add_runtime_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -66,7 +67,7 @@ Gem::Specification.new do |s|
       s.add_runtime_dependency(%q<treetop>, [">= 1.4.2"])
       s.add_development_dependency(%q<open4>, [">= 1.0.1"])
       s.add_development_dependency(%q<rspec>, ["~> 2"])
-      s.add_runtime_dependency(%q<libarchive-static-ruby186>, [">= 1.0.0"])
+      s.add_runtime_dependency(%q<libarchive-static>, [">= 1.0.0"])
       s.add_runtime_dependency(%q<highline>, [">= 1.6.2"])
       s.add_runtime_dependency(%q<log4r>, [">= 1.1.5"])
       s.add_runtime_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -78,7 +79,7 @@ Gem::Specification.new do |s|
       s.add_development_dependency(%q<open4>, [">= 1.0.1"])
       s.add_development_dependency(%q<rspec>, ["~> 2"])
     else
-      s.add_dependency(%q<libarchive-static-ruby186>, [">= 1.0.0"])
+      s.add_dependency(%q<libarchive-static>, [">= 1.0.0"])
       s.add_dependency(%q<highline>, [">= 1.6.2"])
       s.add_dependency(%q<log4r>, [">= 1.1.5"])
       s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -89,7 +90,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<treetop>, [">= 1.4.2"])
       s.add_dependency(%q<open4>, [">= 1.0.1"])
       s.add_dependency(%q<rspec>, ["~> 2"])
-      s.add_dependency(%q<libarchive-static-ruby186>, [">= 1.0.0"])
+      s.add_dependency(%q<libarchive-static>, [">= 1.0.0"])
       s.add_dependency(%q<highline>, [">= 1.6.2"])
       s.add_dependency(%q<log4r>, [">= 1.1.5"])
       s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -102,7 +103,7 @@ Gem::Specification.new do |s|
       s.add_dependency(%q<rspec>, ["~> 2"])
     end
   else
-    s.add_dependency(%q<libarchive-static-ruby186>, [">= 1.0.0"])
+    s.add_dependency(%q<libarchive-static>, [">= 1.0.0"])
     s.add_dependency(%q<highline>, [">= 1.6.2"])
     s.add_dependency(%q<log4r>, [">= 1.1.5"])
     s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
@@ -113,7 +114,7 @@ Gem::Specification.new do |s|
     s.add_dependency(%q<treetop>, [">= 1.4.2"])
     s.add_dependency(%q<open4>, [">= 1.0.1"])
     s.add_dependency(%q<rspec>, ["~> 2"])
-    s.add_dependency(%q<libarchive-static-ruby186>, [">= 1.0.0"])
+    s.add_dependency(%q<libarchive-static>, [">= 1.0.0"])
     s.add_dependency(%q<highline>, [">= 1.6.2"])
     s.add_dependency(%q<log4r>, [">= 1.1.5"])
     s.add_dependency(%q<net-netrc>, [">= 0.2.2"])
