@@ -2,6 +2,10 @@ require 'stringio'
 
 require 'fig/backtrace'
 require 'fig/logging'
+require 'fig/package/command'
+require 'fig/package/include'
+require 'fig/package/path'
+require 'fig/package/set'
 require 'fig/repositoryerror'
 
 module Fig
@@ -72,13 +76,13 @@ module Fig
 
     def apply_config_statement(base_package, statement, backtrace)
       case statement
-      when Path
+      when Package::Path
         append_variable(base_package, statement.name, statement.value)
-      when Set
+      when Package::Set
         set_variable(base_package, statement.name, statement.value)
-      when Include
+      when Package::Include
         include_config(base_package, statement.package_name, statement.config_name, statement.version_name, statement.overrides, backtrace)
-      when Command
+      when Package::Command
         # ignore
       else
         fail "Unexpected statement: #{statement}"

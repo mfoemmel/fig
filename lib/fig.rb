@@ -7,6 +7,9 @@ require 'fig/figrc'
 require 'fig/logging'
 require 'fig/options'
 require 'fig/os'
+require 'fig/package'
+require 'fig/package/configuration'
+require 'fig/package/publish'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/retriever'
@@ -162,8 +165,8 @@ module Fig
         return 10
       end
       if not options[:modifiers].empty?
-        publish_statements = options[:resources] + options[:archives] + [Configuration.new('default', options[:modifiers])]
-        publish_statements << Publish.new('default','default')
+        publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:modifiers])]
+        publish_statements << Package::Publish.new('default','default')
       elsif not package.statements.empty?
         publish_statements = package.statements
       else

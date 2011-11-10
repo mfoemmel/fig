@@ -1,5 +1,7 @@
 require 'fig/logging'
 require 'fig/notfounderror'
+require 'fig/package/archive'
+require 'fig/package/resource'
 require 'fig/parser'
 require 'fig/repositoryerror'
 require 'fig/urlaccesserror'
@@ -54,10 +56,10 @@ module Fig
       @os.clear_directory(local_dir)
       fig_file = File.join(temp_dir, '.fig')
       content = bundle_resources(package_statements).map do |statement|
-        if statement.is_a?(Publish)
+        if statement.is_a?(Package::Publish)
           nil
-        elsif statement.is_a?(Archive) || statement.is_a?(Resource)
-          if statement.is_a?(Resource) && !is_url?(statement.url)
+        elsif statement.is_a?(Package::Archive) || statement.is_a?(Package::Resource)
+          if statement.is_a?(Package::Resource) && !is_url?(statement.url)
             archive_name = statement.url
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
           else
@@ -72,7 +74,7 @@ module Fig
           end
           @os.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
           @os.copy(archive_local, local_dir + '/' + archive_name)
-          if statement.is_a?(Archive)
+          if statement.is_a?(Package::Archive)
             @os.unpack_archive(local_dir, archive_name)
           end
           statement.class.new(archive_name).unparse('')
@@ -88,7 +90,7 @@ module Fig
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
-        if statement.is_a?(Resource) && !is_url?(statement.url)
+        if statement.is_a?(Package::Resource) && !is_url?(statement.url)
           resources << statement.url
           true
         else
@@ -99,7 +101,7 @@ module Fig
         resources = expand_globs_from(resources)
         file = 'resources.tar.gz'
         @os.create_archive(file, resources)
-        new_package_statements.unshift(Archive.new(file))
+        new_package_statements.unshift(Package::Archive.new(file))
         at_exit { File.delete(file) }
       end
       new_package_statements

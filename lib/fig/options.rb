@@ -1,5 +1,10 @@
 require 'optparse'
 require 'fig/package'
+require 'fig/package/archive'
+require 'fig/package/include'
+require 'fig/package/path'
+require 'fig/package/resource'
+require 'fig/package/set'
 
 module Fig
   def parse_descriptor(descriptor)
@@ -66,7 +71,7 @@ EOF
         'append (actually, prepend) VAL to environment var VAR, delimited by separator'
       ) do |var_val|
         var, val = var_val.split('=')
-        options[:modifiers] << Path.new(var, val)
+        options[:modifiers] << Package::Path.new(var, val)
       end
 
       options[:archives] = []
@@ -74,7 +79,7 @@ EOF
         '--archive FULLPATH',
         'include FULLPATH archive in package (when using --publish)'
       ) do |path|
-        options[:archives] << Archive.new(path)
+        options[:archives] << Package::Archive.new(path)
       end
 
       options[:cleans] = []
@@ -127,7 +132,7 @@ EOF
         'include PKG (with any variable prepends) in environment'
       ) do |descriptor|
         package_name, config_name, version_name = parse_descriptor(descriptor)
-        options[:modifiers] << Include.new(package_name, config_name, version_name, {})
+        options[:modifiers] << Package::Include.new(package_name, config_name, version_name, {})
       end
 
       options[:list] = false
@@ -179,14 +184,14 @@ EOF
         '--resource FULLPATH',
         'include FULLPATH resource in package (when using --publish)'
       ) do |path|
-        options[:resources] << Resource.new(path)
+        options[:resources] << Package::Resource.new(path)
       end
 
       opts.on(
         '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
       ) do |var_val|
         var, val = var_val.split('=')
-        options[:modifiers] << Set.new(var, val)
+        options[:modifiers] << Package::Set.new(var, val)
       end
 
       options[:update] = false
