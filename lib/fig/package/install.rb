@@ -1,10 +1,13 @@
 require 'fig/logging'
 require 'fig/packageerror'
+require 'fig/package/statement'
 
 module Fig; end
 class Fig::Package; end
 
 class Fig::Package::Install
+  include Fig::Package::Statement
+
   def initialize(statements)
     @statements = statements
   end

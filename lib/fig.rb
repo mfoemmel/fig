@@ -132,7 +132,7 @@ module Fig
     end
 
     if input
-      package = Parser.new.parse_package(nil, nil, '.', input)
+      package = Parser.new(configuration).parse_package(nil, nil, '.', input)
       direct_retrieves=[]
       if options[:retrieve]
         package.retrieves.each do |var, path|
@@ -211,7 +211,8 @@ module Fig
       return_code = run_fig(argv)
       return return_code
     rescue URLAccessError => exception
-      $stderr.puts "Access to #{exception.url} not allowed."
+      urls = exception.urls.join(', ')
+      $stderr.puts "Access to #{urls} in #{exception.package}/#{exception.version} not allowed."
       return 1
     rescue UserInputError => exception
       # If there's no message, we assume that the cause has already been logged.

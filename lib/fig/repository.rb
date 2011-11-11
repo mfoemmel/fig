@@ -8,6 +8,10 @@ require 'fig/urlaccesserror'
 
 module Fig
   class Repository
+    def self.is_url?(url)
+      not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
+    end
+
     def initialize(os, local_repository_dir, remote_repository_url, application_config, remote_repository_user=nil, update=false, update_if_missing=true)
       @os = os
       @local_repository_dir = local_repository_dir
@@ -16,7 +20,7 @@ module Fig
       @application_config = application_config
       @update = update
       @update_if_missing = update_if_missing
-      @parser = Parser.new
+      @parser = Parser.new(@application_config)
 
       @overrides = {}
       if File.exist?('fig.properties')
@@ -59,14 +63,14 @@ module Fig
         if statement.is_a?(Package::Publish)
           nil
         elsif statement.is_a?(Package::Archive) || statement.is_a?(Package::Resource)
-          if statement.is_a?(Package::Resource) && !is_url?(statement.url)
+          if statement.is_a?(Package::Resource) && !Repository.is_url?(statement.url)
             archive_name = statement.url
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
           else
             archive_name = statement.url.split('/').last
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
           end
-          if is_url_with_access?(statement.url)
+          if Repository.is_url?(statement.url)
             archive_local = File.join(temp_dir, archive_name)
             @os.download(statement.url, archive_local)
           else
@@ -90,7 +94,7 @@ module Fig
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
-        if statement.is_a?(Package::Resource) && !is_url?(statement.url)
+        if statement.is_a?(Package::Resource) && !Repository.is_url?(statement.url)
           resources << statement.url
           true
         else
@@ -141,7 +145,7 @@ module Fig
     def read_remote_package(package_name, version_name)
       url = remote_fig_file_for_package(package_name, version_name)
       content = @os.read_url(url)
-      @parser.parse_package(package_name, version_name, nil, content)
+      return @parser.parse_package(package_name, version_name, nil, content)
     end
 
     def read_package_from_directory(dir, package_name, version_name)
@@ -161,9 +165,8 @@ module Fig
         Logging.fatal "Package not found: #{package_name}/#{version_name}"
         raise RepositoryError.new
       end
-      modified_time = @os.mtime(file_name)
       content = @os.read(file_name)
-      @parser.parse_package(package_name, version_name, File.dirname(file_name), content)
+      return @parser.parse_package(package_name, version_name, File.dirname(file_name), content)
     end
 
     def local_dir_for_package(package_name, version_name)
@@ -185,13 +188,13 @@ module Fig
         temp_dir = temp_dir_for_package(package_name, version_name)
         @os.clear_directory(temp_dir)
         package.archive_urls.each do |archive_url|
-          if not is_url?(archive_url)
+          if not Repository.is_url?(archive_url)
             archive_url = remote_dir_for_package(package_name, version_name) + '/' + archive_url
           end
           @os.download_archive(archive_url, File.join(temp_dir))
         end
         package.resource_urls.each do |resource_url|
-          if not is_url?(resource_url)
+          if not Repository.is_url?(resource_url)
             resource_url = remote_dir_for_package(package_name, version_name) + '/' + resource_url
           end
           @os.download_resource(resource_url, File.join(temp_dir))
@@ -215,16 +218,6 @@ module Fig
       expanded_files = []
       resources.each {|f| expanded_files.concat(Dir.glob(f))}
       expanded_files
-    end
-
-    def is_url?(url)
-      not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
-    end
-
-    def is_url_with_access?(url)
-      return false if not is_url?(url)
-      raise URLAccessError.new(url) if not @application_config.url_access_allowed?(url)
-      return true
     end
 
     def delete_local_package(package_name, version_name)

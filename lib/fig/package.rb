@@ -45,11 +45,19 @@ class Fig::Package
     @statements.select{|s| s.is_a?(Resource)}.map{|s|s.url}
   end
 
+  def walk_statements(&block)
+    @statements.each do |statement|
+      yield statement
+      statement.walk_statements &block
+    end
+  end
+
   def unparse
     @statements.map { |statement| statement.unparse('') }.join("\n")
   end
 
   def ==(other)
+    return false if other.nil?
     @package_name == other.package_name && @version_name == other.version_name && @statements.to_yaml == other.statements.to_yaml
   end
 

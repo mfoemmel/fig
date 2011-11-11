@@ -1,11 +1,14 @@
 require 'fig/logging'
 require 'fig/packageerror'
 require 'fig/package/command'
+require 'fig/package/statement'
 
 module Fig; end
 class Fig::Package; end
 
 class Fig::Package::Configuration
+  include Fig::Package::Statement
+
   attr_reader :name, :statements
 
   def initialize(name, statements)
@@ -20,6 +23,13 @@ class Fig::Package::Configuration
   def commands
     result = statements.select { |statement| statement.is_a?(Command) }
     result
+  end
+
+  def walk_statements(&block)
+    @statements.each do |statement|
+      yield statement
+      statement.walk_statements &block
+    end
   end
 
   def unparse(indent)

@@ -1,10 +1,13 @@
 require 'fig/logging'
 require 'fig/packageerror'
+require 'fig/package/statement'
 
 module Fig; end
 class Fig::Package; end
 
 class Fig::Package::Include
+  include Fig::Package::Statement
+
   attr_reader :package_name, :config_name, :version_name, :overrides
 
   def initialize(package_name, config_name, version_name, overrides)
