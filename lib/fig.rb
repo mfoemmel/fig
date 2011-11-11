@@ -221,6 +221,10 @@ module Fig
       end
 
       return 1
+    rescue OptionParser::InvalidOption => exception
+      $stderr.puts exception.to_s
+      $stderr.puts USAGE
+      return 1
     end
   end
 end
