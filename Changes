@@ -4,6 +4,8 @@ v0.1.41
 
 v0.1.40
 
+  - Works on Mac (in conjunction with libarchive-static 1.0.1).
+
   - Supports configuration via rc files in JSON format.  These can be (in
     ascending order of priority of values):
       - in the repository under "_meta/figrc"
