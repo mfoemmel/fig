@@ -21,9 +21,9 @@ module Fig
 
   def parse_descriptor(descriptor)
     # todo should use treetop for these:
-    package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
-    config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
-    version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil
+    package_name = descriptor =~ %r< ^ ( [^:/]+ ) >x ? $1 : nil
+    config_name  = descriptor =~ %r< : ( [^:/]+ ) >x ? $1 : nil
+    version_name = descriptor =~ %r< / ( [^:/]+ ) >x ? $1 : nil
     return package_name, config_name, version_name
   end
 
