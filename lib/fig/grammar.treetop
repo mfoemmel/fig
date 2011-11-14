@@ -48,11 +48,19 @@ grammar Fig
   end
 
   rule retrieve
-    "retrieve" ws var:[@a-zA-Z0-9/._]+ "->" path:[a-zA-Z0-9_/.\[\]-]+ ws {
+    "retrieve" ws var:retrieve_variable "->" path:retrieve_path ws {
       def to_package_statement
         Package::Retrieve.new(var.text_value, path.text_value)
       end
     }
+  end
+
+  rule retrieve_variable
+    [@a-zA-Z0-9/._]+
+  end
+
+  rule retrieve_path
+    [a-zA-Z0-9_/.\[\]-]+
   end
 
   rule install
@@ -95,19 +103,35 @@ grammar Fig
   end
 
   rule path
-    ("append" / "path" / "add") ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\\._-]+ ws {
+    ("append" / "path" / "add") ws name:path_name "=" value:path_value ws {
       def to_config_statement
         Package::Path.new(name.text_value, value.text_value)
       end
     }
   end
 
+  rule path_name
+    [a-zA-Z0-9_]+
+  end
+
+  rule path_value
+    [@a-zA-Z0-9/\\._-]+
+  end
+
   rule set
-    "set" ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\\._-]+ ws {
+    "set" ws name:set_name "=" value:set_value ws {
       def to_config_statement
         Package::Set.new(name.text_value, value.text_value)
       end
     }
+  end
+
+  rule set_name
+    [a-zA-Z0-9_]+
+  end
+
+  rule set_value
+    [@a-zA-Z0-9/\\._-]+
   end
 
   rule command
