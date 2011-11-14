@@ -17,7 +17,12 @@ grammar Fig
   rule package
     ws statements:(package_statement*) {
       def to_package(package_name, version_name, directory)
-        Package.new(package_name, version_name, directory, statements.elements.map { |statement| statement.to_package_statement })
+        Package.new(
+          package_name,
+          version_name,
+          directory,
+          statements.elements.map { |statement| statement.to_package_statement }
+        )
       end
     }
   end
@@ -43,7 +48,7 @@ grammar Fig
   end
 
   rule retrieve
-    "retrieve" ws var:[@a-zA-Z0-9/\._]+ "->" path:[a-zA-Z0-9_/\.\-\[\]]+ ws {
+    "retrieve" ws var:[@a-zA-Z0-9/._]+ "->" path:[a-zA-Z0-9_/.\[\]-]+ ws {
       def to_package_statement
         Package::Retrieve.new(var.text_value, path.text_value)
       end
@@ -90,7 +95,7 @@ grammar Fig
   end
 
   rule path
-    ("append" / "path" / "add") ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
+    ("append" / "path" / "add") ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\\._-]+ ws {
       def to_config_statement
         Package::Path.new(name.text_value, value.text_value)
       end
@@ -98,7 +103,7 @@ grammar Fig
   end
 
   rule set
-    "set" ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
+    "set" ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\\._-]+ ws {
       def to_config_statement
         Package::Set.new(name.text_value, value.text_value)
       end
@@ -145,11 +150,11 @@ grammar Fig
   end
 
   rule version_name
-    [a-zA-Z0-9_\-.]+
+    [a-zA-Z0-9_.-]+
   end
 
   rule config_name
-    [a-zA-Z0-9_\-.]+
+    [a-zA-Z0-9_.-]+
   end
 
   rule name
@@ -157,7 +162,7 @@ grammar Fig
   end
 
   rule url
-    (value:[a-zA-Z0-9:/\-\\._\*]+ ws) / ('"' value:[a-zA-Z0-9:/\-\\._]+ '"' ws)
+    (value:[a-zA-Z0-9:/\\._*-]+ ws) / ('"' value:[a-zA-Z0-9:/\\._-]+ '"' ws)
   end
 
   rule ws
