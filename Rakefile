@@ -85,7 +85,7 @@ RDoc::Task.new do |rdoc|
 end
 
 task :clean do
-  %w< coverage pkg rdoc resources.tar.gz spec/tmp tmp >.each do
+  %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >.each do
     |path|
     rm_rf "./#{path}"
   end

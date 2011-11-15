@@ -23,8 +23,7 @@ rdoc
 pkg
 
 ## PROJECT::SPECIFIC
-/tmp
-spec/tmp
+spec/runtime-work
 resources.tar.gz
 
 # gemspec files
