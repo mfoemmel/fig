@@ -270,6 +270,9 @@ package name (minus the version).
      $ cat lib/hello-lib/hello.foo
      print 'hello'
 
+### Building the gem ###
+Use `rake drwbuild` instead of `rake build`, due to a glitch with "gem build's" naming of i386 gems as 'x86', which causes problems with a subsequent `gem install fig18` command; it picks the wrong Fig gem to install.
+
 Community
 =========
 
