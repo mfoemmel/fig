@@ -1,6 +1,14 @@
+v0.1.xx
+
+  - "file:" protocol works for FIG_REMOTE_HOME.
+
+  - Testing no longer requires ssh.
+
+
 v0.1.41
 
   - Release cleanup
+
 
 v0.1.40
 
