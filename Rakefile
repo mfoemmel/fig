@@ -63,7 +63,7 @@ RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
-task :drwbuild => :build do
+task :figbuild => :build do
   # Hack to fix "gem build"'s broken naming; if we leave it as 'x86', then a 'gem install fig18'
   # will download fig for the wrong platform (the ruby platform), which will depend on
   # the wrong libarchive-static (the non-ruby186 one), and a runtime error will result.
