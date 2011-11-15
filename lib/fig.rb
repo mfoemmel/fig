@@ -218,7 +218,7 @@ module Fig
       return 1
     rescue UserInputError => exception
       # If there's no message, we assume that the cause has already been logged.
-      if not exception.message.nil?
+      if not exception_has_message?(exception)
         $stderr.puts exception.to_s
       end
 
@@ -228,5 +228,10 @@ module Fig
       $stderr.puts USAGE
       return 1
     end
+  end
+
+  def exception_has_message?(exception)
+    class_name = exception.class.name
+    return exception.message == class_name
   end
 end
