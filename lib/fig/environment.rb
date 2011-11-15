@@ -38,7 +38,7 @@ module Fig
     def register_package(package)
       name = package.package_name
       if @packages[name]
-        Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
+        Logging.fatal %Q<There is already a package with the name "#{name}".>
         raise RepositoryError.new
       end
       @packages[name] = package
@@ -157,7 +157,7 @@ module Fig
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
         stacktrace = string_handle.to_s
-        Fig::Logging.fatal                      \
+        Logging.fatal                           \
             "Version mismatch: #{package_name}" \
           + stacktrace.empty? ? '' : "\n#{stacktrace}"
         raise RepositoryError.new
@@ -206,7 +206,7 @@ module Fig
       arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
         package = @packages[$1]
         if package.nil?
-          Fig::Logging.fatal "Package not found: #{$1}"
+          Logging.fatal "Package not found: #{$1}"
           raise RepositoryError.new
         end
         package.directory
