@@ -7,6 +7,7 @@ begin
     ['java',        'fig',    nil,                        ['runtime']              ], # Java
     [nil,           'fig',   'libarchive-static',         ['development','runtime']], # Linux (RHEL/Ubuntu) 1.9.2; Win 1.9.2
     ['x86_64-linux','fig18', 'libarchive-static',         ['runtime']              ], # Linux (RHEL/Ubuntu) 1.8.6
+    ['darwin',      'fig18', 'libarchive-static',         ['runtime']              ], # MacOS
     [nil,           'fig18', 'libarchive-static-ruby186', ['runtime']              ]  # Win 1.8.6
   ]
 
