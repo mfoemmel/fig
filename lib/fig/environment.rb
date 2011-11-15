@@ -156,7 +156,7 @@ module Fig
         string_handle = StringIO.new
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
-        stacktrace = string_handle.to_s
+        stacktrace = string_handle.string
         Logging.fatal                           \
             "Version mismatch: #{package_name}" \
           + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
