@@ -159,7 +159,7 @@ module Fig
         stacktrace = string_handle.to_s
         Logging.fatal                           \
             "Version mismatch: #{package_name}" \
-          + stacktrace.empty? ? '' : "\n#{stacktrace}"
+          + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
         raise RepositoryError.new
       end
       package
