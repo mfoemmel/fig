@@ -84,8 +84,10 @@ RDoc::Task.new do |rdoc|
 end
 
 task :clean do
-    rm_rf './tmp'
-    rm './resources.tar.gz'
+  %w< coverage pkg rdoc resources.tar.gz spec/tmp tmp >.each do
+    |path|
+    rm_rf "./#{path}"
+  end
 end
 
 desc 'Build and install the Fig gem for local testing.'
