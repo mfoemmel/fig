@@ -6,8 +6,9 @@ begin
   gems = [
     ['java',        'fig',    nil,                        ['runtime']              ], # Java
     [nil,           'fig',   'libarchive-static',         ['development','runtime']], # Linux (RHEL/Ubuntu) 1.9.2; Win 1.9.2
-    ['x86_64-linux','fig18', 'libarchive-static',         ['runtime']              ], # Linux (RHEL/Ubuntu) 1.8.6
-    [nil,           'fig18', 'libarchive-static-ruby186', ['runtime']              ]  # Win 1.8.6
+    [nil,           'fig18', 'libarchive-static',         ['runtime']              ], # MacOS, Linux (RHEL/Ubuntu) 1.8.6
+    ['mswin32',     'fig18', 'libarchive-static-ruby186', ['runtime']              ], # Win 1.8.6
+    ['mingw32',     'fig18', 'libarchive-static-ruby186', ['runtime']              ]  # Win 1.8.6
   ]
 
   gems.each do |platform, fig_name, libarchive_dep, deptypes|
