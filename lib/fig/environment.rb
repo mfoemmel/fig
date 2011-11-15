@@ -68,7 +68,7 @@ module Fig
       with_environment do
         # TODO nil check
         commands.each do |command|
-          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@',package.directory).split(' ')
+          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@', package.directory).split(' ')
         end
       end
       result
@@ -203,7 +203,7 @@ module Fig
     end
 
     def expand_arg(arg)
-      arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
+      arg.gsub( / @ ( [a-zA-Z0-9.-]+ ) /x ) do |match|
         package = @packages[$1]
         if package.nil?
           Logging.fatal "Package not found: #{$1}"
