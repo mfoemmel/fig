@@ -51,8 +51,7 @@ describe 'Fig' do
   end
 
   it 'publishes to remote repository' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_home_and_remote
     input = <<-END
       config default
         set FOO=BAR
@@ -65,8 +64,7 @@ describe 'Fig' do
   end
 
   it 'allows single and multiple override' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_home_and_remote
     [3,4,5].each do |point_ver|   # Publish some versions of foo
       input = <<-END
         config default
@@ -131,8 +129,7 @@ describe 'Fig' do
   end
 
   it 'publishes resource to remote repository' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo bar' }
     fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
@@ -149,8 +146,7 @@ describe 'Fig' do
   end
 
   it 'publishes resource to remote repository using command line' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo bar' }
     fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
@@ -161,8 +157,7 @@ describe 'Fig' do
   end
 
   it 'refuses to overwrite existing version in remote repository without being forced' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_home_and_remote
     input = <<-END
       config default
         set FOO=SHEEP
@@ -190,8 +185,7 @@ describe 'Fig' do
   end
 
   it 'publishes to the local repo only when told to' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo bar' }
     fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
@@ -201,9 +195,7 @@ describe 'Fig' do
   end
 
   it 'retrieves resource' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
     input = <<-END
@@ -224,9 +216,7 @@ describe 'Fig' do
   end
 
   it 'retrieves resource that is a directory' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
     # To copy the contents of a directory, instead of the directory itself,
@@ -249,9 +239,7 @@ describe 'Fig' do
   end
 
   it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/include")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello.h", 'w') { |f| f << 'a header file' }
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello2.h", 'w') { |f| f << 'another header file' }
@@ -278,9 +266,7 @@ describe 'Fig' do
   end
 
   it 'packages multiple resources' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello2", 'w') { |f| f << 'some other library' }
@@ -305,9 +291,7 @@ describe 'Fig' do
   end
 
   it 'packages multiple resources with wildcards' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
-    FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/foo.jar", 'w') { |f| f << 'some library' }
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/bar.jar", 'w') { |f| f << 'some other library' }
@@ -329,8 +313,7 @@ describe 'Fig' do
   end
 
   it 'updates local packages if they already exist' do
-    FileUtils.rm_rf(FIG_HOME)
-    FileUtils.rm_rf(FIG_REMOTE_DIR)
+    cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo sheep' }
     fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"

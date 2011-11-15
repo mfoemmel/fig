@@ -86,6 +86,7 @@ def setup_repository()
     :FIG_SPEC_BASE_DIRECTORY,
     File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
   )
+  cleanup_repository
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
 
   self.class.const_set(
@@ -107,4 +108,19 @@ def setup_repository()
   )
   ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
   self.class.const_set(:FIG_EXE, %Q<#{FIG_BIN}/fig>)
+
+  return
+end
+
+def cleanup_repository()
+  FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
+
+  return
+end
+
+def cleanup_home_and_remote()
+  FileUtils.rm_rf(FIG_HOME)
+  FileUtils.rm_rf(FIG_REMOTE_DIR)
+
+  return
 end
