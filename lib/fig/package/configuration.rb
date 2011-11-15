@@ -21,7 +21,9 @@ class Fig::Package::Configuration
   end
 
   def commands
-    result = statements.select { |statement| statement.is_a?(Command) }
+    result = statements.select do
+      |statement| statement.is_a?(Fig::Package::Command)
+    end
     result
   end
 
