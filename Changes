@@ -2,6 +2,8 @@ v0.1.xx
 
   - "file:" protocol works for FIG_REMOTE_HOME.
 
+  - Complains if it has nothing to do.
+
   - Testing no longer requires ssh.
 
 
