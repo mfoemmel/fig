@@ -196,11 +196,13 @@ module Fig
       package_name, config_name, version_name = parse_descriptor(argv.shift)
       env.include_config(package, package_name, config_name, version_name, {}, nil)
       env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
-    elsif input
+    elsif not argv.empty?
       env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
-    elsif !repos.updating?
+    elsif not repos.updating?
+      $stderr.puts "Nothing to do.\n"
       $stderr.puts USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
+      return 1
     end
 
     return 0
