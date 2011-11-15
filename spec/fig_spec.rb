@@ -329,7 +329,16 @@ describe 'Fig' do
   end
 
   it 'prints the version number' do
-    %w/-v --version/.each do |option| 
+    %w/-v --version/.each do |option|
+      (out, err, exitstatus) = fig(option)
+      exitstatus.should == 0
+      err.should == ''
+      out.should =~ / \d+ \. \d+ \. \d+ /x
+    end
+  end
+
+  it 'prints the version number' do
+    %w/-v --version/.each do |option|
       (out, err, exitstatus) = fig(option)
       exitstatus.should == 0
       err.should == ''
