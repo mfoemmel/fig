@@ -26,3 +26,6 @@ pkg
 /tmp
 spec/tmp
 resources.tar.gz
+
+# gemspec files
+*.gemspec

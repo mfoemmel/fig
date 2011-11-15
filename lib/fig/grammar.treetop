@@ -1,4 +1,15 @@
 require 'fig/package'
+require 'fig/package/archive'
+require 'fig/package/command'
+require 'fig/package/configuration'
+require 'fig/package/include'
+require 'fig/package/install'
+require 'fig/package/override'
+require 'fig/package/path'
+require 'fig/package/publish'
+require 'fig/package/resource'
+require 'fig/package/retrieve'
+require 'fig/package/set'
 
 module Fig
 
@@ -6,7 +17,12 @@ grammar Fig
   rule package
     ws statements:(package_statement*) {
       def to_package(package_name, version_name, directory)
-        Package.new(package_name, version_name, directory, statements.elements.map { |statement| statement.to_package_statement })
+        Package.new(
+          package_name,
+          version_name,
+          directory,
+          statements.elements.map { |statement| statement.to_package_statement }
+        )
       end
     }
   end
@@ -18,7 +34,7 @@ grammar Fig
   rule archive
     "archive" ws url {
       def to_package_statement
-        Archive.new(url.value.text_value)
+        Package::Archive.new(url.value.text_value)
       end
     }
   end
@@ -26,23 +42,31 @@ grammar Fig
   rule resource
     "resource" ws url {
       def to_package_statement
-        Resource.new(url.value.text_value)
+        Package::Resource.new(url.value.text_value)
       end
     }
   end
 
   rule retrieve
-    "retrieve" ws var:[@a-zA-Z0-9/\._]+ "->" path:[a-zA-Z0-9_/\.\-\[\]]+ ws {
+    "retrieve" ws var:retrieve_variable "->" path:retrieve_path ws {
       def to_package_statement
-        Retrieve.new(var.text_value, path.text_value)
+        Package::Retrieve.new(var.text_value, path.text_value)
       end
     }
+  end
+
+  rule retrieve_variable
+    [@a-zA-Z0-9/._]+
+  end
+
+  rule retrieve_path
+    [a-zA-Z0-9_/.\[\]-]+
   end
 
   rule install
     "install" ws statements:config_statement* "end" ws {
       def to_package_statement
-        Install.new(statements.elements.map { |statement| statement.to_config_statement })
+        Package::Install.new(statements.elements.map { |statement| statement.to_config_statement })
       end
     }
   end
@@ -50,7 +74,7 @@ grammar Fig
   rule config
     "config" ws config_name ws statements:config_statement* "end" ws {
       def to_package_statement
-        Configuration.new(config_name.text_value, statements.elements.map { |statement| statement.to_config_statement })
+        Package::Configuration.new(config_name.text_value, statements.elements.map { |statement| statement.to_config_statement })
       end
     }
   end
@@ -65,7 +89,7 @@ grammar Fig
         package = descriptor.respond_to?(:package) ? descriptor.package.text_value : nil
         config = descriptor.get_config
         version = descriptor.get_version
-        Include.new(package, config, version, overrides.elements.map{ |e| e.to_override })
+        Package::Include.new(package, config, version, overrides.elements.map{ |e| e.to_override })
       end
     }
   end
@@ -73,31 +97,47 @@ grammar Fig
   rule override
     "override" ws package_name "/" version_name ws {
       def to_override
-        return Override.new(package_name.text_value, version_name.text_value)
+        return Package::Override.new(package_name.text_value, version_name.text_value)
       end
     }
   end
 
   rule path
-    ("append" / "path" / "add") ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
+    ("append" / "path" / "add") ws name:path_name "=" value:path_value ws {
       def to_config_statement
-        Path.new(name.text_value, value.text_value)
+        Package::Path.new(name.text_value, value.text_value)
       end
     }
   end
 
+  rule path_name
+    [a-zA-Z0-9_]+
+  end
+
+  rule path_value
+    [@a-zA-Z0-9/\\._-]+
+  end
+
   rule set
-    "set" ws name:[a-zA-Z0-9_]+ "=" value:[@a-zA-Z0-9/\-\\._]+ ws {
+    "set" ws name:set_name "=" value:set_value ws {
       def to_config_statement
-        Set.new(name.text_value, value.text_value)
+        Package::Set.new(name.text_value, value.text_value)
       end
     }
+  end
+
+  rule set_name
+    [a-zA-Z0-9_]+
+  end
+
+  rule set_value
+    [@a-zA-Z0-9/\\._-]+
   end
 
   rule command
     "command" ws string {
       def to_config_statement
-        Command.new(string.value.text_value)
+        Package::Command.new(string.value.text_value)
       end
     }
   end
@@ -134,11 +174,11 @@ grammar Fig
   end
 
   rule version_name
-    [a-zA-Z0-9_\-.]+
+    [a-zA-Z0-9_.-]+
   end
 
   rule config_name
-    [a-zA-Z0-9_\-.]+
+    [a-zA-Z0-9_.-]+
   end
 
   rule name
@@ -146,7 +186,7 @@ grammar Fig
   end
 
   rule url
-    (value:[a-zA-Z0-9:/\-\\._\*]+ ws) / ('"' value:[a-zA-Z0-9:/\-\\._]+ '"' ws)
+    (value:[a-zA-Z0-9:/\\._*-]+ ws) / ('"' value:[a-zA-Z0-9:/\\._-]+ '"' ws)
   end
 
   rule ws

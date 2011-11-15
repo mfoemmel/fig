@@ -2,8 +2,12 @@ require 'fig/userinputerror'
 
 module Fig
   class URLAccessError < UserInputError
-    def initialize(url)
-      @url = url
+    attr_reader :urls, :package, :version
+
+    def initialize(urls, package, version)
+      @urls = urls
+      @package = package
+      @version = version
     end
   end
 end

@@ -1,11 +1,10 @@
-require 'fileutils'
+require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+
 require 'stringio'
 require 'tempfile'
 
 require 'fig/figrc'
 require 'fig/retriever'
-
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 setup_repository()
 

@@ -7,6 +7,9 @@ require 'fig/figrc'
 require 'fig/logging'
 require 'fig/options'
 require 'fig/os'
+require 'fig/package'
+require 'fig/package/configuration'
+require 'fig/package/publish'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/retriever'
@@ -18,23 +21,23 @@ module Fig
 
   def parse_descriptor(descriptor)
     # todo should use treetop for these:
-    package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
-    config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
-    version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil
+    package_name = descriptor =~ %r< ^ ( [^:/]+ ) >x ? $1 : nil
+    config_name  = descriptor =~ %r< : ( [^:/]+ ) >x ? $1 : nil
+    version_name = descriptor =~ %r< / ( [^:/]+ ) >x ? $1 : nil
     return package_name, config_name, version_name
   end
 
-  def run_fig
+  def run_fig(argv)
     shell_command = nil
-    ARGV.each_with_index do |arg, i|
+    argv.each_with_index do |arg, i|
       if arg == '--'
-        shell_command = ARGV[(i+1)..-1]
-        ARGV.slice!(i..-1)
+        shell_command = argv[(i+1)..-1]
+        argv.slice!(i..-1)
         break
       end
     end
 
-    options, argv, exit_value = parse_options(ARGV)
+    options, argv, exit_value = parse_options(argv)
     if not exit_value.nil?
       return exit_value
     end
@@ -129,7 +132,7 @@ module Fig
     end
 
     if input
-      package = Parser.new.parse_package(nil, nil, '.', input)
+      package = Parser.new(configuration).parse_package(nil, nil, '.', input)
       direct_retrieves=[]
       if options[:retrieve]
         package.retrieves.each do |var, path|
@@ -162,8 +165,8 @@ module Fig
         return 10
       end
       if not options[:modifiers].empty?
-        publish_statements = options[:resources] + options[:archives] + [Configuration.new('default', options[:modifiers])]
-        publish_statements << Publish.new('default','default')
+        publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:modifiers])]
+        publish_statements << Package::Publish.new('default','default')
       elsif not package.statements.empty?
         publish_statements = package.statements
       else
@@ -201,5 +204,27 @@ module Fig
     end
 
     return 0
+  end
+
+  def run_with_exception_handling(argv)
+    begin
+      return_code = run_fig(argv)
+      return return_code
+    rescue URLAccessError => exception
+      urls = exception.urls.join(', ')
+      $stderr.puts "Access to #{urls} in #{exception.package}/#{exception.version} not allowed."
+      return 1
+    rescue UserInputError => exception
+      # If there's no message, we assume that the cause has already been logged.
+      if not exception.message.nil?
+        $stderr.puts exception.to_s
+      end
+
+      return 1
+    rescue OptionParser::InvalidOption => exception
+      $stderr.puts exception.to_s
+      $stderr.puts USAGE
+      return 1
+    end
   end
 end

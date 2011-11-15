@@ -68,12 +68,22 @@ module Fig
     NOT_MODIFIED = 3
     NOT_FOUND = 4
 
+    def strip_paths_for_list(ls_output, packages, path)
+      if not ls_output.nil?
+        ls_output = ls_output.gsub(path + '/', '').gsub(path, '').split("\n")
+        ls_output.each do |line|
+          parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
+          packages << parts.join('/') if parts.size == 2
+        end
+      end
+    end
+
     def download_list(url)
       begin
         uri = URI.parse(url)
       rescue
         Logging.fatal %Q<Unable to parse url: "#{url}">
-        raise NetworkError.new
+        raise NetworkError.new(%Q<Unable to parse url: "#{url}">)
       end
       case uri.scheme
       when 'ftp'
@@ -88,18 +98,17 @@ module Fig
         packages = []
         Net::SSH.start(uri.host, uri.user) do |ssh|
           ls = ssh.exec!("[ -d #{uri.path} ] && find #{uri.path}")
-          if not ls.nil?
-            ls = ls.gsub(uri.path + '/', '').gsub(uri.path, '').split("\n")
-            ls.each do |line|
-              parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
-              packages << parts.join('/') if parts.size == 2
-            end
-          end
+          strip_paths_for_list(ls, packages, uri.path)
         end
         packages
+      when 'file'
+        packages = []
+        ls = %x<[ -d #{uri.path} ] && find #{uri.path}>
+        strip_paths_for_list(ls, packages, uri.path)
+        return packages
       else
         Logging.fatal "Protocol not supported: #{url}"
-        raise NetworkError.new
+        raise NetworkError.new("Protocol not supported: #{url}")
       end
     end
 
@@ -170,9 +179,15 @@ module Fig
         cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
         log_download(url, path)
         ssh_download(uri.user, uri.host, path, cmd)
+      when 'file'
+        begin
+          FileUtils.cp(uri.path, path)
+        rescue Errno::ENOENT => e
+          raise NotFoundError.new
+        end
       else
         Logging.fatal "Unknown protocol: #{url}"
-        raise NetworkError.new
+        raise NetworkError.new("Unknown protocol: #{url}")
       end
     end
 
@@ -197,7 +212,7 @@ module Fig
         unpack_archive(dir, path)
       else
         Logging.fatal "Unknown archive type: #{basename}"
-        raise NetworkError.new
+        raise NetworkError.new("Unknown archive type: #{basename}")
       end
     end
 
@@ -233,6 +248,12 @@ module Fig
           end
           ftp.putbinaryfile(local_file)
         end
+      when 'file'
+        FileUtils.mkdir_p(File.dirname(uri.path))
+        FileUtils.cp(local_file, uri.path)
+      else
+        Logging.fatal "Unknown protocol: #{uri}"
+        raise NetworkError.new("Unknown protocol: #{uri}")
       end
     end
 
@@ -371,7 +392,7 @@ module Fig
       else
         tempfile.delete
         Logging.fatal "Unable to download file #{path}: #{return_code}"
-        raise NetworkError.new
+        raise NetworkError.new("Unable to download file #{path}: #{return_code}")
       end
     end
 

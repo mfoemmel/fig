@@ -36,7 +36,10 @@ begin
       gemspec.add_development_dependency  'open4',      '>= 1.0.1'
       gemspec.add_development_dependency  'rspec',      '~> 2'
 
-      gemspec.files = %w<bin/fig bin/fig-download VERSION> + Dir['lib/**/*.rb'] + Dir['lib/**/*.treetop']
+      gemspec.files =
+          %w<bin/fig bin/fig-download VERSION Changes> \
+        + Dir['lib/**/*.rb']                           \
+        + Dir['lib/**/*.treetop']
       gemspec.executables = ['fig', 'fig-download']
     end
 
@@ -55,8 +58,12 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
 end
 
 RSpec::Core::RakeTask.new(:rcov) do |spec|
-  spec.pattern = 'spec/**/*_spec.rb'
   spec.rcov = true
+end
+
+task :simplecov do
+  ENV['COVERAGE'] = 'true'
+  Rake::Task[:spec].invoke
 end
 
 task :spec => 'check_dependencies:development'

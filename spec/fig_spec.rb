@@ -1,55 +1,46 @@
-# Note: you will get failures unless you have passwordless SSH access to
-# localhost as ENV['USER'].
-
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'rubygems'
-require 'fig/os'
-require 'rake'
-require 'fileutils'
+require 'English'
 
-class Popen
-  if Fig::OS.windows?
-    require 'win32/open3'
-    def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  elsif Fig::OS.java?
-    require 'open3'
-    def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  else
-    require 'open4'
-    def self.popen(*cmd)
-      Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  end
-end
+require 'fig/os'
 
 setup_repository
 
-def fig(args, input=nil)
+def fig(args, input = nil, no_raise_on_error = false)
   args = "--log-level warn #{args}"
   args = "--no-figrc #{args}"
   args = "--file - #{args}" if input
   out = nil
   err = nil
-  Popen.popen("#{Gem::Platform::RUBY} #{FIG_EXE} #{args}") do |stdin, stdout, stderr|
+  Popen.popen("#{Gem::Platform::RUBY} #{FIG_EXE} #{args}") do
+    |stdin, stdout, stderr|
+
     if input
       stdin.puts input
       stdin.close
     end
+
     err = stderr.read.strip
     out = stdout.read.strip
   end
-  return out, err, $?.exitstatus
+  result = $CHILD_STATUS
+
+  if not result or result.success? or no_raise_on_error
+    return out, err, result.nil? ? 0 : result.exitstatus
+  end
+
+  # Common scenario during development is that the fig external process will
+  # fail for whatever reason, but the RSpec expectation is checking whether a
+  # file was created, etc. meaning that we don't see stdout, stderr, etc. but
+  # RSpec's failure message for the expectation, which isn't informative.
+  # Throwing an exception that RSpec will catch will correctly integrate the
+  # fig output with the rest of the RSpec output.
+  fig_failure = "External fig process failed:\n"
+  fig_failure << "result: #{result.nil? ? '<nil>' : result}\n"
+  fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
+  fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
+
+  raise fig_failure
 end
 
 describe 'Fig' do
@@ -224,7 +215,9 @@ describe 'Fig' do
         set FOO=CHEESE
       end
     END
-    (out, err, exitstatus) = fig('--publish foo/1.2.3', input)
+    (out, err, exitstatus) = fig(
+      '--publish foo/1.2.3', input, :no_raise_on_error
+    )
     exitstatus.should == 1
     fig('-u -i foo/1.2.3 -g FOO')[0].should == 'SHEEP'
 

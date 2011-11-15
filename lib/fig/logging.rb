@@ -1,5 +1,6 @@
 require 'log4r'
 require 'log4r/configurator'
+require 'log4r/yamlconfigurator'
 
 require 'fig/configfileerror'
 require 'fig/log4rconfigerror'
@@ -39,7 +40,7 @@ module Fig::Logging
           when / [.] xml \z /x
             Log4r::Configurator.load_xml_file(config_file)
           when / [.] ya?ml \z /x
-            raise NotImplementedError, %q<Haven't handled yaml files yet.>
+            Log4r::YamlConfigurator.load_yaml_file(config_file)
           else
             raise ConfigFileError, %Q<Don't know what format #{config_file} is in.>, config_file
         end
@@ -52,15 +53,15 @@ module Fig::Logging
       end
     end
 
-    if not config_file and not suppress_default_configuration
-      assign_log_level(@@logger, 'info')
-      setup_default_outputter(@@logger)
-    end
-
     if Log4r::Logger['fig'].nil?
       @@logger = Log4r::Logger.new('fig')
     else
       @@logger = Log4r::Logger['fig']
+    end
+
+    if not config_file and not suppress_default_configuration
+      assign_log_level(@@logger, 'info')
+      setup_default_outputter(@@logger)
     end
 
     assign_log_level(@@logger, log_level)
