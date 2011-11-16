@@ -93,10 +93,10 @@ module Fig
     elsif options[:input] == '-'
       input = $stdin.read
     elsif options[:input].nil?
-      input = os.read(DEFAULT_FIG_FILE) if os.exist?(DEFAULT_FIG_FILE)
+      input = File.read(DEFAULT_FIG_FILE) if File.exist?(DEFAULT_FIG_FILE)
     else
-      if os.exist?(options[:input])
-        input = os.read(options[:input])
+      if File.exist?(options[:input])
+        input = File.read(options[:input])
       else
         $stderr.puts %Q<File not found: "#{options[:input]}".>
         return 1
@@ -134,7 +134,7 @@ module Fig
     if input
       package = Parser.new(configuration).parse_package(nil, nil, '.', input)
       direct_retrieves=[]
-      if options[:retrieve]
+      if options[:update] || options[:update_if_missing]
         package.retrieves.each do |var, path|
           if var =~ %r< ^ \@ ([^/]+) (.*) >x
             direct_retrieves << [$1, $2, path]

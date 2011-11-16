@@ -142,12 +142,6 @@ module Fig
       read_package_from_directory(dir, package_name, version_name)
     end
 
-    def read_remote_package(package_name, version_name)
-      url = remote_fig_file_for_package(package_name, version_name)
-      content = @os.read_url(url)
-      return @parser.parse_package(package_name, version_name, nil, content)
-    end
-
     def read_package_from_directory(dir, package_name, version_name)
       file = File.join(dir, '.fig')
       if not File.exist?(file)
@@ -161,11 +155,11 @@ module Fig
     end
 
     def read_package_from_file(file_name, package_name, version_name)
-      if not @os.exist?(file_name)
+      if not File.exist?(file_name)
         Logging.fatal "Package not found: #{package_name}/#{version_name}"
         raise RepositoryError.new
       end
-      content = @os.read(file_name)
+      content = File.read(file_name)
       return @parser.parse_package(package_name, version_name, File.dirname(file_name), content)
     end
 

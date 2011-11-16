@@ -200,7 +200,7 @@ EOF
         '--update',
         'check remote repo for updates and download to $FIG_HOME as necessary'
       ) do
-        options[:update] = true; options[:retrieve] = true
+        options[:update] = true
       end
 
       options[:update_if_missing] = false
@@ -209,7 +209,7 @@ EOF
         '--update-if-missing',
         'check remote repo for updates only if package missing from $FIG_HOME'
       ) do
-        options[:update_if_missing] = true; options[:retrieve] = true
+        options[:update_if_missing] = true
       end
 
       opts.on(
