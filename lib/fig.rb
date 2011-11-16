@@ -79,7 +79,7 @@ module Fig
       options[:update_if_missing]
     )
     retriever = Retriever.new('.')
-  # Check to see if this is still happening with the new layers of abstraction.
+    # Check to see if this is still happening with the new layers of abstraction.
     at_exit { retriever.save }
     env = Environment.new(os, repos, vars, retriever)
 
@@ -136,7 +136,7 @@ module Fig
       direct_retrieves=[]
       if options[:update] || options[:update_if_missing]
         package.retrieves.each do |var, path|
-          if var =~ /^@([^\/]+)(.*)/
+          if var =~ %r< ^ \@ ([^/]+) (.*) >x
             direct_retrieves << [$1, $2, path]
           else
             env.add_retrieve(var, path)
@@ -196,11 +196,13 @@ module Fig
       package_name, config_name, version_name = parse_descriptor(argv.shift)
       env.include_config(package, package_name, config_name, version_name, {}, nil)
       env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
-    elsif input
+    elsif not argv.empty?
       env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
-    elsif !repos.updating?
+    elsif not repos.updating?
+      $stderr.puts "Nothing to do.\n"
       $stderr.puts USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
+      return 1
     end
 
     return 0
@@ -216,7 +218,7 @@ module Fig
       return 1
     rescue UserInputError => exception
       # If there's no message, we assume that the cause has already been logged.
-      if not exception.message.nil?
+      if not exception_has_message?(exception)
         $stderr.puts exception.to_s
       end
 
@@ -226,5 +228,10 @@ module Fig
       $stderr.puts USAGE
       return 1
     end
+  end
+
+  def exception_has_message?(exception)
+    class_name = exception.class.name
+    return exception.message == class_name
   end
 end

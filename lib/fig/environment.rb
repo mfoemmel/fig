@@ -38,7 +38,7 @@ module Fig
     def register_package(package)
       name = package.package_name
       if @packages[name]
-        Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
+        Logging.fatal %Q<There is already a package with the name "#{name}".>
         raise RepositoryError.new
       end
       @packages[name] = package
@@ -68,7 +68,7 @@ module Fig
       with_environment do
         # TODO nil check
         commands.each do |command|
-          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@',package.directory).split(' ')
+          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@', package.directory).split(' ')
         end
       end
       result
@@ -156,16 +156,17 @@ module Fig
         string_handle = StringIO.new
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
-        stacktrace = string_handle.to_s
-        Fig::Logging.fatal                      \
+        stacktrace = string_handle.string
+        Logging.fatal                           \
             "Version mismatch: #{package_name}" \
-          + stacktrace.empty? ? '' : "\n#{stacktrace}"
+          + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
         raise RepositoryError.new
       end
       package
     end
 
-    # Replace @ symbol with the package's directory
+    # Replace @ symbol with the package's directory, "[package]" with the
+    # package name.
     def expand_value(base_package, name, value)
       return value unless base_package && base_package.package_name
       file = value.gsub(/\@/, base_package.directory)
@@ -175,18 +176,12 @@ module Fig
         if file.split('//').size > 1
           preserved_path = file.split('//').last
           target = File.join(
-            @retrieve_vars[name].gsub(
-              /\[package\]/,
-              base_package.package_name
-            ),
+            translate_retrieve_variables(base_package, name),
             preserved_path
           )
         else
           target = File.join(
-            @retrieve_vars[name].gsub(
-              /\[package\]/,
-              base_package.package_name
-            )
+            translate_retrieve_variables(base_package, name)
           )
           if not File.directory?(file)
             target = File.join(target, File.basename(file))
@@ -203,14 +198,24 @@ module Fig
     end
 
     def expand_arg(arg)
-      arg.gsub(/\@([a-zA-Z0-9\-\.]+)/) do |match|
+      arg.gsub( / \@ ( [a-zA-Z0-9.-]+ ) /x ) do |match|
         package = @packages[$1]
         if package.nil?
-          Fig::Logging.fatal "Package not found: #{$1}"
+          Logging.fatal "Package not found: #{$1}"
           raise RepositoryError.new
         end
         package.directory
       end
+    end
+
+    private
+
+    def translate_retrieve_variables(base_package, name)
+      return \
+        @retrieve_vars[name].gsub(
+          / \[package\] /x,
+          base_package.package_name
+        )
     end
   end
 end

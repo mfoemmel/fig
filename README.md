@@ -200,9 +200,9 @@ A config section can be included in another config section:
 Let's share our little script with the rest of the team by bundling it into a
 package and publishing it. First, point the `FIG_REMOTE_URL` environment
 variable to the remote repository. If you just want to play around with fig,
-you can have it point to localhost:
+you can have it point to a local directory:
 
-    $ export FIG_REMOTE_URL=ssh://localhost$(pwd)/remote
+    $ export FIG_REMOTE_URL=file://$(pwd)/remote
 
 Before we publish our package, we'll need to tell fig which files we want to include. We do this by using the "resource" statement in our "package.fig" file:
 
@@ -270,6 +270,9 @@ package name (minus the version).
      $ cat lib/hello-lib/hello.foo
      print 'hello'
 
+### Building the gem ###
+Use `rake figbuild` instead of `rake build`, due to a glitch with "gem build's" naming of i386 gems as 'x86', which causes problems with a subsequent `gem install fig18` command; it picks the wrong Fig gem to install.
+
 Community
 =========
 
@@ -280,4 +283,4 @@ Community
 Copyright
 =========
 
-Copyright (c) 2009 Matthew Foemmel. See LICENSE for details.
+Copyright (c) 2009-2011 Matthew Foemmel. See LICENSE for details.
