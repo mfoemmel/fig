@@ -30,7 +30,6 @@ module Fig
     end
 
     # Indicates that the values from a particular envrionment variable path
-
     def add_retrieve(name, path)
       @retrieve_vars[name] = path
     end
@@ -62,13 +61,20 @@ module Fig
     end
 
     def execute_config(base_package, package_name, config_name, version_name, args)
-      package = lookup_package(package_name || base_package.package_name, version_name, Backtrace.new(nil, package_name, version_name, config_name))
+      package = lookup_package(
+        package_name || base_package.package_name,
+        version_name,
+        Backtrace.new(nil, package_name, version_name, config_name)
+      )
       result = nil
       commands = package[config_name || 'default'].commands
       with_environment do
         # TODO nil check
         commands.each do |command|
-          result = yield expand_arg("#{command.command} #{args.join(' ')}").gsub('@', package.directory).split(' ')
+          result = yield                                        \
+            expand_arg("#{command.command} #{args.join(' ')}")  \
+            .gsub('@', package.directory)                       \
+            .split(' ')
         end
       end
       result
@@ -207,8 +213,6 @@ module Fig
         package.directory
       end
     end
-
-    private
 
     def translate_retrieve_variables(base_package, name)
       return \
