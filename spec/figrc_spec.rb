@@ -50,7 +50,7 @@ describe 'FigRC' do
   end
 
   it 'handles no repository config and no override specified, and config does NOT exist on server' do
-    configuration = Fig::FigRC.find(nil, %Q<ssh://#{ENV['USER']}@localhost/does_not_exist/>, true, ENV['FIG_HOME'], true)
+    configuration = Fig::FigRC.find(nil, %Q<file:///does_not_exist/>, true, ENV['FIG_HOME'], true)
     configuration['foo'].should == nil
   end
 
