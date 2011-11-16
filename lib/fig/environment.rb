@@ -165,7 +165,8 @@ module Fig
       package
     end
 
-    # Replace @ symbol with the package's directory
+    # Replace @ symbol with the package's directory, "[package]" with the
+    # package name.
     def expand_value(base_package, name, value)
       return value unless base_package && base_package.package_name
       file = value.gsub(/\@/, base_package.directory)
@@ -175,18 +176,12 @@ module Fig
         if file.split('//').size > 1
           preserved_path = file.split('//').last
           target = File.join(
-            @retrieve_vars[name].gsub(
-              /\[package\]/,
-              base_package.package_name
-            ),
+            translate_retrieve_variables(base_package, name),
             preserved_path
           )
         else
           target = File.join(
-            @retrieve_vars[name].gsub(
-              /\[package\]/,
-              base_package.package_name
-            )
+            translate_retrieve_variables(base_package, name)
           )
           if not File.directory?(file)
             target = File.join(target, File.basename(file))
@@ -203,7 +198,7 @@ module Fig
     end
 
     def expand_arg(arg)
-      arg.gsub( / @ ( [a-zA-Z0-9.-]+ ) /x ) do |match|
+      arg.gsub( / \@ ( [a-zA-Z0-9.-]+ ) /x ) do |match|
         package = @packages[$1]
         if package.nil?
           Logging.fatal "Package not found: #{$1}"
@@ -211,6 +206,16 @@ module Fig
         end
         package.directory
       end
+    end
+
+    private
+
+    def translate_retrieve_variables(base_package, name)
+      return \
+        @retrieve_vars[name].gsub(
+          / \[package\] /x,
+          base_package.package_name
+        )
     end
   end
 end
