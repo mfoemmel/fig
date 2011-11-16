@@ -16,8 +16,8 @@ begin
   gems.each do |platform, fig_name, libarchive_dep, deptypes|
     Jeweler::Tasks.new do |gemspec|
       gemspec.name = fig_name
-      gemspec.summary = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers.}
-      gemspec.description = %Q{Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected.}
+      gemspec.summary = %Q<Fig is a utility for configuring environments and managing dependencies across a team of developers. (#{fig_name}/#{platform} version)>
+      gemspec.description = %q<Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected.>
       gemspec.email = 'git@foemmel.com'
       gemspec.homepage = 'http://github.com/mfoemmel/fig'
       gemspec.authors = ['Matthew Foemmel']
@@ -52,6 +52,7 @@ rescue LoadError
 end
 
 require 'rspec/core/rake_task'
+desc 'Run RSpec tests.'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.pattern = 'spec/**/*_spec.rb'
   spec.rspec_opts = []
@@ -59,15 +60,18 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.rspec_opts << '--color'
 end
 
+desc 'Run RSpec tests with coverage reporting via rcov.'
 RSpec::Core::RakeTask.new(:rcov) do |spec|
   spec.rcov = true
 end
 
+desc 'Build gems and then fix fig18 gem file names.'
 task :figbuild => :build do
-  # Hack to fix "gem build"'s broken naming; if we leave it as 'x86', then a 'gem install fig18'
-  # will download fig for the wrong platform (the ruby platform), which will depend on
-  # the wrong libarchive-static (the non-ruby186 one), and a runtime error will result.
-  # (This had to be done in libarchive-static as well).
+  # Hack to fix "gem build"'s broken naming; if we leave it as 'x86', then a
+  # 'gem install fig18' will download fig for the wrong platform (the ruby
+  # platform), which will depend on the wrong libarchive-static (the
+  # non-ruby186 one), and a runtime error will result.  (This had to be done in
+  # libarchive-static as well).
   version = File.exist?('VERSION') ? File.read('VERSION').strip : ''
   cd 'pkg' do
     mv "fig18-#{version}-x86-mswin32.gem", "fig18-#{version}-i386-mswin32.gem"
@@ -98,6 +102,7 @@ RDoc::Task.new do |rdoc|
   rdoc.rdoc_files.include('lib/**/*.rb')
 end
 
+desc 'Remove build products and temporary files.'
 task :clean do
   %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >.each do
     |path|
