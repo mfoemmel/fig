@@ -79,7 +79,7 @@ module Fig
       options[:update_if_missing]
     )
     retriever = Retriever.new('.')
-  # Check to see if this is still happening with the new layers of abstraction.
+    # Check to see if this is still happening with the new layers of abstraction.
     at_exit { retriever.save }
     env = Environment.new(os, repos, vars, retriever)
 
@@ -136,7 +136,7 @@ module Fig
       direct_retrieves=[]
       if options[:retrieve]
         package.retrieves.each do |var, path|
-          if var =~ /^@([^\/]+)(.*)/
+          if var =~ %r< ^ \@ ([^/]+) (.*) >x
             direct_retrieves << [$1, $2, path]
           else
             env.add_retrieve(var, path)
