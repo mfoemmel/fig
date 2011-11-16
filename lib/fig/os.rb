@@ -48,16 +48,8 @@ module Fig
       Dir.entries(dir) - ['.','..']
     end
 
-    def exist?(path)
-      File.exist?(path)
-    end
-
     def mtime(path)
       File.mtime(path)
-    end
-
-    def read(path)
-      File.read(path)
     end
 
     def write(path, content)
@@ -148,9 +140,10 @@ module Fig
       uri = URI.parse(url)
       case uri.scheme
       when 'ftp'
-        ftp = Net::FTP.new(uri.host)
-        ftp_login(ftp, uri.host)
         begin
+          ftp = Net::FTP.new(uri.host)
+          ftp_login(ftp, uri.host)
+
           if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
             Logging.debug "#{path} is up to date."
             return false
@@ -159,8 +152,11 @@ module Fig
             ftp.getbinaryfile(uri.path, path, 256*1024)
             return true
           end
-        rescue Net::FTPPermError => e
-          Logging.warn e
+        rescue Net::FTPPermError => error
+          Logging.warn error
+          raise NotFoundError.new
+        rescue SocketError => error
+          Logging.warn error
           raise NotFoundError.new
         end
       when 'http'
