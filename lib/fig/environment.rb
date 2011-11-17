@@ -204,14 +204,30 @@ module Fig
     end
 
     def expand_arg(arg)
-      arg.gsub( / \@ ( [a-zA-Z0-9.-]+ ) /x ) do |match|
-        package = @packages[$1]
-        if package.nil?
-          Logging.fatal "Package not found: #{$1}"
-          raise RepositoryError.new
+      package_substituted =
+        arg.gsub(
+          %r<
+            (?: ^ | \G)           # Zero-width anchor.
+            ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
+            \@                    # The package indicator
+            ( [a-zA-Z0-9.-]+ )    # Package name
+          >x
+        ) do |match|
+          backslashes = $1 || ''
+          package = @packages[$2]
+          if package.nil?
+            raise RepositoryError.new "Package not found: #{$1}"
+          end
+          backslashes + package.directory
         end
-        package.directory
+
+      if package_substituted =~ / (?: ^ | [^\\]) (?: \\{2})* ( \\ [^\\@] ) /x
+        raise RepositoryError.new(
+          %Q<Unknown escape "#{$1}" in "#{arg}">
+        )
       end
+
+      return package_substituted.gsub(%r< \\ ([\\@]) >x, '\1')
     end
 
     def translate_retrieve_variables(base_package, name)

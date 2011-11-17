@@ -219,7 +219,7 @@ module Fig
     rescue UserInputError => exception
       # If there's no message, we assume that the cause has already been logged.
       if not exception_has_message?(exception)
-        $stderr.puts exception.to_s
+        Logging.fatal exception.to_s
       end
 
       return 1
