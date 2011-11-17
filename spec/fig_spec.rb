@@ -9,8 +9,8 @@ setup_repository
 describe 'Fig' do
   describe 'environment variables' do
     it 'sets variable from command line' do
-      fig('-s FOO=BAR -g FOO')[0].should == 'BAR'
-      fig('--set FOO=BAR -g FOO')[0].should == 'BAR'
+      fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
+      fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
     end
 
     it 'sets variable from fig file' do
@@ -19,11 +19,11 @@ describe 'Fig' do
           set FOO=BAR
         end
       END
-      fig('-g FOO', input)[0].should == 'BAR'
+      fig('--get FOO', input)[0].should == 'BAR'
     end
 
     it 'appends variable from command line' do
-      fig('-p PATH=foo -g PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
+      fig('--append PATH=foo --get PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
     end
 
     it 'appends variable from fig file' do
@@ -32,11 +32,11 @@ describe 'Fig' do
           add PATH=foo
         end
       END
-      fig('-g PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
+      fig('--get PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
     end
 
     it 'appends empty variable' do
-      fig('-p XYZZY=foo -g XYZZY').should == ['foo', '', 0]
+      fig('--append XYZZY=foo --get XYZZY').should == ['foo', '', 0]
     end
   end
 
@@ -49,7 +49,7 @@ describe 'Fig' do
         set FOO=BAR # Another comment
       end
     END
-    fig('-g FOO', input)[0].should == 'BAR'
+    fig('--get FOO', input)[0].should == 'BAR'
   end
 
   describe 'publishing/retrieval' do
@@ -63,7 +63,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
       fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
       fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-u -i foo/1.2.3 -g FOO')[0].should == 'BAR'
+      fig('--update --include foo/1.2.3 --get FOO')[0].should == 'BAR'
     end
 
     it 'allows single and multiple override' do
@@ -128,7 +128,7 @@ describe 'Fig' do
       END
       fig('--publish top/1', input)
 
-      fig('-u -i top/1 -g FOO')[0].should == 'foo123'
+      fig('--update --include top/1 --get FOO')[0].should == 'foo123'
     end
 
     it 'publishes resource to remote repository' do
@@ -145,7 +145,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
       fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
       fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+      fig('--update --include foo/1.2.3 -- hello')[0].should == 'bar'
     end
 
     it 'publishes resource to remote repository using command line' do
@@ -156,7 +156,7 @@ describe 'Fig' do
       fig("--publish foo/1.2.3 --resource bin/hello --append PATH=@/bin")
       fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
       fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-u -i foo/1.2.3 -- hello')[0].should == 'bar'
+      fig('--update --include foo/1.2.3 -- hello')[0].should == 'bar'
     end
 
     it 'refuses to overwrite existing version in remote repository without being forced' do
@@ -169,7 +169,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
       fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
       fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-u -i foo/1.2.3 -g FOO')[0].should == 'SHEEP'
+      fig('--update --include foo/1.2.3 --get FOO')[0].should == 'SHEEP'
 
       input = <<-END
         config default
@@ -180,11 +180,11 @@ describe 'Fig' do
         '--publish foo/1.2.3', input, :no_raise_on_error
       )
       exitstatus.should == 1
-      fig('-u -i foo/1.2.3 -g FOO')[0].should == 'SHEEP'
+      fig('--update --include foo/1.2.3 --get FOO')[0].should == 'SHEEP'
 
       (out, err, exitstatus) = fig('--publish foo/1.2.3 --force', input)
       exitstatus.should == 0
-      fig('-u -i foo/1.2.3 -g FOO')[0].should == 'CHEESE'
+      fig('--update --include foo/1.2.3 --get FOO')[0].should == 'CHEESE'
     end
 
     it 'publishes to the local repo only when told to' do
@@ -194,7 +194,7 @@ describe 'Fig' do
       fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
       fig("--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin")
       fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-m -i foo/1.2.3 -- hello')[0].should == 'bar'
+      fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'bar'
     end
 
     it 'retrieves resource' do
@@ -214,7 +214,7 @@ describe 'Fig' do
           include foo/1.2.3
         end
       END
-      fig('-m', input)
+      fig('--update-if-missing', input)
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
     end
 
@@ -237,7 +237,7 @@ describe 'Fig' do
           include foo/1.2.3
         end
       END
-      fig('-m', input)
+      fig('--update-if-missing', input)
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
     end
 
@@ -262,7 +262,7 @@ describe 'Fig' do
           include foo/1.2.3
         end
       END
-      fig('-u', input)
+      fig('--update', input)
 
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/foo/include/hello.h").should == 'a header file'
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/foo/include/hello2.h").should == 'another header file'
@@ -288,7 +288,7 @@ describe 'Fig' do
           include foo/1.2.3
         end
       END
-      fig('-m', input)
+      fig('--update-if-missing', input)
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello2").should == 'some other library'
     end
@@ -311,7 +311,7 @@ describe 'Fig' do
           include foo/1.2.3
         end
       END
-      fig('-m', input)
+      fig('--update-if-missing', input)
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/foo.jar").should == 'some library'
     end
 
@@ -322,13 +322,13 @@ describe 'Fig' do
       fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
       fig('--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin')
       fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-m -i foo/1.2.3 -- hello')[0].should == 'sheep'
+      fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'sheep'
 
       File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo cheese' }
       fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
       fig('--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin')
       fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-      fig('-m -i foo/1.2.3 -- hello')[0].should == 'cheese'
+      fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'cheese'
     end
   end
 
