@@ -122,11 +122,11 @@ module Fig
     private
 
     def set_variable(base_package, name, value)
-      @variables[name] = expand_variable_value(base_package, name, value)
+      @variables[name] = expand_and_retrieve_variable_value(base_package, name, value)
     end
 
     def append_variable(base_package, name, value)
-      value = expand_variable_value(base_package, name, value)
+      value = expand_and_retrieve_variable_value(base_package, name, value)
       # TODO: converting all environment variables to upcase is not a robust
       #       comparison. It also assumes all env vars will be in upcase
       #       in package.fig
@@ -175,7 +175,7 @@ module Fig
 
     # Replace @ symbol with the package's directory, "[package]" with the
     # package name.
-    def expand_variable_value(base_package, name, value)
+    def expand_and_retrieve_variable_value(base_package, name, value)
       return value unless base_package && base_package.package_name
 
       file = expand_path(value, base_package)
@@ -204,7 +204,7 @@ module Fig
         end
         file = target
       end
-      file
+      return file
     end
 
     def expand_path(path, base_package)

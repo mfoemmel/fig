@@ -5,8 +5,16 @@ require 'fig/package'
 require 'fig/package/configuration'
 require 'fig/package/set'
 
-def new_example_environment(variable_value = 'whatever')
-  environment = Fig::Environment.new(nil, nil, {'FOO' => 'bar'}, nil)
+def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
+  retriever_double = double('retriever')
+  retriever_double.stub(:with_package_config)
+  environment = Fig::Environment.new(nil, nil, {'FOO' => 'bar'}, retriever_double)
+
+  if retrieve_vars
+    retrieve_vars.each do |name, path|
+      environment.add_retrieve( name, path )
+    end
+  end
 
   %w< one two three >.each do
     |package_name|
@@ -129,6 +137,20 @@ describe 'Environment' do
       output = substitute_variable('\\@/foobie')
 
       output.should == "@/foobie\n@/foobie\n@/foobie\n"
+    end
+
+    it 'does retrieve variables [package] substitution' do
+      retrieve_vars = {'WHATEVER_ONE' => 'foo.[package].bar'}
+      environment = new_example_environment('blah', retrieve_vars)
+
+      output = nil
+      environment.execute_shell([]) {
+        output = %x[
+          echo $WHATEVER_ONE; echo $WHATEVER_TWO; echo $WHATEVER_THREE;
+        ]
+      }
+
+      output.should == "foo.one.bar/blah\nblah\nblah\n"
     end
   end
 end
