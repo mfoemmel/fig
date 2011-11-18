@@ -140,7 +140,7 @@ describe 'Environment' do
     end
 
     it 'does retrieve variables [package] substitution' do
-      retrieve_vars = {'WHATEVER_ONE' => 'foo.[package].bar'}
+      retrieve_vars = {'WHATEVER_ONE' => 'foo.[package].bar.[package].baz'}
       environment = new_example_environment('blah', retrieve_vars)
 
       output = nil
@@ -150,7 +150,25 @@ describe 'Environment' do
         ]
       }
 
-      output.should == "foo.one.bar/blah\nblah\nblah\n"
+      output.should == "foo.one.bar.one.baz/blah\nblah\nblah\n"
     end
+
+    it 'truncates before //' do
+      retrieve_vars = {
+        'WHATEVER_ONE'   => 'foo.[package].//./bar.[package].baz',
+        'WHATEVER_THREE' => 'phoo.//.bhar'
+      }
+      environment = new_example_environment('blah.//.blez', retrieve_vars)
+
+      output = nil
+      environment.execute_shell([]) {
+        output = %x[
+          echo $WHATEVER_ONE; echo $WHATEVER_TWO; echo $WHATEVER_THREE;
+        ]
+      }
+
+      output.should == "foo.one.//./bar.one.baz/.blez\nblah.//.blez\nphoo.//.bhar/.blez\n"
+    end
+
   end
 end
