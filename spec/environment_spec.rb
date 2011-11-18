@@ -2,20 +2,27 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/environment'
 require 'fig/package'
+require 'fig/package/configuration'
+require 'fig/package/set'
 
-def new_example_environment()
+def new_example_environment(variable_value = 'whatever')
   environment = Fig::Environment.new(nil, nil, {'FOO' => 'bar'}, nil)
 
   %w< one two three >.each do
     |package_name|
-    environment.register_package(
+    package =
       Fig::Package.new(
         package_name,
         "#{package_name}-version",
         "#{package_name}-directory",
-        []
+        [Fig::Package::Configuration.new('default', [])]
       )
+    environment.register_package(package)
+
+    set_statement = Fig::Package::Set.new(
+      "WHATEVER_#{package_name.upcase}", variable_value
     )
+    environment.apply_config_statement(package, set_statement, nil)
   end
 
   return environment
@@ -31,6 +38,19 @@ def substitute_command(command)
   }
 
   return substituted_command
+end
+
+def substitute_variable(variable_value)
+  environment = new_example_environment(variable_value)
+
+  output = nil
+  environment.execute_shell([]) {
+    output = %x[
+      echo $WHATEVER_ONE; echo $WHATEVER_TWO; echo $WHATEVER_THREE;
+    ]
+  }
+
+  return output
 end
 
 describe 'Environment' do
@@ -94,6 +114,21 @@ describe 'Environment' do
         # Grrr, Ruby syntax: that's three backslashes followed by "f"
         substitute_command %w< bar\\\\\\foo >
       }.to raise_error(/unknown escape/i)
+    end
+  end
+
+  describe 'package name substitution in variables' do
+    it 'does basic @ substitution' do
+      output = substitute_variable('@/foobie')
+
+      output.should ==
+        "one-directory/foobie\ntwo-directory/foobie\nthree-directory/foobie\n"
+    end
+
+    it 'does @ escaping' do
+      output = substitute_variable('\\@/foobie')
+
+      output.should == "@/foobie\n@/foobie\n@/foobie\n"
     end
   end
 end

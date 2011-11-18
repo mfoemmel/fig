@@ -56,7 +56,7 @@ module Fig
 
     def execute_shell(command)
       with_environment do
-        yield command.map{|arg| expand_arg(arg)}
+        yield command.map{|arg| expand_command_line_argument(arg)}
       end
     end
 
@@ -71,10 +71,12 @@ module Fig
       with_environment do
         # TODO nil check
         commands.each do |command|
-          result = yield                                        \
-            expand_arg("#{command.command} #{args.join(' ')}")  \
-            .gsub('@', package.directory)                       \
-            .split(' ')
+          argument =
+            expand_command_line_argument(
+              "#{command.command} #{args.join(' ')}"
+            )
+
+          result = yield expand_path(argument, package).split(' ')
         end
       end
       result
@@ -120,11 +122,11 @@ module Fig
     private
 
     def set_variable(base_package, name, value)
-      @variables[name] = expand_value(base_package, name, value)
+      @variables[name] = expand_variable_value(base_package, name, value)
     end
 
     def append_variable(base_package, name, value)
-      value = expand_value(base_package, name, value)
+      value = expand_variable_value(base_package, name, value)
       # TODO: converting all environment variables to upcase is not a robust
       #       comparison. It also assumes all env vars will be in upcase
       #       in package.fig
@@ -173,9 +175,11 @@ module Fig
 
     # Replace @ symbol with the package's directory, "[package]" with the
     # package name.
-    def expand_value(base_package, name, value)
+    def expand_variable_value(base_package, name, value)
       return value unless base_package && base_package.package_name
-      file = value.gsub(/\@/, base_package.directory)
+
+      file = expand_path(value, base_package)
+
       if @retrieve_vars.member?(name)
         # A '//' in the source file's path tells us to preserve path
         # information after the '//' when doing a retrieve.
@@ -203,31 +207,62 @@ module Fig
       file
     end
 
-    def expand_arg(arg)
-      package_substituted =
-        arg.gsub(
-          %r<
-            (?: ^ | \G)           # Zero-width anchor.
-            ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
-            \@                    # The package indicator
-            ( [a-zA-Z0-9.-]+ )    # Package name
-          >x
-        ) do |match|
-          backslashes = $1 || ''
-          package = @packages[$2]
-          if package.nil?
-            raise RepositoryError.new "Package not found: #{$1}"
-          end
-          backslashes + package.directory
-        end
+    def expand_path(path, base_package)
+      expanded_path = expand_at_sign_package_references(path, base_package)
+      check_for_bad_escape(expanded_path, path)
+      return expanded_path.gsub(%r< \\ ([\\@]) >x, '\1')
+    end
 
-      if package_substituted =~ / (?: ^ | [^\\]) (?: \\{2})* ( \\ [^\\@] ) /x
-        raise RepositoryError.new(
-          %Q<Unknown escape "#{$1}" in "#{arg}">
-        )
+    def expand_at_sign_package_references(arg, base_package)
+      return arg.gsub(
+        %r<
+          (?: ^ | \G)           # Zero-width anchor.
+          ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
+          \@                    # The package indicator
+        >x
+      ) do |match|
+        backslashes = $1 || ''
+        backslashes + base_package.directory
       end
+    end
+
+    def expand_command_line_argument(arg)
+      package_substituted = expand_named_package_references(arg)
+      check_for_bad_escape(package_substituted, arg)
 
       return package_substituted.gsub(%r< \\ ([\\@]) >x, '\1')
+    end
+
+    def expand_named_package_references(arg)
+      return arg.gsub(
+        %r<
+          (?: ^ | \G)           # Zero-width anchor.
+          ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
+          \@                    # The package indicator
+          ( [a-zA-Z0-9.-]+ )    # Package name
+        >x
+      ) do |match|
+        backslashes = $1 || ''
+        package = @packages[$2]
+        if package.nil?
+          raise RepositoryError.new "Package not found: #{$1}"
+        end
+        backslashes + package.directory
+      end
+    end
+
+    # The value is expected to have had any @ substitution already done, but
+    # collapsing of escapes not done yet.
+    def check_for_bad_escape(substituted, original)
+      if substituted =~ %r<
+        (?: ^ | [^\\])  # Start of line or non backslash
+        (?: \\{2})*     # Even number of backslashes (including zero)
+        ( \\ [^\\@] )   # A bad escape
+      >x
+        raise RepositoryError.new(
+          %Q<Unknown escape "#{$1}" in "#{original}">
+        )
+      end
     end
 
     def translate_retrieve_variables(base_package, name)

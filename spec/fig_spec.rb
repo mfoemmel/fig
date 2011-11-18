@@ -38,6 +38,10 @@ describe 'Fig' do
     it 'appends empty variable' do
       fig('--append XYZZY=foo --get XYZZY').should == ['foo', '', 0]
     end
+
+    it %q<doesn't expand variables without packages> do
+      fig('--set FOO=@bar --get FOO')[0].should == '@bar'
+    end
   end
 
   it 'ignores comments' do
