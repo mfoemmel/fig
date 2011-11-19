@@ -178,6 +178,7 @@ module Fig
       when 'file'
         begin
           FileUtils.cp(uri.path, path)
+          return true
         rescue Errno::ENOENT => e
           raise NotFoundError.new
         end

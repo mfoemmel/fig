@@ -265,6 +265,36 @@ describe 'Fig' do
     File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/foo/include/hello2.h").should == 'another header file'
   end
 
+  it 'updates without there being a copy of the package in the FIG_HOME left there from publishing' do
+    cleanup_repository
+    FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/include")
+    File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello.h", 'w') { |f| f << 'a header file' }
+    File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello2.h", 'w') { |f| f << 'another header file' }
+    input = <<-END
+      resource include/hello.h
+      resource include/hello2.h
+      config default
+        append INCLUDE=@/include/hello.h
+        append INCLUDE=@/include/hello2.h
+      end
+    END
+    fig('--publish foo/1.2.3', input)
+
+    FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY + '/fighome')
+
+    input = <<-END
+      retrieve INCLUDE->include2/[package]
+      config default
+        include foo/1.2.3
+      end
+    END
+    fig('-u', input)
+
+    File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/foo/hello.h").should == 'a header file'
+    File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/foo/hello2.h").should == 'another header file'
+  end
+
+
   it 'packages multiple resources' do
     cleanup_repository
     FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
