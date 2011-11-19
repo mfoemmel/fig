@@ -132,7 +132,7 @@ module Fig
     end
 
     if input
-      package = Parser.new(configuration).parse_package(nil, nil, '.', input)
+      package = Parser.new(configuration).parse_package('default', 'default', '.', input)
       direct_retrieves=[]
       if options[:update] || options[:update_if_missing]
         package.retrieves.each do |var, path|
