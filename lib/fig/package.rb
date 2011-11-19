@@ -23,8 +23,10 @@ class Fig::Package
     @statements.each do |stmt|
       return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
     end
-    Fig::Logging.fatal "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
-    raise PackageError.new
+    message =
+      "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
+    Fig::Logging.fatal message
+    raise Fig::PackageError.new message
   end
 
   def configs
