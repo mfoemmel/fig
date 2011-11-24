@@ -101,12 +101,12 @@ EOF
         options[:debug] = true
       end
 
-      options[:input] = nil
+      options[:package_config_file] = nil
       opts.on(
         '--file FILE',
         %q<read fig file FILE. Use '-' for stdin. See also --no-file>
       ) do |path|
-        options[:input] = path
+        options[:package_config_file] = path
       end
 
       options[:force] = nil
@@ -162,7 +162,7 @@ EOF
       opts.on(
         '--no-file', 'ignore package.fig file in current directory'
       ) do |path|
-        options[:input] = :none
+        options[:package_config_file] = :none
       end
 
       options[:publish] = nil
