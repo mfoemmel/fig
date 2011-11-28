@@ -87,18 +87,18 @@ module Fig
       env.apply_config_statement(nil, modifier, nil)
     end
 
-    input = nil
-    if options[:input] == :none
+    package_config_file = nil
+    if options[:package_config_file] == :none
       # ignore
-    elsif options[:input] == '-'
-      input = $stdin.read
-    elsif options[:input].nil?
-      input = File.read(DEFAULT_FIG_FILE) if File.exist?(DEFAULT_FIG_FILE)
+    elsif options[:package_config_file] == '-'
+      package_config_file = $stdin.read
+    elsif options[:package_config_file].nil?
+      package_config_file = File.read(DEFAULT_FIG_FILE) if File.exist?(DEFAULT_FIG_FILE)
     else
-      if File.exist?(options[:input])
-        input = File.read(options[:input])
+      if File.exist?(options[:package_config_file])
+        package_config_file = File.read(options[:package_config_file])
       else
-        $stderr.puts %Q<File not found: "#{options[:input]}".>
+        $stderr.puts %Q<File not found: "#{options[:package_config_file]}".>
         return 1
       end
     end
@@ -131,8 +131,8 @@ module Fig
       return 0
     end
 
-    if input
-      package = Parser.new(configuration).parse_package('default', 'default', '.', input)
+    if package_config_file
+      package = Parser.new(configuration).parse_package(nil, nil, '.', package_config_file)
       direct_retrieves=[]
       if options[:update] || options[:update_if_missing]
         package.retrieves.each do |var, path|
@@ -226,6 +226,13 @@ module Fig
     rescue OptionParser::InvalidOption => exception
       $stderr.puts exception.to_s
       $stderr.puts USAGE
+      return 1
+    rescue RepositoryError => error
+      # If there's no message, we assume that the cause has already been logged.
+      if not exception_has_message?(error)
+        Logging.fatal error.to_s
+      end
+
       return 1
     end
   end

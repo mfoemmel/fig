@@ -12,8 +12,8 @@ class Fig::Package
   attr_accessor :backtrace
 
   def initialize(package_name, version_name, directory, statements)
-    @package_name = package_name
-    @version_name = version_name
+    @package_name = package_name || 'uninitialized'
+    @version_name = version_name || 'default'
     @directory = directory
     @statements = statements
     @backtrace = nil

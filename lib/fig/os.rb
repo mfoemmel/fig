@@ -124,7 +124,10 @@ module Fig
                 packages << pkg + '/' + ver
               end
             rescue Net::FTPPermError
-              # ignore
+              # Ignore this error because it's indicative of the FTP library encountering a file
+              # or directory that it does not have permission to open.
+              # Fig needs to be able to have secure repos/packages
+              # and there is no way easy way to deal with the permissions issues other than consuming these errors.
             end
             pos += num_threads
           end
@@ -153,10 +156,10 @@ module Fig
             return true
           end
         rescue Net::FTPPermError => error
-          Logging.warn error
+          Logging.warn error.message
           raise NotFoundError.new
         rescue SocketError => error
-          Logging.warn error
+          Logging.warn error.message
           raise NotFoundError.new
         end
       when 'http'

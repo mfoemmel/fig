@@ -28,3 +28,6 @@ resources.tar.gz
 
 # gemspec files
 *.gemspec
+
+# Rubymine files
+.idea/*
