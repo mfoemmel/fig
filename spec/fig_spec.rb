@@ -53,6 +53,7 @@ describe 'Fig' do
         set FOO=BAR # Another comment
       end
     END
+    system("mkdir -p #{FIG_SPEC_BASE_DIRECTORY}")
     fig('--get FOO', input)[0].should == 'BAR'
   end
 
