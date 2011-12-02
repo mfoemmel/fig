@@ -9,7 +9,7 @@ module Fig
 
     def ensure_url_whitelist_initialized()
       return if not @whitelist.nil?
-      whitelist = self['url_whitelist']
+      whitelist = self['url whitelist']
       if whitelist.nil?
         @whitelist = []
       else

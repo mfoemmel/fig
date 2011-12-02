@@ -13,56 +13,56 @@ describe 'ApplicationConfiguration' do
 
   it 'allows the repo url when whitelist is empty' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => []})
+    config.push_dataset({'url whitelist' => []})
     config.url_access_allowed?(REPOSITORY_TEST_URL).should == true
   end
 
   it 'disallows a non-repo url when whitelist is empty' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => []})
+    config.push_dataset({'url whitelist' => []})
     config.url_access_allowed?('').should == false
   end
 
   it 'disallows a url that starts with a whitelisted url that is a hostname only' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => []})
+    config.push_dataset({'url whitelist' => []})
     config.url_access_allowed?(REPOSITORY_TEST_URL + 'x').should == false
   end
 
   it 'allows a full url with empty whitelist' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => []})
+    config.push_dataset({'url whitelist' => []})
     config.url_access_allowed?(REPOSITORY_TEST_URL + '/x').should == true
   end
 
   it 'allows a url when it\'s on the whitelist' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => [REPOSITORY_TEST_URL]})
+    config.push_dataset({'url whitelist' => [REPOSITORY_TEST_URL]})
     config.url_access_allowed?(REPOSITORY_TEST_URL + '/x').should == true
   end
 
   it 'disallows a url when it\'s not on the whitelist' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => [WHITELIST_TEST_URL]})
+    config.push_dataset({'url whitelist' => [WHITELIST_TEST_URL]})
     config.url_access_allowed?('http://bar.com' + '/x').should == false
   end
 
   it 'disallows a non-repo url when whitelist is not empty' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => [WHITELIST_TEST_URL]})
+    config.push_dataset({'url whitelist' => [WHITELIST_TEST_URL]})
     config.url_access_allowed?('').should == false
   end
 
   it 'disallows a url with a port whose url is whitelisted, but not the port' do
     pending('disallow that')
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => [WHITELIST_TEST_URL]})
+    config.push_dataset({'url whitelist' => [WHITELIST_TEST_URL]})
     config.url_access_allowed?(WHITELIST_TEST_URL + ':2001').should == false
   end
 
   it 'disallows a url with a different port (but the first part matches)' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url_whitelist' => [WHITELIST_TEST_URL+':2000']})
+    config.push_dataset({'url whitelist' => [WHITELIST_TEST_URL+':2000']})
     config.url_access_allowed?(WHITELIST_TEST_URL+':20001').should == false
   end
 

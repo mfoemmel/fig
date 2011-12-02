@@ -12,7 +12,7 @@ describe 'Parser' do
       archive http://svpsvn/my/repo/is/cool.jar
     FIG_PACKAGE
     application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-    application_configuration.push_dataset( { 'url_whitelist' => 'http://svpsvn/' } )
+    application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
     package = Fig::Parser.new(application_configuration).parse_package('package_name', 'version', 'foo_directory', fig_package)
     package.should_not == nil
@@ -25,7 +25,7 @@ describe 'Parser' do
       archive http://evil_repo/my/repo/is/bad.jar
     FIG_PACKAGE
     application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-    application_configuration.push_dataset( { 'url_whitelist' => 'http://svpsvn/' } )
+    application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
     exception = nil
     begin
