@@ -1,3 +1,6 @@
+v0.1.49
+
+  - Finalizing figrc name for URL whitelist.
 
 v0.1.47-48
 
@@ -14,8 +17,6 @@ v0.1.47-48
   - Refactored '[package]' substitution.
 
   - Implemented @ escaping in variables.
-
-  - Finalizing figrc name for URL whitelist.
 
 v0.1.46
 
