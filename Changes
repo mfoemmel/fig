@@ -1,3 +1,7 @@
+v0.1.50
+
+  - Trying to get releases via rake to work properly for multiple platforms.
+
 v0.1.49
 
   - Finalizing figrc name for URL whitelist.

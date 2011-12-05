@@ -43,9 +43,10 @@ begin
         + Dir['lib/**/*.rb']                           \
         + Dir['lib/**/*.treetop']
       gemspec.executables = ['fig', 'fig-download']
+
+      Jeweler::GemcutterTasks.new
     end
 
-    Jeweler::GemcutterTasks.new
   end
 rescue LoadError
   puts 'Jeweler (or a dependency) not available. Install it with: gem install jeweler.'
