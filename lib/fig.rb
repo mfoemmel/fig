@@ -59,7 +59,7 @@ module Fig
     return nil
   end
 
-  def initialize_package_config_file(options)
+  def load_package_config_file_contents(options)
     package_config_file = options[:package_config_file]
 
     if package_config_file == :none
@@ -115,7 +115,7 @@ module Fig
     return false
   end
 
-  def process_package_config_file(options, package_config_file, environment, configuration)
+  def parse_package_config_file(options, package_config_file, environment, configuration)
     if package_config_file
       package = Parser.new(configuration).parse_package(nil, nil, '.', package_config_file)
       if options[:update] || options[:update_if_missing]
@@ -123,6 +123,7 @@ module Fig
           environment.add_retrieve(var, path)
         end
       end
+
       unless options[:publish] || options[:list] || options[:publish_local]
         environment.register_package(package)
         environment.apply_config(package, options[:config], nil)
@@ -179,7 +180,7 @@ module Fig
       environment.apply_config_statement(nil, modifier, nil)
     end
 
-    package_config_file = initialize_package_config_file(options)
+    package_config_file = load_package_config_file_contents(options)
 
     options[:cleans].each do |descriptor|
       package_name, version_name = descriptor.split('/')
@@ -188,7 +189,7 @@ module Fig
 
     resolve_listing(options, repository)
 
-    package, environment = process_package_config_file(options, package_config_file, environment, configuration)
+    package, environment = parse_package_config_file(options, package_config_file, environment, configuration)
 
     if options[:publish] || options[:publish_local]
       if !argv.empty?
