@@ -113,12 +113,6 @@ module Fig
       apply_config(package, config_name || 'default', new_backtrace)
     end
 
-    def direct_retrieve(package_name, source_path, target_path)
-      package = lookup_package(package_name, nil, nil)
-      FileUtils.mkdir_p(target_path)
-      FileUtils.cp_r(File.join(package.directory, source_path, '.'), target_path)
-    end
-
     private
 
     def set_variable(base_package, name, value)

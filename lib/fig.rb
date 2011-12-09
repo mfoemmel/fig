@@ -118,22 +118,14 @@ module Fig
   def process_package_config_file(options, package_config_file, environment, configuration)
     if package_config_file
       package = Parser.new(configuration).parse_package(nil, nil, '.', package_config_file)
-      direct_retrieves=[]
       if options[:update] || options[:update_if_missing]
         package.retrieves.each do |var, path|
-          if var =~ %r< ^ \@ ([^/]+) (.*) >x
-            direct_retrieves << [$1, $2, path]
-          else
-            environment.add_retrieve(var, path)
-          end
+          environment.add_retrieve(var, path)
         end
       end
       unless options[:publish] || options[:list] || options[:publish_local]
         environment.register_package(package)
         environment.apply_config(package, options[:config], nil)
-        direct_retrieves.each do |info|
-          environment.direct_retrieve(info[0], info[1], info[2])
-        end
       end
     else
       package = Package.new(nil, nil, '.', [])
