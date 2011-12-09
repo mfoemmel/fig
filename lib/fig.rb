@@ -135,6 +135,50 @@ module Fig
     return package, environment
   end
 
+  def publish(argv, options, package, repository)
+    if not argv.empty?
+      $stderr.puts %Q<Unexpected arguments: #{argv.join(' ')}>
+      return 10
+    end
+
+    package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
+
+    if package_name.nil? || version_name.nil?
+      $stderr.puts 'Please specify a package name and a version name.'
+      return 10
+    end
+
+    if not options[:modifiers].empty?
+      publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:modifiers])]
+      publish_statements << Package::Publish.new('default','default')
+    elsif not package.statements.empty?
+      publish_statements = package.statements
+    else
+      $stderr.puts 'Nothing to publish.'
+      return 1
+    end
+
+    if options[:publish]
+      Logging.info "Checking status of #{package_name}/#{version_name}..."
+
+      if repository.list_remote_packages.include?("#{package_name}/#{version_name}")
+        Logging.info "#{package_name}/#{version_name} has already been published."
+
+        if not options[:force]
+          Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
+          return 1
+        else
+          Logging.info 'Overwriting...'
+        end
+      end
+    end
+
+    Logging.info "Publishing #{package_name}/#{version_name}."
+    repository.publish_package(publish_statements, package_name, version_name, options[:publish_local])
+
+    return 0
+  end
+
   def run_fig(argv)
     shell_command = initialize_shell_command(argv)
 
@@ -151,11 +195,7 @@ module Fig
     remote_url = initialize_remote_url(options)
 
     configuration = FigRC.find(
-      options[:figrc],
-      remote_url,
-      options[:login],
-      options[:home],
-      options[:no_figrc]
+      options[:figrc], remote_url, options[:login], options[:home], options[:no_figrc]
     )
 
     Logging.initialize_post_configuration(options[:log_config] || configuration['log configuration'], options[:log_level])
@@ -192,38 +232,7 @@ module Fig
     package, environment = parse_package_config_file(options, package_config_file, environment, configuration)
 
     if options[:publish] || options[:publish_local]
-      if !argv.empty?
-        $stderr.puts %Q<Unexpected arguments: #{argv.join(' ')}>
-        return 10
-      end
-      package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
-      if package_name.nil? || version_name.nil?
-        $stderr.puts 'Please specify a package name and a version name.'
-        return 10
-      end
-      if not options[:modifiers].empty?
-        publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:modifiers])]
-        publish_statements << Package::Publish.new('default','default')
-      elsif not package.statements.empty?
-        publish_statements = package.statements
-      else
-        $stderr.puts 'Nothing to publish.'
-        return 1
-      end
-      if options[:publish]
-        Logging.info "Checking status of #{package_name}/#{version_name}..."
-        if repository.list_remote_packages.include?("#{package_name}/#{version_name}")
-          Logging.info "#{package_name}/#{version_name} has already been published."
-          if not options[:force]
-            Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
-            return 1
-          else
-            Logging.info 'Overwriting...'
-          end
-        end
-      end
-      Logging.info "Publishing #{package_name}/#{version_name}."
-      repository.publish_package(publish_statements, package_name, version_name, options[:publish_local])
+      return publish(argv, options, package, repository)
     elsif options[:echo]
       puts environment[options[:echo]]
     elsif shell_command
