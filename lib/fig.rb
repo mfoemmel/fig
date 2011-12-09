@@ -66,8 +66,10 @@ module Fig
       return nil
     elsif package_config_file == '-'
       return $stdin.read
-    elsif package_config_file.nil? and File.exist?(DEFAULT_FIG_FILE)
-      return File.read(DEFAULT_FIG_FILE)
+    elsif package_config_file.nil?
+      if File.exist?(DEFAULT_FIG_FILE)
+        return File.read(DEFAULT_FIG_FILE)
+      end
     else
       return read_in_package_config_file(options)
     end
@@ -85,7 +87,7 @@ module Fig
     end
   end
 
-  def display_configs_in_local_packages_list(repository)
+  def display_configs_in_local_packages_list(options, repository)
     options[:list_configs].each do |descriptor|
       package_name, version_name = descriptor.split('/')
       repository.read_local_package(package_name, version_name).configs.each do |config|
@@ -96,17 +98,17 @@ module Fig
 
   def resolve_listing(options, repository)
     if options[:list]
-      display_package_list
+      display_package_list(repository)
       return true
     end
 
     if options[:list_remote]
-      display_remote_package_list
+      display_remote_package_list(repository)
       return true
     end
 
     if not options[:list_configs].empty?
-      display_configs_in_local_packages_list
+      display_configs_in_local_packages_list(options, repository)
       return true
     end
 
@@ -185,23 +187,7 @@ module Fig
       environment.apply_config_statement(nil, modifier, nil)
     end
 
-    #package_config_file = initialize_package_config_file(options)
-    package_config_file = nil
-    if options[:package_config_file] == :none
-      # ignore
-    elsif options[:package_config_file] == '-'
-      package_config_file = $stdin.read
-    elsif options[:package_config_file].nil?
-      package_config_file = File.read(DEFAULT_FIG_FILE) if File.exist?(DEFAULT_FIG_FILE)
-    else
-      if File.exist?(options[:package_config_file])
-        package_config_file = File.read(options[:package_config_file])
-      else
-        $stderr.puts %Q<File not found: "#{options[:package_config_file]}".>
-        return 1
-      end
-    end
-
+    package_config_file = initialize_package_config_file(options)
 
     options[:cleans].each do |descriptor|
       package_name, version_name = descriptor.split('/')
