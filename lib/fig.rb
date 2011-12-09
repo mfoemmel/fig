@@ -27,7 +27,15 @@ module Fig
     return package_name, config_name, version_name
   end
 
-  def run_fig(argv)
+  def read_in_package_config_file(options)
+    if File.exist?(options[:package_config_file])
+      return File.read(options[:package_config_file])
+    else
+      raise UserInputError.new(%Q<File not found: "#{options[:package_config_file]}".>)
+    end
+  end
+
+  def initialize_shell_command(argv)
     shell_command = nil
     argv.each_with_index do |arg, i|
       if arg == '--'
@@ -36,6 +44,104 @@ module Fig
         break
       end
     end
+
+    return shell_command
+  end
+
+  def initialize_remote_url(options)
+    if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
+      if ENV['FIG_REMOTE_URL'].nil?
+        raise UserInputError.new 'Please define the FIG_REMOTE_URL environment variable.'
+      end
+      return ENV['FIG_REMOTE_URL']
+    end
+
+    return nil
+  end
+
+  def initialize_package_config_file(options)
+    package_config_file = options[:package_config_file]
+
+    if package_config_file == :none
+      return nil
+    elsif package_config_file == '-'
+      return $stdin.read
+    elsif package_config_file.nil? and File.exist?(DEFAULT_FIG_FILE)
+      return File.read(DEFAULT_FIG_FILE)
+    else
+      return read_in_package_config_file(options)
+    end
+  end
+
+  def display_package_list(repository)
+    repository.list_packages.sort.each do |item|
+      puts item
+    end
+  end
+
+  def display_remote_package_list(repository)
+    repository.list_remote_packages.sort.each do |item|
+      puts item
+    end
+  end
+
+  def display_configs_in_local_packages_list(repository)
+    options[:list_configs].each do |descriptor|
+      package_name, version_name = descriptor.split('/')
+      repository.read_local_package(package_name, version_name).configs.each do |config|
+        puts config.name
+      end
+    end
+  end
+
+  def resolve_listing(options, repository)
+    if options[:list]
+      display_package_list
+      return true
+    end
+
+    if options[:list_remote]
+      display_remote_package_list
+      return true
+    end
+
+    if not options[:list_configs].empty?
+      display_configs_in_local_packages_list
+      return true
+    end
+
+    return false
+  end
+
+  def process_package_config_file(options, package_config_file, environment, configuration)
+    if package_config_file
+      package = Parser.new(configuration).parse_package(nil, nil, '.', package_config_file)
+      direct_retrieves=[]
+      if options[:update] || options[:update_if_missing]
+        package.retrieves.each do |var, path|
+          if var =~ %r< ^ \@ ([^/]+) (.*) >x
+            direct_retrieves << [$1, $2, path]
+          else
+            environment.add_retrieve(var, path)
+          end
+        end
+      end
+      unless options[:publish] || options[:list] || options[:publish_local]
+        environment.register_package(package)
+        environment.apply_config(package, options[:config], nil)
+        direct_retrieves.each do |info|
+          environment.direct_retrieve(info[0], info[1], info[2])
+        end
+      end
+    else
+      package = Package.new(nil, nil, '.', [])
+    end
+
+    return package, environment
+  end
+
+  def run_fig(argv)
+    shell_command = initialize_shell_command(argv)
 
     options, argv, exit_value = parse_options(argv)
     if not exit_value.nil?
@@ -47,14 +153,7 @@ module Fig
     vars = {}
     ENV.each {|key,value| vars[key]=value }
 
-    remote_url = nil
-    if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
-      remote_url = ENV['FIG_REMOTE_URL']
-      if remote_url.nil?
-        $stderr.puts 'Please define the FIG_REMOTE_URL environment variable.'
-        return 1
-      end
-    end
+    remote_url = initialize_remote_url(options)
 
     configuration = FigRC.find(
       options[:figrc],
@@ -66,27 +165,27 @@ module Fig
 
     Logging.initialize_post_configuration(options[:log_config] || configuration['log configuration'], options[:log_level])
 
-    remote_user = nil
-
     os = OS.new(options[:login])
-    repos = Repository.new(
+    repository = Repository.new(
       os,
       File.expand_path(File.join(options[:home], 'repos')),
       remote_url,
       configuration,
-      remote_user,
+      nil, # remote_user
       options[:update],
       options[:update_if_missing]
     )
+
     retriever = Retriever.new('.')
     # Check to see if this is still happening with the new layers of abstraction.
     at_exit { retriever.save }
-    env = Environment.new(os, repos, vars, retriever)
+    environment = Environment.new(os, repository, vars, retriever)
 
     options[:modifiers].each do |modifier|
-      env.apply_config_statement(nil, modifier, nil)
+      environment.apply_config_statement(nil, modifier, nil)
     end
 
+    #package_config_file = initialize_package_config_file(options)
     package_config_file = nil
     if options[:package_config_file] == :none
       # ignore
@@ -103,56 +202,15 @@ module Fig
       end
     end
 
+
     options[:cleans].each do |descriptor|
       package_name, version_name = descriptor.split('/')
-      repos.clean(package_name, version_name)
-    end
-    if options[:list]
-      repos.list_packages.sort.each do |item|
-        puts item
-      end
-      return 0
+      repository.clean(package_name, version_name)
     end
 
-    if options[:list_remote]
-      repos.list_remote_packages.sort.each do |item|
-        puts item
-      end
-      return 0
-    end
+    resolve_listing(options, repository)
 
-    if not options[:list_configs].empty?
-      options[:list_configs].each do |descriptor|
-        package_name, version_name = descriptor.split('/')
-        repos.read_local_package(package_name, version_name).configs.each do |config|
-          puts config.name
-        end
-      end
-      return 0
-    end
-
-    if package_config_file
-      package = Parser.new(configuration).parse_package(nil, nil, '.', package_config_file)
-      direct_retrieves=[]
-      if options[:update] || options[:update_if_missing]
-        package.retrieves.each do |var, path|
-          if var =~ %r< ^ \@ ([^/]+) (.*) >x
-            direct_retrieves << [$1, $2, path]
-          else
-            env.add_retrieve(var, path)
-          end
-        end
-      end
-      unless options[:publish] || options[:list] || options[:publish_local]
-        env.register_package(package)
-        env.apply_config(package, options[:config], nil)
-        direct_retrieves.each do |info|
-          env.direct_retrieve(info[0], info[1], info[2])
-        end
-      end
-    else
-      package = Package.new(nil, nil, '.', [])
-    end
+    package, environment = process_package_config_file(options, package_config_file, environment, configuration)
 
     if options[:publish] || options[:publish_local]
       if !argv.empty?
@@ -175,7 +233,7 @@ module Fig
       end
       if options[:publish]
         Logging.info "Checking status of #{package_name}/#{version_name}..."
-        if repos.list_remote_packages.include?("#{package_name}/#{version_name}")
+        if repository.list_remote_packages.include?("#{package_name}/#{version_name}")
           Logging.info "#{package_name}/#{version_name} has already been published."
           if not options[:force]
             Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
@@ -186,19 +244,19 @@ module Fig
         end
       end
       Logging.info "Publishing #{package_name}/#{version_name}."
-      repos.publish_package(publish_statements, package_name, version_name, options[:publish_local])
+      repository.publish_package(publish_statements, package_name, version_name, options[:publish_local])
     elsif options[:echo]
-      puts env[options[:echo]]
+      puts environment[options[:echo]]
     elsif shell_command
       argv.shift
-      env.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
+      environment.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
     elsif argv[0]
       package_name, config_name, version_name = parse_descriptor(argv.shift)
-      env.include_config(package, package_name, config_name, version_name, {}, nil)
-      env.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
+      environment.include_config(package, package_name, config_name, version_name, {}, nil)
+      environment.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
     elsif not argv.empty?
-      env.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
-    elsif not repos.updating?
+      environment.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
+    elsif not repository.updating?
       $stderr.puts "Nothing to do.\n"
       $stderr.puts USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
