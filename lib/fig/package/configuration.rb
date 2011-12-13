@@ -20,11 +20,11 @@ class Fig::Package::Configuration
     Configuration.new(name, statements)
   end
 
-  def commands
+  def command
     result = statements.select do
       |statement| statement.is_a?(Fig::Package::Command)
     end
-    result
+    result.first
   end
 
   def walk_statements(&block)

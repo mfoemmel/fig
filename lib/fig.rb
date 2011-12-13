@@ -238,12 +238,10 @@ module Fig
     elsif shell_command
       argv.shift
       environment.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
-    elsif argv[0]
+    elsif not argv.empty?
       package_name, config_name, version_name = parse_descriptor(argv.shift)
       environment.include_config(package, package_name, config_name, version_name, {}, nil)
       environment.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
-    elsif not argv.empty?
-      environment.execute_config(package, nil, options[:config], nil, argv) { |cmd| os.shell_exec cmd }
     elsif not repository.updating?
       $stderr.puts "Nothing to do.\n"
       $stderr.puts USAGE
@@ -264,7 +262,7 @@ module Fig
       return 1
     rescue UserInputError => exception
       # If there's no message, we assume that the cause has already been logged.
-      if not exception_has_message?(exception)
+      if exception_has_message?(exception)
         Logging.fatal exception.to_s
       end
 
@@ -275,7 +273,7 @@ module Fig
       return 1
     rescue RepositoryError => error
       # If there's no message, we assume that the cause has already been logged.
-      if not exception_has_message?(error)
+      if exception_has_message?(error)
         Logging.fatal error.to_s
       end
 
@@ -285,6 +283,6 @@ module Fig
 
   def exception_has_message?(exception)
     class_name = exception.class.name
-    return exception.message == class_name
+    return exception.message != class_name
   end
 end

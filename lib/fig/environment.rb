@@ -67,19 +67,16 @@ module Fig
         Backtrace.new(nil, package_name, version_name, config_name)
       )
       result = nil
-      commands = package[config_name || 'default'].commands
+      command = package[config_name || 'default'].command
       with_environment do
         # TODO nil check
-        commands.each do |command|
-          argument =
-            expand_command_line_argument(
-              "#{command.command} #{args.join(' ')}"
-            )
+        argument =
+          expand_command_line_argument(
+            "#{command.command} #{args.join(' ')}"
+          )
 
-          result = yield expand_path(argument, package).split(' ')
-        end
+        yield expand_path(argument, package).split(' ')
       end
-      result
     end
 
     def apply_config_statement(base_package, statement, backtrace)

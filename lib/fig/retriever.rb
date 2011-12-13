@@ -108,6 +108,7 @@ private
           Fig::Logging.info "+ [#{@config.name}/#{@config.version}] #{relpath}"
         end
         FileUtils.mkdir_p(File.dirname(target))
+
         FileUtils.cp(source, target, :preserve => true)
       end
       @config.files << relpath if @config
