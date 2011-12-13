@@ -37,4 +37,22 @@ describe 'Parser' do
     exception.package.should == 'package_name'
     exception.version.should == '0.1.1'
   end
+
+  it 'rejects multiple commands in config file' do
+    fig_package=<<-END
+      config default
+        command "echo foo"
+        command "echo foo"
+      end
+    END
+
+    error = nil
+    application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+    begin
+      Fig::Parser.new(application_configuration).parse_package('package_name', '0.1.1', 'foo_directory', fig_package)
+    rescue Fig::UserInputError => error
+    end
+
+    error.should_not == nil
+  end
 end
