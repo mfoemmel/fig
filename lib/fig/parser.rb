@@ -36,6 +36,8 @@ module Fig
             raise UserInputError.new("Multiple command statements cannot be processed.")
           end
           command_processed = true
+        elsif statement.is_a?(Package::Configuration)
+          command_processed = false
         end
       end
     end

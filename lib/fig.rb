@@ -227,7 +227,9 @@ module Fig
       repository.clean(package_name, version_name)
     end
 
-    resolve_listing(options, repository)
+    if resolve_listing(options, repository)
+      return true
+    end
 
     package, environment = parse_package_config_file(options, package_config_file, environment, configuration)
 

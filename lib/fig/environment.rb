@@ -7,6 +7,7 @@ require 'fig/package/include'
 require 'fig/package/path'
 require 'fig/package/set'
 require 'fig/repositoryerror'
+require 'fig/userinputerror'
 
 module Fig
   # This class manages the program's state, including the value of all
@@ -60,22 +61,28 @@ module Fig
       end
     end
 
-    def execute_config(base_package, package_name, config_name, version_name, args)
-      package = lookup_package(
-        package_name || base_package.package_name,
-        version_name,
-        Backtrace.new(nil, package_name, version_name, config_name)
-      )
-      result = nil
-      command = package[config_name || 'default'].command
+    def execute_command(command, args, package)
       with_environment do
-        # TODO nil check
         argument =
           expand_command_line_argument(
             "#{command.command} #{args.join(' ')}"
           )
 
         yield expand_path(argument, package).split(' ')
+      end
+    end
+
+    def execute_config(base_package, package_name, config_name, version_name, args, &block)
+      package = lookup_package(
+        package_name || base_package.package_name,
+        version_name,
+        Backtrace.new(nil, package_name, version_name, config_name)
+      )
+      command = package[config_name || 'default'].command
+      if command
+        execute_command(command, args, package, &block)
+      else
+        raise UserInputError.new(%Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>)
       end
     end
 

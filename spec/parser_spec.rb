@@ -42,17 +42,54 @@ describe 'Parser' do
     fig_package=<<-END
       config default
         command "echo foo"
-        command "echo foo"
+        command "echo bar"
       end
     END
 
-    error = nil
-    application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-    begin
-      Fig::Parser.new(application_configuration).parse_package('package_name', '0.1.1', 'foo_directory', fig_package)
-    rescue Fig::UserInputError => error
-    end
+    application_configuration =
+      Fig::ApplicationConfiguration.new('http://example/')
 
-    error.should_not == nil
+    expect {
+      Fig::Parser.new(application_configuration).parse_package(
+        'package_name', '0.1.1', 'foo_directory', fig_package
+      )
+    }.to raise_error(
+      Fig::UserInputError
+    )
+  end
+
+  it 'accepts multiple configs, each with a single command' do
+    fig_package=<<-END
+      config default
+        command "echo foo"
+      end
+      config another
+        command "echo bar"
+      end
+    END
+
+    application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+    Fig::Parser.new(application_configuration).parse_package('package_name', '0.1.1', 'foo_directory', fig_package)
+    # Got no exception.
+  end
+
+  it 'rejects multiple configs where one has multiple commands' do
+    fig_package=<<-END
+      config default
+        command "echo foo"
+      end
+      config another
+        command "echo bar"
+        command "echo baz"
+      end
+    END
+
+    application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+
+    expect {
+      Fig::Parser.new(application_configuration).parse_package('package_name', '0.1.1', 'foo_directory', fig_package)
+    }.to raise_error(
+      Fig::UserInputError
+    )
   end
 end

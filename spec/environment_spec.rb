@@ -33,6 +33,16 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
     environment.apply_config_statement(package, set_statement, nil)
   end
 
+  environment.register_package(
+    Fig::Package.new(
+      'has_command', 'version', 'directory',
+      [Fig::Package::Configuration.new(
+        'default',
+        [Fig::Package::Command.new('echo foo')]
+      )]
+    )
+  )
+
   return environment
 end
 
@@ -169,6 +179,21 @@ describe 'Environment' do
 
       output.should == "foo.one.//./bar.one.baz/.blez\nblah.//.blez\nphoo.//.bhar/.blez\n"
     end
+  end
 
+  describe 'command execution' do
+    it 'issues an error when attempting to execute a command from a config which contains no command' do
+      environment = new_example_environment('blah')
+      expect {
+        environment.execute_config(nil, 'one', nil, nil, nil)
+      }.to raise_error(Fig::UserInputError)
+    end
+
+    it 'executes a command successfully' do
+      environment = new_example_environment('blah')
+      received_command = nil
+      environment.execute_config(nil, 'has_command', nil, nil, []) { |command| received_command = command }
+      received_command.should == %w<echo foo>
+    end
   end
 end
