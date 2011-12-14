@@ -21,10 +21,9 @@ class Fig::Package::Configuration
   end
 
   def command
-    result = statements.select do
+    return statements.find do
       |statement| statement.is_a?(Fig::Package::Command)
     end
-    result.first
   end
 
   def walk_statements(&block)
