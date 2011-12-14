@@ -46,13 +46,15 @@ describe 'Parser' do
       end
     END
 
-    error = nil
-    application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-    begin
-      Fig::Parser.new(application_configuration).parse_package('package_name', '0.1.1', 'foo_directory', fig_package)
-    rescue Fig::UserInputError => error
-    end
+    application_configuration =
+      Fig::ApplicationConfiguration.new('http://example/')
 
-    error.should_not == nil
+    expect {
+      Fig::Parser.new(application_configuration).parse_package(
+        'package_name', '0.1.1', 'foo_directory', fig_package
+      )
+    }.to raise_error(
+      Fig::UserInputError
+    )
   end
 end
