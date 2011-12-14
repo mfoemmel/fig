@@ -1,3 +1,7 @@
+v0.1.51
+
+  - You can now set an environment variable to the empty string with "set".
+
 v0.1.50
 
   - Trying to get releases via rake to work properly for multiple platforms.
