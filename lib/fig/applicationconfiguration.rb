@@ -1,5 +1,6 @@
-
 module Fig
+  # Configuration for the Fig program, as opposed to the configuration for a
+  # package.
   class ApplicationConfiguration
     def initialize(remote_repository_url)
       @data = []

@@ -5,6 +5,9 @@ require 'fig/package/statement'
 module Fig; end
 class Fig::Package; end
 
+# Specifies an archive file (possibly via a URL) that is part of the current package.
+#
+# Differs from a Resource in that the contents will be extracted.
 class Fig::Package::Archive
   include Fig::Package::Statement
 

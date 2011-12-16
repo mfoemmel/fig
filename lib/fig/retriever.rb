@@ -3,11 +3,11 @@ require 'set'
 
 require 'fig/logging'
 
-# This class copies files from the project directories in ~/.fighome to the
-# user's working directory. It keeps track of which files have already been copied, and which
-# package/versions they came from, and deletes files as necessary to ensure that
-# we never have files from two different versions of the same package in the user's
-# working directory.
+# Copies files from the project directories in FIG_HOME to the user's working
+# directory. It keeps track of which files have already been copied, and which
+# package/versions they came from, and deletes files as necessary to ensure
+# that we never have files from two different versions of the same package in
+# the user's working directory.
 class Retriever
   def initialize(base_dir)
     @base_dir = base_dir
@@ -55,7 +55,7 @@ class Retriever
     end
   end
 
-private
+  private
 
   def load(file)
     File.open(file).each_line do |line|

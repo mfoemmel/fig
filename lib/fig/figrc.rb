@@ -7,6 +7,8 @@ require 'fig/os'
 REPOSITORY_CONFIGURATION = '_meta/figrc'
 
 module Fig
+  # Parse multiple figrc files and assemble them into a single
+  # ApplicationConfiguration object.
   class FigRC
     def self.find(
       override_path, repository_url, login, fig_home, disable_figrc = false

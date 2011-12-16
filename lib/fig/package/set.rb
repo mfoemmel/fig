@@ -5,6 +5,7 @@ require 'fig/package/statement'
 module Fig; end
 class Fig::Package; end
 
+# A statement that sets the value of an environment variable.
 class Fig::Package::Set
   include Fig::Package::Statement
 

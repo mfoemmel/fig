@@ -5,6 +5,7 @@ require 'fig/package/statement'
 module Fig; end
 class Fig::Package; end
 
+# This class appears to be unused, though it is in the grammar.
 class Fig::Package::Install
   include Fig::Package::Statement
 

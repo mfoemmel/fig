@@ -16,6 +16,7 @@ require 'fig/retriever'
 require 'fig/userinputerror'
 require 'fig/windows'
 
+# Main program
 module Fig
   DEFAULT_FIG_FILE = 'package.fig'
 

@@ -6,6 +6,9 @@ require 'fig/package/path'
 require 'fig/package/resource'
 require 'fig/package/set'
 
+# Command-line processing.
+
+
 module Fig
   def parse_descriptor(descriptor)
     # todo should use treetop for these:

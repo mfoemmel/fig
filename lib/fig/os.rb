@@ -15,6 +15,8 @@ require 'fig/networkerror'
 require 'fig/notfounderror'
 
 module Fig
+  # Does things requiring real O/S interaction, primarilly taking care of file
+  # transfers and running external commands.
   class OS
     def initialize(login)
       @login = login

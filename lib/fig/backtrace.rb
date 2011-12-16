@@ -1,3 +1,5 @@
+# Contains traces of file inclusions so that the user can track down which file
+# an error occurred in.
 class Backtrace
   attr_reader :overrides
 

@@ -7,6 +7,8 @@ require 'fig/package/retrieve'
 
 module Fig; end
 
+# The parsed representation of a configuration file.  Contains the statement
+# objects.
 class Fig::Package
   attr_reader :package_name, :version_name, :directory, :statements
   attr_accessor :backtrace
@@ -72,4 +74,3 @@ def unparse_statements(indent, prefix, statements, suffix)
   body = @statements.map { |statement| statement.unparse(indent+'  ') }.join("\n")
   return ["\n#{indent}#{prefix}", body, "#{indent}#{suffix}"].join("\n")
 end
-

@@ -7,6 +7,8 @@ require 'fig/repositoryerror'
 require 'fig/urlaccesserror'
 
 module Fig
+  # Overall management of a repository.  Handles local operations itself;
+  # defers remote operations to others.
   class Repository
     def self.is_url?(url)
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?

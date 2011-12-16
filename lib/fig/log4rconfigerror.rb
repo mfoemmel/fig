@@ -1,6 +1,7 @@
 require 'fig/userinputerror'
 
 module Fig
+  # A problem with configuring Log4r.
   class Log4rConfigError < UserInputError
     def initialize(config_file, original_exception)
       super(

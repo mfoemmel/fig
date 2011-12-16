@@ -5,6 +5,7 @@ require 'fig/package/statement'
 module Fig; end
 class Fig::Package; end
 
+# Specifies the destination to put a dependency into.
 class Fig::Package::Retrieve
   include Fig::Package::Statement
 

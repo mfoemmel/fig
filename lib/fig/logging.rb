@@ -7,6 +7,8 @@ require 'fig/log4rconfigerror'
 
 module Fig; end
 
+# Logging facility that handles the fact that we may wish to do logging prior
+# to Log4r being properly configured.
 module Fig::Logging
   if not Log4r::Logger['initial']
     @@logger = Log4r::Logger.new('initial')

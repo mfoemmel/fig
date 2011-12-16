@@ -5,6 +5,8 @@ require 'fig/package/statement'
 module Fig; end
 class Fig::Package; end
 
+# Artificial statement (it's not in the grammar) used to handle default
+# publishing.
 class Fig::Package::Publish
   include Fig::Package::Statement
 

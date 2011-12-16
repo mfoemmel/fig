@@ -10,8 +10,9 @@ require 'fig/repositoryerror'
 require 'fig/userinputerror'
 
 module Fig
-  # This class manages the program's state, including the value of all
-  # environment variables, and which packages have already been applied.
+  # Manages the program's metadata, including packages and environment
+  # variables, and sets things up for running commands (from "command"
+  # statements in configuration files).
   class Environment
     DEFAULT_VERSION_NAME = 'current'
 

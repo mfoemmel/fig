@@ -9,6 +9,7 @@ require 'fig/urlaccesserror'
 require 'fig/userinputerror'
 
 module Fig
+  # Parses configuration files and deals with a few restrictions on them.
   class Parser
     def initialize(application_config)
       @parser = FigParser.new

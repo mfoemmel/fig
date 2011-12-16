@@ -1,5 +1,3 @@
-# Keeping Windows-specific implementation details here.
-
 require 'erb'
 require 'fileutils'
 
@@ -8,8 +6,8 @@ require 'fileutils'
 # on the fly to run a user supplied command.
 
 module Fig
+  # Windows-specific implementation details.
   class Windows
-
     BATCH_SCRIPT_TEMPLATE = <<EOF
 @echo off
 % ENV.each do |k,v|

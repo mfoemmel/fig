@@ -6,6 +6,7 @@ require 'fig/package/statement'
 module Fig; end
 class Fig::Package; end
 
+# A grouping of statements within a configuration.  May not be nested.
 class Fig::Package::Configuration
   include Fig::Package::Statement
 
