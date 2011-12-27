@@ -149,8 +149,8 @@ module Fig
       return 10
     end
 
-    if not options[:modifiers].empty?
-      publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:modifiers])]
+    if not options[:non_command_package_statements].empty?
+      publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:non_command_package_statements])]
       publish_statements << Package::Publish.new('default','default')
     elsif not package.statements.empty?
       publish_statements = package.statements
@@ -190,9 +190,6 @@ module Fig
 
     Logging.initialize_pre_configuration(options[:log_level])
 
-    vars = {}
-    ENV.each {|key,value| vars[key]=value }
-
     remote_url = initialize_remote_url(options)
 
     configuration = FigRC.find(
@@ -215,10 +212,10 @@ module Fig
     retriever = Retriever.new('.')
     # Check to see if this is still happening with the new layers of abstraction.
     at_exit { retriever.save }
-    environment = Environment.new(os, repository, vars, retriever)
+    environment = Environment.new(os, repository, nil, retriever)
 
-    options[:modifiers].each do |modifier|
-      environment.apply_config_statement(nil, modifier, nil)
+    options[:non_command_package_statements].each do |statement|
+      environment.apply_config_statement(nil, statement, nil)
     end
 
     package_config_file = load_package_config_file_contents(options)
@@ -226,6 +223,7 @@ module Fig
     options[:cleans].each do |descriptor|
       package_name, version_name = descriptor.split('/')
       repository.clean(package_name, version_name)
+      return true
     end
 
     if resolve_listing(options, repository)
@@ -236,8 +234,8 @@ module Fig
 
     if options[:publish] || options[:publish_local]
       return publish(argv, options, package, repository)
-    elsif options[:echo]
-      puts environment[options[:echo]]
+    elsif options[:get]
+      puts environment[options[:get]]
     elsif shell_command
       argv.shift
       environment.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
@@ -255,37 +253,36 @@ module Fig
     return 0
   end
 
+  def log_error_message(error)
+    # If there's no message, we assume that the cause has already been logged.
+    if error_has_message?(error)
+      Logging.fatal error.to_s
+    end
+  end
+
   def run_with_exception_handling(argv)
     begin
       return_code = run_fig(argv)
       return return_code
-    rescue URLAccessError => exception
+    rescue URLAccessError => error
       urls = exception.urls.join(', ')
       $stderr.puts "Access to #{urls} in #{exception.package}/#{exception.version} not allowed."
       return 1
-    rescue UserInputError => exception
-      # If there's no message, we assume that the cause has already been logged.
-      if exception_has_message?(exception)
-        Logging.fatal exception.to_s
-      end
-
+    rescue UserInputError => error
+      log_error_message(error)
       return 1
-    rescue OptionParser::InvalidOption => exception
-      $stderr.puts exception.to_s
+    rescue OptionParser::InvalidOption => error
+      $stderr.puts error.to_s
       $stderr.puts USAGE
       return 1
     rescue RepositoryError => error
-      # If there's no message, we assume that the cause has already been logged.
-      if exception_has_message?(error)
-        Logging.fatal error.to_s
-      end
-
+      log_error_message(error)
       return 1
     end
   end
 
-  def exception_has_message?(exception)
-    class_name = exception.class.name
-    return exception.message != class_name
+  def error_has_message?(error)
+    class_name = error.class.name
+    return error.message != class_name
   end
 end

@@ -16,14 +16,20 @@ module Fig
   class Environment
     DEFAULT_VERSION_NAME = 'current'
 
-    def initialize(os, repository, variables, retriever)
+    def initialize(os, repository, variables_override, retriever)
       @os = os
       @repository = repository
-      @variables = variables
+      @variables = variables_override || get_environment_variables
       @retrieve_vars = {}
       @packages = {}
       @applied_configs = {}
       @retriever = retriever
+    end
+
+    def get_environment_variables
+      vars = {}
+      ENV.each { |key,value| vars[key]=value }
+      return vars
     end
 
     # Returns the value of an envirionment variable
@@ -73,13 +79,19 @@ module Fig
       end
     end
 
+    def find_config_name_in_package(package_name)
+      return @applied_configs.key?(package_name) ? @applied_configs[package_name].first : 'default'
+    end
+
     def execute_config(base_package, package_name, config_name, version_name, args, &block)
+      config_name ||= find_config_name_in_package(package_name)
       package = lookup_package(
         package_name || base_package.package_name,
         version_name,
         Backtrace.new(nil, package_name, version_name, config_name)
       )
-      command = package[config_name || 'default'].command
+
+      command = package[config_name].command
       if command
         execute_command(command, args, package, &block)
       else

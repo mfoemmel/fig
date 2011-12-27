@@ -20,7 +20,10 @@ module Fig
 
   USAGE = <<EOF
 
-Usage: fig [--debug] [--update] [--config <config>] [--get <var> | --list | <package> | -- <command>]
+Usage: fig [--update | --update-if-missing] [--file <path>] [--set <VAR=value>] [--config <config>] [--login] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc] [-- <command>]
+       fig [--publish | --publish-local] [--append <VAR=val>] [--resource <fullpath>] [--include <package name/version>] [--force] [--no-file] [--archive <path>] [--file] [--set <VAR=value>] [--config <config>] [--login] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc]
+       fig [--set <VAR=value>] [--get <VAR> | --list-configs <package name>/<version> | --list | --list-remote | --clean <package name/version> | --version] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc] [-- <command>]
+       fig [<package name>/<version>] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc]
 
 Relevant env vars: FIG_REMOTE_URL (required), FIG_HOME (path to local repository cache, defaults
 to $HOME/.fighome).
@@ -67,14 +70,14 @@ EOF
         return nil, nil, 0
       end
 
-      options[:modifiers] = []
+      options[:non_command_package_statements] = []
       opts.on(
         '-p',
         '--append VAR=VAL',
         'append (actually, prepend) VAL to environment var VAR, delimited by separator'
       ) do |var_val|
         var, val = var_val.split('=')
-        options[:modifiers] << Package::Path.new(var, val)
+        options[:non_command_package_statements] << Package::Path.new(var, val)
       end
 
       options[:archives] = []
@@ -99,11 +102,6 @@ EOF
         options[:config] = config
       end
 
-      options[:debug] = false
-      opts.on('-d', '--debug', 'print debug info') do
-        options[:debug] = true
-      end
-
       options[:package_config_file] = nil
       opts.on(
         '--file FILE',
@@ -120,13 +118,13 @@ EOF
         options[:force] = force
       end
 
-      options[:echo] = nil
+      options[:get] = nil
       opts.on(
         '-g',
         '--get VAR',
         'print value of environment variable VAR'
-      ) do |echo|
-        options[:echo] = echo
+      ) do |get|
+        options[:get] = get
       end
 
       opts.on(
@@ -135,7 +133,7 @@ EOF
         'include PKG (with any variable prepends) in environment'
       ) do |descriptor|
         package_name, config_name, version_name = parse_descriptor(descriptor)
-        options[:modifiers] << Package::Include.new(package_name, config_name, version_name, {})
+        options[:non_command_package_statements] << Package::Include.new(package_name, config_name, version_name, {})
       end
 
       options[:list] = false
@@ -194,7 +192,7 @@ EOF
         '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
       ) do |var_val|
         var, val = var_val.split('=')
-        options[:modifiers] << Package::Set.new(var, val)
+        options[:non_command_package_statements] << Package::Set.new(var, val)
       end
 
       options[:update] = false
@@ -244,7 +242,12 @@ EOF
     end
 
     # Need to catch the exception thrown from parser and retranslate into a fig exception
-    parser.parse!(argv)
+    begin
+      parser.parse!(argv)
+    rescue OptionParser::MissingArgument => error
+      $stderr.puts "Please provide the #{error}."
+      return nil, nil, 1
+    end
 
     return options, argv, nil
   end
