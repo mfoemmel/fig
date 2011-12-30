@@ -223,6 +223,29 @@ describe 'Fig' do
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
     end
 
+    it 'retrieves resource and ignores the append statement in the updating config' do
+      cleanup_repository
+      FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
+      File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
+      input = <<-END
+        resource lib/hello
+        config default
+          append FOOPATH=@/lib/hello
+        end
+      END
+      fig('--publish foo/1.2.3', input)
+      input = <<-END
+        retrieve FOOPATH->lib2/[package]
+        config default
+          include foo/1.2.3
+          append FOOPATH=@/does/not/exist
+        end
+      END
+      fig('--update-if-missing', input)
+      File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
+    end
+
+
     it 'retrieves resource that is a directory' do
       cleanup_repository
       FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
