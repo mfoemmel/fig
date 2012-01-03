@@ -184,7 +184,7 @@ Configurations other than "default" can be specified using the "-c" option:
     $ fig -c french -- hello
     Bonjour, World
 
-The statements from one config section can be incorporated into another config section via an include statement:
+The statements from one config section can be incorporated into another config section via an `include` statement:
 
     config default
       include :spanish
@@ -279,6 +279,114 @@ package name (minus the version).
 
 ### Building the gem ###
 Use `rake figbuild` instead of `rake build`, due to a glitch with "gem build's" naming of i386 gems as 'x86', which causes problems with a subsequent `gem install fig18` command; it picks the wrong Fig gem to install.
+
+Statement Descriptions
+======================
+
+### `add` ###
+
+Specifies a value to be appended to a `PATH`-like environment variable, e.g. `CLASSPATH` for Java.  Does not include the delimiter within the variable, just the component value.
+
+### `append` ###
+
+Synonym for `add`.
+
+### `archive` ###
+
+Specifies an archive file (either a local path or a URL) that is supposed to be incorporated into the package.  This is different from a `resource` in that the contents will be extracted as part of installation.
+
+### `command` ###
+
+Specifies a default command to be run for a given `config` when no command is given on the command-line.
+
+    config default
+      command echo Hello there.
+    end
+
+Cannot be specified outside of a `config` statement.  There may not be multiple commands within a given `config`.
+
+### `config` ###
+
+A grouping of statements that specifies what is to be done.  There must either be a configuration named "default" or you will always have to specify a configuration on the command-line.
+
+May not be nested.  If you wish to incorporate the effects of one configuration into another, use an `include` statement.
+
+### `include` ###
+
+Can be used in two ways: to affect configurations and to declare package dependencies.
+
+#### Pull one configuration into another ####
+
+You can get the effects of one configuration in another by using the name of the other configuration preceded by a colon:
+
+    config a
+      include :b
+    end
+
+    config b
+      ...
+    end
+
+#### Declare a package dependency ####
+
+States that one package should be installed prior to the current one; can specify a version.
+
+    config default
+      include somepackage/1.2.3
+    end
+
+Dependency version conflicts can be resolved by using `override` clauses.
+
+Say you've got a "base-dependency" package.  Then, in the `package.fig` for "middle-dependency-a" you have
+
+    config default
+      include base-dependency/1.2.3
+    end
+
+And in the `package.fig` for "middle-dependency-b" you have
+
+    config default
+      include base-dependency/3.2.1
+    end
+
+Finally, in the `package.fig` for the package you're working on you've got
+
+    config default
+      include middle-dependency-a
+      include middle-dependency-b
+    end
+
+This will produce a conflicting requirement on "base-dependency".  Resolve this by either matching the version of one dependency to another:
+
+    config default
+      include middle-dependency-a override base-dependency/3.2.1
+      include middle-dependency-b
+    end
+
+Or specify the same version to both:
+
+    config default
+      include middle-dependency-a override base-dependency/2.2.2
+      include middle-dependency-b override base-dependency/2.2.2
+    end
+
+Multiple `override` clauses can be specified in a single `include` statement.
+
+### `path` ###
+
+Synonym for `add`.
+
+### `resource` ###
+
+Specifies a file (either a local path or a URL) that is supposed to be incorporated into the package.  This is different from an `archive` in that the contents will not be extracted as part of installation.
+
+### `retrieve` ###
+
+Gives the installation location for a dependency.
+
+### `set` ###
+
+Gives the value of an environment variable.  Unlike `add`/`append`/`path`, this is the complete, final value.
 
 Community
 =========
