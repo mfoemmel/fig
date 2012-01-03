@@ -7,7 +7,7 @@ An "environment" in fig is a set of environment variables.  A "package" is a
 collection of files, along with some metadata describing which environment variables
 should be modified when the package is included.  For instance, each dependency
 may prepend its corresponding jar to CLASSPATH.  The metadata may also list
-that package's lower-level Fig package dependencies. 
+that package's lower-level Fig package dependencies.
 
 Fig recursively builds an environment consisting of package dependencies
 (typically specified via command-line options or a package.fig file), each of
@@ -159,7 +159,7 @@ Then we can just run:
     Hello, World
 
 NOTE: The '@' symbol in a given package.fig file (or in a published dependency's .fig
-file) represents the full path to that file's directory.  The 
+file) represents the full path to that file's directory.  The
 above example would
 still work if we just used "bin", but later on when we publish our project to
 the shared repository we'll definitely need the '@', since the project directories will
@@ -221,7 +221,7 @@ Now we can share the package with the rest of the team by using the `--publish` 
 
     $ fig --publish hello/1.0.0
 
-Once the package has been published, we can include it in other environments 
+Once the package has been published, we can include it in other environments
 with the `-i` or `--include` option.  (For the purpose of this example, let's
 first move the "package.fig" file out of the way, so that it doesn't confuse
 fig or us.) The "hello/1.0.0" string represents the name of the package and the
@@ -268,7 +268,7 @@ Create a new "package.fig" file (first moving to a different directory or deleti
       include hello-lib/3.2.1
     end
 
-Upon a `fig --update`, each resource in FOOPATH will be copied into lib/[package], where [package] resolves to the resource's 
+Upon a `fig --update`, each resource in FOOPATH will be copied into lib/[package], where [package] resolves to the resource's
 package name (minus the version).
 
      $ fig -u
