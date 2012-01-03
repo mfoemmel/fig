@@ -283,4 +283,4 @@ Community
 Copyright
 =========
 
-Copyright (c) 2009-2011 Matthew Foemmel. See LICENSE for details.
+Copyright (c) 2009-2012 Matthew Foemmel. See LICENSE for details.
