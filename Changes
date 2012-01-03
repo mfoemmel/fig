@@ -2,6 +2,10 @@ v0.1.51
 
   - You can now set an environment variable to the empty string with "set".
 
+  - Fix bug with same env variable in both APPEND and RETRIEVE statements,
+    causing Fig to attempt to retrieve libs intended for publish. (The bug
+    was introduced in 0.1.49, in commit aa3f3ab6c7, while fixing another bug).
+
 v0.1.50
 
   - Trying to get releases via rake to work properly for multiple platforms.
