@@ -184,7 +184,7 @@ Configurations other than "default" can be specified using the "-c" option:
     $ fig -c french -- hello
     Bonjour, World
 
-A config section can be included in another config section:
+The statements from one config section can be incorporated into another config section via an include statement:
 
     config default
       include :spanish
@@ -193,6 +193,13 @@ A config section can be included in another config section:
     config spanish
       set GREETING="Buenas Dias"
       append PATH=@/bin
+    end
+
+Note that config statments cannot be nested within a fig file.  I.e. the following is _invalid_:
+
+    config foo
+      config bar
+      end
     end
 
 ### Packages ###
