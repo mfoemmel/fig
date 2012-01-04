@@ -20,13 +20,38 @@ module Fig
 
   USAGE = <<EOF
 
-Usage: fig [--update | --update-if-missing] [--file <path>] [--set <VAR=value>] [--config <config>] [--login] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc] [-- <command>]
-       fig [--publish | --publish-local] [--append <VAR=val>] [--resource <fullpath>] [--include <package name/version>] [--force] [--no-file] [--archive <path>] [--file] [--set <VAR=value>] [--config <config>] [--login] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc]
-       fig [--set <VAR=value>] [--get <VAR> | --list-configs <package name>/<version> | --list | --list-remote | --clean <package name/version> | --version] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc] [-- <command>]
-       fig [<package name>/<version>] [--log-level <level>] [--log-config <path>] [--figrc <path>] [--no-figrc]
+Usage:
 
-Relevant env vars: FIG_REMOTE_URL (required), FIG_HOME (path to local repository cache, defaults
-to $HOME/.fighome).
+  fig [...] -- <command>
+  fig [...] <package name>/<version>
+  fig [...] {--update | --update-if-missing} [-- <command>]
+
+  fig {--publish | --publish-local}
+      [--resource <fullpath>]
+      [--include <package name/version>]
+      [--force]
+      [--archive <path>]
+      [...]
+
+  fig --list-configs <package name>/<version> [...]
+  fig {--list | --list-remote} [...]
+  fig --clean <package name/version> [...]
+  fig --get <VAR> [...]
+
+  fig {--version | --help}
+
+Standard options:
+
+      [--set <VAR=value>]
+      [--append <VAR=val>]
+      [--file <path>] [--no-file]
+      [--config <config>]
+      [--login]
+      [--log-level <level>] [--log-config <path>]
+      [--figrc <path>] [--no-figrc]
+
+Relevant environment variables: FIG_REMOTE_URL (required), FIG_HOME (path to
+local repository cache, defaults to $HOME/.fighome).
 
 EOF
 
