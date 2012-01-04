@@ -256,7 +256,7 @@ module Fig
         backslashes = $1 || ''
         package = @packages[$2]
         if package.nil?
-          raise RepositoryError.new "Package not found: #{$1}"
+          raise RepositoryError.new("Package not found: #{$1}")
         end
         backslashes + package.directory
       end
