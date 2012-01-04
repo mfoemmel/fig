@@ -7,56 +7,6 @@ require 'fig/os'
 setup_repository
 
 describe 'Fig' do
-  describe 'environment variables' do
-    it 'sets variable from command line' do
-      fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
-      fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
-    end
-
-    it 'sets variable from fig file' do
-      input = <<-END
-        config default
-          set FOO=BAR
-        end
-      END
-      fig('--get FOO', input)[0].should == 'BAR'
-    end
-
-    it 'appends variable from command line' do
-      fig('--append PATH=foo --get PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
-    end
-
-    it 'appends variable from fig file' do
-      input = <<-END
-        config default
-          add PATH=foo
-        end
-      END
-      fig('--get PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
-    end
-
-    it 'appends empty variable' do
-      fig('--append XYZZY=foo --get XYZZY').should == ['foo', '', 0]
-    end
-
-    it %q<doesn't expand variables without packages> do
-      fig('--set FOO=@bar --get FOO')[0].should == '@bar'
-    end
-  end
-
-  it 'ignores comments' do
-    input = <<-END
-      #/usr/bin/env fig
-
-      # Some comment
-      config default
-        set FOO=BAR # Another comment
-      end
-    END
-    system("mkdir -p #{FIG_SPEC_BASE_DIRECTORY}")
-    fig('--get FOO', input)[0].should == 'BAR'
-  end
-
   describe 'publishing/retrieval' do
     it 'publishes to remote repository' do
       cleanup_home_and_remote
@@ -386,69 +336,6 @@ describe 'Fig' do
       fig('--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin')
       fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
       fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'cheese'
-    end
-  end
-
-  it 'prints the version number' do
-    %w/-v --version/.each do |option|
-      (out, err, exitstatus) = fig(option)
-      exitstatus.should == 0
-      err.should == ''
-      out.should =~ / \d+ \. \d+ \. \d+ /x
-    end
-  end
-
-  describe 'usage errors' do
-    it %q<prints usage message when passed an unknown option> do
-      (out, err, exitstatus) = fig('--no-such-option', nil, :no_raise_on_error)
-      exitstatus.should == 1
-      err.should =~ / --no-such-option /x
-      err.should =~ / usage /xi
-      out.should == ''
-    end
-
-    it %q<prints usage message when there's nothing to do and there's no package.fig file> do
-      (out, err, exitstatus) = fig('', nil, :no_raise_on_error)
-      exitstatus.should == 1
-      err.should =~ / usage /xi
-      out.should == ''
-    end
-
-    it %q<prints usage message when there's nothing to do and there's a package.fig file> do
-      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::DEFAULT_FIG_FILE}", 'w' do
-        |handle|
-        handle.print <<-END
-          config default
-          end
-        END
-      end
-
-      (out, err, exitstatus) = fig('', nil, :no_raise_on_error)
-      exitstatus.should == 1
-      err.should =~ / usage /xi
-      out.should == ''
-    end
-  end
-
-  describe 'running commands' do
-    it %q<runs a single command> do
-      input = <<-END
-        config default
-          command "echo foo"
-        end
-      END
-      fig('--publish foo/1.2.3', input)
-      fig('foo/1.2.3').first.should == 'foo'
-    end
-
-    it %q<prints a warning message when attempting to run multiple commands> do
-      input = <<-END
-        config default
-          command "echo foo"
-          command "echo bar"
-        end
-      END
-      fig('--publish foo/1.2.3.4', input, :no_raise_on_error).first.should == 'Multiple command statements cannot be processed.'
     end
   end
 end

@@ -67,7 +67,7 @@ EOF
       opts.banner = USAGE
       opts.on('-?', '-h','--help','display this help text') do
         puts opts.help
-        puts "\n    --  end of fig options; everything following is a command to run in the fig environment.\n\n"
+        puts "        --                           end of fig options; anything after this is used as a command to run\n\n"
         return nil, nil, 0
       end
 
