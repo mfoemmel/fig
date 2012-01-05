@@ -150,7 +150,14 @@ module Fig
     end
 
     if not options[:non_command_package_statements].empty?
-      publish_statements = options[:resources] + options[:archives] + [Package::Configuration.new('default', options[:non_command_package_statements])]
+      publish_statements =
+        options[:resources] +
+        options[:archives] +
+        [
+          Package::Configuration.new(
+            'default', options[:non_command_package_statements]
+          )
+        ]
       publish_statements << Package::Publish.new('default','default')
     elsif not package.statements.empty?
       publish_statements = package.statements
