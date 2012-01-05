@@ -110,7 +110,7 @@ module Fig
     end
   end
 
-  def handle_list_options(options, repository)
+  def handle_pre_parse_list_options(options, repository)
     case options[:listing]
     when :local_packages
       display_local_package_list(repository)
@@ -118,6 +118,15 @@ module Fig
       display_remote_package_list(repository)
     when :configs
       display_configs_in_local_packages_list(options, repository)
+    else
+      return false
+    end
+
+    return true
+  end
+
+  def handle_post_parse_list_options(options, environment)
+    case options[:listing]
     when :dependencies
       raise UserInputError.new('--list-dependencies not yet implemented.')
     when :dependencies_all_configs
@@ -127,10 +136,10 @@ module Fig
     when :variables_all_configs
       raise UserInputError.new('--list-variables-all-configs not yet implemented.')
     else
-      return false
+      raise %Q<Bug in code! Found unknown :listing option value "#{options[:listing]}">
     end
 
-    return true
+    return
   end
 
   def parse_package_config_file(options, config_raw_text, environment, configuration)
@@ -248,13 +257,15 @@ module Fig
       return 0
     end
 
-    if handle_list_options(options, repository)
+    if handle_pre_parse_list_options(options, repository)
       return 0
     end
 
     package, environment = parse_package_config_file(options, config_raw_text, environment, configuration)
 
-    if options[:publish] || options[:publish_local]
+    if options[:listing]
+      handle_post_parse_list_options(options, environment)
+    elsif options[:publish] || options[:publish_local]
       return publish(argv, options, package, repository)
     elsif options[:get]
       puts environment[options[:get]]
