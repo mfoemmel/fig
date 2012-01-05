@@ -5,10 +5,34 @@ require 'fig/package'
 require 'fig/package/configuration'
 require 'fig/package/set'
 
+def standard_package_version(name)
+  return "#{name}-version"
+end
+
+def new_example_package(environment, name, extra_statements, variable_value)
+  statements = extra_statements +
+      [Fig::Package::Configuration.new('default', [])]
+
+  package =
+    Fig::Package.new(
+      name, standard_package_version(name), "#{name}-directory", statements
+    )
+
+  environment.register_package(package)
+
+  set_statement = Fig::Package::Set.new(
+    "WHATEVER_#{name.upcase}", variable_value
+  )
+  environment.apply_config_statement(package, set_statement, nil)
+
+  return package
+end
+
 def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   retriever_double = double('retriever')
   retriever_double.stub(:with_package_config)
-  environment = Fig::Environment.new(nil, nil, {'FOO' => 'bar'}, retriever_double)
+  environment =
+    Fig::Environment.new(nil, nil, {'FOO' => 'bar'}, retriever_double)
 
   if retrieve_vars
     retrieve_vars.each do |name, path|
@@ -16,21 +40,24 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
     end
   end
 
+  depended_upon_package_name = 'depended-upon'
+  depended_upon_package_version =
+    standard_package_version(depended_upon_package_name)
+  new_example_package(
+    environment, depended_upon_package_name, [], variable_value
+  )
+
   %w< one two three >.each do
     |package_name|
-    package =
-      Fig::Package.new(
-        package_name,
-        "#{package_name}-version",
-        "#{package_name}-directory",
-        [Fig::Package::Configuration.new('default', [])]
-      )
-    environment.register_package(package)
 
-    set_statement = Fig::Package::Set.new(
-      "WHATEVER_#{package_name.upcase}", variable_value
+    extra_statements = [
+      Fig::Package::Include.new(
+        depended_upon_package_name, nil, depended_upon_package_version, []
+      )
+    ]
+    new_example_package(
+      environment, package_name, extra_statements, variable_value
     )
-    environment.apply_config_statement(package, set_statement, nil)
   end
 
   environment.register_package(
