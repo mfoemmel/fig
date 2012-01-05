@@ -91,6 +91,8 @@ module Fig
       @os.write(fig_file, content.join("\n").strip)
       @os.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user) unless local_only
       @os.copy(fig_file, local_fig_file_for_package(package_name, version_name))
+
+      FileUtils.rm_rf(temp_dir)
     end
 
     def bundle_resources(package_statements)
@@ -179,6 +181,8 @@ module Fig
   private
 
     def install_package(package_name, version_name)
+      temp_dir = nil
+
       begin
         package = read_local_package(package_name, version_name)
         temp_dir = temp_dir_for_package(package_name, version_name)
@@ -206,6 +210,8 @@ module Fig
         Logging.fatal 'Install failed, cleaning up.'
         delete_local_package(package_name, version_name)
         raise RepositoryError.new
+      ensure
+        FileUtils.rm_rf(temp_dir)
       end
     end
 
