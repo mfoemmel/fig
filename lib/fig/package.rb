@@ -64,8 +64,8 @@ class Fig::Package
   end
 
   def to_s
-    package_name ||= 'uninitialized'
-    version_name ||= 'uninitialized'
+    package_name = @package_name || 'uninitialized'
+    version_name = @version_name || 'uninitialized'
     package_name + '/' + version_name
   end
 end

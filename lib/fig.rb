@@ -126,7 +126,6 @@ module Fig
       end
 
       unless options[:publish] || options[:list] || options[:publish_local]
-File.open('/dev/tty', 'w') { |file| file.puts 'Not publishing, listing, or publishing local' }
         environment.register_package(package)
         environment.apply_config(package, options[:config], nil)
       end
