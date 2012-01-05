@@ -49,8 +49,15 @@ module Fig
     return shell_command
   end
 
+  def remote_operation_necessary?(options)
+    return options[:update]                       ||
+           options[:publish]                      ||
+           options[:update_if_missing]            ||
+           options[:listing] == :remote_packages
+  end
+
   def initialize_remote_url(options)
-    if options[:update] || options[:publish] || options[:update_if_missing] || options[:list_remote]
+    if remote_operation_necessary?(options)
       if ENV['FIG_REMOTE_URL'].nil?
         raise UserInputError.new('Please define the FIG_REMOTE_URL environment variable.')
       end
@@ -76,7 +83,7 @@ module Fig
     end
   end
 
-  def display_package_list(repository)
+  def display_local_package_list(repository)
     repository.list_packages.sort.each do |item|
       puts item
     end
@@ -90,6 +97,12 @@ module Fig
 
   def display_configs_in_local_packages_list(options, repository)
     options[:list_configs].each do |descriptor|
+      if descriptor !~ %r< / >x
+        raise UserInputError.new(
+          %Q<Package "#{descriptor}" does not contain a version.>
+        )
+      end
+
       package_name, version_name = descriptor.split('/')
       repository.read_local_package(package_name, version_name).configs.each do |config|
         puts config.name
@@ -98,22 +111,22 @@ module Fig
   end
 
   def resolve_listing(options, repository)
-    if options[:list]
-      display_package_list(repository)
-      return true
-    end
-
-    if options[:list_remote]
+    case options[:listing]
+    when :local_packages
+      display_local_package_list(repository)
+    when :remote_packages
       display_remote_package_list(repository)
-      return true
-    end
-
-    if not options[:list_configs].empty?
+    when :configs
       display_configs_in_local_packages_list(options, repository)
-      return true
+    when :dependencies
+      raise UserInputError.new('--list-dependencies not yet implemented.')
+    when :all_variables
+      raise UserInputError.new('--list-all-variables not yet implemented.')
+    else
+      return false
     end
 
-    return false
+    return true
   end
 
   def parse_package_config_file(options, package_config_file, environment, configuration)

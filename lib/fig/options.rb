@@ -33,8 +33,9 @@ Usage:
       [--archive <path>]
       [...]
 
-  fig --list-configs <package name>/<version> [...]
-  fig {--list | --list-remote} [...]
+  fig {--list-configs | --list-dependencies | --list-all-variables}
+      <package name>/<version> [...]
+  fig {--list-local | --list-remote} [...]
   fig --clean <package name/version> [...]
   fig --get <VAR> [...]
 
@@ -161,21 +162,37 @@ EOF
         options[:non_command_package_statements] << Package::Include.new(package_name, config_name, version_name, {})
       end
 
-      options[:list] = false
-      opts.on('--list', 'list packages in $FIG_HOME') do
-        options[:list] = true
+      opts.on('--list-local', '--list', 'list packages in $FIG_HOME') do
+        options[:listing] = :local_packages
       end
 
       options[:list_configs] = []
       opts.on(
         '--list-configs PKG', 'list configurations in package'
       ) do |descriptor|
+        options[:listing] = :configs
         options[:list_configs] << descriptor
+      end
+
+      options[:list_dependencies] = []
+      opts.on(
+        '--list-dependencies PKG', 'list package dependencies for package, recursively'
+      ) do |descriptor|
+        options[:listing] = :dependencies
+        options[:list_dependencies] << descriptor
+      end
+
+      options[:list_all_variables] = []
+      opts.on(
+        '--list-all-variables PKG', 'list all variables defined/used by package and its dependencies'
+      ) do |descriptor|
+        options[:listing] = :all_variables
+        options[:list_all_variables] << descriptor
       end
 
       options[:list_remote] = false
       opts.on('--list-remote', 'list packages in remote repo') do
-        options[:list_remote] = true
+        options[:listing] = :remote_packages
       end
 
       options[:login] = false

@@ -77,7 +77,7 @@ module Fig
         uri = URI.parse(url)
       rescue
         Logging.fatal %Q<Unable to parse url: "#{url}">
-        raise NetworkError.new(%Q<Unable to parse url: "#{url}">)
+        raise NetworkError.new
       end
       case uri.scheme
       when 'ftp'
