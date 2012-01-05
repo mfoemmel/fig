@@ -51,6 +51,15 @@ module Fig
       @packages[name] = package
     end
 
+    # Enumerates through all packages, passing them to a block.  Note that
+    # there is no guarantee of the ordering of the packages; consider it
+    # effectively random.
+    def walk_packages(&block)
+      @packages.values.each do |package|
+        yield package
+      end
+    end
+
     def apply_config(package, config_name, backtrace)
       if (@applied_configs[package.package_name] ||= []).member?(config_name)
         return

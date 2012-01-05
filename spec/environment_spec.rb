@@ -5,6 +5,8 @@ require 'fig/package'
 require 'fig/package/configuration'
 require 'fig/package/set'
 
+DEPENDED_UPON_PACKAGE_NAME = 'depended-upon'
+
 def standard_package_version(name)
   return "#{name}-version"
 end
@@ -40,11 +42,10 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
     end
   end
 
-  depended_upon_package_name = 'depended-upon'
   depended_upon_package_version =
-    standard_package_version(depended_upon_package_name)
+    standard_package_version(DEPENDED_UPON_PACKAGE_NAME)
   new_example_package(
-    environment, depended_upon_package_name, [], variable_value
+    environment, DEPENDED_UPON_PACKAGE_NAME, [], variable_value
   )
 
   %w< one two three >.each do
@@ -52,7 +53,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
 
     extra_statements = [
       Fig::Package::Include.new(
-        depended_upon_package_name, nil, depended_upon_package_version, []
+        DEPENDED_UPON_PACKAGE_NAME, nil, depended_upon_package_version, []
       )
     ]
     new_example_package(
@@ -221,6 +222,21 @@ describe 'Environment' do
       received_command = nil
       environment.execute_config(nil, 'has_command', nil, nil, []) { |command| received_command = command }
       received_command.should == %w<echo foo>
+    end
+  end
+
+  describe 'package enumeration' do
+    it 'enumerates all the packages when asked to walk them' do
+      environment = new_example_environment('blah')
+      enumerated_names = []
+      environment.walk_packages {
+        | package | enumerated_names << package.package_name
+      }
+
+      [ %w< one two three >, DEPENDED_UPON_PACKAGE_NAME ].flatten.each do
+        | package_name |
+        enumerated_names.should be_include(package_name);
+      end
     end
   end
 end
