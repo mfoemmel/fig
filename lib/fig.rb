@@ -110,7 +110,7 @@ module Fig
     end
   end
 
-  def resolve_listing(options, repository)
+  def handle_list_options(options, repository)
     case options[:listing]
     when :local_packages
       display_local_package_list(repository)
@@ -120,8 +120,12 @@ module Fig
       display_configs_in_local_packages_list(options, repository)
     when :dependencies
       raise UserInputError.new('--list-dependencies not yet implemented.')
-    when :all_variables
-      raise UserInputError.new('--list-all-variables not yet implemented.')
+    when :dependencies_all_configs
+      raise UserInputError.new('--list-dependencies-all-configs not yet implemented.')
+    when :variables
+      raise UserInputError.new('--list-variables not yet implemented.')
+    when :variables_all_configs
+      raise UserInputError.new('--list-variables-all-configs not yet implemented.')
     else
       return false
     end
@@ -129,19 +133,17 @@ module Fig
     return true
   end
 
-  def parse_package_config_file(options, package_config_file, environment, configuration)
-    if package_config_file
-      package = Parser.new(configuration).parse_package(nil, nil, '.', package_config_file)
+  def parse_package_config_file(options, config_raw_text, environment, configuration)
+    if config_raw_text
+      package = Parser.new(configuration).parse_package(nil, nil, '.', config_raw_text)
       if options[:update] || options[:update_if_missing]
         package.retrieves.each do |var, path|
           environment.add_retrieve(var, path)
         end
       end
 
-      unless options[:publish] || options[:list] || options[:publish_local]
-        environment.register_package(package)
-        environment.apply_config(package, options[:config], nil)
-      end
+      environment.register_package(package)
+      environment.apply_config(package, options[:config], nil)
     else
       package = Package.new(nil, nil, '.', [])
     end
@@ -238,19 +240,19 @@ module Fig
       environment.apply_config_statement(nil, statement, nil)
     end
 
-    package_config_file = load_package_config_file_contents(options)
+    config_raw_text = load_package_config_file_contents(options)
 
     options[:cleans].each do |descriptor|
       package_name, version_name = descriptor.split('/')
       repository.clean(package_name, version_name)
-      return true
+      return 0
     end
 
-    if resolve_listing(options, repository)
-      return true
+    if handle_list_options(options, repository)
+      return 0
     end
 
-    package, environment = parse_package_config_file(options, package_config_file, environment, configuration)
+    package, environment = parse_package_config_file(options, config_raw_text, environment, configuration)
 
     if options[:publish] || options[:publish_local]
       return publish(argv, options, package, repository)

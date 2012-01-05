@@ -33,8 +33,9 @@ Usage:
       [--archive <path>]
       [...]
 
-  fig {--list-configs | --list-dependencies | --list-all-variables}
-      <package name>/<version> [...]
+  fig --list-configs <package name>/<version> [...]
+  fig {--list-dependencies | --list-all-variables} [...]
+  fig {--list-dependencies-all-configs | --list-all-variables-all-configs} [...]
   fig {--list-local | --list-remote} [...]
   fig --clean <package name/version> [...]
   fig --get <VAR> [...]
@@ -174,20 +175,30 @@ EOF
         options[:list_configs] << descriptor
       end
 
-      options[:list_dependencies] = []
       opts.on(
-        '--list-dependencies PKG', 'list package dependencies for package, recursively'
+        '--list-dependencies', 'list package dependencies, recursively'
       ) do |descriptor|
         options[:listing] = :dependencies
-        options[:list_dependencies] << descriptor
       end
 
-      options[:list_all_variables] = []
       opts.on(
-        '--list-all-variables PKG', 'list all variables defined/used by package and its dependencies'
+        '--list-dependencies-all-configs',
+        'list package dependencies, recursively, following all configurations'
       ) do |descriptor|
-        options[:listing] = :all_variables
-        options[:list_all_variables] << descriptor
+        options[:listing] = :dependencies_all_configs
+      end
+
+      opts.on(
+        '--list-variables', 'list all variables defined/used by package and its dependencies'
+      ) do |descriptor|
+        options[:listing] = :variables
+      end
+
+      opts.on(
+        '--list-variables-all-configs',
+        'list all variables defined/used by package and its dependencies, following all configurations'
+      ) do |descriptor|
+        options[:listing] = :variables_all_configs
       end
 
       options[:list_remote] = false
