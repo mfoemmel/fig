@@ -1,6 +1,8 @@
+module Fig; end
+
 # Contains traces of file inclusions so that the user can track down which file
 # an error occurred in.
-class Backtrace
+class Fig::Backtrace
   attr_reader :overrides
 
   def initialize(parent, package_name, version_name, config_name)
