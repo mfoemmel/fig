@@ -12,14 +12,6 @@ require 'fig/package/set'
 
 
 module Fig
-  def parse_descriptor(descriptor)
-    # todo should use treetop for these:
-    package_name = descriptor =~ /^([^:\/]+)/ ? $1 : nil
-    config_name = descriptor =~ /:([^:\/]+)/ ? $1 : nil
-    version_name = descriptor =~ /\/([^:\/]+)/ ? $1 : nil
-    return package_name, config_name, version_name
-  end
-
   # TODO: this is out of date.
   USAGE = <<EOF
 
@@ -162,8 +154,8 @@ EOF
         '--include PKG',
         'include PKG (with any variable prepends) in environment'
       ) do |descriptor|
-        package_name, config_name, version_name = parse_descriptor(descriptor)
-        options[:non_command_package_statements] << Package::Include.new(package_name, config_name, version_name, {})
+        options[:non_command_package_statements] <<
+          Package::Include.new(PackageDescriptor.new(descriptor), {})
       end
 
       opts.on('--list-local', '--list', 'list packages in $FIG_HOME') do

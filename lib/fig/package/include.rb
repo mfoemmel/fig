@@ -12,10 +12,10 @@ class Fig::Package::Include
 
   attr_reader :package_name, :config_name, :version_name, :overrides
 
-  def initialize(package_name, config_name, version_name, overrides)
-    @package_name = package_name
-    @config_name = config_name
-    @version_name = version_name
+  def initialize(descriptor, overrides)
+    @package_name = descriptor.name
+    @config_name = descriptor.config
+    @version_name = descriptor.version
     @overrides = overrides
   end
 

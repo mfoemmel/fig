@@ -1,4 +1,5 @@
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/package/archive'
 require 'fig/package/command'
 require 'fig/package/configuration'
@@ -77,10 +78,10 @@ grammar Fig
   rule include
     "include" ws descriptor overrides:(override*) {
       def to_config_statement
-        package = descriptor.respond_to?(:package) ? descriptor.package.text_value : nil
-        config = descriptor.get_config
-        version = descriptor.get_version
-        Package::Include.new(package, config, version, overrides.elements.map{ |e| e.to_override })
+        Package::Include.new(
+          PackageDescriptor.new(descriptor.text_value.strip),
+          overrides.elements.map{ |e| e.to_override }
+        )
       end
     }
   end

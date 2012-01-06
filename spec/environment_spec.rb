@@ -2,6 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/environment'
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/package/configuration'
 require 'fig/package/set'
 
@@ -53,7 +54,10 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
 
     extra_statements = [
       Fig::Package::Include.new(
-        DEPENDED_UPON_PACKAGE_NAME, nil, depended_upon_package_version, []
+        Fig::PackageDescriptor.new(
+          "#{DEPENDED_UPON_PACKAGE_NAME}/#{depended_upon_package_version}"
+        ),
+        []
       )
     ]
     new_example_package(
