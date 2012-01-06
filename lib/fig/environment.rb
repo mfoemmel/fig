@@ -181,7 +181,12 @@ module Fig
     def lookup_package(package_name, version_name, backtrace)
       package = @packages[package_name]
       if package.nil?
-        package = @repository.load_package(package_name, version_name || DEFAULT_VERSION_NAME)
+        if not version_name
+          Logging.fatal "No version specified for #{package_name}."
+          raise RepositoryError.new
+        end
+
+        package = @repository.load_package(package_name, version_name)
         package.backtrace = backtrace
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name
@@ -194,7 +199,8 @@ module Fig
           + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
         raise RepositoryError.new
       end
-      package
+
+      return package
     end
 
     # Replace @ symbol with the package's directory, "[package]" with the
