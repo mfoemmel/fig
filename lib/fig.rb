@@ -20,19 +20,11 @@ require 'fig/windows'
 module Fig
   DEFAULT_FIG_FILE = 'package.fig'
 
-  def parse_descriptor(descriptor)
-    # todo should use treetop for these:
-    package_name = descriptor =~ %r< ^ ( [^:/]+ ) >x ? $1 : nil
-    config_name  = descriptor =~ %r< : ( [^:/]+ ) >x ? $1 : nil
-    version_name = descriptor =~ %r< / ( [^:/]+ ) >x ? $1 : nil
-    return package_name, config_name, version_name
-  end
-
-  def read_in_package_config_file(options)
-    if File.exist?(options[:package_config_file])
-      return File.read(options[:package_config_file])
+  def read_in_package_config_file(config_file)
+    if File.exist?(config_file)
+      return File.read(config_file)
     else
-      raise UserInputError.new(%Q<File not found: "#{options[:package_config_file]}".>)
+      raise UserInputError.new(%Q<File not found: "#{config_file}".>)
     end
   end
 
@@ -79,8 +71,10 @@ module Fig
         return File.read(DEFAULT_FIG_FILE)
       end
     else
-      return read_in_package_config_file(options)
+      return read_in_package_config_file(package_config_file)
     end
+
+    return
   end
 
   def display_local_package_list(repository)
@@ -95,19 +89,12 @@ module Fig
     end
   end
 
-  def display_configs_in_local_packages_list(options, repository)
-    options[:list_configs].each do |descriptor|
-      if descriptor !~ %r< / >x
-        raise UserInputError.new(
-          %Q<Package "#{descriptor}" does not contain a version.>
-        )
-      end
-
-      package_name, version_name = descriptor.split('/')
-      repository.read_local_package(package_name, version_name).configs.each do |config|
-        puts config.name
-      end
+  def display_configs_in_local_packages_list(package)
+    package.configs.each do |config|
+      puts config.name
     end
+
+    return
   end
 
   def handle_pre_parse_list_options(options, repository)
@@ -116,8 +103,6 @@ module Fig
       display_local_package_list(repository)
     when :remote_packages
       display_remote_package_list(repository)
-    when :configs
-      display_configs_in_local_packages_list(options, repository)
     else
       return false
     end
@@ -125,8 +110,14 @@ module Fig
     return true
   end
 
-  def handle_post_parse_list_options(options, environment)
+  def display_dependencies(environment)
+    environment.packages.sort.each { |package| puts package }
+  end
+
+  def handle_post_parse_list_options(options, package, environment)
     case options[:listing]
+    when :configs
+      display_configs_in_local_packages_list(package)
     when :dependencies
       raise UserInputError.new('--list-dependencies not yet implemented.')
     when :dependencies_all_configs
@@ -142,33 +133,62 @@ module Fig
     return
   end
 
-  def parse_package_config_file(options, config_raw_text, environment, configuration)
-    if config_raw_text
-      package = Parser.new(configuration).parse_package(nil, nil, '.', config_raw_text)
-      if options[:update] || options[:update_if_missing]
-        package.retrieves.each do |var, path|
-          environment.add_retrieve(var, path)
-        end
+  def register_package_with_environment(options, package, environment)
+    if options[:update] || options[:update_if_missing]
+      package.retrieves.each do |var, path|
+        environment.add_retrieve(var, path)
       end
-
-      environment.register_package(package)
-      environment.apply_config(package, options[:config], nil)
-    else
-      package = Package.new(nil, nil, '.', [])
     end
 
-    return package, environment
+    environment.register_package(package)
+    environment.apply_config(package, options[:config], nil)
+
+    return
   end
 
-  def publish(argv, options, package, repository)
-    if not argv.empty?
-      $stderr.puts %Q<Unexpected arguments: #{argv.join(' ')}>
+  def parse_package_config_file(options, config_raw_text, environment, configuration)
+    if config_raw_text.nil?
+      return Package.new(nil, nil, '.', [])
+    end
+
+    package =
+      Parser.new(configuration).parse_package(nil, nil, '.', config_raw_text)
+
+    register_package_with_environment(options, package, environment)
+
+    return package
+  end
+
+  def load_package_file(options, environment, configuration)
+    config_raw_text = load_package_config_file_contents(options)
+
+    return parse_package_config_file(
+      options, config_raw_text, environment, configuration
+    )
+  end
+
+  def load_package(descriptor, options, environment, repository, configuration)
+    package = nil
+    if descriptor.nil?
+      package = load_package_file(options, environment, configuration)
+    else
+      # TODO: complain if config file was specified on the command-line.
+      package =
+        repository.read_local_package(descriptor.name, descriptor.version)
+
+      register_package_with_environment(options, package, environment)
+    end
+
+    return package
+  end
+
+  def publish(descriptor, options, environment, repository, configuration)
+    if not descriptor
+      $stderr.puts 'No package to publish was specified.'
       return 10
     end
 
-    package_name, config_name, version_name = parse_descriptor(options[:publish] || options[:publish_local])
-
-    if package_name.nil? || version_name.nil?
+    if descriptor.name.nil? || descriptor.version.nil?
       $stderr.puts 'Please specify a package name and a version name.'
       return 10
     end
@@ -183,18 +203,21 @@ module Fig
           )
         ]
       publish_statements << Package::Publish.new('default','default')
-    elsif not package.statements.empty?
-      publish_statements = package.statements
     else
-      $stderr.puts 'Nothing to publish.'
-      return 1
+      package = load_package_file(options, environment, configuration)
+      if not package.statements.empty?
+        publish_statements = package.statements
+      else
+        $stderr.puts 'Nothing to publish.'
+        return 1
+      end
     end
 
     if options[:publish]
-      Logging.info "Checking status of #{package_name}/#{version_name}..."
+      Logging.info "Checking status of #{descriptor.name}/#{descriptor.version}..."
 
-      if repository.list_remote_packages.include?("#{package_name}/#{version_name}")
-        Logging.info "#{package_name}/#{version_name} has already been published."
+      if repository.list_remote_packages.include?("#{descriptor.name}/#{descriptor.version}")
+        Logging.info "#{descriptor.name}/#{descriptor.version} has already been published."
 
         if not options[:force]
           Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
@@ -205,8 +228,8 @@ module Fig
       end
     end
 
-    Logging.info "Publishing #{package_name}/#{version_name}."
-    repository.publish_package(publish_statements, package_name, version_name, options[:publish_local])
+    Logging.info "Publishing #{descriptor.name}/#{descriptor.version}."
+    repository.publish_package(publish_statements, descriptor.name, descriptor.version, options[:publish_local])
 
     return 0
   end
@@ -214,7 +237,7 @@ module Fig
   def run_fig(argv)
     shell_command = initialize_shell_command(argv)
 
-    options, argv, exit_value = parse_options(argv)
+    options, descriptor, exit_value = parse_options(argv)
     if not exit_value.nil?
       return exit_value
     end
@@ -241,19 +264,19 @@ module Fig
     )
 
     retriever = Retriever.new('.')
+
     # Check to see if this is still happening with the new layers of abstraction.
     at_exit { retriever.save }
+
     environment = Environment.new(os, repository, nil, retriever)
 
     options[:non_command_package_statements].each do |statement|
       environment.apply_config_statement(nil, statement, nil)
     end
 
-    config_raw_text = load_package_config_file_contents(options)
-
-    options[:cleans].each do |descriptor|
-      package_name, version_name = descriptor.split('/')
-      repository.clean(package_name, version_name)
+    if options[:clean]
+      # TODO: check descriptor was specified.
+      repository.clean(descriptor.name, descriptor.version)
       return 0
     end
 
@@ -261,21 +284,26 @@ module Fig
       return 0
     end
 
-    package, environment = parse_package_config_file(options, config_raw_text, environment, configuration)
+    if options[:publish] || options[:publish_local]
+      return publish(descriptor, options, environment, repository, configuration)
+    end
+
+    package =
+      load_package(descriptor, options, environment, repository, configuration)
 
     if options[:listing]
-      handle_post_parse_list_options(options, environment)
-    elsif options[:publish] || options[:publish_local]
-      return publish(argv, options, package, repository)
+      handle_post_parse_list_options(options, package, environment)
     elsif options[:get]
       puts environment[options[:get]]
     elsif shell_command
-      argv.shift
       environment.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
-    elsif not argv.empty?
-      package_name, config_name, version_name = parse_descriptor(argv.shift)
-      environment.include_config(package, package_name, config_name, version_name, {}, nil)
-      environment.execute_config(package, package_name, config_name, nil, argv) { |cmd| os.shell_exec cmd }
+    elsif descriptor
+      environment.include_config(
+        package, descriptor.name, descriptor.config, descriptor.version, {}, nil
+      )
+      environment.execute_config(
+        package, descriptor.name, descriptor.config, nil, []
+      ) { |cmd| os.shell_exec cmd }
     elsif not repository.updating?
       $stderr.puts "Nothing to do.\n"
       $stderr.puts USAGE

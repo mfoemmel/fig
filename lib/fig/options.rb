@@ -1,5 +1,7 @@
 require 'optparse'
+
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/package/archive'
 require 'fig/package/include'
 require 'fig/package/path'
@@ -115,9 +117,9 @@ EOF
         options[:archives] << Package::Archive.new(path)
       end
 
-      options[:cleans] = []
-      opts.on('--clean PKG', 'remove package from $FIG_HOME') do |descriptor|
-        options[:cleans] << descriptor
+      options[:clean] = false
+      opts.on('--clean', 'remove package from $FIG_HOME') do |descriptor|
+        options[:clean] = true
       end
 
       options[:config] = 'default'
@@ -167,12 +169,10 @@ EOF
         options[:listing] = :local_packages
       end
 
-      options[:list_configs] = []
       opts.on(
-        '--list-configs PKG', 'list configurations in package'
+        '--list-configs', 'list configurations'
       ) do |descriptor|
         options[:listing] = :configs
-        options[:list_configs] << descriptor
       end
 
       opts.on(
@@ -219,18 +219,18 @@ EOF
         options[:package_config_file] = :none
       end
 
-      options[:publish] = nil
+      options[:publish] = false
       opts.on(
-        '--publish PKG', 'install PKG in $FIG_HOME and in remote repo'
+        '--publish', 'install package in $FIG_HOME and in remote repo'
       ) do |publish|
-        options[:publish] = publish
+        options[:publish] = true
       end
 
-      options[:publish_local] = nil
+      options[:publish_local] = false
       opts.on(
-        '--publish-local PKG', 'install package only in $FIG_HOME'
+        '--publish-local', 'install package only in $FIG_HOME'
       ) do |publish_local|
-        options[:publish_local] = publish_local
+        options[:publish_local] = true
       end
 
       options[:resources] =[]
@@ -302,6 +302,17 @@ EOF
       return nil, nil, 1
     end
 
-    return options, argv, nil
+    if argv.size > 1
+      $stderr.puts %q<Extra arguments. Should only have a package/version after all other options. Had "> + argv.join(%q<", ">) + %q<" left over.>
+      return nil, nil, 1
+    end
+
+    package_text = argv.first
+    descriptor = nil
+    if package_text
+      descriptor = PackageDescriptor.new(package_text)
+    end
+
+    return options, descriptor, nil
   end
 end

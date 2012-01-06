@@ -51,6 +51,10 @@ module Fig
       @packages[name] = package
     end
 
+    def packages
+      return @packages.values
+    end
+
     # Enumerates through all packages, passing them to a block.  Note that
     # there is no guarantee of the ordering of the packages; consider it
     # effectively random.

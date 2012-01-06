@@ -9,14 +9,26 @@ setup_repository
 def set_up_local_and_remote_repository
   cleanup_home_and_remote
 
-  input = <<-END
+  input = <<-END_INPUT
     config default
       set FOO=BAR
     end
     config nondefault
       set FOO=BAZ
     end
-  END
+  END_INPUT
+  fig('--publish prerequisite/1.2.3', input)
+
+  input = <<-END_INPUT
+    config default
+      include prerequisite/1.2.3
+      set FOO=BAR
+    end
+    config nondefault
+      include prerequisite/1.2.3
+      set FOO=BAZ
+    end
+  END_INPUT
 
   fig('--publish remote-only/1.2.3', input)
   fig('--clean remote-only/1.2.3', input)
@@ -53,7 +65,7 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig('--list-local')
       exitstatus.should == 0
-      out.should == "both/1.2.3\nlocal-only/1.2.3"
+      out.should == "both/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3"
       err.should == ''
     end
   end
@@ -73,7 +85,7 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig('--list-remote')
       exitstatus.should == 0
-      out.should == "both/1.2.3\nremote-only/1.2.3"
+      out.should == "both/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
       err.should == ''
     end
   end
@@ -96,4 +108,15 @@ describe 'Fig' do
       out.should =~ /Fig file not found for package/
     end
   end
+
+#  describe '--list-dependencies' do
+#    it %q<lists only the current package and not all in the repository> do
+#      set_up_local_and_remote_repository
+#
+#      (out, err, exitstatus) = fig('--list-dependencies local-only/1.2.3')
+#      exitstatus.should == 0
+#      out.should == "local-only\nprerequisite"
+#      err.should == ''
+#    end
+#  end
 end

@@ -41,5 +41,21 @@ describe 'Fig' do
       err.should =~ / usage /xi
       out.should == ''
     end
+
+    it %q<prints error when extra parameters are given with a package descriptor> do
+      (out, err, exitstatus) = fig('package/descriptor extra bits', nil, :no_raise_on_error)
+      exitstatus.should == 1
+      err.should =~ / extra /xi
+      err.should =~ / bits /xi
+      out.should == ''
+    end
+
+    it %q<prints error when extra parameters are given with a command> do
+      (out, err, exitstatus) = fig('extra bits -- echo foo', nil, :no_raise_on_error)
+      exitstatus.should == 1
+      err.should =~ / extra /xi
+      err.should =~ / bits /xi
+      out.should == ''
+    end
   end
 end

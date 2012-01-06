@@ -1,3 +1,13 @@
+v0.1.x
+
+  - Now requires at least ruby v1.8.7.
+
+  - Backwards incompatibility: you can no longer run a command without using
+    "--".
+
+  - Backwards incompatibility: you can no longer specify multiple --clean or
+    --list-configs options.
+
 v0.1.51
 
   - You can now set an environment variable to the empty string with "set".
