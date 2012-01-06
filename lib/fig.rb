@@ -20,6 +20,18 @@ require 'fig/windows'
 module Fig
   DEFAULT_FIG_FILE = 'package.fig'
 
+  def raise_package_descriptor_required(operation_description)
+    raise UserInputError.new(
+      "Need to specify a package #{operation_description}."
+    )
+  end
+
+  def raise_package_descriptor_not_allowed(operation_description)
+    raise UserInputError.new(
+      "Cannot specify a package for #{operation_description}."
+    )
+  end
+
   def read_in_package_config_file(config_file)
     if File.exist?(config_file)
       return File.read(config_file)
@@ -184,8 +196,7 @@ module Fig
 
   def publish(descriptor, options, environment, repository, configuration)
     if not descriptor
-      $stderr.puts 'No package to publish was specified.'
-      return 10
+      raise_package_descriptor_required('to publish')
     end
 
     if descriptor.name.nil? || descriptor.version.nil?
