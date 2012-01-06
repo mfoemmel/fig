@@ -20,6 +20,7 @@ module Fig
     return package_name, config_name, version_name
   end
 
+  # TODO: this is out of date.
   USAGE = <<EOF
 
 Usage:

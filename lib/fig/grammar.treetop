@@ -3,7 +3,6 @@ require 'fig/package/archive'
 require 'fig/package/command'
 require 'fig/package/configuration'
 require 'fig/package/include'
-require 'fig/package/install'
 require 'fig/package/override'
 require 'fig/package/path'
 require 'fig/package/publish'
@@ -61,14 +60,6 @@ grammar Fig
 
   rule retrieve_path
     [a-zA-Z0-9_/.\[\]-]+
-  end
-
-  rule install
-    "install" ws statements:config_statement* "end" ws {
-      def to_package_statement
-        Package::Install.new(statements.elements.map { |statement| statement.to_config_statement })
-      end
-    }
   end
 
   rule config
