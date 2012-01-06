@@ -1,5 +1,7 @@
 Cleanup tasks:
 
 - Check package descriptor presence/absence for each command in Fig::Command.
+- Instance variables in Fig::Command instead of passing everything around.
+- Clean up method names in Fig::Command, probably by breaking out package loading into a separate class.
 - Turn Fig::Options into an object
 - Make everything use PackageDescriptors rather than passing name/version/config around.
