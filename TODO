@@ -1,0 +1,4 @@
+- Check package descriptor presence/absence for each command in Fig::Command.
+- Turn Fig::Options into an object
+- Make everything use PackageDescriptors rather than passing name/version/config around.
+- Remove DEFAULT_VERSION_NAME.

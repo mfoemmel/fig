@@ -16,18 +16,20 @@ require 'fig/retriever'
 require 'fig/userinputerror'
 require 'fig/windows'
 
+module Fig; end
+
 # Main program
-module Fig
+class Fig::Command
   DEFAULT_FIG_FILE = 'package.fig'
 
   def raise_package_descriptor_required(operation_description)
-    raise UserInputError.new(
+    raise Fig::UserInputError.new(
       "Need to specify a package #{operation_description}."
     )
   end
 
   def raise_package_descriptor_not_allowed(operation_description)
-    raise UserInputError.new(
+    raise Fig::UserInputError.new(
       "Cannot specify a package for #{operation_description}."
     )
   end
@@ -36,7 +38,7 @@ module Fig
     if File.exist?(config_file)
       return File.read(config_file)
     else
-      raise UserInputError.new(%Q<File not found: "#{config_file}".>)
+      raise Fig::UserInputError.new(%Q<File not found: "#{config_file}".>)
     end
   end
 
@@ -63,7 +65,7 @@ module Fig
   def initialize_remote_url(options)
     if remote_operation_necessary?(options)
       if ENV['FIG_REMOTE_URL'].nil?
-        raise UserInputError.new('Please define the FIG_REMOTE_URL environment variable.')
+        raise Fig::UserInputError.new('Please define the FIG_REMOTE_URL environment variable.')
       end
       return ENV['FIG_REMOTE_URL']
     end
@@ -131,13 +133,13 @@ module Fig
     when :configs
       display_configs_in_local_packages_list(package)
     when :dependencies
-      raise UserInputError.new('--list-dependencies not yet implemented.')
+      raise Fig::UserInputError.new('--list-dependencies not yet implemented.')
     when :dependencies_all_configs
-      raise UserInputError.new('--list-dependencies-all-configs not yet implemented.')
+      raise Fig::UserInputError.new('--list-dependencies-all-configs not yet implemented.')
     when :variables
-      raise UserInputError.new('--list-variables not yet implemented.')
+      raise Fig::UserInputError.new('--list-variables not yet implemented.')
     when :variables_all_configs
-      raise UserInputError.new('--list-variables-all-configs not yet implemented.')
+      raise Fig::UserInputError.new('--list-variables-all-configs not yet implemented.')
     else
       raise %Q<Bug in code! Found unknown :listing option value "#{options[:listing]}">
     end
@@ -160,11 +162,11 @@ module Fig
 
   def parse_package_config_file(options, config_raw_text, environment, configuration)
     if config_raw_text.nil?
-      return Package.new(nil, nil, '.', [])
+      return Fig::Package.new(nil, nil, '.', [])
     end
 
     package =
-      Parser.new(configuration).parse_package(nil, nil, '.', config_raw_text)
+      Fig::Parser.new(configuration).parse_package(nil, nil, '.', config_raw_text)
 
     register_package_with_environment(options, package, environment)
 
@@ -209,11 +211,11 @@ module Fig
         options[:resources] +
         options[:archives] +
         [
-          Package::Configuration.new(
+          Fig::Package::Configuration.new(
             'default', options[:non_command_package_statements]
           )
         ]
-      publish_statements << Package::Publish.new('default','default')
+      publish_statements << Fig::Package::Publish.new('default','default')
     else
       package = load_package_file(options, environment, configuration)
       if not package.statements.empty?
@@ -225,21 +227,21 @@ module Fig
     end
 
     if options[:publish]
-      Logging.info "Checking status of #{descriptor.name}/#{descriptor.version}..."
+      Fig::Logging.info "Checking status of #{descriptor.name}/#{descriptor.version}..."
 
       if repository.list_remote_packages.include?("#{descriptor.name}/#{descriptor.version}")
-        Logging.info "#{descriptor.name}/#{descriptor.version} has already been published."
+        Fig::Logging.info "#{descriptor.name}/#{descriptor.version} has already been published."
 
         if not options[:force]
-          Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
+          Fig::Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
           return 1
         else
-          Logging.info 'Overwriting...'
+          Fig::Logging.info 'Overwriting...'
         end
       end
     end
 
-    Logging.info "Publishing #{descriptor.name}/#{descriptor.version}."
+    Fig::Logging.info "Publishing #{descriptor.name}/#{descriptor.version}."
     repository.publish_package(publish_statements, descriptor.name, descriptor.version, options[:publish_local])
 
     return 0
@@ -248,23 +250,23 @@ module Fig
   def run_fig(argv)
     shell_command = initialize_shell_command(argv)
 
-    options, descriptor, exit_value = parse_options(argv)
+    options, descriptor, exit_value = Fig::Options.parse_options(argv)
     if not exit_value.nil?
       return exit_value
     end
 
-    Logging.initialize_pre_configuration(options[:log_level])
+    Fig::Logging.initialize_pre_configuration(options[:log_level])
 
     remote_url = initialize_remote_url(options)
 
-    configuration = FigRC.find(
+    configuration = Fig::FigRC.find(
       options[:figrc], remote_url, options[:login], options[:home], options[:no_figrc]
     )
 
-    Logging.initialize_post_configuration(options[:log_config] || configuration['log configuration'], options[:log_level])
+    Fig::Logging.initialize_post_configuration(options[:log_config] || configuration['log configuration'], options[:log_level])
 
-    os = OS.new(options[:login])
-    repository = Repository.new(
+    os = Fig::OS.new(options[:login])
+    repository = Fig::Repository.new(
       os,
       File.expand_path(File.join(options[:home], 'repos')),
       remote_url,
@@ -274,12 +276,12 @@ module Fig
       options[:update_if_missing]
     )
 
-    retriever = Retriever.new('.')
+    retriever = Fig::Retriever.new('.')
 
     # Check to see if this is still happening with the new layers of abstraction.
     at_exit { retriever.save }
 
-    environment = Environment.new(os, repository, nil, retriever)
+    environment = Fig::Environment.new(os, repository, nil, retriever)
 
     options[:non_command_package_statements].each do |statement|
       environment.apply_config_statement(nil, statement, nil)
@@ -317,7 +319,7 @@ module Fig
       ) { |cmd| os.shell_exec cmd }
     elsif not repository.updating?
       $stderr.puts "Nothing to do.\n"
-      $stderr.puts USAGE
+      $stderr.puts Fig::Options::USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
       return 1
     end
@@ -328,7 +330,7 @@ module Fig
   def log_error_message(error)
     # If there's no message, we assume that the cause has already been logged.
     if error_has_message?(error)
-      Logging.fatal error.to_s
+      Fig::Logging.fatal error.to_s
     end
   end
 
@@ -336,18 +338,18 @@ module Fig
     begin
       return_code = run_fig(argv)
       return return_code
-    rescue URLAccessError => error
+    rescue Fig::URLAccessError => error
       urls = exception.urls.join(', ')
       $stderr.puts "Access to #{urls} in #{exception.package}/#{exception.version} not allowed."
       return 1
-    rescue UserInputError => error
+    rescue Fig::UserInputError => error
       log_error_message(error)
       return 1
     rescue OptionParser::InvalidOption => error
       $stderr.puts error.to_s
-      $stderr.puts USAGE
+      $stderr.puts Fig::Options::USAGE
       return 1
-    rescue RepositoryError => error
+    rescue Fig::RepositoryError => error
       log_error_message(error)
       return 1
     end

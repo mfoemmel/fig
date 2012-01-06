@@ -4,9 +4,7 @@ $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
 
 require 'rubygems'
 
-require 'fig'
+require 'fig/command'
 
-include Fig
-
-return_code = run_with_exception_handling(ARGV)
+return_code = Fig::Command.new.run_with_exception_handling(ARGV)
 exit return_code

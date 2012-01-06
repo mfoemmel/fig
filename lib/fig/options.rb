@@ -8,10 +8,10 @@ require 'fig/package/path'
 require 'fig/package/resource'
 require 'fig/package/set'
 
+module Fig; end
+
 # Command-line processing.
-
-
-module Fig
+module Fig::Options
   # TODO: this is out of date.
   USAGE = <<EOF
 
@@ -57,7 +57,7 @@ EOF
 
   # Returns hash of option values, the remainders of argv, and an exit code if
   # full program processing occured in this method, otherwise nil.
-  def parse_options(argv)
+  def self.parse_options(argv)
     options = {}
 
     parser = OptionParser.new do |opts|
@@ -99,7 +99,7 @@ EOF
         'append (actually, prepend) VAL to environment var VAR, delimited by separator'
       ) do |var_val|
         var, val = var_val.split('=')
-        options[:non_command_package_statements] << Package::Path.new(var, val)
+        options[:non_command_package_statements] << Fig::Package::Path.new(var, val)
       end
 
       options[:archives] = []
@@ -107,7 +107,7 @@ EOF
         '--archive FULLPATH',
         'include FULLPATH archive in package (when using --publish)'
       ) do |path|
-        options[:archives] << Package::Archive.new(path)
+        options[:archives] << Fig::Package::Archive.new(path)
       end
 
       options[:clean] = false
@@ -155,7 +155,7 @@ EOF
         'include PKG (with any variable prepends) in environment'
       ) do |descriptor|
         options[:non_command_package_statements] <<
-          Package::Include.new(PackageDescriptor.new(descriptor), {})
+          Fig::Package::Include.new(Fig::PackageDescriptor.new(descriptor), {})
       end
 
       opts.on('--list-local', '--list', 'list packages in $FIG_HOME') do
@@ -231,14 +231,14 @@ EOF
         '--resource FULLPATH',
         'include FULLPATH resource in package (when using --publish)'
       ) do |path|
-        options[:resources] << Package::Resource.new(path)
+        options[:resources] << Fig::Package::Resource.new(path)
       end
 
       opts.on(
         '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
       ) do |var_val|
         var, val = var_val.split('=')
-        options[:non_command_package_statements] << Package::Set.new(var, val)
+        options[:non_command_package_statements] << Fig::Package::Set.new(var, val)
       end
 
       options[:update] = false
@@ -303,7 +303,7 @@ EOF
     package_text = argv.first
     descriptor = nil
     if package_text
-      descriptor = PackageDescriptor.new(package_text)
+      descriptor = Fig::PackageDescriptor.new(package_text)
     end
 
     return options, descriptor, nil

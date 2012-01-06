@@ -11,7 +11,7 @@ end
 
 require 'fileutils'
 
-require 'fig'
+require 'fig/command'
 require 'fig/logging'
 
 class Popen

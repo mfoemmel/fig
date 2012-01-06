@@ -28,7 +28,7 @@ describe 'Fig' do
     end
 
     it %q<prints usage message when there's nothing to do and there's a package.fig file> do
-      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::DEFAULT_FIG_FILE}", 'w' do
+      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
         |handle|
         handle.print <<-END
           config default
