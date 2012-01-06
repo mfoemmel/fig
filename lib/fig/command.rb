@@ -22,6 +22,58 @@ module Fig; end
 class Fig::Command
   DEFAULT_FIG_FILE = 'package.fig'
 
+  def derive_remote_url()
+    if remote_operation_necessary?()
+      if ENV['FIG_REMOTE_URL'].nil?
+        raise Fig::UserInputError.new('Please define the FIG_REMOTE_URL environment variable.')
+      end
+      return ENV['FIG_REMOTE_URL']
+    end
+
+    return nil
+  end
+
+  def configure()
+    Fig::Logging.initialize_pre_configuration(@options[:log_level])
+
+    remote_url = derive_remote_url()
+
+    @configuration = Fig::FigRC.find(
+      @options[:figrc],
+      remote_url,
+      @options[:login],
+      @options[:home],
+      @options[:no_figrc]
+    )
+
+    Fig::Logging.initialize_post_configuration(
+      @options[:log_config] || @configuration['log configuration'],
+      @options[:log_level]
+    )
+
+    @os = Fig::OS.new(@options[:login])
+    @repository = Fig::Repository.new(
+      @os,
+      File.expand_path(File.join(@options[:home], 'repos')),
+      remote_url,
+      @configuration,
+      nil, # remote_user
+      @options[:update],
+      @options[:update_if_missing]
+    )
+
+    @retriever = Fig::Retriever.new('.')
+
+    # Check to see if this is still happening with the new layers of abstraction.
+    at_exit { @retriever.save }
+
+    @environment = Fig::Environment.new(@os, @repository, nil, @retriever)
+
+    @options[:non_command_package_statements].each do |statement|
+      @environment.apply_config_statement(nil, statement, nil)
+    end
+  end
+
   def raise_package_descriptor_required(operation_description)
     raise Fig::UserInputError.new(
       "Need to specify a package #{operation_description}."
@@ -55,26 +107,15 @@ class Fig::Command
     return shell_command
   end
 
-  def remote_operation_necessary?(options)
-    return options[:update]                       ||
-           options[:publish]                      ||
-           options[:update_if_missing]            ||
-           options[:listing] == :remote_packages
+  def remote_operation_necessary?()
+    return @options[:update]                       ||
+           @options[:publish]                      ||
+           @options[:update_if_missing]            ||
+           @options[:listing] == :remote_packages
   end
 
-  def initialize_remote_url(options)
-    if remote_operation_necessary?(options)
-      if ENV['FIG_REMOTE_URL'].nil?
-        raise Fig::UserInputError.new('Please define the FIG_REMOTE_URL environment variable.')
-      end
-      return ENV['FIG_REMOTE_URL']
-    end
-
-    return nil
-  end
-
-  def load_package_config_file_contents(options)
-    package_config_file = options[:package_config_file]
+  def load_package_config_file_contents()
+    package_config_file = @options[:package_config_file]
 
     if package_config_file == :none
       return nil
@@ -91,32 +132,32 @@ class Fig::Command
     return
   end
 
-  def display_local_package_list(repository)
-    repository.list_packages.sort.each do |item|
+  def display_local_package_list()
+    @repository.list_packages.sort.each do |item|
       puts item
     end
   end
 
-  def display_remote_package_list(repository)
-    repository.list_remote_packages.sort.each do |item|
+  def display_remote_package_list()
+    @repository.list_remote_packages.sort.each do |item|
       puts item
     end
   end
 
-  def display_configs_in_local_packages_list(package)
-    package.configs.each do |config|
+  def display_configs_in_local_packages_list()
+    @package.configs.each do |config|
       puts config.name
     end
 
     return
   end
 
-  def handle_pre_parse_list_options(options, repository)
-    case options[:listing]
+  def handle_pre_parse_list_options()
+    case @options[:listing]
     when :local_packages
-      display_local_package_list(repository)
+      display_local_package_list()
     when :remote_packages
-      display_remote_package_list(repository)
+      display_remote_package_list()
     else
       return false
     end
@@ -124,14 +165,14 @@ class Fig::Command
     return true
   end
 
-  def display_dependencies(environment)
-    environment.packages.sort.each { |package| puts package }
+  def display_dependencies()
+    @environment.packages.sort.each { |package| puts package }
   end
 
-  def handle_post_parse_list_options(options, package, environment)
-    case options[:listing]
+  def handle_post_parse_list_options()
+    case @options[:listing]
     when :configs
-      display_configs_in_local_packages_list(package)
+      display_configs_in_local_packages_list()
     when :dependencies
       raise Fig::UserInputError.new('--list-dependencies not yet implemented.')
     when :dependencies_all_configs
@@ -147,92 +188,92 @@ class Fig::Command
     return
   end
 
-  def register_package_with_environment(options, package, environment)
-    if options[:update] || options[:update_if_missing]
-      package.retrieves.each do |var, path|
-        environment.add_retrieve(var, path)
+  def register_package_with_environment()
+    if @options[:update] || @options[:update_if_missing]
+      @package.retrieves.each do |var, path|
+        @environment.add_retrieve(var, path)
       end
     end
 
-    environment.register_package(package)
-    environment.apply_config(package, options[:config], nil)
+    @environment.register_package(@package)
+    @environment.apply_config(@package, @options[:config], nil)
 
     return
   end
 
-  def parse_package_config_file(options, config_raw_text, environment, configuration)
+  def parse_package_config_file(config_raw_text)
     if config_raw_text.nil?
-      return Fig::Package.new(nil, nil, '.', [])
+      @package = Fig::Package.new(nil, nil, '.', [])
+      return
     end
 
-    package =
-      Fig::Parser.new(configuration).parse_package(nil, nil, '.', config_raw_text)
+    @package =
+      Fig::Parser.new(@configuration).parse_package(
+        nil, nil, '.', config_raw_text
+      )
 
-    register_package_with_environment(options, package, environment)
+    register_package_with_environment()
 
-    return package
+    return
   end
 
-  def load_package_file(options, environment, configuration)
-    config_raw_text = load_package_config_file_contents(options)
+  def load_package_file()
+    config_raw_text = load_package_config_file_contents()
 
-    return parse_package_config_file(
-      options, config_raw_text, environment, configuration
-    )
+    parse_package_config_file(config_raw_text)
   end
 
-  def load_package(descriptor, options, environment, repository, configuration)
-    package = nil
-    if descriptor.nil?
-      package = load_package_file(options, environment, configuration)
+  def load_package()
+    if @descriptor.nil?
+      @package = load_package_file()
     else
       # TODO: complain if config file was specified on the command-line.
-      package =
-        repository.read_local_package(descriptor.name, descriptor.version)
+      @package =
+        @repository.read_local_package(@descriptor.name, @descriptor.version)
 
-      register_package_with_environment(options, package, environment)
+      register_package_with_environment()
     end
 
-    return package
+    return
   end
 
-  def publish(descriptor, options, environment, repository, configuration)
-    if not descriptor
+  def publish()
+    if not @descriptor
       raise_package_descriptor_required('to publish')
     end
 
-    if descriptor.name.nil? || descriptor.version.nil?
+    if @descriptor.name.nil? || @descriptor.version.nil?
       $stderr.puts 'Please specify a package name and a version name.'
       return 10
     end
 
-    if not options[:non_command_package_statements].empty?
+    if not @options[:non_command_package_statements].empty?
       publish_statements =
-        options[:resources] +
-        options[:archives] +
+        @options[:resources] +
+        @options[:archives] +
         [
           Fig::Package::Configuration.new(
-            'default', options[:non_command_package_statements]
+            'default', @options[:non_command_package_statements]
           )
         ]
       publish_statements << Fig::Package::Publish.new('default','default')
     else
-      package = load_package_file(options, environment, configuration)
-      if not package.statements.empty?
-        publish_statements = package.statements
+      load_package_file()
+      if not @package.statements.empty?
+        publish_statements = @package.statements
       else
         $stderr.puts 'Nothing to publish.'
         return 1
       end
     end
 
-    if options[:publish]
-      Fig::Logging.info "Checking status of #{descriptor.name}/#{descriptor.version}..."
+    if @options[:publish]
+      Fig::Logging.info "Checking status of #{@descriptor.name}/#{@descriptor.version}..."
 
-      if repository.list_remote_packages.include?("#{descriptor.name}/#{descriptor.version}")
-        Fig::Logging.info "#{descriptor.name}/#{descriptor.version} has already been published."
+      if @repository.list_remote_packages.include?("#{@descriptor.name}/#{@descriptor.version}")
+        Fig::Logging.info "#{@descriptor.name}/#{@descriptor.version} has already been published."
 
-        if not options[:force]
+        if not @options[:force]
           Fig::Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
           return 1
         else
@@ -241,8 +282,13 @@ class Fig::Command
       end
     end
 
-    Fig::Logging.info "Publishing #{descriptor.name}/#{descriptor.version}."
-    repository.publish_package(publish_statements, descriptor.name, descriptor.version, options[:publish_local])
+    Fig::Logging.info "Publishing #{@descriptor.name}/#{@descriptor.version}."
+    @repository.publish_package(
+      publish_statements,
+      @descriptor.name,
+      @descriptor.version,
+      @options[:publish_local]
+    )
 
     return 0
   end
@@ -250,74 +296,43 @@ class Fig::Command
   def run_fig(argv)
     shell_command = initialize_shell_command(argv)
 
-    options, descriptor, exit_value = Fig::Options.parse_options(argv)
+    @options, @descriptor, exit_value = Fig::Options.parse_options(argv)
     if not exit_value.nil?
       return exit_value
     end
 
-    Fig::Logging.initialize_pre_configuration(options[:log_level])
+    configure
 
-    remote_url = initialize_remote_url(options)
-
-    configuration = Fig::FigRC.find(
-      options[:figrc], remote_url, options[:login], options[:home], options[:no_figrc]
-    )
-
-    Fig::Logging.initialize_post_configuration(options[:log_config] || configuration['log configuration'], options[:log_level])
-
-    os = Fig::OS.new(options[:login])
-    repository = Fig::Repository.new(
-      os,
-      File.expand_path(File.join(options[:home], 'repos')),
-      remote_url,
-      configuration,
-      nil, # remote_user
-      options[:update],
-      options[:update_if_missing]
-    )
-
-    retriever = Fig::Retriever.new('.')
-
-    # Check to see if this is still happening with the new layers of abstraction.
-    at_exit { retriever.save }
-
-    environment = Fig::Environment.new(os, repository, nil, retriever)
-
-    options[:non_command_package_statements].each do |statement|
-      environment.apply_config_statement(nil, statement, nil)
-    end
-
-    if options[:clean]
+    if @options[:clean]
       # TODO: check descriptor was specified.
-      repository.clean(descriptor.name, descriptor.version)
+      @repository.clean(@descriptor.name, @descriptor.version)
       return 0
     end
 
-    if handle_pre_parse_list_options(options, repository)
+    if handle_pre_parse_list_options()
       return 0
     end
 
-    if options[:publish] || options[:publish_local]
-      return publish(descriptor, options, environment, repository, configuration)
+    if @options[:publish] || @options[:publish_local]
+      return publish()
     end
 
-    package =
-      load_package(descriptor, options, environment, repository, configuration)
+    load_package()
 
-    if options[:listing]
-      handle_post_parse_list_options(options, package, environment)
-    elsif options[:get]
-      puts environment[options[:get]]
+    if @options[:listing]
+      handle_post_parse_list_options()
+    elsif @options[:get]
+      puts @environment[@options[:get]]
     elsif shell_command
-      environment.execute_shell(shell_command) { |cmd| os.shell_exec cmd }
-    elsif descriptor
-      environment.include_config(
-        package, descriptor.name, descriptor.config, descriptor.version, {}, nil
+      @environment.execute_shell(shell_command) { |cmd| @os.shell_exec cmd }
+    elsif @descriptor
+      @environment.include_config(
+        @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
       )
-      environment.execute_config(
-        package, descriptor.name, descriptor.config, nil, []
-      ) { |cmd| os.shell_exec cmd }
-    elsif not repository.updating?
+      @environment.execute_config(
+        @package, @descriptor.name, @descriptor.config, nil, []
+      ) { |cmd| @os.shell_exec cmd }
+    elsif not @repository.updating?
       $stderr.puts "Nothing to do.\n"
       $stderr.puts Fig::Options::USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
@@ -339,8 +354,8 @@ class Fig::Command
       return_code = run_fig(argv)
       return return_code
     rescue Fig::URLAccessError => error
-      urls = exception.urls.join(', ')
-      $stderr.puts "Access to #{urls} in #{exception.package}/#{exception.version} not allowed."
+      urls = error.urls.join(', ')
+      $stderr.puts "Access to #{urls} in #{error.package}/#{error.version} not allowed."
       return 1
     rescue Fig::UserInputError => error
       log_error_message(error)
