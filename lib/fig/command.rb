@@ -74,16 +74,22 @@ class Fig::Command
     end
   end
 
-  def raise_package_descriptor_required(operation_description)
-    raise Fig::UserInputError.new(
-      "Need to specify a package #{operation_description}."
-    )
+  def check_required_package_descriptor(operation_description)
+    if not @descriptor
+      raise Fig::UserInputError.new(
+        "Need to specify a package #{operation_description}."
+      )
+    end
+
+    return
   end
 
-  def raise_package_descriptor_not_allowed(operation_description)
-    raise Fig::UserInputError.new(
-      "Cannot specify a package for #{operation_description}."
-    )
+  def check_disallowed_package_descriptor(operation_description)
+    if @descriptor
+      raise Fig::UserInputError.new(
+        "Cannot specify a package for #{operation_description}."
+      )
+    end
   end
 
   def read_in_package_config_file(config_file)
@@ -238,9 +244,7 @@ class Fig::Command
   end
 
   def publish()
-    if not @descriptor
-      raise_package_descriptor_required('to publish')
-    end
+    check_required_package_descriptor('to publish')
 
     if @descriptor.name.nil? || @descriptor.version.nil?
       $stderr.puts 'Please specify a package name and a version name.'
@@ -304,7 +308,7 @@ class Fig::Command
     configure
 
     if @options[:clean]
-      # TODO: check descriptor was specified.
+      check_required_package_descriptor('to clean')
       @repository.clean(@descriptor.name, @descriptor.version)
       return 0
     end
