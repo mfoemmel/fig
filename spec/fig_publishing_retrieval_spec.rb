@@ -335,5 +335,19 @@ describe 'Fig' do
       fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
       fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'cheese'
     end
+
+    it 'should complain if you publish without a package descriptor' do
+      cleanup_home_and_remote
+      out, err, exit_code = fig('--publish', nil, :no_raise_on_error)
+      out.should_not be_empty
+      exit_code.should_not == 0
+    end
+
+    it 'should complain if you publish without a package version' do
+      cleanup_home_and_remote
+      out, err, exit_code = fig('--publish foo', nil, :no_raise_on_error)
+      out.should_not be_empty
+      exit_code.should_not == 0
+    end
   end
 end

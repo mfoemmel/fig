@@ -247,8 +247,7 @@ class Fig::Command
     check_required_package_descriptor('to publish')
 
     if @descriptor.name.nil? || @descriptor.version.nil?
-      $stderr.puts 'Please specify a package name and a version name.'
-      return 10
+      raise Fig::UserInputError.new('Please specify a package name and a version name.')
     end
 
     if not @options[:non_command_package_statements].empty?
