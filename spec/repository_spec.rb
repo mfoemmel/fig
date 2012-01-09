@@ -1,10 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'stringio'
-require 'tempfile'
-
 require 'fig/applicationconfiguration'
 require 'fig/package/configuration'
+require 'fig/package/path'
 require 'fig/package/publish'
 require 'fig/package/resource'
 require 'fig/repository'
