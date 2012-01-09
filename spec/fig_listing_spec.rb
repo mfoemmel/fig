@@ -66,6 +66,13 @@ describe 'Fig' do
       out.should == "both/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3"
       err.should == ''
     end
+
+    it 'should complain if with a package descriptor' do
+      cleanup_home_and_remote
+      out, err, exit_code = fig('--list-local foo', nil, :no_raise_on_error)
+      out.should_not be_empty
+      exit_code.should_not == 0
+    end
   end
 
   describe '--list-remote' do
@@ -85,6 +92,13 @@ describe 'Fig' do
       exitstatus.should == 0
       out.should == "both/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
       err.should == ''
+    end
+
+    it 'should complain if with a package descriptor' do
+      cleanup_home_and_remote
+      out, err, exit_code = fig('--list-remote foo', nil, :no_raise_on_error)
+      out.should_not be_empty
+      exit_code.should_not == 0
     end
   end
 
