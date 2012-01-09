@@ -1,9 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'English'
-
-require 'fig/os'
-
 setup_repository
 
 describe 'Fig' do
