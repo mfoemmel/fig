@@ -2,8 +2,6 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'English'
 
-require 'fig/os'
-
 setup_repository
 
 def set_up_local_and_remote_repository

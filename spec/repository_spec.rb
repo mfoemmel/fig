@@ -4,7 +4,6 @@ require 'stringio'
 require 'tempfile'
 
 require 'fig/applicationconfiguration'
-require 'fig/os'
 require 'fig/package/configuration'
 require 'fig/package/publish'
 require 'fig/package/resource'

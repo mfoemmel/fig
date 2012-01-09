@@ -1,7 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
-require 'fig/os'
-require 'fig/windows'
 
+require 'fig/windows'
 
 # Only run on Windows...
 if Fig::OS.windows?
