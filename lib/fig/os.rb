@@ -2,12 +2,14 @@ require 'fileutils'
 # Must specify absolute path of ::Archive when using
 # this module to avoid conflicts with Fig::Package::Archive
 require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
-require 'uri'
 require 'net/http'
 require 'net/ssh'
 require 'net/sftp'
 require 'net/netrc'
+require 'rbconfig'
 require 'tempfile'
+require 'uri'
+
 require 'highline/import'
 
 require 'fig/logging'
@@ -184,7 +186,7 @@ module Fig
         begin
           FileUtils.cp(uri.path, path)
           return true
-        rescue Errno::ENOENT => e
+        rescue Errno::ENOENT
           raise NotFoundError.new
         end
       else
@@ -331,7 +333,7 @@ module Fig
     end
 
     def self.windows?
-      Config::CONFIG['host_os'] =~ /mswin|mingw/
+      RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
     end
 
     def self.java?
