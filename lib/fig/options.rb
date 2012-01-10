@@ -12,7 +12,7 @@ module Fig; end
 
 # Command-line processing.
 module Fig::Options
-  USAGE = <<EOF
+  USAGE = <<-EOF
 
 Usage:
 
@@ -56,7 +56,7 @@ Environment variables:
   FIG_REMOTE_URL (required),
   FIG_HOME (path to local repository cache, defaults to $HOME/.fighome).
 
-EOF
+  EOF
 
   LOG_LEVELS = %w[ off fatal error warn info debug all ]
   LOG_ALIASES = { 'warning' => 'warn' }
@@ -69,33 +69,11 @@ EOF
     parser = OptionParser.new do |opts|
       opts.banner = USAGE
       opts.on('-?', '-h','--help','display this help text') do
-        puts opts.help
-        puts "        --                           end of fig options; anything after this is used as a command to run\n\n"
-        return nil, nil, 0
+        return nil, nil, help(opts)
       end
 
       opts.on('-v', '--version', 'Print fig version') do
-        line = nil
-
-        begin
-          File.open(
-            "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
-          ) do |file|
-            line = file.gets
-          end
-        rescue
-          $stderr.puts 'Could not retrieve version number. Something has mucked with your fig install.'
-          return nil, nil, 1
-        end
-
-        if line !~ /\d+\.\d+\.\d+/
-          $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your fig install.>
-          return nil, nil, 1
-        end
-
-        puts File.basename($0) + ' v' + line
-
-        return nil, nil, 0
+        return nil, nil, version()
       end
 
       options[:non_command_package_statements] = []
@@ -293,7 +271,7 @@ EOF
       options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
     end
 
-    # Need to catch the exception thrown from parser and retranslate into a fig exception
+    # TODO: Need to catch the exception thrown from parser and retranslate into a fig exception
     begin
       parser.parse!(argv)
     rescue OptionParser::MissingArgument => error
@@ -313,5 +291,37 @@ EOF
     end
 
     return options, descriptor, nil
+  end
+
+  private
+
+  def self.help(opts)
+    puts opts.help
+    puts "        --                           end of fig options; anything after this is used as a command to run\n\n"
+    return 0
+  end
+
+  def self.version()
+    line = nil
+
+    begin
+      File.open(
+        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
+      ) do |file|
+        line = file.gets
+      end
+    rescue
+      $stderr.puts 'Could not retrieve version number. Something has mucked with your fig install.'
+      return 1
+    end
+
+    if line !~ /\d+\.\d+\.\d+/
+      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your fig install.>
+      return 1
+    end
+
+    puts File.basename($0) + ' v' + line
+
+    return 0
   end
 end
