@@ -61,10 +61,13 @@ Environment variables:
   LOG_LEVELS = %w[ off fatal error warn info debug all ]
   LOG_ALIASES = { 'warning' => 'warn' }
 
+  attr_reader :shell_command
   attr_reader :descriptor
   attr_reader :exit_code
 
   def initialize(argv)
+    strip_shell_command(argv)
+
     @options = {}
 
     @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
@@ -183,6 +186,18 @@ Environment variables:
   end
 
   private
+
+  def strip_shell_command(argv)
+    argv.each_with_index do |arg, i|
+      if arg == '--'
+        @shell_command = argv[(i+1)..-1]
+        argv.slice!(i..-1)
+        break
+      end
+    end
+
+    return
+  end
 
   def new_parser
     return OptionParser.new do |opts|

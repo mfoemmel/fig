@@ -100,19 +100,6 @@ class Fig::Command
     end
   end
 
-  def initialize_shell_command(argv)
-    shell_command = nil
-    argv.each_with_index do |arg, i|
-      if arg == '--'
-        shell_command = argv[(i+1)..-1]
-        argv.slice!(i..-1)
-        break
-      end
-    end
-
-    return shell_command
-  end
-
   def remote_operation_necessary?()
     return @options.updating?                     ||
            @options.publish?                      ||
@@ -298,8 +285,6 @@ class Fig::Command
   end
 
   def run_fig(argv)
-    shell_command = initialize_shell_command(argv)
-
     @options = Fig::Options.new(argv)
     if not @options.exit_code.nil?
       return @options.exit_code
@@ -328,8 +313,10 @@ class Fig::Command
       handle_post_parse_list_options()
     elsif @options.get()
       puts @environment[@options.get()]
-    elsif shell_command
-      @environment.execute_shell(shell_command) { |cmd| @os.shell_exec cmd }
+    elsif @options.shell_command
+      @environment.execute_shell(@options.shell_command) do
+        |command| @os.shell_exec command
+      end
     elsif @descriptor
       @environment.include_config(
         @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
