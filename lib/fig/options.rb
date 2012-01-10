@@ -64,212 +64,11 @@ Environment variables:
   # Returns hash of option values, the remainders of argv, and an exit code if
   # full program processing occured in this method, otherwise nil.
   def self.parse_options(argv)
-    options = {}
+    @options = {}
 
-    parser = OptionParser.new do |opts|
-      opts.banner = USAGE
-      opts.on('-?', '-h','--help','display this help text') do
-        return nil, nil, help(opts)
-      end
+    @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
 
-      opts.on('-v', '--version', 'Print fig version') do
-        return nil, nil, version()
-      end
-
-      options[:non_command_package_statements] = []
-      opts.on(
-        '-p',
-        '--append VAR=VAL',
-        'append (actually, prepend) VAL to environment var VAR, delimited by separator'
-      ) do |var_val|
-        var, val = var_val.split('=')
-        options[:non_command_package_statements] << Fig::Package::Path.new(var, val)
-      end
-
-      options[:archives] = []
-      opts.on(
-        '--archive FULLPATH',
-        'include FULLPATH archive in package (when using --publish)'
-      ) do |path|
-        options[:archives] << Fig::Package::Archive.new(path)
-      end
-
-      options[:clean] = false
-      opts.on('--clean', 'remove package from $FIG_HOME') do |descriptor|
-        options[:clean] = true
-      end
-
-      options[:config] = 'default'
-      opts.on(
-        '-c',
-        '--config CFG',
-        %q<apply configuration CFG, default is 'default'>
-      ) do |config|
-        options[:config] = config
-      end
-
-      options[:package_config_file] = nil
-      opts.on(
-        '--file FILE',
-        %q<read fig file FILE. Use '-' for stdin. See also --no-file>
-      ) do |path|
-        options[:package_config_file] = path
-      end
-
-      options[:force] = nil
-      opts.on(
-        '--force',
-        'force-overwrite existing version of a package to the remote repo'
-      ) do |force|
-        options[:force] = force
-      end
-
-      options[:get] = nil
-      opts.on(
-        '-g',
-        '--get VAR',
-        'print value of environment variable VAR'
-      ) do |get|
-        options[:get] = get
-      end
-
-      opts.on(
-        '-i',
-        '--include PKG',
-        'include PKG (with any variable prepends) in environment'
-      ) do |descriptor|
-        options[:non_command_package_statements] <<
-          Fig::Package::Include.new(Fig::PackageDescriptor.new(descriptor), {})
-      end
-
-      opts.on('--list-local', '--list', 'list packages in $FIG_HOME') do
-        options[:listing] = :local_packages
-      end
-
-      opts.on(
-        '--list-configs', 'list configurations'
-      ) do |descriptor|
-        options[:listing] = :configs
-      end
-
-      opts.on(
-        '--list-dependencies', 'list package dependencies, recursively'
-      ) do |descriptor|
-        options[:listing] = :dependencies
-      end
-
-      opts.on(
-        '--list-dependencies-all-configs',
-        'list package dependencies, recursively, following all configurations'
-      ) do |descriptor|
-        options[:listing] = :dependencies_all_configs
-      end
-
-      opts.on(
-        '--list-variables', 'list all variables defined/used by package and its dependencies'
-      ) do |descriptor|
-        options[:listing] = :variables
-      end
-
-      opts.on(
-        '--list-variables-all-configs',
-        'list all variables defined/used by package and its dependencies, following all configurations'
-      ) do |descriptor|
-        options[:listing] = :variables_all_configs
-      end
-
-      options[:list_remote] = false
-      opts.on('--list-remote', 'list packages in remote repo') do
-        options[:listing] = :remote_packages
-      end
-
-      options[:login] = false
-      opts.on(
-        '-l', '--login', 'login to remote repo as a non-anonymous user'
-      ) do
-        options[:login] = true
-      end
-
-      opts.on(
-        '--no-file', 'ignore package.fig file in current directory'
-      ) do |path|
-        options[:package_config_file] = :none
-      end
-
-      options[:publish] = false
-      opts.on(
-        '--publish', 'install package in $FIG_HOME and in remote repo'
-      ) do |publish|
-        options[:publish] = true
-      end
-
-      options[:publish_local] = false
-      opts.on(
-        '--publish-local', 'install package only in $FIG_HOME'
-      ) do |publish_local|
-        options[:publish_local] = true
-      end
-
-      options[:resources] =[]
-      opts.on(
-        '--resource FULLPATH',
-        'include FULLPATH resource in package (when using --publish)'
-      ) do |path|
-        options[:resources] << Fig::Package::Resource.new(path)
-      end
-
-      opts.on(
-        '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
-      ) do |var_val|
-        var, val = var_val.split('=')
-        options[:non_command_package_statements] << Fig::Package::Set.new(var, val)
-      end
-
-      options[:update] = false
-      opts.on(
-        '-u',
-        '--update',
-        'check remote repo for updates and download to $FIG_HOME as necessary'
-      ) do
-        options[:update] = true
-      end
-
-      options[:update_if_missing] = false
-      opts.on(
-        '-m',
-        '--update-if-missing',
-        'check remote repo for updates only if package missing from $FIG_HOME'
-      ) do
-        options[:update_if_missing] = true
-      end
-
-      opts.on(
-        '--figrc PATH', 'add PATH to configuration used for Fig'
-      ) do |path|
-        options[:figrc] = path
-      end
-
-      opts.on('--no-figrc', 'ignore ~/.figrc') { options[:no_figrc] = true }
-
-      opts.on(
-        '--log-config PATH', 'use PATH file as configuration for Log4r'
-      ) do |path|
-        options[:log_config] = path
-      end
-
-      level_list = LOG_LEVELS.join(', ')
-      opts.on(
-        '--log-level LEVEL',
-        LOG_LEVELS,
-        LOG_ALIASES,
-        'set logging level to LEVEL',
-        "  (#{level_list})"
-      ) do |log_level|
-        options[:log_level] = log_level
-      end
-
-      options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
-    end
+    parser = new_parser()
 
     # TODO: Need to catch the exception thrown from parser and retranslate into a fig exception
     begin
@@ -284,21 +83,267 @@ Environment variables:
       return nil, nil, 1
     end
 
+    if @options[:help]
+      return nil, nil, 0
+    end
+    if @options[:version]
+      return nil, nil, version()
+    end
+
     package_text = argv.first
     descriptor = nil
     if package_text
       descriptor = Fig::PackageDescriptor.new(package_text)
     end
 
-    return options, descriptor, nil
+    return @options, descriptor, nil
   end
 
   private
 
+  def self.new_parser
+    return OptionParser.new do |opts|
+      set_up_queries(opts)
+      set_up_commands(opts)
+      set_up_package_configuration_source(opts)
+      set_up_package_statements(opts)
+      set_up_remote_repository_access(opts)
+      set_up_program_configuration(opts)
+    end
+  end
+
+  def self.set_up_queries(opts)
+    opts.banner = USAGE
+    opts.on('-?', '-h','--help','display this help text') do
+      help(opts)
+      @options[:help] = true
+    end
+
+    opts.on('-v', '--version', 'Print fig version') do
+      @options[:version] = true
+    end
+
+    @options[:get] = nil
+    opts.on(
+      '-g',
+      '--get VAR',
+      'print value of environment variable VAR'
+    ) do |get|
+      @options[:get] = get
+    end
+
+    set_up_listings(opts)
+
+    return
+  end
+
+  def self.set_up_listings(opts)
+    option_mapping = {
+      :local_packages =>
+        [ '--list-local', '--list', 'list packages in $FIG_HOME' ],
+
+      :configs =>
+        ['--list-configs', 'list configurations'],
+
+      :dependencies =>
+        ['--list-dependencies', 'list package dependencies, recursively'],
+
+      :dependencies_all_configs =>
+        [
+          '--list-dependencies-all-configs',
+          'list package dependencies, recursively, following all configurations'
+        ],
+
+      :variables =>
+        [
+          '--list-variables',
+          'list all variables defined/used by package and its dependencies'
+        ],
+
+      :variables_all_configs =>
+        [
+          '--list-variables-all-configs',
+          'list all variables defined/used by package and its dependencies, following all configurations'
+        ],
+
+      :remote_packages =>
+        ['--list-remote', 'list packages in remote repo']
+    }
+
+    option_mapping.each_pair do
+      | type, specification |
+
+      opts.on(*specification) do
+        @options[:listing] = type
+      end
+    end
+
+    return
+  end
+
+  def self.set_up_commands(opts)
+    opts.on('--clean', 'remove package from $FIG_HOME') do
+      @options[:clean] = true
+    end
+
+    opts.on(
+      '--publish', 'install package in $FIG_HOME and in remote repo'
+    ) do |publish|
+      @options[:publish] = true
+    end
+
+    opts.on(
+      '--publish-local', 'install package only in $FIG_HOME'
+    ) do |publish_local|
+      @options[:publish_local] = true
+    end
+
+    return
+  end
+
+  def self.set_up_package_configuration_source(opts)
+    @options[:config] = 'default'
+    opts.on(
+      '-c',
+      '--config CFG',
+      %q<apply configuration CFG, default is 'default'>
+    ) do |config|
+      @options[:config] = config
+    end
+
+    @options[:package_config_file] = nil
+    opts.on(
+      '--file FILE',
+      %q<read fig file FILE. Use '-' for stdin. See also --no-file>
+    ) do |path|
+      @options[:package_config_file] = path
+    end
+
+    opts.on(
+      '--no-file', 'ignore package.fig file in current directory'
+    ) do |path|
+      @options[:package_config_file] = :none
+    end
+
+    return
+  end
+
+  def self.set_up_package_statements(opts)
+    @options[:non_command_package_statements] = []
+    opts.on(
+      '-p',
+      '--append VAR=VAL',
+      'append (actually, prepend) VAL to environment var VAR, delimited by separator'
+    ) do |var_val|
+      var, val = var_val.split('=')
+      @options[:non_command_package_statements] << Fig::Package::Path.new(var, val)
+    end
+
+    opts.on(
+      '-i',
+      '--include PKG',
+      'include PKG (with any variable prepends) in environment'
+    ) do |descriptor|
+      @options[:non_command_package_statements] <<
+        Fig::Package::Include.new(Fig::PackageDescriptor.new(descriptor), {})
+    end
+
+    opts.on(
+      '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
+    ) do |var_val|
+      var, val = var_val.split('=')
+      @options[:non_command_package_statements] << Fig::Package::Set.new(var, val)
+    end
+
+    @options[:archives] = []
+    opts.on(
+      '--archive FULLPATH',
+      'include FULLPATH archive in package (when using --publish)'
+    ) do |path|
+      @options[:archives] << Fig::Package::Archive.new(path)
+    end
+
+    @options[:resources] =[]
+    opts.on(
+      '--resource FULLPATH',
+      'include FULLPATH resource in package (when using --publish)'
+    ) do |path|
+      @options[:resources] << Fig::Package::Resource.new(path)
+    end
+
+    return
+  end
+
+  def self.set_up_remote_repository_access(opts)
+    @options[:update] = false
+    opts.on(
+      '-u',
+      '--update',
+      'check remote repo for updates and download to $FIG_HOME as necessary'
+    ) do
+      @options[:update] = true
+    end
+
+    @options[:update_if_missing] = false
+    opts.on(
+      '-m',
+      '--update-if-missing',
+      'check remote repo for updates only if package missing from $FIG_HOME'
+    ) do
+      @options[:update_if_missing] = true
+    end
+
+    @options[:login] = false
+    opts.on(
+      '-l', '--login', 'login to remote repo as a non-anonymous user'
+    ) do
+      @options[:login] = true
+    end
+
+    @options[:force] = nil
+    opts.on(
+      '--force',
+      'force-overwrite existing version of a package to the remote repo'
+    ) do |force|
+      @options[:force] = force
+    end
+
+    return
+  end
+
+  def self.set_up_program_configuration(opts)
+    opts.on(
+      '--figrc PATH', 'add PATH to configuration used for Fig'
+    ) do |path|
+      @options[:figrc] = path
+    end
+
+    opts.on('--no-figrc', 'ignore ~/.figrc') { @options[:no_figrc] = true }
+
+    opts.on(
+      '--log-config PATH', 'use PATH file as configuration for Log4r'
+    ) do |path|
+      @options[:log_config] = path
+    end
+
+    level_list = LOG_LEVELS.join(', ')
+    opts.on(
+      '--log-level LEVEL',
+      LOG_LEVELS,
+      LOG_ALIASES,
+      'set logging level to LEVEL',
+      "  (#{level_list})"
+    ) do |log_level|
+      @options[:log_level] = log_level
+    end
+
+    return
+  end
+
   def self.help(opts)
     puts opts.help
     puts "        --                           end of fig options; anything after this is used as a command to run\n\n"
-    return 0
+    return
   end
 
   def self.version()
