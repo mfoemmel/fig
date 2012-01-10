@@ -1,6 +1,5 @@
 source 'http://gems'
 source 'http://gems-mirror'
-source :rubygems
 
 gem 'rake', '>= 0.8.7'
 gem 'ftp', '>= 0.69'
