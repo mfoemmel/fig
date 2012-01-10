@@ -12,30 +12,34 @@ module Fig; end
 
 # Command-line processing.
 module Fig::Options
-  # TODO: this is out of date.
   USAGE = <<EOF
 
 Usage:
 
-  fig [...] -- <command>
-  fig [...] <package name>/<version>
-  fig [...] {--update | --update-if-missing} [-- <command>]
+  fig [...] [<descriptor>] [--update | --update-if-missing] [-- <command>]
 
-  fig {--publish | --publish-local}
+  fig {--publish | --publish-local} <descriptor>
       [--resource <fullpath>]
       [--include <package name/version>]
       [--force]
       [--archive <path>]
       [...]
 
-  fig --list-configs <package name>/<version> [...]
-  fig {--list-dependencies | --list-all-variables} [...]
-  fig {--list-dependencies-all-configs | --list-all-variables-all-configs} [...]
+  fig --clean <descriptor> [...]
+
+  fig --get <VAR>                                               [<descriptor>] [...]
+  fig --list-configs                                            [<descriptor>] [...]
   fig {--list-local | --list-remote} [...]
-  fig --clean <package name/version> [...]
-  fig --get <VAR> [...]
 
   fig {--version | --help}
+
+Not yet implemented:
+  fig {--list-dependencies | --list-dependencies-all-configs}   [<descriptor>] [...]
+  fig {--list-all-variables | --list-all-variables-all-configs} [<descriptor>] [...]
+
+A <descriptor> looks like <package name>[:<config>][/<version>] e.g. "foo",
+"foo/1.2.3", and "foo:default/1.2.3". Whether ":<config>" and "/<version>" are
+required or allowed is dependent upon what your are doing
 
 Standard options:
 
@@ -47,8 +51,10 @@ Standard options:
       [--log-level <level>] [--log-config <path>]
       [--figrc <path>] [--no-figrc]
 
-Relevant environment variables: FIG_REMOTE_URL (required), FIG_HOME (path to
-local repository cache, defaults to $HOME/.fighome).
+Environment variables:
+
+  FIG_REMOTE_URL (required),
+  FIG_HOME (path to local repository cache, defaults to $HOME/.fighome).
 
 EOF
 
@@ -78,12 +84,12 @@ EOF
             line = file.gets
           end
         rescue
-          $stderr.puts 'Could not retrieve version number. Something has mucked with your gem install.'
+          $stderr.puts 'Could not retrieve version number. Something has mucked with your fig install.'
           return nil, nil, 1
         end
 
         if line !~ /\d+\.\d+\.\d+/
-          $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your gem install.>
+          $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your fig install.>
           return nil, nil, 1
         end
 
