@@ -121,14 +121,14 @@ describe 'Fig' do
     end
   end
 
-#  describe '--list-dependencies' do
-#    it %q<lists only the current package and not all in the repository> do
-#      set_up_local_and_remote_repository
-#
-#      (out, err, exitstatus) = fig('--list-dependencies local-only/1.2.3')
-#      exitstatus.should == 0
-#      out.should == "local-only\nprerequisite"
-#      err.should == ''
-#    end
-#  end
+  describe '--list-dependencies' do
+    it %q<lists only the current package and not all in the repository> do
+      set_up_local_and_remote_repository
+
+      (out, err, exitstatus) = fig('--list-dependencies local-only/1.2.3')
+      exitstatus.should == 0
+      out.should == "local-only/1.2.3\nprerequisite/1.2.3"
+      err.should == ''
+    end
+  end
 end

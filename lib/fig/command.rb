@@ -160,7 +160,10 @@ class Fig::Command
   end
 
   def display_dependencies()
-    @environment.packages.sort.each { |package| puts package }
+    packages = @environment.packages.sort { |a, b| a.package_name <=> b.package_name }
+    packages.each { |package| puts package }
+
+    return
   end
 
   def handle_post_parse_list_options()
@@ -168,7 +171,7 @@ class Fig::Command
     when :configs
       display_configs_in_local_packages_list()
     when :dependencies
-      raise Fig::UserInputError.new('--list-dependencies not yet implemented.')
+      display_dependencies()
     when :dependencies_all_configs
       raise Fig::UserInputError.new('--list-dependencies-all-configs not yet implemented.')
     when :variables
