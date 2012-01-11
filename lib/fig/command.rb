@@ -34,32 +34,32 @@ class Fig::Command
   end
 
   def configure()
-    Fig::Logging.initialize_pre_configuration(@options[:log_level])
+    Fig::Logging.initialize_pre_configuration(@options.log_level())
 
     remote_url = derive_remote_url()
 
     @configuration = Fig::FigRC.find(
-      @options[:figrc],
+      @options.figrc(),
       remote_url,
-      @options[:login],
-      @options[:home],
-      @options[:no_figrc]
+      @options.login?,
+      @options.home(),
+      @options.no_figrc?
     )
 
     Fig::Logging.initialize_post_configuration(
-      @options[:log_config] || @configuration['log configuration'],
-      @options[:log_level]
+      @options.log_config() || @configuration['log configuration'],
+      @options.log_level()
     )
 
-    @os = Fig::OS.new(@options[:login])
+    @os = Fig::OS.new(@options.login?)
     @repository = Fig::Repository.new(
       @os,
-      File.expand_path(File.join(@options[:home], 'repos')),
+      File.expand_path(File.join(@options.home(), 'repos')),
       remote_url,
       @configuration,
       nil, # remote_user
-      @options[:update],
-      @options[:update_if_missing]
+      @options.update?,
+      @options.update_if_missing?
     )
 
     @retriever = Fig::Retriever.new('.')
@@ -69,7 +69,7 @@ class Fig::Command
 
     @environment = Fig::Environment.new(@os, @repository, nil, @retriever)
 
-    @options[:non_command_package_statements].each do |statement|
+    @options.non_command_package_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
     end
   end
@@ -100,28 +100,14 @@ class Fig::Command
     end
   end
 
-  def initialize_shell_command(argv)
-    shell_command = nil
-    argv.each_with_index do |arg, i|
-      if arg == '--'
-        shell_command = argv[(i+1)..-1]
-        argv.slice!(i..-1)
-        break
-      end
-    end
-
-    return shell_command
-  end
-
   def remote_operation_necessary?()
-    return @options[:update]                       ||
-           @options[:publish]                      ||
-           @options[:update_if_missing]            ||
-           @options[:listing] == :remote_packages
+    return @options.updating?                     ||
+           @options.publish?                      ||
+           @options.listing == :remote_packages
   end
 
   def load_package_config_file_contents()
-    package_config_file = @options[:package_config_file]
+    package_config_file = @options.package_config_file()
 
     if package_config_file == :none
       return nil
@@ -161,7 +147,7 @@ class Fig::Command
   end
 
   def handle_pre_parse_list_options()
-    case @options[:listing]
+    case @options.listing()
     when :local_packages
       display_local_package_list()
     when :remote_packages
@@ -178,7 +164,7 @@ class Fig::Command
   end
 
   def handle_post_parse_list_options()
-    case @options[:listing]
+    case @options.listing()
     when :configs
       display_configs_in_local_packages_list()
     when :dependencies
@@ -190,21 +176,21 @@ class Fig::Command
     when :variables_all_configs
       raise Fig::UserInputError.new('--list-variables-all-configs not yet implemented.')
     else
-      raise %Q<Bug in code! Found unknown :listing option value "#{options[:listing]}">
+      raise %Q<Bug in code! Found unknown :listing option value "#{options.listing()}">
     end
 
     return
   end
 
   def register_package_with_environment()
-    if @options[:update] || @options[:update_if_missing]
+    if @options.updating?
       @package.retrieves.each do |var, path|
         @environment.add_retrieve(var, path)
       end
     end
 
     @environment.register_package(@package)
-    @environment.apply_config(@package, @options[:config], nil)
+    @environment.apply_config(@package, @options.config(), nil)
 
     return
   end
@@ -252,13 +238,13 @@ class Fig::Command
       raise Fig::UserInputError.new('Please specify a package name and a version name.')
     end
 
-    if not @options[:non_command_package_statements].empty?
+    if not @options.non_command_package_statements().empty?
       publish_statements =
-        @options[:resources] +
-        @options[:archives] +
+        @options.resources() +
+        @options.archives() +
         [
           Fig::Package::Configuration.new(
-            'default', @options[:non_command_package_statements]
+            'default', @options.non_command_package_statements()
           )
         ]
       publish_statements << Fig::Package::Publish.new('default','default')
@@ -272,13 +258,13 @@ class Fig::Command
       end
     end
 
-    if @options[:publish]
+    if @options.publish?
       Fig::Logging.info "Checking status of #{@descriptor.name}/#{@descriptor.version}..."
 
       if @repository.list_remote_packages.include?("#{@descriptor.name}/#{@descriptor.version}")
         Fig::Logging.info "#{@descriptor.name}/#{@descriptor.version} has already been published."
 
-        if not @options[:force]
+        if not @options.force?
           Fig::Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
           return 1
         else
@@ -292,23 +278,22 @@ class Fig::Command
       publish_statements,
       @descriptor.name,
       @descriptor.version,
-      @options[:publish_local]
+      @options.publish_local?
     )
 
     return 0
   end
 
   def run_fig(argv)
-    shell_command = initialize_shell_command(argv)
-
-    @options, @descriptor, exit_value = Fig::Options.parse_options(argv)
-    if not exit_value.nil?
-      return exit_value
+    @options = Fig::Options.new(argv)
+    if not @options.exit_code.nil?
+      return @options.exit_code
     end
+    @descriptor = @options.descriptor
 
     configure
 
-    if @options[:clean]
+    if @options.clean?
       check_required_package_descriptor('to clean')
       @repository.clean(@descriptor.name, @descriptor.version)
       return 0
@@ -318,18 +303,20 @@ class Fig::Command
       return 0
     end
 
-    if @options[:publish] || @options[:publish_local]
+    if @options.publishing?
       return publish()
     end
 
     load_package()
 
-    if @options[:listing]
+    if @options.listing()
       handle_post_parse_list_options()
-    elsif @options[:get]
-      puts @environment[@options[:get]]
-    elsif shell_command
-      @environment.execute_shell(shell_command) { |cmd| @os.shell_exec cmd }
+    elsif @options.get()
+      puts @environment[@options.get()]
+    elsif @options.shell_command
+      @environment.execute_shell(@options.shell_command) do
+        |command| @os.shell_exec command
+      end
     elsif @descriptor
       @environment.include_config(
         @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
