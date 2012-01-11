@@ -36,6 +36,25 @@ def set_up_local_and_remote_repository
   return
 end
 
+def create_package_dot_fig
+  File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
+    |handle|
+    handle.print <<-END
+      config default
+        include prerequisite/1.2.3
+      end
+    END
+  end
+
+  return
+end
+
+def remove_any_package_dot_fig
+  FileUtils.rm_rf "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}"
+
+  return
+end
+
 def test_list_configs(package_name)
   set_up_local_and_remote_repository
 
@@ -122,12 +141,23 @@ describe 'Fig' do
   end
 
   describe '--list-dependencies' do
-    it %q<lists only the current package and not all in the repository> do
+    it %q<lists only the current package and not all in the repository without a package.fig> do
       set_up_local_and_remote_repository
+      remove_any_package_dot_fig
 
       (out, err, exitstatus) = fig('--list-dependencies local-only/1.2.3')
       exitstatus.should == 0
-      out.should == "local-only/1.2.3\nprerequisite/1.2.3"
+      out.should == "prerequisite/1.2.3"
+      err.should == ''
+    end
+
+    it %q<lists only the current package and not all in the repository with a package.fig> do
+      set_up_local_and_remote_repository
+      create_package_dot_fig
+
+      (out, err, exitstatus) = fig('--list-dependencies')
+      exitstatus.should == 0
+      out.should == "prerequisite/1.2.3"
       err.should == ''
     end
   end

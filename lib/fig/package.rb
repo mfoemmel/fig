@@ -10,6 +10,8 @@ module Fig; end
 # The parsed representation of a configuration file.  Contains the statement
 # objects.
 class Fig::Package
+  UNPUBLISHED = '<unpublished>'
+
   attr_reader :package_name, :version_name, :directory, :statements
   attr_accessor :backtrace
 

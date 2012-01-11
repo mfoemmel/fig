@@ -160,7 +160,15 @@ class Fig::Command
   end
 
   def display_dependencies()
-    packages = @environment.packages.sort { |a, b| a.package_name <=> b.package_name }
+    packages = @environment.packages
+
+    packages.reject! { |package| package.package_name == nil }
+    if @descriptor
+      packages.reject! { |package| package.package_name == @descriptor.name }
+    end
+
+    packages.sort! { |a, b| a.package_name <=> b.package_name }
+
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
     else
