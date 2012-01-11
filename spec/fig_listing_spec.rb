@@ -147,7 +147,7 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig('--list-dependencies local-only/1.2.3')
       exitstatus.should == 0
-      out.should == "prerequisite/1.2.3"
+      out.should == 'prerequisite/1.2.3'
       err.should == ''
     end
 
@@ -157,7 +157,17 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig('--list-dependencies')
       exitstatus.should == 0
-      out.should == "prerequisite/1.2.3"
+      out.should == 'prerequisite/1.2.3'
+      err.should == ''
+    end
+
+    it %q<lists nothing when there are no dependencies (and output is not a tty)> do
+      set_up_local_and_remote_repository
+      remove_any_package_dot_fig
+
+      (out, err, exitstatus) = fig('--list-dependencies prerequisite/1.2.3')
+      exitstatus.should == 0
+      out.should == ''
       err.should == ''
     end
   end
