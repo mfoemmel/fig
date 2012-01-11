@@ -2,6 +2,16 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'English'
 
+def dir_exists?(dir_path)
+  begin
+    Dir.entries(dir_path)
+  rescue SystemCallError => error
+    return false
+  end
+
+  return true
+end
+
 setup_repository
 
 describe 'Fig' do
@@ -15,7 +25,7 @@ describe 'Fig' do
       END
       fig('--publish foo/1.2.3', input)[2].should == 0
       fig('--clean foo/1.2.3')[2].should == 0
-      fail unless not Dir.exists? FIG_HOME + '/repos/foo/1.2.3'
+      fail unless not dir_exists? FIG_HOME + '/repos/foo/1.2.3'
     end
 
     it 'cleans a named package from the FIG_HOME and does not clean packages differing only by version' do
@@ -28,7 +38,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)[2].should == 0
       fig('--publish foo/4.5.6', input)[2].should == 0
       fig('--clean foo/1.2.3')[2].should == 0
-      fail unless Dir.exists? FIG_HOME + '/repos/foo/4.5.6'
+      fail unless dir_exists? FIG_HOME + '/repos/foo/4.5.6'
     end
 
     it 'should complain if you clean without a package descriptor' do
