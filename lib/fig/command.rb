@@ -171,11 +171,7 @@ class Fig::Command
 
   def display_dependencies_in_tree(package = @package, indent = 0)
     print ' ' * (indent * 4)
-    if package.package_name.nil?
-      puts Fig::Package::UNPUBLISHED
-    else
-      puts package
-    end
+    puts package.to_s_with_primary_config()
 
     new_indent = indent + 1
     package.package_dependencies(package.primary_config_name).sort.each do
@@ -202,7 +198,7 @@ class Fig::Command
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
     else
-      packages.each { |package| puts package }
+      packages.each { |package| puts package.to_s_with_primary_config() }
     end
 
     return
@@ -235,7 +231,11 @@ class Fig::Command
     end
 
     @environment.register_package(@package)
-    @environment.apply_config(@package, @options.config(), nil)
+    @environment.apply_config(
+      @package,
+      @options.config() || @descriptor && @descriptor.config() || 'default',
+      nil
+    )
 
     return
   end

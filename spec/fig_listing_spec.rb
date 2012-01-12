@@ -41,6 +41,10 @@ def set_up_local_and_remote_repository_with_depends_on_everything
 
   input = <<-END_INPUT
     config default
+      include :everything
+    end
+
+    config everything
       include prerequisite/1.2.3
       include local-only/1.2.3
       include remote-only/1.2.3
@@ -49,6 +53,20 @@ def set_up_local_and_remote_repository_with_depends_on_everything
   END_INPUT
 
   fig('--update-if-missing --publish depends-on-everything/1.2.3', input)
+
+  input = <<-END_INPUT
+    config default
+    end
+
+    config indirectly-everything
+      include depends-on-everything/1.2.3:everything
+    end
+  END_INPUT
+
+  fig(
+    '--update-if-missing --publish depends-on-depends-on-everything/1.2.3',
+    input
+  )
 
   return
 end
@@ -193,10 +211,12 @@ describe 'Fig' do
         set_up_local_and_remote_repository_with_depends_on_everything
         remove_any_package_dot_fig
 
-        (out, err, exitstatus) = fig('--list-dependencies depends-on-everything/1.2.3')
+        (out, err, exitstatus) = fig(
+          '--list-dependencies depends-on-depends-on-everything/1.2.3:indirectly-everything'
+        )
         exitstatus.should == 0
         out.should ==
-          "both/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
+          "both/1.2.3\ndepends-on-everything/1.2.3:everything\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
         err.should == ''
       end
 
@@ -207,7 +227,7 @@ describe 'Fig' do
         (out, err, exitstatus) = fig('--list-dependencies')
         exitstatus.should == 0
         out.should ==
-          "both/1.2.3\ndepends-on-everything/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
+          "both/1.2.3\ndepends-on-everything/1.2.3:everything\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
         err.should == ''
       end
     end
@@ -244,18 +264,21 @@ describe 'Fig' do
         remove_any_package_dot_fig
 
         expected = <<-END_EXPECTED_OUTPUT
-depends-on-everything/1.2.3
-    both/1.2.3
+depends-on-depends-on-everything/1.2.3:indirectly-everything
+    depends-on-everything/1.2.3:everything
+        both/1.2.3
+            prerequisite/1.2.3
+        local-only/1.2.3
+            prerequisite/1.2.3
         prerequisite/1.2.3
-    local-only/1.2.3
-        prerequisite/1.2.3
-    prerequisite/1.2.3
-    remote-only/1.2.3
-        prerequisite/1.2.3
+        remote-only/1.2.3
+            prerequisite/1.2.3
         END_EXPECTED_OUTPUT
         expected.chomp!
 
-        (out, err, exitstatus) = fig('--list-dependencies --list-tree depends-on-everything/1.2.3')
+        (out, err, exitstatus) = fig(
+          '--list-dependencies --list-tree depends-on-depends-on-everything/1.2.3:indirectly-everything'
+        )
         exitstatus.should == 0
         out.should == expected
         err.should == ''
@@ -267,7 +290,7 @@ depends-on-everything/1.2.3
 
         expected = <<-END_EXPECTED_OUTPUT
 <unpublished>
-    depends-on-everything/1.2.3
+    depends-on-everything/1.2.3:everything
         both/1.2.3
             prerequisite/1.2.3
         local-only/1.2.3

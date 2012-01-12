@@ -10,7 +10,8 @@ module Fig; end
 # The parsed representation of a configuration file.  Contains the statement
 # objects.
 class Fig::Package
-  UNPUBLISHED = '<unpublished>'
+  UNPUBLISHED     = '<unpublished>'
+  DEFAULT_CONFIG  = 'default'
 
   attr_reader   :package_name, :version_name, :directory, :statements
   attr_accessor :backtrace, :primary_config_name
@@ -28,7 +29,14 @@ class Fig::Package
       return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
     end
 
-    message = "Configuration not found: #{@package_name}/#{@version_name}:#{config_name}"
+    message =
+      'Configuration not found: ' +
+      (@package_name || '<empty>')  +
+      '/'                         +
+      (@version_name || '<empty>')  +
+      ':'                         +
+      (config_name || '<empty>')
+
     raise Fig::PackageError.new(message)
   end
 
@@ -93,9 +101,25 @@ class Fig::Package
   end
 
   def to_s
-    package_name = @package_name || 'uninitialized'
-    version_name = @version_name || 'uninitialized'
+    package_name = @package_name || '<empty>'
+    version_name = @version_name || '<empty>'
     return package_name + '/' + version_name
+  end
+
+  def to_s_with_primary_config()
+    string = nil
+
+    if package_name.nil?
+      string = UNPUBLISHED
+    else
+      string = to_s
+    end
+
+    if not primary_config_name.nil? and primary_config_name != DEFAULT_CONFIG
+      string += ":#{primary_config_name}"
+    end
+
+    return string
   end
 end
 

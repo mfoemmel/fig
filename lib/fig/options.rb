@@ -303,7 +303,6 @@ Environment variables:
   end
 
   def set_up_package_configuration_source(opts)
-    @options[:config] = 'default'
     opts.on(
       '-c',
       '--config CFG',
