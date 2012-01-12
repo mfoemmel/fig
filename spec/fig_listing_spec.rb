@@ -53,12 +53,14 @@ def set_up_local_and_remote_repository_with_depends_on_everything
   return
 end
 
-def create_package_dot_fig(package_name)
+def create_package_dot_fig(package_name, config = nil)
+  config = config ? config = ':' + config : ''
+
   File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
     |handle|
     handle.print <<-END
       config default
-        include #{package_name}/1.2.3
+        include #{package_name}/1.2.3#{config}
       end
     END
   end
@@ -71,7 +73,7 @@ def create_package_dot_fig_with_single_dependency()
 end
 
 def create_package_dot_fig_with_all_dependencies()
-  create_package_dot_fig('depends-on-everything')
+  create_package_dot_fig('depends-on-everything', 'default')
 end
 
 def remove_any_package_dot_fig
@@ -166,46 +168,121 @@ describe 'Fig' do
   end
 
   describe '--list-dependencies' do
-    it %q<lists nothing when there are no dependencies without a package.fig (and output is not a tty)> do
-      set_up_local_and_remote_repository_with_depends_on_everything
-      remove_any_package_dot_fig
+    describe 'no --list-tree' do
+      it %q<lists nothing when there are no dependencies without a package.fig (and output is not a tty)> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        remove_any_package_dot_fig
 
-      (out, err, exitstatus) = fig('--list-dependencies prerequisite/1.2.3')
-      exitstatus.should == 0
-      out.should == ''
-      err.should == ''
+        (out, err, exitstatus) = fig('--list-dependencies prerequisite/1.2.3')
+        exitstatus.should == 0
+        out.should == ''
+        err.should == ''
+      end
+
+      it %q<lists only the single dependency and not all in the repository with a package.fig> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        create_package_dot_fig_with_single_dependency
+
+        (out, err, exitstatus) = fig('--list-dependencies')
+        exitstatus.should == 0
+        out.should == 'prerequisite/1.2.3'
+        err.should == ''
+      end
+
+      it %q<lists almost all packages in the repository without a package.fig> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        remove_any_package_dot_fig
+
+        (out, err, exitstatus) = fig('--list-dependencies depends-on-everything/1.2.3')
+        exitstatus.should == 0
+        out.should ==
+          "both/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
+        err.should == ''
+      end
+
+      it %q<lists all packages in the repository with a package.fig> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        create_package_dot_fig_with_all_dependencies
+
+        (out, err, exitstatus) = fig('--list-dependencies')
+        exitstatus.should == 0
+        out.should ==
+          "both/1.2.3\ndepends-on-everything/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
+        err.should == ''
+      end
     end
 
-    it %q<lists only the single dependency and not all in the repository with a package.fig> do
-      set_up_local_and_remote_repository_with_depends_on_everything
-      create_package_dot_fig_with_single_dependency
+    describe 'with --list-tree' do
+      it %q<lists the package when there are no dependencies without a package.fig (and output is not a tty)> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        remove_any_package_dot_fig
 
-      (out, err, exitstatus) = fig('--list-dependencies')
-      exitstatus.should == 0
-      out.should == 'prerequisite/1.2.3'
-      err.should == ''
-    end
+        (out, err, exitstatus) = fig('--list-dependencies --list-tree prerequisite/1.2.3')
+        exitstatus.should == 0
+        out.should == 'prerequisite/1.2.3'
+        err.should == ''
+      end
 
-    it %q<lists almost all packages in the repository without a package.fig> do
-      set_up_local_and_remote_repository_with_depends_on_everything
-      remove_any_package_dot_fig
+      it %q<lists only the package and the dependency and not all in the repository with a package.fig> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        create_package_dot_fig_with_single_dependency
 
-      (out, err, exitstatus) = fig('--list-dependencies depends-on-everything/1.2.3')
-      exitstatus.should == 0
-      out.should ==
-        "both/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
-      err.should == ''
-    end
+        expected = <<-END_EXPECTED_OUTPUT
+<unpublished>
+    prerequisite/1.2.3
+        END_EXPECTED_OUTPUT
+        expected.chomp!
 
-    it %q<lists all packages in the repository with a package.fig> do
-      set_up_local_and_remote_repository_with_depends_on_everything
-      create_package_dot_fig_with_all_dependencies
+        (out, err, exitstatus) = fig('--list-dependencies --list-tree')
+        exitstatus.should == 0
+        out.should == expected
+        err.should == ''
+      end
 
-      (out, err, exitstatus) = fig('--list-dependencies')
-      exitstatus.should == 0
-      out.should ==
-        "both/1.2.3\ndepends-on-everything/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
-      err.should == ''
+      it %q<lists almost all packages in the repository without a package.fig> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        remove_any_package_dot_fig
+
+        expected = <<-END_EXPECTED_OUTPUT
+depends-on-everything/1.2.3
+    both/1.2.3
+        prerequisite/1.2.3
+    local-only/1.2.3
+        prerequisite/1.2.3
+    prerequisite/1.2.3
+    remote-only/1.2.3
+        prerequisite/1.2.3
+        END_EXPECTED_OUTPUT
+        expected.chomp!
+
+        (out, err, exitstatus) = fig('--list-dependencies --list-tree depends-on-everything/1.2.3')
+        exitstatus.should == 0
+        out.should == expected
+        err.should == ''
+      end
+
+      it %q<lists all packages in the repository with a package.fig> do
+        set_up_local_and_remote_repository_with_depends_on_everything
+        create_package_dot_fig_with_all_dependencies
+
+        expected = <<-END_EXPECTED_OUTPUT
+<unpublished>
+    depends-on-everything/1.2.3
+        both/1.2.3
+            prerequisite/1.2.3
+        local-only/1.2.3
+            prerequisite/1.2.3
+        prerequisite/1.2.3
+        remote-only/1.2.3
+            prerequisite/1.2.3
+        END_EXPECTED_OUTPUT
+        expected.chomp!
+
+        (out, err, exitstatus) = fig('--list-dependencies --list-tree')
+        exitstatus.should == 0
+        out.should == expected
+        err.should == ''
+      end
     end
   end
 end

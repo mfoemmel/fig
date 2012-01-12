@@ -2,6 +2,8 @@ module Fig; end
 
 # Parsed representation of a package name:config/version.
 class Fig::PackageDescriptor
+  include Comparable
+
   DEFAULT_CONFIG = 'default'
 
   attr_reader :name, :version, :config
@@ -16,6 +18,11 @@ class Fig::PackageDescriptor
   def to_string(use_default_config = false)
     string = @name || ''
 
+    if @version
+      string += '/'
+      string += @version
+    end
+
     if @config
       string += ':'
       string += @config
@@ -23,11 +30,10 @@ class Fig::PackageDescriptor
       string += ':default'
     end
 
-    if @version
-      string += '/'
-      string += @version
-    end
-
     return string
+  end
+
+  def <=>(other)
+    return to_string() <=> other.to_string()
   end
 end

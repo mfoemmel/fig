@@ -3,10 +3,66 @@ v0.1.x
   - Now requires at least ruby v1.8.7.
 
   - Backwards incompatibility: you can no longer run a command without using
-    "--".
+    "--".  Through an accident of implementation, you previously could do
+
+        fig echo foo
+
+    You are now required to run this as
+
+        fig -- echo foo
 
   - Backwards incompatibility: you can no longer specify multiple --clean or
     --list-configs options.
+
+  - New "--list-dependencies" option.  This will list all dependencies a given
+    package has, recursively.
+
+    For example, if you have package A which depends upon packages B and C
+    which both depend upon package D, running
+
+        fig --list-dependencies A/1.2.3
+
+    will give you
+
+        B/2.3.4
+        C/3.4.5
+        D/4.5.6
+
+    If you additionally specify "--list-tree", you'll get a nested dependency
+    tree:
+
+        fig --list-dependencies --list-tree A/1.2.3
+
+        A/1.2.3
+            B/2.3.4
+                D/4.5.6
+            C/3.4.5
+                D/4.5.6
+
+    If you don't specify a package descriptor, but you've got a package.fig
+    file in the current directory with the same dependencies as package A
+    above, you'll get
+
+        fig --list-dependencies --list-tree
+
+        <unpublished>
+            B/2.3.4
+                D/4.5.6
+            C/3.4.5
+                D/4.5.6
+
+    If there are no dependencies, you don't specify "--list-tree", and stdout
+    is connected to a terminal:
+
+        fig --list-dependencies package-with-no-dependencies/1.2.3
+
+        <no dependencies>
+
+    However, if stdout is not connected to a terminal:
+
+        fig --list-dependencies package-with-no-dependencies/1.2.3 | cat
+
+        [no output]
 
 v0.1.51
 

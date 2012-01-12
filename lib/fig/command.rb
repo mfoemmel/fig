@@ -160,9 +160,39 @@ class Fig::Command
   end
 
   def display_dependencies()
+    if @options.list_tree?
+      display_dependencies_in_tree()
+    else
+      display_dependencies_flat()
+    end
+
+    return
+  end
+
+  def display_dependencies_in_tree(package = @package, indent = 0)
+    print ' ' * (indent * 4)
+    if package.package_name.nil?
+      puts Fig::Package::UNPUBLISHED
+    else
+      puts package
+    end
+
+    new_indent = indent + 1
+    package.package_dependencies(package.primary_config_name).sort.each do
+      |descriptor|
+
+      display_dependencies_in_tree(
+        @environment.get_package(descriptor.name), new_indent
+      )
+    end
+
+    return
+  end
+
+  def display_dependencies_flat()
     packages = @environment.packages
 
-    packages.reject! { |package| package.package_name == nil }
+    packages.reject! { |package| package.package_name.nil? }
     if @descriptor
       packages.reject! { |package| package.package_name == @descriptor.name }
     end
@@ -234,7 +264,7 @@ class Fig::Command
 
   def load_package()
     if @descriptor.nil?
-      @package = load_package_file()
+      load_package_file()
     else
       # TODO: complain if config file was specified on the command-line.
       @package =
