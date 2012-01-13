@@ -2,7 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe 'Fig' do
   describe 'environment variables' do
-    before(:all) do
+    before(:each) do
       setup_test_environment
     end
 

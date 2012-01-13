@@ -4,12 +4,10 @@ require 'English'
 
 describe 'Fig' do
   describe 'publishing/retrieval' do
-    before(:all) do
-      setup_test_environment
-    end
-
     context 'starting with a clean home and remote repository' do
       before(:each) do
+        cleanup_test_environment
+        setup_test_environment
         cleanup_home_and_remote
       end
 
