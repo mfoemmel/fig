@@ -82,35 +82,28 @@ end
 
 Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
-def setup_test_environment()
-  return if self.class.const_defined? :FIG_SPEC_BASE_DIRECTORY
-
-  self.class.const_set(
-    :FIG_SPEC_BASE_DIRECTORY,
+FIG_SPEC_BASE_DIRECTORY =
     File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
-  )
-  cleanup_test_environment
+FIG_HOME =
+    File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
+FIG_REMOTE_DIR =
+    File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
+FIG_BIN =
+    File.expand_path(File.dirname(__FILE__) + '/../bin')
+FIG_EXE =
+    %Q<#{FIG_BIN}/fig>
+
+ENV['FIG_HOME'] = FIG_HOME
+ENV['FIG_REMOTE_URL'] = %Q<file://#{FIG_REMOTE_DIR}>
+ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
+
+def setup_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
 
-  self.class.const_set(
-    :FIG_HOME, File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
-  )
   FileUtils.mkdir_p(FIG_HOME)
-  ENV['FIG_HOME'] = FIG_HOME
 
-  self.class.const_set(
-    :FIG_REMOTE_DIR, File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
-  )
   FileUtils.mkdir_p(FIG_REMOTE_DIR)
   FileUtils.mkdir_p(File.join(FIG_REMOTE_DIR,'_meta'))
-  ENV['FIG_REMOTE_URL'] = %Q<file://#{FIG_REMOTE_DIR}>
-
-  self.class.const_set(
-    :FIG_BIN,
-    File.expand_path(File.dirname(__FILE__) + '/../bin')
-  )
-  ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
-  self.class.const_set(:FIG_EXE, %Q<#{FIG_BIN}/fig>)
 
   return
 end
