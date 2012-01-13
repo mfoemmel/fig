@@ -160,6 +160,13 @@ class Fig::Command
   end
 
   def display_dependencies()
+    if @options.list_all_configs?
+      @package.config_names.each do
+        |name|
+        @environment.apply_config(@package, name, nil)
+      end
+    end
+
     if @options.list_tree?
       display_dependencies_in_tree()
     else
@@ -189,16 +196,25 @@ class Fig::Command
     packages = @environment.packages
 
     packages.reject! { |package| package.package_name.nil? }
-    if @descriptor
+    if ! @options.list_all_configs? && @descriptor
       packages.reject! { |package| package.package_name == @descriptor.name }
     end
-
-    packages.sort! { |a, b| a.package_name <=> b.package_name }
 
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
     else
-      packages.each { |package| puts package.to_s_with_primary_config() }
+      packages.sort.each do
+        |package|
+
+        if @options.list_all_configs?
+          package.applied_config_names.sort.each do
+            |config_name|
+            puts package.to_s_with_config(config_name)
+          end
+        else
+          puts package.to_s_with_config(package.primary_config_name)
+        end
+      end
     end
 
     return

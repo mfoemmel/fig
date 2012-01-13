@@ -2,6 +2,7 @@ require 'stringio'
 
 require 'fig/backtrace'
 require 'fig/logging'
+require 'fig/package'
 require 'fig/package/command'
 require 'fig/package/include'
 require 'fig/package/path'
@@ -22,7 +23,6 @@ module Fig
       @variables = variables_override || get_environment_variables
       @retrieve_vars = {}
       @packages = {}
-      @applied_configs = {}
       @retriever = retriever
     end
 
@@ -67,17 +67,14 @@ module Fig
     end
 
     def apply_config(package, config_name, backtrace)
-      if (@applied_configs[package.package_name] ||= []).member?(config_name)
+      if package.applied_config_names.member?(config_name)
         return
       end
       new_backtrace = backtrace
 
       config = package[config_name]
       config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
-      @applied_configs[package.package_name] << config_name
-      if not package.primary_config_name
-        package.primary_config_name = config_name
-      end
+      package.add_applied_config_name(config_name)
 
       return
     end
@@ -104,9 +101,12 @@ module Fig
     end
 
     def find_config_name_in_package(package_name)
-      return @applied_configs.key?(package_name)   ?
-              @applied_configs[package_name].first :
-              'default'
+      package = get_package(package_name)
+      if not package
+        return Package::DEFAULT_CONFIG
+      end
+
+      return package.primary_config_name || Package::DEFAULT_CONFIG
     end
 
     def execute_config(base_package, package_name, config_name, version_name, args, &block)
@@ -156,8 +156,12 @@ module Fig
       overrides.each do |override|
         new_backtrace.add_override(override.package_name, override.version_name)
       end
-      package = lookup_package(package_name || base_package.package_name, version_name, new_backtrace)
-      apply_config(package, config_name || 'default', new_backtrace)
+      package = lookup_package(
+        package_name || base_package.package_name, version_name, new_backtrace
+      )
+      apply_config(
+        package, config_name || Package::DEFAULT_CONFIG, new_backtrace
+      )
 
       return
     end

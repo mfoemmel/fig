@@ -10,17 +10,20 @@ module Fig; end
 # The parsed representation of a configuration file.  Contains the statement
 # objects.
 class Fig::Package
+  include Comparable
+
   UNPUBLISHED     = '<unpublished>'
   DEFAULT_CONFIG  = 'default'
 
   attr_reader   :package_name, :version_name, :directory, :statements
-  attr_accessor :backtrace, :primary_config_name
+  attr_accessor :backtrace
 
   def initialize(package_name, version_name, directory, statements)
     @package_name = package_name
     @version_name = version_name
     @directory = directory
     @statements = statements
+    @applied_config_names = []
     @backtrace = nil
   end
 
@@ -40,8 +43,19 @@ class Fig::Package
     raise Fig::PackageError.new(message)
   end
 
+  def <=>(other)
+    compared = compare_components(package_name, other.package_name)
+    return compared if compared != 0
+
+    return compare_components(version_name, other.version_name)
+  end
+
   def configs
     return @statements.select { |statement| statement.is_a?(Configuration) }
+  end
+
+  def config_names
+    return configs.collect { |statement| statement.name }
   end
 
   def retrieves
@@ -62,6 +76,18 @@ class Fig::Package
 
   def resource_urls
     return @statements.select{|s| s.is_a?(Resource)}.map{|s|s.url}
+  end
+
+  def applied_config_names()
+    return @applied_config_names.clone
+  end
+
+  def add_applied_config_name(name)
+    @applied_config_names << name
+  end
+
+  def primary_config_name()
+    return @applied_config_names.first
   end
 
   # Returns an array of PackageDescriptors
@@ -106,7 +132,7 @@ class Fig::Package
     return package_name + '/' + version_name
   end
 
-  def to_s_with_primary_config()
+  def to_s_with_config(config_name)
     string = nil
 
     if package_name.nil?
@@ -115,11 +141,33 @@ class Fig::Package
       string = to_s
     end
 
-    if not primary_config_name.nil? and primary_config_name != DEFAULT_CONFIG
-      string += ":#{primary_config_name}"
+    if not config_name.nil? and config_name != DEFAULT_CONFIG
+      string += ":#{config_name}"
     end
 
     return string
+  end
+
+  def to_s_with_primary_config()
+    return to_s_with_config(primary_config_name)
+  end
+
+  private
+
+  def compare_components(mine, others)
+    if mine.nil?
+      if others.nil?
+        return 0
+      end
+
+      return 1
+    end
+
+    if others.nil?
+      return -1
+    end
+
+    return mine <=> others
   end
 end
 
