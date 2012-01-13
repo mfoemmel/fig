@@ -34,3 +34,6 @@ resources.tar.gz
 
 # Personal rspec config
 .rspec
+
+# Bundler lock file
+*.lock
