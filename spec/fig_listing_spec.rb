@@ -287,6 +287,11 @@ describe 'Fig' do
   describe '--list-dependencies' do
     describe 'no --list-tree' do
       describe 'no --list-all-configs' do
+        before(:each) do
+          setup_test_environment
+          cleanup_home_and_remote
+        end
+
         it %q<lists nothing when there are no dependencies without a package.fig (and output is not a tty)> do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
@@ -341,6 +346,11 @@ remote-only/1.2.3
       end
 
       describe 'with --list-all-configs' do
+        before(:each) do
+          setup_test_environment
+          cleanup_home_and_remote
+        end
+
         it %q<lists only the single configuration when there are no dependencies without a package.fig> do
           set_up_multiple_config_repository
           remove_any_package_dot_fig
@@ -407,6 +417,11 @@ no-dependencies/1.2.3
     end
 
     describe 'with --list-tree' do
+      before(:each) do
+        setup_test_environment
+        cleanup_home_and_remote
+      end
+
       it %q<lists the package when there are no dependencies without a package.fig (and output is not a tty)> do
         set_up_local_and_remote_repository_with_depends_on_everything
         remove_any_package_dot_fig
