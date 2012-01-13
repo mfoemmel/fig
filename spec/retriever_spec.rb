@@ -2,9 +2,11 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/retriever'
 
-setup_repository
-
 describe 'Retriever' do
+  before(:all) do
+    setup_test_environment
+  end
+
   it 'retrieves single file' do
 
     # Set up some test files

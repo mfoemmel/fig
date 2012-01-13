@@ -6,8 +6,6 @@ require 'tempfile'
 require 'fig/figrc'
 require 'fig/retriever'
 
-setup_repository()
-
 def create_override_file(foo, bar = nil)
     tempfile = Tempfile.new('some_json_tempfile')
     tempfile << %Q< { "foo" : "#{foo}" >
@@ -33,13 +31,20 @@ def create_remote_config(foo, bar = nil)
 end
 
 describe 'FigRC' do
+  before(:all) do
+    setup_test_environment
+  end
+
+  after(:each) do
+    cleanup_test_environment
+  end
+
   it 'handles override path with a remote repository' do
     tempfile = create_override_file('loaded as override')
 
     create_remote_config("loaded from repository (shouldn't be)")
     configuration = Fig::FigRC.find(tempfile.path, ENV['FIG_REMOTE_URL'], true, ENV['FIG_HOME'], true)
     tempfile.unlink
-    cleanup_repository
 
     configuration['foo'].should == 'loaded as override'
   end
@@ -59,7 +64,6 @@ describe 'FigRC' do
 
     configuration = Fig::FigRC.find(nil, ENV['FIG_REMOTE_URL'], true, ENV['FIG_HOME'], true)
     configuration['foo'].should == 'loaded from repository'
-    cleanup_repository
   end
 
   it 'has a remote config but gets its config from the override file provided' do
@@ -67,7 +71,6 @@ describe 'FigRC' do
     tempfile = create_override_file('loaded as override to override remote config')
     configuration = Fig::FigRC.find(tempfile.path, ENV['FIG_REMOTE_URL'], true, ENV['FIG_HOME'], true)
     configuration['foo'].should == 'loaded as override to override remote config'
-    cleanup_repository
   end
 
   it 'merges override file config over remote config' do
@@ -76,6 +79,5 @@ describe 'FigRC' do
     configuration = Fig::FigRC.find(tempfile.path, ENV['FIG_REMOTE_URL'], true, ENV['FIG_HOME'], true)
     configuration['foo'].should == 'loaded as override to override remote config'
     configuration['bar'].should == 'should not be overwritten'
-    cleanup_repository
   end
 end

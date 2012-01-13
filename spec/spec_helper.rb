@@ -46,6 +46,7 @@ def fig(args, input = nil, no_raise_on_error = false)
     args = "--file - #{args}" if input
     out = nil
     err = nil
+
     Popen.popen("#{Gem::Platform::RUBY} #{FIG_EXE} #{args}") do
       |stdin, stdout, stderr|
 
@@ -74,20 +75,21 @@ def fig(args, input = nil, no_raise_on_error = false)
     fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
     fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
 
+
     raise fig_failure
   end
 end
 
 Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
-def setup_repository()
+def setup_test_environment()
   return if self.class.const_defined? :FIG_SPEC_BASE_DIRECTORY
 
   self.class.const_set(
     :FIG_SPEC_BASE_DIRECTORY,
     File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
   )
-  cleanup_repository
+  cleanup_test_environment
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
 
   self.class.const_set(
@@ -113,7 +115,7 @@ def setup_repository()
   return
 end
 
-def cleanup_repository()
+def cleanup_test_environment()
   FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
 
   return

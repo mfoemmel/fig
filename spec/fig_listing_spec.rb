@@ -2,8 +2,6 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'English'
 
-setup_repository
-
 def set_up_local_and_remote_repository
   cleanup_home_and_remote
 
@@ -49,9 +47,12 @@ end
 
 describe 'Fig' do
   describe '--list-local' do
-    it %q<prints nothing with an empty repository> do
+    before(:each) do
+      setup_test_environment
       cleanup_home_and_remote
+    end
 
+    it %q<prints nothing with an empty repository> do
       (out, err, exitstatus) = fig('--list-local')
       exitstatus.should == 0
       out.should == ''
@@ -68,7 +69,6 @@ describe 'Fig' do
     end
 
     it 'should complain if with a package descriptor' do
-      cleanup_home_and_remote
       out, err, exit_code = fig('--list-local foo', nil, :no_raise_on_error)
       out.should_not be_empty
       exit_code.should_not == 0
@@ -76,9 +76,12 @@ describe 'Fig' do
   end
 
   describe '--list-remote' do
-    it %q<prints nothing with an empty repository> do
+    before(:each) do
+      setup_test_environment
       cleanup_home_and_remote
+    end
 
+    it %q<prints nothing with an empty repository> do
       (out, err, exitstatus) = fig('--list-remote')
       exitstatus.should == 0
       out.should == ''
@@ -95,7 +98,6 @@ describe 'Fig' do
     end
 
     it 'should complain if with a package descriptor' do
-      cleanup_home_and_remote
       out, err, exit_code = fig('--list-remote foo', nil, :no_raise_on_error)
       out.should_not be_empty
       exit_code.should_not == 0
@@ -103,6 +105,11 @@ describe 'Fig' do
   end
 
   describe '--list-configs' do
+    before(:each) do
+      setup_test_environment
+      cleanup_home_and_remote
+    end
+
     it %q<prints all the configurations for local-only> do
       test_list_configs('local-only')
     end

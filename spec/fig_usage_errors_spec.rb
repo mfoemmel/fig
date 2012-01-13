@@ -2,11 +2,13 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'English'
 
-setup_repository
-
 describe 'Fig' do
   describe 'usage errors' do
     before(:all) do
+      setup_test_environment
+    end
+
+    before(:each) do
       FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
     end
 

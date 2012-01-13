@@ -1,8 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-setup_repository
-
 describe 'Fig' do
+  before(:each) do
+    setup_test_environment
+  end
+
   it 'ignores comments' do
     input = <<-END
       #/usr/bin/env fig

@@ -55,17 +55,12 @@ end
 
 require 'rspec/core/rake_task'
 desc 'Run RSpec tests.'
-RSpec::Core::RakeTask.new(:spec) do |spec|
-  spec.pattern = 'spec/**/*_spec.rb'
-  spec.rspec_opts = []
-  spec.rspec_opts << '--format nested'
-  spec.rspec_opts << '--color'
-end
+RSpec::Core::RakeTask.new(:spec)
 
-desc 'Run RSpec tests with coverage reporting via rcov.'
-RSpec::Core::RakeTask.new(:rcov) do |spec|
-  spec.rcov = true
-end
+#desc 'Run RSpec tests with coverage reporting via rcov.'
+#RSpec::Core::RakeTask.new(:rcov) do |spec|
+#  spec.rcov = true
+#end
 
 desc 'Build gems and then fix fig18 gem file names.'
 task :figbuild => :build do

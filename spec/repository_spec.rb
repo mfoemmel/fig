@@ -7,8 +7,6 @@ require 'fig/package/publish'
 require 'fig/package/resource'
 require 'fig/repository'
 
-setup_repository()
-
 def create_local_repository()
   application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_DIR)
   repository = Fig::Repository.new(Fig::OS.new(nil), FIG_SPEC_BASE_DIRECTORY, "file://#{FIG_REMOTE_DIR}", application_config)
@@ -27,8 +25,12 @@ def generate_package_statements
 end
 
 describe 'Repository' do
+  before(:each) do
+    setup_test_environment
+  end
+
   it 'cleans a package from the repository' do
-    cleanup_repository
+    cleanup_test_environment
 
     repository = create_local_repository
 
@@ -44,6 +46,6 @@ describe 'Repository' do
 
     repository.list_packages.include?('foo/1.0.0').should be_false
 
-    cleanup_repository
+    cleanup_test_environment
   end
 end

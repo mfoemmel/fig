@@ -1,11 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-setup_repository
-
 describe 'Fig' do
   describe 'running commands' do
-    before(:all) do
-      FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
+    before(:each) do
+      setup_test_environment
     end
 
     it %q<runs a single command> do
