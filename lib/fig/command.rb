@@ -160,7 +160,64 @@ class Fig::Command
   end
 
   def display_dependencies()
-    @environment.packages.sort.each { |package| puts package }
+    if @options.list_all_configs?
+      @package.config_names.each do
+        |name|
+        @environment.apply_config(@package, name, nil)
+      end
+    end
+
+    if @options.list_tree?
+      display_dependencies_in_tree()
+    else
+      display_dependencies_flat()
+    end
+
+    return
+  end
+
+  def display_dependencies_in_tree(package = @package, indent = 0)
+    print ' ' * (indent * 4)
+    puts package.to_s_with_primary_config()
+
+    new_indent = indent + 1
+    package.package_dependencies(package.primary_config_name).sort.each do
+      |descriptor|
+
+      display_dependencies_in_tree(
+        @environment.get_package(descriptor.name), new_indent
+      )
+    end
+
+    return
+  end
+
+  def display_dependencies_flat()
+    packages = @environment.packages
+
+    packages.reject! { |package| package.package_name.nil? }
+    if ! @options.list_all_configs? && @descriptor
+      packages.reject! { |package| package.package_name == @descriptor.name }
+    end
+
+    if packages.empty? and $stdout.tty?
+      puts '<no dependencies>'
+    else
+      packages.sort.each do
+        |package|
+
+        if @options.list_all_configs?
+          package.applied_config_names.sort.each do
+            |config_name|
+            puts package.to_s_with_config(config_name)
+          end
+        else
+          puts package.to_s_with_config(package.primary_config_name)
+        end
+      end
+    end
+
+    return
   end
 
   def handle_post_parse_list_options()
@@ -168,7 +225,7 @@ class Fig::Command
     when :configs
       display_configs_in_local_packages_list()
     when :dependencies
-      raise Fig::UserInputError.new('--list-dependencies not yet implemented.')
+      display_dependencies()
     when :dependencies_all_configs
       raise Fig::UserInputError.new('--list-dependencies-all-configs not yet implemented.')
     when :variables
@@ -190,7 +247,11 @@ class Fig::Command
     end
 
     @environment.register_package(@package)
-    @environment.apply_config(@package, @options.config(), nil)
+    @environment.apply_config(
+      @package,
+      @options.config() || @descriptor && @descriptor.config() || 'default',
+      nil
+    )
 
     return
   end
@@ -219,7 +280,7 @@ class Fig::Command
 
   def load_package()
     if @descriptor.nil?
-      @package = load_package_file()
+      load_package_file()
     else
       # TODO: complain if config file was specified on the command-line.
       @package =

@@ -152,7 +152,7 @@ module Fig
         file = File.join(dir, 'package.fig')
       end
       if not File.exist?(file)
-        Logging.fatal "Fig file not found for package: #{file}"
+        Logging.fatal %Q<Fig file not found for package "#{package_name || '<unnamed>'}": #{file}>
         raise RepositoryError.new
       end
       read_package_from_file(file, package_name, version_name)

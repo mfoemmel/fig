@@ -228,19 +228,4 @@ describe 'Environment' do
       received_command.should == %w<echo foo>
     end
   end
-
-  describe 'package enumeration' do
-    it 'enumerates all the packages when asked to walk them' do
-      environment = new_example_environment('blah')
-      enumerated_names = []
-      environment.walk_packages {
-        | package | enumerated_names << package.package_name
-      }
-
-      [ %w< one two three >, DEPENDED_UPON_PACKAGE_NAME ].flatten.each do
-        | package_name |
-        enumerated_names.should be_include(package_name);
-      end
-    end
-  end
 end

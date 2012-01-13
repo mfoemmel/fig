@@ -27,15 +27,16 @@ Usage:
 
   fig --clean <descriptor> [...]
 
-  fig --get <VAR>                                               [<descriptor>] [...]
-  fig --list-configs                                            [<descriptor>] [...]
+  fig --get <VAR>                                            [<descriptor>] [...]
+  fig --list-configs                                         [<descriptor>] [...]
+  fig --list-dependencies [--list-tree]                      [<descriptor>] [...]
   fig {--list-local | --list-remote} [...]
 
   fig {--version | --help}
 
 Not yet implemented:
-  fig {--list-dependencies | --list-dependencies-all-configs}   [<descriptor>] [...]
-  fig {--list-all-variables | --list-all-variables-all-configs} [<descriptor>] [...]
+  fig --list-dependencies [--list-all-configs]               [<descriptor>] [...]
+  fig --list-variables [--list-tree] [--list-all-configs]    [<descriptor>] [...]
 
 A <descriptor> looks like <package name>[:<config>][/<version>] e.g. "foo",
 "foo/1.2.3", and "foo:default/1.2.3". Whether ":<config>" and "/<version>" are
@@ -131,6 +132,14 @@ Environment variables:
 
   def listing()
     return @options[:listing]
+  end
+
+  def list_tree?()
+    return @options[:list_tree]
+  end
+
+  def list_all_configs?()
+    return @options[:list_all_configs]
   end
 
   def log_config()
@@ -244,22 +253,10 @@ Environment variables:
       :dependencies =>
         ['--list-dependencies', 'list package dependencies, recursively'],
 
-      :dependencies_all_configs =>
-        [
-          '--list-dependencies-all-configs',
-          'list package dependencies, recursively, following all configurations'
-        ],
-
       :variables =>
         [
           '--list-variables',
           'list all variables defined/used by package and its dependencies'
-        ],
-
-      :variables_all_configs =>
-        [
-          '--list-variables-all-configs',
-          'list all variables defined/used by package and its dependencies, following all configurations'
         ],
 
       :remote_packages =>
@@ -272,6 +269,14 @@ Environment variables:
       opts.on(*specification) do
         @options[:listing] = type
       end
+    end
+
+    opts.on('--list-tree', 'for listings, output a tree instead of a list') do
+      @options[:list_tree] = true
+    end
+
+    opts.on('--list-all-configs', 'for listings, follow all configurations') do
+      @options[:list_all_configs] = true
     end
 
     return
@@ -298,7 +303,6 @@ Environment variables:
   end
 
   def set_up_package_configuration_source(opts)
-    @options[:config] = 'default'
     opts.on(
       '-c',
       '--config CFG',

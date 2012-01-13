@@ -10,23 +10,33 @@ class Fig::Package; end
 class Fig::Package::Include
   include Fig::Package::Statement
 
-  attr_reader :package_name, :config_name, :version_name, :overrides
+  attr_reader :descriptor, :overrides
 
   def initialize(descriptor, overrides)
-    @package_name = descriptor.name
-    @config_name = descriptor.config
-    @version_name = descriptor.version
+    @descriptor = descriptor
     @overrides = overrides
   end
 
+  def package_name
+    return @descriptor.name
+  end
+
+  def config_name
+    return @descriptor.config
+  end
+
+  def version_name
+    return @descriptor.version
+  end
+
   def unparse(indent)
-    descriptor = ''
-    descriptor += @package_name if @package_name
-    descriptor += "/#{@version_name}" if @version_name
-    descriptor += ":#{@config_name}" if @config_name
+    text = ''
+    text += package_name() if package_name()
+    text += "/#{version_name()}" if version_name()
+    text += ":#{config_name()}" if config_name()
     @overrides.each do |override|
-      descriptor += override.unparse
+      text += override.unparse
     end
-    return "#{indent}include #{descriptor}"
+    return "#{indent}include #{text}"
   end
 end

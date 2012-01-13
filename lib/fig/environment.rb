@@ -2,6 +2,7 @@ require 'stringio'
 
 require 'fig/backtrace'
 require 'fig/logging'
+require 'fig/package'
 require 'fig/package/command'
 require 'fig/package/include'
 require 'fig/package/path'
@@ -22,63 +23,68 @@ module Fig
       @variables = variables_override || get_environment_variables
       @retrieve_vars = {}
       @packages = {}
-      @applied_configs = {}
       @retriever = retriever
     end
 
     def get_environment_variables
       vars = {}
       ENV.each { |key,value| vars[key]=value }
+
       return vars
     end
 
     # Returns the value of an envirionment variable
     def [](name)
-      @variables[name]
+      return @variables[name]
     end
 
     # Indicates that the values from a particular envrionment variable path
     def add_retrieve(name, path)
       @retrieve_vars[name] = path
+
+      return
     end
 
     def register_package(package)
       name = package.package_name
-      if @packages[name]
+
+      if get_package(name)
         Logging.fatal %Q<There is already a package with the name "#{name}".>
         raise RepositoryError.new
       end
+
       @packages[name] = package
+
+      return
+    end
+
+    def get_package(package_name)
+      return @packages[package_name]
     end
 
     def packages
       return @packages.values
     end
 
-    # Enumerates through all packages, passing them to a block.  Note that
-    # there is no guarantee of the ordering of the packages; consider it
-    # effectively random.
-    def walk_packages(&block)
-      @packages.values.each do |package|
-        yield package
-      end
-    end
-
     def apply_config(package, config_name, backtrace)
-      if (@applied_configs[package.package_name] ||= []).member?(config_name)
+      if package.applied_config_names.member?(config_name)
         return
       end
       new_backtrace = backtrace
 
       config = package[config_name]
       config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
-      @applied_configs[package.package_name] << config_name
+      package.add_applied_config_name(config_name)
+
+      return
     end
 
     def execute_shell(command)
       with_environment do
         yield command.map{|arg| expand_command_line_argument(arg)}
       end
+
+      return
     end
 
     def execute_command(command, args, package)
@@ -90,10 +96,17 @@ module Fig
 
         yield expand_path(argument, package).split(' ')
       end
+
+      return
     end
 
     def find_config_name_in_package(package_name)
-      return @applied_configs.key?(package_name) ? @applied_configs[package_name].first : 'default'
+      package = get_package(package_name)
+      if not package
+        return Package::DEFAULT_CONFIG
+      end
+
+      return package.primary_config_name || Package::DEFAULT_CONFIG
     end
 
     def execute_config(base_package, package_name, config_name, version_name, args, &block)
@@ -110,6 +123,8 @@ module Fig
       else
         raise UserInputError.new(%Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>)
       end
+
+      return
     end
 
     def apply_config_statement(base_package, statement, backtrace)
@@ -125,6 +140,8 @@ module Fig
       else
         fail "Unexpected statement: #{statement}"
       end
+
+      return
     end
 
     def include_config(base_package, package_name, config_name, version_name, overrides, backtrace)
@@ -139,14 +156,22 @@ module Fig
       overrides.each do |override|
         new_backtrace.add_override(override.package_name, override.version_name)
       end
-      package = lookup_package(package_name || base_package.package_name, version_name, new_backtrace)
-      apply_config(package, config_name || 'default', new_backtrace)
+      package = lookup_package(
+        package_name || base_package.package_name, version_name, new_backtrace
+      )
+      apply_config(
+        package, config_name || Package::DEFAULT_CONFIG, new_backtrace
+      )
+
+      return
     end
 
     private
 
     def set_variable(base_package, name, value)
       @variables[name] = expand_and_retrieve_variable_value(base_package, name, value)
+
+      return
     end
 
     def append_variable(base_package, name, value)
@@ -166,6 +191,8 @@ module Fig
       else
         @variables[name] = value
       end
+
+      return
     end
 
     def with_environment
@@ -176,10 +203,12 @@ module Fig
       ensure
         old_env.each { |key,value| ENV[key] = value }
       end
+
+      return
     end
 
     def lookup_package(package_name, version_name, backtrace)
-      package = @packages[package_name]
+      package = get_package(package_name)
       if package.nil?
         if not version_name
           Logging.fatal "No version specified for #{package_name}."
@@ -234,12 +263,14 @@ module Fig
         end
         file = target
       end
+
       return file
     end
 
     def expand_path(path, base_package)
       expanded_path = expand_at_sign_package_references(path, base_package)
       check_for_bad_escape(expanded_path, path)
+
       return expanded_path.gsub(%r< \\ ([\\@]) >x, '\1')
     end
 
@@ -254,6 +285,8 @@ module Fig
         backslashes = $1 || ''
         backslashes + base_package.directory
       end
+
+      return
     end
 
     def expand_command_line_argument(arg)
@@ -273,7 +306,7 @@ module Fig
         >x
       ) do |match|
         backslashes = $1 || ''
-        package = @packages[$2]
+        package = get_package($2)
         if package.nil?
           raise RepositoryError.new("Package not found: #{$1}")
         end
@@ -293,6 +326,8 @@ module Fig
           %Q<Unknown escape "#{$1}" in "#{original}">
         )
       end
+
+      return
     end
 
     def translate_retrieve_variables(base_package, name)
