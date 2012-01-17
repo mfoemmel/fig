@@ -1,11 +1,11 @@
 v0.1.x
 
+  Backwards incompatibilities:
+
   - Now requires at least ruby v1.8.7.
 
-  - Development now requires at least rspec 2.8.
-
-  - Backwards incompatibility: you can no longer run a command without using
-    "--".  Through an accident of implementation, you previously could do
+  - You can no longer run a command without using "--".  Through an accident of
+    implementation, you previously could do
 
         fig echo foo
 
@@ -13,10 +13,18 @@ v0.1.x
 
         fig -- echo foo
 
-  - Backwards incompatibility: you can no longer specify multiple --clean or
-    --list-configs options.
+  - You can no longer specify multiple --clean or --list-configs options.
 
-  - New "--list-dependencies" option.  This will list all dependencies a given
+  - There was partial support for overridding the local location of a package
+    via a "fig.properties" file in the current directory.  A full
+    implementation of this type of thing may come in the future, but for the
+    time being, in the efforts of making the code clean, this is gone.
+
+  - Development now requires at least rspec 2.8.
+
+  New features:
+
+  - "--list-dependencies" option.  This will list all dependencies a given
     package has, recursively.
 
     For example, if you have package A which depends upon packages B and C

@@ -23,14 +23,6 @@ module Fig
       @update = update
       @update_if_missing = update_if_missing
       @parser = Parser.new(@application_config)
-
-      @overrides = {}
-      if File.exist?('fig.properties')
-        File.readlines('fig.properties').each do |line|
-          descriptor, path = line.strip.split('=')
-          @overrides[descriptor] = path
-        end
-      end
     end
 
     def clean(package_name, version_name)
@@ -168,14 +160,7 @@ module Fig
     end
 
     def local_dir_for_package(package_name, version_name)
-      descriptor = "#{package_name}/#{version_name}"
-      dir = @overrides[descriptor]
-      if dir
-        Logging.info "override: #{descriptor}=#{dir}"
-      else
-        dir = File.join(@local_repository_dir, package_name, version_name)
-      end
-      dir
+      return File.join(@local_repository_dir, package_name, version_name)
     end
 
   private
