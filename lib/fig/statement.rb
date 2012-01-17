@@ -1,8 +1,7 @@
 module Fig; end
-class Fig::Package; end
 
 # A statement within a package configuration file (package.fig).
-module Fig::Package::Statement
+module Fig::Statement
   def walk_statements(&block)
     return
   end

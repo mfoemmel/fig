@@ -1,15 +1,15 @@
 require 'fig/package'
 require 'fig/packagedescriptor'
-require 'fig/package/archive'
-require 'fig/package/command'
-require 'fig/package/configuration'
-require 'fig/package/include'
-require 'fig/package/override'
-require 'fig/package/path'
-require 'fig/package/publish'
-require 'fig/package/resource'
-require 'fig/package/retrieve'
-require 'fig/package/set'
+require 'fig/statement/archive'
+require 'fig/statement/command'
+require 'fig/statement/configuration'
+require 'fig/statement/include'
+require 'fig/statement/override'
+require 'fig/statement/path'
+require 'fig/statement/publish'
+require 'fig/statement/resource'
+require 'fig/statement/retrieve'
+require 'fig/statement/set'
 
 module Fig
 
@@ -34,7 +34,7 @@ grammar Fig
   rule archive
     "archive" ws url {
       def to_package_statement
-        Package::Archive.new(url.value.text_value)
+        Statement::Archive.new(url.value.text_value)
       end
     }
   end
@@ -42,7 +42,7 @@ grammar Fig
   rule resource
     "resource" ws url {
       def to_package_statement
-        Package::Resource.new(url.value.text_value)
+        Statement::Resource.new(url.value.text_value)
       end
     }
   end
@@ -50,7 +50,7 @@ grammar Fig
   rule retrieve
     "retrieve" ws var:retrieve_variable "->" path:retrieve_path ws {
       def to_package_statement
-        Package::Retrieve.new(var.text_value, path.text_value)
+        Statement::Retrieve.new(var.text_value, path.text_value)
       end
     }
   end
@@ -66,7 +66,7 @@ grammar Fig
   rule config
     "config" ws config_name ws statements:config_statement* "end" ws {
       def to_package_statement
-        Package::Configuration.new(config_name.text_value, statements.elements.map { |statement| statement.to_config_statement })
+        Statement::Configuration.new(config_name.text_value, statements.elements.map { |statement| statement.to_config_statement })
       end
     }
   end
@@ -78,7 +78,7 @@ grammar Fig
   rule include
     "include" ws descriptor overrides:(override*) {
       def to_config_statement
-        Package::Include.new(
+        Statement::Include.new(
           PackageDescriptor.new(descriptor.text_value.strip),
           overrides.elements.map{ |e| e.to_override }
         )
@@ -89,7 +89,7 @@ grammar Fig
   rule override
     "override" ws package_name "/" version_name ws {
       def to_override
-        return Package::Override.new(package_name.text_value, version_name.text_value)
+        return Statement::Override.new(package_name.text_value, version_name.text_value)
       end
     }
   end
@@ -97,7 +97,7 @@ grammar Fig
   rule path
     ("append" / "path" / "add") ws name:path_name "=" value:path_value ws {
       def to_config_statement
-        Package::Path.new(name.text_value, value.text_value)
+        Statement::Path.new(name.text_value, value.text_value)
       end
     }
   end
@@ -113,7 +113,7 @@ grammar Fig
   rule set
     "set" ws name:set_name "=" value:set_value ws {
       def to_config_statement
-        Package::Set.new(name.text_value, value.text_value)
+        Statement::Set.new(name.text_value, value.text_value)
       end
     }
   end
@@ -129,7 +129,7 @@ grammar Fig
   rule command
     "command" ws string {
       def to_config_statement
-        Package::Command.new(string.value.text_value)
+        Statement::Command.new(string.value.text_value)
       end
     }
   end

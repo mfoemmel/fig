@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fig/environment'
 require 'fig/package'
 require 'fig/packagedescriptor'
-require 'fig/package/configuration'
-require 'fig/package/set'
+require 'fig/statement/configuration'
+require 'fig/statement/set'
 
 DEPENDED_UPON_PACKAGE_NAME = 'depended-upon'
 
@@ -14,7 +14,7 @@ end
 
 def new_example_package(environment, name, extra_statements, variable_value)
   statements = extra_statements +
-      [Fig::Package::Configuration.new('default', [])]
+      [Fig::Statement::Configuration.new('default', [])]
 
   package =
     Fig::Package.new(
@@ -23,7 +23,7 @@ def new_example_package(environment, name, extra_statements, variable_value)
 
   environment.register_package(package)
 
-  set_statement = Fig::Package::Set.new(
+  set_statement = Fig::Statement::Set.new(
     "WHATEVER_#{name.upcase}", variable_value
   )
   environment.apply_config_statement(package, set_statement, nil)
@@ -53,7 +53,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
     |package_name|
 
     extra_statements = [
-      Fig::Package::Include.new(
+      Fig::Statement::Include.new(
         Fig::PackageDescriptor.new(
           "#{DEPENDED_UPON_PACKAGE_NAME}/#{depended_upon_package_version}"
         ),
@@ -68,9 +68,9 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   environment.register_package(
     Fig::Package.new(
       'has_command', 'version', 'directory',
-      [Fig::Package::Configuration.new(
+      [Fig::Statement::Configuration.new(
         'default',
-        [Fig::Package::Command.new('echo foo')]
+        [Fig::Statement::Command.new('echo foo')]
       )]
     )
   )

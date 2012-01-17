@@ -32,12 +32,12 @@ module Fig
     def find_multiple_command_statements(package)
       command_processed = false
       package.walk_statements do |statement|
-        if statement.is_a?(Package::Command)
+        if statement.is_a?(Statement::Command)
           if command_processed == true
             raise UserInputError.new("Multiple command statements cannot be processed.")
           end
           command_processed = true
-        elsif statement.is_a?(Package::Configuration)
+        elsif statement.is_a?(Statement::Configuration)
           command_processed = false
         end
       end

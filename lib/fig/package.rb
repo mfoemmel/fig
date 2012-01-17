@@ -1,9 +1,9 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/archive'
-require 'fig/package/configuration'
-require 'fig/package/resource'
-require 'fig/package/retrieve'
+require 'fig/statement/archive'
+require 'fig/statement/configuration'
+require 'fig/statement/resource'
+require 'fig/statement/retrieve'
 
 module Fig; end
 
@@ -29,7 +29,7 @@ class Fig::Package
 
   def [](config_name)
     @statements.each do |stmt|
-      return stmt if stmt.is_a?(Configuration) && stmt.name == config_name
+      return stmt if stmt.is_a?(Fig::Statement::Configuration) && stmt.name == config_name
     end
 
     message =
@@ -51,7 +51,7 @@ class Fig::Package
   end
 
   def configs
-    return @statements.select { |statement| statement.is_a?(Configuration) }
+    return @statements.select { |statement| statement.is_a?(Fig::Statement::Configuration) }
   end
 
   def config_names
@@ -64,18 +64,18 @@ class Fig::Package
     statements.each do
       |statement|
 
-      retrieves[statement.var] = statement.path if statement.is_a?(Retrieve)
+      retrieves[statement.var] = statement.path if statement.is_a?(Fig::Statement::Retrieve)
     end
 
     return retrieves
   end
 
   def archive_urls
-    return @statements.select{|s| s.is_a?(Archive)}.map{|s| s.url}
+    return @statements.select{|s| s.is_a?(Fig::Statement::Archive)}.map{|s| s.url}
   end
 
   def resource_urls
-    return @statements.select{|s| s.is_a?(Resource)}.map{|s|s.url}
+    return @statements.select{|s| s.is_a?(Fig::Statement::Resource)}.map{|s|s.url}
   end
 
   def applied_config_names()
@@ -97,7 +97,7 @@ class Fig::Package
     self[config_name].walk_statements do
       |statement|
 
-      if statement.is_a?(Include)
+      if statement.is_a?(Fig::Statement::Include)
         descriptors << statement.descriptor
       end
     end

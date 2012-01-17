@@ -1,15 +1,14 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/statement'
+require 'fig/statement'
 
 module Fig; end
-class Fig::Package; end
 
 # Specifies a file (possibly via a URL) that is part of the current package.
 #
 # Differs from an Archive in that the contents will not be extracted.
-class Fig::Package::Resource
-  include Fig::Package::Statement
+class Fig::Statement::Resource
+  include Fig::Statement
 
   attr_reader :url
 

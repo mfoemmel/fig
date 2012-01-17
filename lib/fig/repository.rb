@@ -1,9 +1,9 @@
 require 'fig/logging'
 require 'fig/notfounderror'
-require 'fig/package/archive'
-require 'fig/package/resource'
 require 'fig/parser'
 require 'fig/repositoryerror'
+require 'fig/statement/archive'
+require 'fig/statement/resource'
 require 'fig/urlaccesserror'
 
 module Fig
@@ -62,10 +62,10 @@ module Fig
       @operating_system.clear_directory(local_dir)
       fig_file = File.join(temp_dir, '.fig')
       content = bundle_resources(package_statements).map do |statement|
-        if statement.is_a?(Package::Publish)
+        if statement.is_a?(Statement::Publish)
           nil
-        elsif statement.is_a?(Package::Archive) || statement.is_a?(Package::Resource)
-          if statement.is_a?(Package::Resource) && !Repository.is_url?(statement.url)
+        elsif statement.is_a?(Statement::Archive) || statement.is_a?(Statement::Resource)
+          if statement.is_a?(Statement::Resource) && !Repository.is_url?(statement.url)
             archive_name = statement.url
             archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
           else
@@ -80,7 +80,7 @@ module Fig
           end
           @operating_system.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
           @operating_system.copy(archive_local, local_dir + '/' + archive_name)
-          if statement.is_a?(Package::Archive)
+          if statement.is_a?(Statement::Archive)
             @operating_system.unpack_archive(local_dir, archive_name)
           end
           statement.class.new(archive_name).unparse('')
@@ -98,7 +98,7 @@ module Fig
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
-        if statement.is_a?(Package::Resource) && !Repository.is_url?(statement.url)
+        if statement.is_a?(Statement::Resource) && !Repository.is_url?(statement.url)
           resources << statement.url
           true
         else
@@ -109,7 +109,7 @@ module Fig
         resources = expand_globs_from(resources)
         file = 'resources.tar.gz'
         @operating_system.create_archive(file, resources)
-        new_package_statements.unshift(Package::Archive.new(file))
+        new_package_statements.unshift(Statement::Archive.new(file))
         at_exit { File.delete(file) }
       end
       new_package_statements

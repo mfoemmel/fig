@@ -3,11 +3,11 @@ require 'stringio'
 require 'fig/backtrace'
 require 'fig/logging'
 require 'fig/package'
-require 'fig/package/command'
-require 'fig/package/include'
-require 'fig/package/path'
-require 'fig/package/set'
 require 'fig/repositoryerror'
+require 'fig/statement/command'
+require 'fig/statement/include'
+require 'fig/statement/path'
+require 'fig/statement/set'
 require 'fig/userinputerror'
 
 module Fig
@@ -128,13 +128,13 @@ module Fig
 
     def apply_config_statement(base_package, statement, backtrace)
       case statement
-      when Package::Path
+      when Statement::Path
         append_variable(base_package, statement.name, statement.value)
-      when Package::Set
+      when Statement::Set
         set_variable(base_package, statement.name, statement.value)
-      when Package::Include
+      when Statement::Include
         include_config(base_package, statement.package_name, statement.config_name, statement.version_name, statement.overrides, backtrace)
-      when Package::Command
+      when Statement::Command
         # ignore
       else
         fail "Unexpected statement: #{statement}"

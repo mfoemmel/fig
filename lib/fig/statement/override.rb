@@ -1,9 +1,8 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/statement'
+require 'fig/statement'
 
 module Fig; end
-class Fig::Package; end
 
 # Overrides one package version dependency with another in an include
 # statement.
@@ -12,8 +11,8 @@ class Fig::Package; end
 #
 # indicates that, regardless of which version of somedependency the blah
 # package says it needs, the blah package will actually use v3.2.6.
-class Fig::Package::Override
-  include Fig::Package::Statement
+class Fig::Statement::Override
+  include Fig::Statement
 
   attr_reader :package_name, :version_name
 

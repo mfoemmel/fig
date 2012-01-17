@@ -1,6 +1,6 @@
 require 'fileutils'
 # Must specify absolute path of ::Archive when using
-# this module to avoid conflicts with Fig::Package::Archive
+# this module to avoid conflicts with Fig::Statement::Archive
 require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
 require 'net/http'
 require 'net/ssh'

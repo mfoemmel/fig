@@ -1,14 +1,13 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/statement'
+require 'fig/statement'
 
 module Fig; end
-class Fig::Package; end
 
 # Dual role: "include :configname" incorporates one configuration into another;
 # "include package[/version]" declares a dependency upon another package.
-class Fig::Package::Include
-  include Fig::Package::Statement
+class Fig::Statement::Include
+  include Fig::Statement
 
   attr_reader :descriptor, :overrides
 

@@ -1,11 +1,11 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/applicationconfiguration'
-require 'fig/package/configuration'
-require 'fig/package/path'
-require 'fig/package/publish'
-require 'fig/package/resource'
 require 'fig/repository'
+require 'fig/statement/configuration'
+require 'fig/statement/path'
+require 'fig/statement/publish'
+require 'fig/statement/resource'
 
 def create_local_repository()
   application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_DIR)
@@ -19,10 +19,10 @@ def create_local_repository()
 end
 
 def generate_package_statements
-    resource_statement      = Fig::Package::Resource.new('fullpath')
-    path_statement          = Fig::Package::Path.new('FOO', 'bar')
-    configuration_statement = Fig::Package::Configuration.new('default', [path_statement])
-    publish_statement       = Fig::Package::Publish.new('default', 'default')
+    resource_statement      = Fig::Statement::Resource.new('fullpath')
+    path_statement          = Fig::Statement::Path.new('FOO', 'bar')
+    configuration_statement = Fig::Statement::Configuration.new('default', [path_statement])
+    publish_statement       = Fig::Statement::Publish.new('default', 'default')
     package_statements = [resource_statement] + [configuration_statement]
     package_statements << publish_statement
 

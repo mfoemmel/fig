@@ -1,13 +1,12 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/statement'
+require 'fig/statement'
 
 module Fig; end
-class Fig::Package; end
 
 # A statement that sets the value of an environment variable.
-class Fig::Package::Set
-  include Fig::Package::Statement
+class Fig::Statement::Set
+  include Fig::Statement
 
   attr_reader :name, :value
 

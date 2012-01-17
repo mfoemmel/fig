@@ -1,14 +1,13 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/statement'
+require 'fig/statement'
 
 module Fig; end
-class Fig::Package; end
 
 # Artificial statement (it's not in the grammar) used to handle default
 # publishing.
-class Fig::Package::Publish
-  include Fig::Package::Statement
+class Fig::Statement::Publish
+  include Fig::Statement
 
   attr_reader :local_name, :remote_name
 

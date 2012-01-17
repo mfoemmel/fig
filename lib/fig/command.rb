@@ -5,14 +5,14 @@ require 'log4r'
 require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
-require 'fig/options'
 require 'fig/operatingsystem'
+require 'fig/options'
 require 'fig/package'
-require 'fig/package/configuration'
-require 'fig/package/publish'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/retriever'
+require 'fig/statement/configuration'
+require 'fig/statement/publish'
 require 'fig/userinputerror'
 require 'fig/windows'
 
@@ -304,11 +304,11 @@ class Fig::Command
         @options.resources() +
         @options.archives() +
         [
-          Fig::Package::Configuration.new(
+          Fig::Statement::Configuration.new(
             'default', @options.non_command_package_statements()
           )
         ]
-      publish_statements << Fig::Package::Publish.new('default','default')
+      publish_statements << Fig::Statement::Publish.new('default','default')
     else
       load_package_file()
       if not @package.statements.empty?

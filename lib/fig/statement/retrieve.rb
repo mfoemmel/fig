@@ -1,13 +1,12 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/statement'
+require 'fig/statement'
 
 module Fig; end
-class Fig::Package; end
 
 # Specifies the destination to put a dependency into.
-class Fig::Package::Retrieve
-  include Fig::Package::Statement
+class Fig::Statement::Retrieve
+  include Fig::Statement
 
   attr_reader :var, :path
 

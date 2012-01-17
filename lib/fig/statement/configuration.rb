@@ -1,14 +1,13 @@
 require 'fig/logging'
 require 'fig/packageerror'
-require 'fig/package/command'
-require 'fig/package/statement'
+require 'fig/statement'
+require 'fig/statement/command'
 
 module Fig; end
-class Fig::Package; end
 
 # A grouping of statements within a configuration.  May not be nested.
-class Fig::Package::Configuration
-  include Fig::Package::Statement
+class Fig::Statement::Configuration
+  include Fig::Statement
 
   attr_reader :name, :statements
 
@@ -23,7 +22,7 @@ class Fig::Package::Configuration
 
   def command
     return statements.find do
-      |statement| statement.is_a?(Fig::Package::Command)
+      |statement| statement.is_a?(Fig::Statement::Command)
     end
   end
 

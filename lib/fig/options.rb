@@ -2,11 +2,11 @@ require 'optparse'
 
 require 'fig/package'
 require 'fig/packagedescriptor'
-require 'fig/package/archive'
-require 'fig/package/include'
-require 'fig/package/path'
-require 'fig/package/resource'
-require 'fig/package/set'
+require 'fig/statement/archive'
+require 'fig/statement/include'
+require 'fig/statement/path'
+require 'fig/statement/resource'
+require 'fig/statement/set'
 
 module Fig; end
 
@@ -336,7 +336,7 @@ Environment variables:
       'append (actually, prepend) VAL to environment var VAR, delimited by separator'
     ) do |var_val|
       var, val = var_val.split('=')
-      @options[:non_command_package_statements] << Fig::Package::Path.new(var, val)
+      @options[:non_command_package_statements] << Fig::Statement::Path.new(var, val)
     end
 
     opts.on(
@@ -345,14 +345,14 @@ Environment variables:
       'include PKG (with any variable prepends) in environment'
     ) do |descriptor|
       @options[:non_command_package_statements] <<
-        Fig::Package::Include.new(Fig::PackageDescriptor.new(descriptor), {})
+        Fig::Statement::Include.new(Fig::PackageDescriptor.new(descriptor), {})
     end
 
     opts.on(
       '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
     ) do |var_val|
       var, val = var_val.split('=')
-      @options[:non_command_package_statements] << Fig::Package::Set.new(var, val)
+      @options[:non_command_package_statements] << Fig::Statement::Set.new(var, val)
     end
 
     @options[:archives] = []
@@ -360,7 +360,7 @@ Environment variables:
       '--archive FULLPATH',
       'include FULLPATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] << Fig::Package::Archive.new(path)
+      @options[:archives] << Fig::Statement::Archive.new(path)
     end
 
     @options[:resources] =[]
@@ -368,7 +368,7 @@ Environment variables:
       '--resource FULLPATH',
       'include FULLPATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] << Fig::Package::Resource.new(path)
+      @options[:resources] << Fig::Statement::Resource.new(path)
     end
 
     return
