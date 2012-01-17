@@ -26,11 +26,24 @@ class Fig::Statement::Configuration
     end
   end
 
+  # Block will receive a Statement.
   def walk_statements(&block)
     @statements.each do |statement|
       yield statement
       statement.walk_statements &block
     end
+  end
+
+  # Block will receive a Statement.
+  def walk_statements_following_package_dependencies(repository, package, &block)
+    @statements.each do |statement|
+      yield statement
+      statement.walk_statements_following_package_dependencies(
+        repository, package, &block
+      )
+    end
+
+    return
   end
 
   def unparse(indent)

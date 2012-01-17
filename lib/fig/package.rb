@@ -105,10 +105,23 @@ class Fig::Package
     return descriptors
   end
 
+  # Block will receive a Statement.
   def walk_statements(&block)
     @statements.each do |statement|
       yield statement
       statement.walk_statements &block
+    end
+
+    return
+  end
+
+  # Block will receive a Statement.
+  def walk_statements_following_package_dependencies(repository, &block)
+    @statements.each do |statement|
+      yield statement
+      statement.walk_statements_following_package_dependencies(
+        repository, self, &block
+      )
     end
 
     return

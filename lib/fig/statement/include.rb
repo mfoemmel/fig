@@ -28,6 +28,29 @@ class Fig::Statement::Include
     return @descriptor.version
   end
 
+  # Block will receive a Statement.
+  def walk_statements_following_package_dependencies(
+    repository, package, &block
+  )
+    referenced_package = nil
+    if package_name()
+      referenced_package = repository.get_package(package_name, version_name)
+    else
+      referenced_package = package
+    end
+
+    configuration = referenced_package[
+      config_name() || Fig::Package::DEFAULT_CONFIG
+    ]
+
+    yield configuration
+    configuration.walk_statements_following_package_dependencies(
+      repository, referenced_package, &block
+    )
+
+    return
+  end
+
   def unparse(indent)
     text = ''
     text += package_name() if package_name()
