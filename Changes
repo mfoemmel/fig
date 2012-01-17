@@ -2,6 +2,8 @@ v0.1.x
 
   - Now requires at least ruby v1.8.7.
 
+  - Development now requires at least rspec 2.8.
+
   - Backwards incompatibility: you can no longer run a command without using
     "--".  Through an accident of implementation, you previously could do
 
