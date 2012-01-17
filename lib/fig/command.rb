@@ -284,7 +284,9 @@ class Fig::Command
     else
       # TODO: complain if config file was specified on the command-line.
       @package =
-        @repository.read_local_package(@descriptor.name, @descriptor.version)
+        @repository.load_package(
+          @descriptor.name, @descriptor.version, :disable_updating
+        )
 
       register_package_with_environment()
     end

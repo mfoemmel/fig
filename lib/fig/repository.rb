@@ -33,12 +33,6 @@ module Fig
       @parser = Parser.new(@application_config)
     end
 
-    def clean(package_name, version_name)
-      dir = File.join(@local_repository_dir, package_name)
-      dir = File.join(dir, version_name) if version_name
-      FileUtils.rm_rf(dir)
-    end
-
     def list_packages
       results = []
       if File.exist?(@local_repository_dir)
@@ -55,7 +49,15 @@ module Fig
       @operating_system.download_list(@remote_repository_url)
     end
 
-    def publish_package(package_statements, package_name, version_name, local_only)
+    def clean(package_name, version_name)
+      dir = File.join(@local_repository_dir, package_name)
+      dir = File.join(dir, version_name) if version_name
+      FileUtils.rm_rf(dir)
+    end
+
+    def publish_package(
+      package_statements, package_name, version_name, local_only
+    )
       temp_dir = temp_dir_for_package(package_name, version_name)
       @operating_system.clear_directory(temp_dir)
       local_dir = local_dir_for_package(package_name, version_name)
@@ -77,11 +79,13 @@ module Fig
       FileUtils.rm_rf(temp_dir)
     end
 
-    def load_package(package_name, version_name)
+    def load_package(package_name, version_name, disable_updating = false)
       Logging.debug "Considering #{package_name}/#{version_name}."
-      if @update || (@update_if_missing && package_missing?(package_name, version_name))
+
+      if should_update?(package_name, version_name, disable_updating)
         update_package(package_name, version_name)
       end
+
       read_local_package(package_name, version_name)
     end
 
@@ -89,12 +93,21 @@ module Fig
       return @update || @update_if_missing
     end
 
+    private
+
+    def should_update?(package_name, version_name, disable_updating)
+      return false if disable_updating
+
+      return true if @update
+
+      return @update_if_missing &&
+        package_missing?(package_name, version_name)
+    end
+
     def read_local_package(package_name, version_name)
       dir = local_dir_for_package(package_name, version_name)
       read_package_from_directory(dir, package_name, version_name)
     end
-
-    private
 
     def bundle_resources(package_statements)
       resources = []
@@ -190,7 +203,9 @@ module Fig
         raise RepositoryError.new
       end
       content = File.read(file_name)
-      return @parser.parse_package(package_name, version_name, File.dirname(file_name), content)
+      return @parser.parse_package(
+        package_name, version_name, File.dirname(file_name), content
+      )
     end
 
     def delete_local_package(package_name, version_name)
