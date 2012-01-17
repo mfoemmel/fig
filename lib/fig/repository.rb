@@ -79,7 +79,7 @@ module Fig
       FileUtils.rm_rf(temp_dir)
     end
 
-    def load_package(package_name, version_name, disable_updating = false)
+    def get_package(package_name, version_name, disable_updating = false)
       Logging.debug "Considering #{package_name}/#{version_name}."
 
       if should_update?(package_name, version_name, disable_updating)

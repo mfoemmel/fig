@@ -278,13 +278,13 @@ class Fig::Command
     parse_package_config_file(config_raw_text)
   end
 
-  def load_package()
+  def get_package()
     if @descriptor.nil?
       load_package_file()
     else
       # TODO: complain if config file was specified on the command-line.
       @package =
-        @repository.load_package(
+        @repository.get_package(
           @descriptor.name, @descriptor.version, :disable_updating
         )
 
@@ -370,7 +370,7 @@ class Fig::Command
       return publish()
     end
 
-    load_package()
+    get_package()
 
     if @options.listing()
       handle_post_parse_list_options()
