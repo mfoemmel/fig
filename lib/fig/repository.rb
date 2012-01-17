@@ -14,7 +14,15 @@ module Fig
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
     end
 
-    def initialize(os, local_repository_dir, remote_repository_url, application_config, remote_repository_user=nil, update=false, update_if_missing=true)
+    def initialize(
+      os,
+      local_repository_dir,
+      remote_repository_url,
+      application_config,
+      remote_repository_user  = nil,
+      update                  = false,
+      update_if_missing       = true
+    )
       @operating_system = os
       @local_repository_dir = local_repository_dir
       @remote_repository_url = remote_repository_url
@@ -87,6 +95,25 @@ module Fig
       FileUtils.rm_rf(temp_dir)
     end
 
+    def load_package(package_name, version_name)
+      Logging.debug "Considering #{package_name}/#{version_name}."
+      if @update || (@update_if_missing && package_missing?(package_name, version_name))
+        update_package(package_name, version_name)
+      end
+      read_local_package(package_name, version_name)
+    end
+
+    def updating?
+      return @update || @update_if_missing
+    end
+
+    def read_local_package(package_name, version_name)
+      dir = local_dir_for_package(package_name, version_name)
+      read_package_from_directory(dir, package_name, version_name)
+    end
+
+    private
+
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
@@ -106,64 +133,6 @@ module Fig
       end
       new_package_statements
     end
-
-    def load_package(package_name, version_name)
-      Logging.debug "Considering #{package_name}/#{version_name}."
-      if @update || (@update_if_missing && package_missing?(package_name, version_name))
-        update_package(package_name, version_name)
-      end
-      read_local_package(package_name, version_name)
-    end
-
-    def updating?
-      return @update || @update_if_missing
-    end
-
-    def update_package(package_name, version_name)
-      remote_fig_file = remote_fig_file_for_package(package_name, version_name)
-      local_fig_file = local_fig_file_for_package(package_name, version_name)
-      begin
-        if @operating_system.download(remote_fig_file, local_fig_file)
-          install_package(package_name, version_name)
-        end
-      rescue NotFoundError
-        Logging.fatal "Package not found in remote repository: #{package_name}/#{version_name}"
-        delete_local_package(package_name, version_name)
-        raise RepositoryError.new
-      end
-    end
-
-    def read_local_package(package_name, version_name)
-      dir = local_dir_for_package(package_name, version_name)
-      read_package_from_directory(dir, package_name, version_name)
-    end
-
-    def read_package_from_directory(dir, package_name, version_name)
-      file = File.join(dir, '.fig')
-      if not File.exist?(file)
-        file = File.join(dir, 'package.fig')
-      end
-      if not File.exist?(file)
-        Logging.fatal %Q<Fig file not found for package "#{package_name || '<unnamed>'}": #{file}>
-        raise RepositoryError.new
-      end
-      read_package_from_file(file, package_name, version_name)
-    end
-
-    def read_package_from_file(file_name, package_name, version_name)
-      if not File.exist?(file_name)
-        Logging.fatal "Package not found: #{package_name}/#{version_name}"
-        raise RepositoryError.new
-      end
-      content = File.read(file_name)
-      return @parser.parse_package(package_name, version_name, File.dirname(file_name), content)
-    end
-
-    def local_dir_for_package(package_name, version_name)
-      return File.join(@local_repository_dir, package_name, version_name)
-    end
-
-  private
 
     def install_package(package_name, version_name)
       temp_dir = nil
@@ -200,11 +169,46 @@ module Fig
       end
     end
 
+    def update_package(package_name, version_name)
+      remote_fig_file = remote_fig_file_for_package(package_name, version_name)
+      local_fig_file = local_fig_file_for_package(package_name, version_name)
+      begin
+        if @operating_system.download(remote_fig_file, local_fig_file)
+          install_package(package_name, version_name)
+        end
+      rescue NotFoundError
+        Logging.fatal "Package not found in remote repository: #{package_name}/#{version_name}"
+        delete_local_package(package_name, version_name)
+        raise RepositoryError.new
+      end
+    end
+
     # 'resources' is an Array of filenames: ['tmp/foo/file1', 'tmp/foo/*.jar']
     def expand_globs_from(resources)
       expanded_files = []
       resources.each {|f| expanded_files.concat(Dir.glob(f))}
       expanded_files
+    end
+
+    def read_package_from_directory(dir, package_name, version_name)
+      file = File.join(dir, '.fig')
+      if not File.exist?(file)
+        file = File.join(dir, 'package.fig')
+      end
+      if not File.exist?(file)
+        Logging.fatal %Q<Fig file not found for package "#{package_name || '<unnamed>'}": #{file}>
+        raise RepositoryError.new
+      end
+      read_package_from_file(file, package_name, version_name)
+    end
+
+    def read_package_from_file(file_name, package_name, version_name)
+      if not File.exist?(file_name)
+        Logging.fatal "Package not found: #{package_name}/#{version_name}"
+        raise RepositoryError.new
+      end
+      content = File.read(file_name)
+      return @parser.parse_package(package_name, version_name, File.dirname(file_name), content)
     end
 
     def delete_local_package(package_name, version_name)
@@ -226,6 +230,10 @@ module Fig
 
     def remote_dir_for_package(package_name, version_name)
       "#{@remote_repository_url}/#{package_name}/#{version_name}"
+    end
+
+    def local_dir_for_package(package_name, version_name)
+      return File.join(@local_repository_dir, package_name, version_name)
     end
 
     def temp_dir_for_package(package_name, version_name)
