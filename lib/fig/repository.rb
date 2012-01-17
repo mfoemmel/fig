@@ -1,5 +1,6 @@
 require 'fig/logging'
 require 'fig/notfounderror'
+require 'fig/packagecache'
 require 'fig/parser'
 require 'fig/repositoryerror'
 require 'fig/statement/archive'
@@ -31,6 +32,7 @@ module Fig
       @update_if_missing = update_if_missing
 
       @parser = Parser.new(@application_config)
+      @packages = PackageCache.new()
     end
 
     def list_packages
@@ -49,10 +51,28 @@ module Fig
       @operating_system.download_list(@remote_repository_url)
     end
 
+    def get_package(package_name, version_name, disable_updating = false)
+      package = @packages.get_package(package_name, version_name)
+      return package if package
+
+      Logging.debug "Considering #{package_name}/#{version_name}."
+
+      if should_update?(package_name, version_name, disable_updating)
+        update_package(package_name, version_name)
+      end
+
+      return read_local_package(package_name, version_name)
+    end
+
     def clean(package_name, version_name)
+      @packages.remove_package(package_name, version_name)
+
       dir = File.join(@local_repository_dir, package_name)
       dir = File.join(dir, version_name) if version_name
+
       FileUtils.rm_rf(dir)
+
+      return
     end
 
     def publish_package(
@@ -79,16 +99,6 @@ module Fig
       FileUtils.rm_rf(temp_dir)
     end
 
-    def get_package(package_name, version_name, disable_updating = false)
-      Logging.debug "Considering #{package_name}/#{version_name}."
-
-      if should_update?(package_name, version_name, disable_updating)
-        update_package(package_name, version_name)
-      end
-
-      read_local_package(package_name, version_name)
-    end
-
     def updating?
       return @update || @update_if_missing
     end
@@ -106,7 +116,7 @@ module Fig
 
     def read_local_package(package_name, version_name)
       dir = local_dir_for_package(package_name, version_name)
-      read_package_from_directory(dir, package_name, version_name)
+      return read_package_from_directory(dir, package_name, version_name)
     end
 
     def bundle_resources(package_statements)
@@ -194,7 +204,8 @@ module Fig
         Logging.fatal %Q<Fig file not found for package "#{package_name || '<unnamed>'}": #{file}>
         raise RepositoryError.new
       end
-      read_package_from_file(file, package_name, version_name)
+
+      return read_package_from_file(file, package_name, version_name)
     end
 
     def read_package_from_file(file_name, package_name, version_name)
@@ -203,9 +214,14 @@ module Fig
         raise RepositoryError.new
       end
       content = File.read(file_name)
-      return @parser.parse_package(
+
+      package = @parser.parse_package(
         package_name, version_name, File.dirname(file_name), content
       )
+
+      @packages.add_package(package)
+
+      return package
     end
 
     def delete_local_package(package_name, version_name)
