@@ -6,7 +6,7 @@ require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/options'
-require 'fig/os'
+require 'fig/operatingsystem'
 require 'fig/package'
 require 'fig/package/configuration'
 require 'fig/package/publish'
@@ -51,9 +51,9 @@ class Fig::Command
       @options.log_level()
     )
 
-    @os = Fig::OS.new(@options.login?)
+    @operating_system = Fig::OperatingSystem.new(@options.login?)
     @repository = Fig::Repository.new(
-      @os,
+      @operating_system,
       File.expand_path(File.join(@options.home(), 'repos')),
       remote_url,
       @configuration,
@@ -67,7 +67,7 @@ class Fig::Command
     # Check to see if this is still happening with the new layers of abstraction.
     at_exit { @retriever.save }
 
-    @environment = Fig::Environment.new(@os, @repository, nil, @retriever)
+    @environment = Fig::Environment.new(@repository, nil, @retriever)
 
     @options.non_command_package_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
@@ -376,7 +376,7 @@ class Fig::Command
       puts @environment[@options.get()]
     elsif @options.shell_command
       @environment.execute_shell(@options.shell_command) do
-        |command| @os.shell_exec command
+        |command| @operating_system.shell_exec command
       end
     elsif @descriptor
       @environment.include_config(
@@ -384,7 +384,7 @@ class Fig::Command
       )
       @environment.execute_config(
         @package, @descriptor.name, @descriptor.config, nil, []
-      ) { |cmd| @os.shell_exec cmd }
+      ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?
       $stderr.puts "Nothing to do.\n"
       $stderr.puts Fig::Options::USAGE

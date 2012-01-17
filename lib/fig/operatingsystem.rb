@@ -19,7 +19,7 @@ require 'fig/notfounderror'
 module Fig
   # Does things requiring real O/S interaction, primarilly taking care of file
   # transfers and running external commands.
-  class OS
+  class OperatingSystem
     def initialize(login)
       @login = login
       @username = ENV['FIG_USERNAME']
@@ -294,7 +294,7 @@ module Fig
 
     # Expects files_to_archive as an Array of filenames.
     def create_archive(archive_name, files_to_archive)
-      if OS.java?
+      if OperatingSystem.java?
         `tar czvf #{archive_name} #{files_to_archive.join(' ')}`
       else
         # TODO: Need to verify files_to_archive exists.
@@ -320,7 +320,7 @@ module Fig
     # .zip
     def unpack_archive(dir, file)
       Dir.chdir(dir) do
-        if OS.java?
+        if OperatingSystem.java?
           `tar xzvf #{file}`
         else
           ::Archive.read_open_filename(file) do |ar|
@@ -345,7 +345,7 @@ module Fig
     end
 
     def shell_exec(cmd)
-      if OS.windows?
+      if OperatingSystem.windows?
         Windows.shell_exec_windows(cmd)
       else
         shell_exec_unix(cmd)

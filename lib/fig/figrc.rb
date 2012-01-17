@@ -2,7 +2,7 @@ require 'json'
 
 require 'fig/applicationconfiguration'
 require 'fig/configfileerror'
-require 'fig/os'
+require 'fig/operatingsystem'
 
 REPOSITORY_CONFIGURATION = '_meta/figrc'
 
@@ -64,7 +64,7 @@ module Fig
       repo_figrc_path =
         File.expand_path(File.join(fig_home, REPOSITORY_CONFIGURATION))
 
-      os = OS.new(login)
+      os = OperatingSystem.new(login)
 
       repo_config_exists = nil
       begin

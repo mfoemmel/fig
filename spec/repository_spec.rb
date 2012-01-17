@@ -9,7 +9,12 @@ require 'fig/repository'
 
 def create_local_repository()
   application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_DIR)
-  repository = Fig::Repository.new(Fig::OS.new(nil), FIG_SPEC_BASE_DIRECTORY, "file://#{FIG_REMOTE_DIR}", application_config)
+  repository = Fig::Repository.new(
+    Fig::OperatingSystem.new(nil),
+    FIG_SPEC_BASE_DIRECTORY,
+    "file://#{FIG_REMOTE_DIR}",
+    application_config
+  )
   return repository
 end
 

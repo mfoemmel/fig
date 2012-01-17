@@ -3,7 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fig/windows'
 
 # Only run on Windows...
-if Fig::OS.windows?
+if Fig::OperatingSystem.windows?
   describe 'Fig on Windows' do
     it 'batch script should exist' do
       Fig::Windows.with_generated_batch_script(['echo', 'Hello World']) do |filename|

@@ -17,8 +17,7 @@ module Fig
   class Environment
     DEFAULT_VERSION_NAME = 'current'
 
-    def initialize(os, repository, variables_override, retriever)
-      @os = os
+    def initialize(repository, variables_override, retriever)
       @repository = repository
       @variables = variables_override || get_environment_variables
       @retrieve_vars = {}

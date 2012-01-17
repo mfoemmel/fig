@@ -35,7 +35,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   retriever_double = double('retriever')
   retriever_double.stub(:with_package_config)
   environment =
-    Fig::Environment.new(nil, nil, {'FOO' => 'bar'}, retriever_double)
+    Fig::Environment.new(nil, {'FOO' => 'bar'}, retriever_double)
 
   if retrieve_vars
     retrieve_vars.each do |name, path|

@@ -15,14 +15,14 @@ require 'fig/command'
 require 'fig/logging'
 
 class Popen
-  if Fig::OS.windows?
+  if Fig::OperatingSystem.windows?
     require 'win32/open3'
     def self.popen(*cmd)
       Open3.popen3(*cmd) { |stdin,stdout,stderr|
         yield stdin, stdout, stderr
       }
     end
-  elsif Fig::OS.java?
+  elsif Fig::OperatingSystem.java?
     require 'open3'
     def self.popen(*cmd)
       Open3.popen3(*cmd) { |stdin,stdout,stderr|
