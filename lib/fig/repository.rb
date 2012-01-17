@@ -27,9 +27,9 @@ module Fig
       @local_repository_dir = local_repository_dir
       @remote_repository_url = remote_repository_url
       @remote_repository_user = remote_repository_user
-      @application_config = application_config
       @update = update
       @update_if_missing = update_if_missing
+
       @parser = Parser.new(@application_config)
     end
 
@@ -61,36 +61,18 @@ module Fig
       local_dir = local_dir_for_package(package_name, version_name)
       @operating_system.clear_directory(local_dir)
       fig_file = File.join(temp_dir, '.fig')
-      content = bundle_resources(package_statements).map do |statement|
-        if statement.is_a?(Statement::Publish)
-          nil
-        elsif statement.is_a?(Statement::Archive) || statement.is_a?(Statement::Resource)
-          if statement.is_a?(Statement::Resource) && !Repository.is_url?(statement.url)
-            archive_name = statement.url
-            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
-          else
-            archive_name = statement.url.split('/').last
-            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
-          end
-          if Repository.is_url?(statement.url)
-            archive_local = File.join(temp_dir, archive_name)
-            @operating_system.download(statement.url, archive_local)
-          else
-            archive_local = statement.url
-          end
-          @operating_system.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
-          @operating_system.copy(archive_local, local_dir + '/' + archive_name)
-          if statement.is_a?(Statement::Archive)
-            @operating_system.unpack_archive(local_dir, archive_name)
-          end
-          statement.class.new(archive_name).unparse('')
-        else
-          statement.unparse('')
-        end
-      end.select {|s|not s.nil?}
+      content = derive_package_content(
+        package_statements, package_name, version_name, local_dir, local_only
+      )
       @operating_system.write(fig_file, content.join("\n").strip)
-      @operating_system.upload(fig_file, remote_fig_file_for_package(package_name, version_name), @remote_repository_user) unless local_only
-      @operating_system.copy(fig_file, local_fig_file_for_package(package_name, version_name))
+      @operating_system.upload(
+        fig_file,
+        remote_fig_file_for_package(package_name, version_name),
+        @remote_repository_user
+      ) unless local_only
+      @operating_system.copy(
+        fig_file, local_fig_file_for_package(package_name, version_name)
+      )
 
       FileUtils.rm_rf(temp_dir)
     end
@@ -242,6 +224,38 @@ module Fig
 
     def package_missing?(package_name, version_name)
       not File.exist?(local_fig_file_for_package(package_name, version_name))
+    end
+
+    def derive_package_content(
+      package_statements, package_name, version_name, local_dir, local_only
+    )
+      return bundle_resources(package_statements).map do |statement|
+        if statement.is_a?(Statement::Publish)
+          nil
+        elsif statement.is_a?(Statement::Archive) || statement.is_a?(Statement::Resource)
+          if statement.is_a?(Statement::Resource) && !Repository.is_url?(statement.url)
+            archive_name = statement.url
+            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
+          else
+            archive_name = statement.url.split('/').last
+            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
+          end
+          if Repository.is_url?(statement.url)
+            archive_local = File.join(temp_dir, archive_name)
+            @operating_system.download(statement.url, archive_local)
+          else
+            archive_local = statement.url
+          end
+          @operating_system.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
+          @operating_system.copy(archive_local, local_dir + '/' + archive_name)
+          if statement.is_a?(Statement::Archive)
+            @operating_system.unpack_archive(local_dir, archive_name)
+          end
+          statement.class.new(archive_name).unparse('')
+        else
+          statement.unparse('')
+        end
+      end.select { |s|not s.nil? }
     end
   end
 end
