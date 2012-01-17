@@ -55,7 +55,10 @@ end
 
 require 'rspec/core/rake_task'
 desc 'Run RSpec tests.'
-RSpec::Core::RakeTask.new(:spec)
+RSpec::Core::RakeTask.new(:spec) do |spec|
+  spec.rspec_opts = []
+  spec.rspec_opts << '--order rand'
+end
 
 #desc 'Run RSpec tests with coverage reporting via rcov.'
 #RSpec::Core::RakeTask.new(:rcov) do |spec|

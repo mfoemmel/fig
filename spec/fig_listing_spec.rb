@@ -204,6 +204,7 @@ end
 describe 'Fig' do
   describe '--list-local' do
     before(:each) do
+      cleanup_test_environment
       setup_test_environment
       cleanup_home_and_remote
     end
@@ -233,6 +234,7 @@ describe 'Fig' do
 
   describe '--list-remote' do
     before(:each) do
+      cleanup_test_environment
       setup_test_environment
       cleanup_home_and_remote
     end
@@ -262,6 +264,7 @@ describe 'Fig' do
 
   describe '--list-configs' do
     before(:each) do
+      cleanup_test_environment
       setup_test_environment
       cleanup_home_and_remote
     end
@@ -288,6 +291,7 @@ describe 'Fig' do
     describe 'no --list-tree' do
       describe 'no --list-all-configs' do
         before(:each) do
+          cleanup_test_environment
           setup_test_environment
           cleanup_home_and_remote
         end
@@ -418,6 +422,7 @@ no-dependencies/1.2.3
 
     describe 'with --list-tree' do
       before(:each) do
+        cleanup_test_environment
         setup_test_environment
         cleanup_home_and_remote
       end

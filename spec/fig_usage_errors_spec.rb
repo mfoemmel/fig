@@ -5,6 +5,7 @@ require 'English'
 describe 'Fig' do
   describe 'usage errors' do
     before(:all) do
+      cleanup_test_environment
       setup_test_environment
     end
 

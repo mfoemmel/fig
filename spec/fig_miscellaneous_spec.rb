@@ -2,6 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe 'Fig' do
   before(:each) do
+    cleanup_test_environment
     setup_test_environment
   end
 

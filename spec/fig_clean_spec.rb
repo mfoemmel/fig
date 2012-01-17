@@ -5,6 +5,7 @@ require 'English'
 describe 'Fig' do
   describe '--clean' do
     before(:each) do
+      cleanup_test_environment
       setup_test_environment
       cleanup_home_and_remote
     end
