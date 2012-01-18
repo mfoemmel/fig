@@ -251,7 +251,10 @@ class Fig::Command
     end
 
     if ! @options.list_all_configs? && @descriptor
-      packages.reject! { |package| package.package_name == @descriptor.name }
+      packages.reject! do
+        |package, config_names|
+        package.package_name == @descriptor.name
+      end
     end
 
     return packages
