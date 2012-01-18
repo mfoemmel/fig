@@ -8,11 +8,18 @@ class Fig::PackageDescriptor
 
   attr_reader :name, :version, :config
 
-  def initialize(raw_string)
-    # todo should use treetop for these:
-    @name    = raw_string =~ %r< ^ ( [^:/]+ ) >x ? $1 : nil
-    @config  = raw_string =~ %r< : ( [^:/]+ ) >x ? $1 : nil
-    @version = raw_string =~ %r< / ( [^:/]+ ) >x ? $1 : nil
+  def self.parse(raw_string)
+    self.new(
+      raw_string =~ %r< ^ ( [^:/]+ ) >x ? $1 : nil,
+      raw_string =~ %r< / ( [^:/]+ ) >x ? $1 : nil,
+      raw_string =~ %r< : ( [^:/]+ ) >x ? $1 : nil
+    )
+  end
+
+  def initialize(name, version, config)
+    @name     = name
+    @version  = version
+    @config   = config
   end
 
   def to_string(use_default_config = false)

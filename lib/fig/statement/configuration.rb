@@ -34,10 +34,10 @@ class Fig::Statement::Configuration
     end
   end
 
-  # Block will receive a Statement.
+  # Block will receive a Package and a Statement.
   def walk_statements_following_package_dependencies(repository, package, &block)
     @statements.each do |statement|
-      yield statement
+      yield package, statement
       statement.walk_statements_following_package_dependencies(
         repository, package, &block
       )

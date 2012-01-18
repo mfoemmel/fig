@@ -1,4 +1,5 @@
 require 'fig/logging'
+require 'fig/packagedescriptor'
 require 'fig/packageerror'
 require 'fig/statement'
 
@@ -20,15 +21,25 @@ class Fig::Statement::Include
     return @descriptor.name
   end
 
-  def config_name
-    return @descriptor.config
-  end
-
   def version_name
     return @descriptor.version
   end
 
-  # Block will receive a Statement.
+  def config_name
+    return @descriptor.config
+  end
+
+  # Assume that this statement is part of the parameter and return a descriptor
+  # that represents the fully resolved dependency.
+  def resolved_dependency_descriptor(package)
+    return Fig::PackageDescriptor.new(
+      referenced_package_name(package),
+      referenced_version_name(package),
+      referenced_config_name()
+    )
+  end
+
+  # Block will receive a Package and a Statement.
   def walk_statements_following_package_dependencies(
     repository, package, &block
   )
@@ -39,11 +50,9 @@ class Fig::Statement::Include
       referenced_package = package
     end
 
-    configuration = referenced_package[
-      config_name() || Fig::Package::DEFAULT_CONFIG
-    ]
+    configuration = referenced_package[referenced_config_name()]
 
-    yield configuration
+    yield referenced_package, configuration
     configuration.walk_statements_following_package_dependencies(
       repository, referenced_package, &block
     )
@@ -60,5 +69,19 @@ class Fig::Statement::Include
       text += override.unparse
     end
     return "#{indent}include #{text}"
+  end
+
+  private
+
+  def referenced_package_name(package)
+    return package_name() || package.package_name()
+  end
+
+  def referenced_version_name(package)
+    return version_name() || package.version_name()
+  end
+
+  def referenced_config_name()
+    config_name() || Fig::Package::DEFAULT_CONFIG
   end
 end

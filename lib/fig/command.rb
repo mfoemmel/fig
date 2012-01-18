@@ -160,15 +160,8 @@ class Fig::Command
   end
 
   def display_dependencies()
-    if @options.list_all_configs?
-      @package.config_names.each do
-        |name|
-        @environment.apply_config(@package, name, nil)
-      end
-    end
-
     if @options.list_tree?
-      display_dependencies_in_tree()
+      display_dependencies_in_tree(@package, derive_base_display_config_names())
     else
       display_dependencies_flat()
     end
@@ -176,48 +169,92 @@ class Fig::Command
     return
   end
 
-  def display_dependencies_in_tree(package = @package, indent = 0)
-    print ' ' * (indent * 4)
-    puts package.to_s_with_primary_config()
+  def display_dependencies_in_tree(package, config_names, indent = 0)
+    config_names.each do
+      |config_name|
 
-    new_indent = indent + 1
-    package.package_dependencies(package.primary_config_name).sort.each do
-      |descriptor|
+      print ' ' * (indent * 4)
+      puts package.to_s_with_config(config_name)
 
-      display_dependencies_in_tree(
-        @environment.get_package(descriptor.name), new_indent
-      )
+      package.package_dependencies(config_name).each do
+        |descriptor|
+
+        display_dependencies_in_tree(
+          @repository.get_package(descriptor.name, descriptor.version),
+          [descriptor.config],
+          indent + 1
+        )
+      end
     end
 
     return
   end
 
   def display_dependencies_flat()
-    packages = @environment.packages
-
-    packages.reject! { |package| package.package_name.nil? }
-    if ! @options.list_all_configs? && @descriptor
-      packages.reject! { |package| package.package_name == @descriptor.name }
-    end
+    base_config_names = derive_base_display_config_names()
+    packages = gather_package_depencency_configurations(base_config_names)
 
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
     else
-      packages.sort.each do
+      packages.keys.sort.each do
         |package|
 
         if @options.list_all_configs?
-          package.applied_config_names.sort.each do
+          packages[package].sort.each do
             |config_name|
+
             puts package.to_s_with_config(config_name)
           end
         else
-          puts package.to_s_with_config(package.primary_config_name)
+          puts package
         end
       end
     end
 
     return
+  end
+
+  def derive_base_display_config_names()
+    if @options.list_all_configs?
+      return @package.config_names
+    end
+
+    return [
+      @descriptor && @descriptor.config || Fig::Package::DEFAULT_CONFIG
+    ]
+  end
+
+  def gather_package_depencency_configurations(starting_config_names)
+    packages = {}
+
+    if ! @package.package_name.nil?
+      packages[@package] = starting_config_names
+    end
+
+    starting_config_names.each do
+      |config_name|
+
+      @package[config_name].walk_statements_following_package_dependencies(
+        @repository, @package
+      ) do
+        |package, statement|
+
+        if (
+              ! package.package_name.nil?               \
+          &&  statement.is_a?(Fig::Statement::Configuration)
+        )
+          packages[package] ||= []
+          packages[package] << statement.name
+        end
+      end
+    end
+
+    if ! @options.list_all_configs? && @descriptor
+      packages.reject! { |package| package.package_name == @descriptor.name }
+    end
+
+    return packages
   end
 
   def handle_post_parse_list_options()
@@ -239,7 +276,9 @@ class Fig::Command
     return
   end
 
-  def register_package_with_environment()
+  def register_package_with_environment_if_not_listing()
+    return if @options.listing
+
     if @options.updating?
       @package.retrieves.each do |var, path|
         @environment.add_retrieve(var, path)
@@ -267,7 +306,7 @@ class Fig::Command
         nil, nil, '.', config_raw_text
       )
 
-    register_package_with_environment()
+    register_package_with_environment_if_not_listing()
 
     return
   end
@@ -288,7 +327,7 @@ class Fig::Command
           @descriptor.name, @descriptor.version, :disable_updating
         )
 
-      register_package_with_environment()
+      register_package_with_environment_if_not_listing()
     end
 
     return

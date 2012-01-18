@@ -79,7 +79,7 @@ grammar Fig
     "include" ws descriptor overrides:(override*) {
       def to_config_statement
         Statement::Include.new(
-          PackageDescriptor.new(descriptor.text_value.strip),
+          PackageDescriptor.parse(descriptor.text_value.strip),
           overrides.elements.map{ |e| e.to_override }
         )
       end

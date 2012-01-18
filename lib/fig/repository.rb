@@ -122,13 +122,17 @@ module Fig
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
-        if statement.is_a?(Statement::Resource) && !Repository.is_url?(statement.url)
+        if (
+          statement.is_a?(Statement::Resource) &&
+          ! Repository.is_url?(statement.url)
+        )
           resources << statement.url
           true
         else
           false
         end
       end
+
       if resources.size > 0
         resources = expand_globs_from(resources)
         file = 'resources.tar.gz'
@@ -136,7 +140,8 @@ module Fig
         new_package_statements.unshift(Statement::Archive.new(file))
         at_exit { File.delete(file) }
       end
-      new_package_statements
+
+      return new_package_statements
     end
 
     def install_package(package_name, version_name)

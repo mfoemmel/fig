@@ -96,7 +96,7 @@ Environment variables:
 
     package_text = argv.first
     if package_text
-      @descriptor = Fig::PackageDescriptor.new(package_text)
+      @descriptor = Fig::PackageDescriptor.parse(package_text)
     end
 
     return
@@ -345,7 +345,7 @@ Environment variables:
       'include PKG (with any variable prepends) in environment'
     ) do |descriptor|
       @options[:non_command_package_statements] <<
-        Fig::Statement::Include.new(Fig::PackageDescriptor.new(descriptor), {})
+        Fig::Statement::Include.new(Fig::PackageDescriptor.parse(descriptor), {})
     end
 
     opts.on(

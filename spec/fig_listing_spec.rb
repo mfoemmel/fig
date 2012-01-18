@@ -320,12 +320,20 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
 
+          expected = <<-END_EXPECTED_OUTPUT
+both/1.2.3
+depends-on-everything/1.2.3
+local-only/1.2.3
+prerequisite/1.2.3
+remote-only/1.2.3
+          END_EXPECTED_OUTPUT
+          expected.chomp!
+
           (out, err, exitstatus) = fig(
             '--list-dependencies depends-on-depends-on-everything/1.2.3:indirectly-everything'
           )
           exitstatus.should == 0
-          out.should ==
-            "both/1.2.3\ndepends-on-everything/1.2.3:everything\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
+          out.should == expected
           err.should == ''
         end
 
@@ -333,14 +341,14 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           create_package_dot_fig_with_all_dependencies
 
-        expected = <<-END_EXPECTED_OUTPUT
+          expected = <<-END_EXPECTED_OUTPUT
 both/1.2.3
-depends-on-everything/1.2.3:everything
+depends-on-everything/1.2.3
 local-only/1.2.3
 prerequisite/1.2.3
 remote-only/1.2.3
-        END_EXPECTED_OUTPUT
-        expected.chomp!
+          END_EXPECTED_OUTPUT
+          expected.chomp!
 
           (out, err, exitstatus) = fig('--list-dependencies')
           exitstatus.should == 0
@@ -460,12 +468,12 @@ no-dependencies/1.2.3
         expected = <<-END_EXPECTED_OUTPUT
 depends-on-depends-on-everything/1.2.3:indirectly-everything
     depends-on-everything/1.2.3:everything
-        both/1.2.3
-            prerequisite/1.2.3
+        prerequisite/1.2.3
         local-only/1.2.3
             prerequisite/1.2.3
-        prerequisite/1.2.3
         remote-only/1.2.3
+            prerequisite/1.2.3
+        both/1.2.3
             prerequisite/1.2.3
         END_EXPECTED_OUTPUT
         expected.chomp!
@@ -484,14 +492,15 @@ depends-on-depends-on-everything/1.2.3:indirectly-everything
 
         expected = <<-END_EXPECTED_OUTPUT
 <unpublished>
-    depends-on-everything/1.2.3:everything
-        both/1.2.3
+    depends-on-everything/1.2.3
+        depends-on-everything/1.2.3:everything
             prerequisite/1.2.3
-        local-only/1.2.3
-            prerequisite/1.2.3
-        prerequisite/1.2.3
-        remote-only/1.2.3
-            prerequisite/1.2.3
+            local-only/1.2.3
+                prerequisite/1.2.3
+            remote-only/1.2.3
+                prerequisite/1.2.3
+            both/1.2.3
+                prerequisite/1.2.3
         END_EXPECTED_OUTPUT
         expected.chomp!
 

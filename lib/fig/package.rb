@@ -94,11 +94,11 @@ class Fig::Package
   def package_dependencies(config_name)
     descriptors = []
 
-    self[config_name].walk_statements do
+    self[config_name || DEFAULT_CONFIG].walk_statements do
       |statement|
 
       if statement.is_a?(Fig::Statement::Include)
-        descriptors << statement.descriptor
+        descriptors << statement.resolved_dependency_descriptor(self)
       end
     end
 
@@ -115,10 +115,10 @@ class Fig::Package
     return
   end
 
-  # Block will receive a Statement.
+  # Block will receive a Package and a Statement.
   def walk_statements_following_package_dependencies(repository, &block)
     @statements.each do |statement|
-      yield statement
+      yield self, statement
       statement.walk_statements_following_package_dependencies(
         repository, self, &block
       )
