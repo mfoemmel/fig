@@ -1,6 +1,7 @@
 require 'rubygems'
 require 'net/ftp'
 require 'log4r'
+require 'set'
 
 require 'fig/environment'
 require 'fig/figrc'
@@ -229,7 +230,7 @@ class Fig::Command
     packages = {}
 
     if ! @package.package_name.nil?
-      packages[@package] = starting_config_names
+      packages[@package] = starting_config_names.to_set
     end
 
     starting_config_names.each do
@@ -244,7 +245,7 @@ class Fig::Command
               ! package.package_name.nil?               \
           &&  statement.is_a?(Fig::Statement::Configuration)
         )
-          packages[package] ||= []
+          packages[package] ||= Set.new
           packages[package] << statement.name
         end
       end

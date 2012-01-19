@@ -395,36 +395,53 @@ no-dependencies/1.2.3
           err.should == ''
         end
 
-# TODO: Environment needs to handle multiple package versions.
-#        it %q<lists all recursive configuration dependencies without a package.fig> do
-#          set_up_multiple_config_repository
-#          remove_any_package_dot_fig
-#
-#        expected = <<-END_EXPECTED_OUTPUT
-#departments/1.2.3:accounting
-#departments/1.2.3:legal
-#departments/1.2.3:marketing
-#        END_EXPECTED_OUTPUT
-#        expected.chomp!
-#
-#          (out, err, exitstatus) = fig(
-#            '--list-dependencies --list-all-configs departments/1.2.3:legal'
-#          )
-#          exitstatus.should == 0
-#          out.should == expected
-#          err.should == ''
-#        end
-#
-#        it %q<lists all packages in the repository with a package.fig> do
-#          set_up_local_and_remote_repository_with_depends_on_everything
-#          create_package_dot_fig_with_all_dependencies
-#
-#          (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
-#          exitstatus.should == 0
-#          out.should ==
-#            "both/1.2.3\ndepends-on-everything/1.2.3:everything\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
-#          err.should == ''
-#        end
+        it %q<lists all recursive configuration dependencies without a package.fig> do
+          set_up_multiple_config_repository
+          remove_any_package_dot_fig
+
+        expected = <<-END_EXPECTED_OUTPUT
+database/1.2.3:oracle
+database/1.2.3:postgresql
+database/1.2.3:sqlserver
+departments/1.2.3:accounting
+departments/1.2.3:legal
+departments/1.2.3:marketing
+operatingsystem/1.2.3:redhat
+operatingsystem/1.2.3:windows
+operatingsystem/3.4.5:ubuntu
+web/1.2.3:apache
+web/1.2.3:iis
+web/1.2.3:lighttpd
+        END_EXPECTED_OUTPUT
+        expected.chomp!
+
+          (out, err, exitstatus) = fig(
+            '--list-dependencies --list-all-configs departments/1.2.3:legal'
+          )
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists all packages in the repository with a package.fig> do
+          set_up_local_and_remote_repository_with_depends_on_everything
+          create_package_dot_fig_with_all_dependencies
+
+          expected = <<-END_EXPECTED_OUTPUT
+both/1.2.3
+depends-on-everything/1.2.3
+depends-on-everything/1.2.3:everything
+local-only/1.2.3
+prerequisite/1.2.3
+remote-only/1.2.3
+          END_EXPECTED_OUTPUT
+          expected.chomp!
+
+          (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
       end
     end
 
