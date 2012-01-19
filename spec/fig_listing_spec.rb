@@ -201,6 +201,16 @@ def test_list_configs(package_name)
   return
 end
 
+# Allow for indenting in expected output given in heredocs.
+def clean_expected(expected)
+  cleaned = expected.chomp
+
+  indent_count = cleaned.scan(/ ^ [ ]+ /x).collect(&:length).min
+  cleaned.gsub!(/ ^ [ ]{#{indent_count}} /x, '')
+
+  return cleaned
+end
+
 describe 'Fig' do
   describe '--list-local' do
     before(:each) do
@@ -320,14 +330,13 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
 
-          expected = <<-END_EXPECTED_OUTPUT
-both/1.2.3
-depends-on-everything/1.2.3
-local-only/1.2.3
-prerequisite/1.2.3
-remote-only/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            both/1.2.3
+            depends-on-everything/1.2.3
+            local-only/1.2.3
+            prerequisite/1.2.3
+            remote-only/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig(
             '--list-dependencies depends-on-depends-on-everything/1.2.3:indirectly-everything'
@@ -341,14 +350,13 @@ remote-only/1.2.3
           set_up_local_and_remote_repository_with_depends_on_everything
           create_package_dot_fig_with_all_dependencies
 
-          expected = <<-END_EXPECTED_OUTPUT
-both/1.2.3
-depends-on-everything/1.2.3
-local-only/1.2.3
-prerequisite/1.2.3
-remote-only/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            both/1.2.3
+            depends-on-everything/1.2.3
+            local-only/1.2.3
+            prerequisite/1.2.3
+            remote-only/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig('--list-dependencies')
           exitstatus.should == 0
@@ -367,10 +375,9 @@ remote-only/1.2.3
           set_up_multiple_config_repository
           remove_any_package_dot_fig
 
-          expected = <<-END_EXPECTED_OUTPUT
-no-dependencies/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig(
             '--list-dependencies --list-all-configs no-dependencies/1.2.3'
@@ -384,10 +391,9 @@ no-dependencies/1.2.3
           set_up_multiple_config_repository
           create_package_dot_fig('no-dependencies')
 
-          expected = <<-END_EXPECTED_OUTPUT
-no-dependencies/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
           exitstatus.should == 0
@@ -399,21 +405,20 @@ no-dependencies/1.2.3
           set_up_multiple_config_repository
           remove_any_package_dot_fig
 
-        expected = <<-END_EXPECTED_OUTPUT
-database/1.2.3:oracle
-database/1.2.3:postgresql
-database/1.2.3:sqlserver
-departments/1.2.3:accounting
-departments/1.2.3:legal
-departments/1.2.3:marketing
-operatingsystem/1.2.3:redhat
-operatingsystem/1.2.3:windows
-operatingsystem/3.4.5:ubuntu
-web/1.2.3:apache
-web/1.2.3:iis
-web/1.2.3:lighttpd
-        END_EXPECTED_OUTPUT
-        expected.chomp!
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            database/1.2.3:oracle
+            database/1.2.3:postgresql
+            database/1.2.3:sqlserver
+            departments/1.2.3:accounting
+            departments/1.2.3:legal
+            departments/1.2.3:marketing
+            operatingsystem/1.2.3:redhat
+            operatingsystem/1.2.3:windows
+            operatingsystem/3.4.5:ubuntu
+            web/1.2.3:apache
+            web/1.2.3:iis
+            web/1.2.3:lighttpd
+          END_EXPECTED_OUTPUT
 
           (out, err, exitstatus) = fig(
             '--list-dependencies --list-all-configs departments/1.2.3:legal'
@@ -427,15 +432,14 @@ web/1.2.3:lighttpd
           set_up_local_and_remote_repository_with_depends_on_everything
           create_package_dot_fig_with_all_dependencies
 
-          expected = <<-END_EXPECTED_OUTPUT
-both/1.2.3
-depends-on-everything/1.2.3
-depends-on-everything/1.2.3:everything
-local-only/1.2.3
-prerequisite/1.2.3
-remote-only/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            both/1.2.3
+            depends-on-everything/1.2.3
+            depends-on-everything/1.2.3:everything
+            local-only/1.2.3
+            prerequisite/1.2.3
+            remote-only/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
           exitstatus.should == 0
@@ -466,11 +470,10 @@ remote-only/1.2.3
         set_up_local_and_remote_repository_with_depends_on_everything
         create_package_dot_fig_with_single_dependency
 
-        expected = <<-END_EXPECTED_OUTPUT
-<unpublished>
-    prerequisite/1.2.3
+        expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+          <unpublished>
+              prerequisite/1.2.3
         END_EXPECTED_OUTPUT
-        expected.chomp!
 
         (out, err, exitstatus) = fig('--list-dependencies --list-tree')
         exitstatus.should == 0
@@ -482,18 +485,17 @@ remote-only/1.2.3
         set_up_local_and_remote_repository_with_depends_on_everything
         remove_any_package_dot_fig
 
-        expected = <<-END_EXPECTED_OUTPUT
-depends-on-depends-on-everything/1.2.3:indirectly-everything
-    depends-on-everything/1.2.3:everything
-        prerequisite/1.2.3
-        local-only/1.2.3
-            prerequisite/1.2.3
-        remote-only/1.2.3
-            prerequisite/1.2.3
-        both/1.2.3
-            prerequisite/1.2.3
+        expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+          depends-on-depends-on-everything/1.2.3:indirectly-everything
+              depends-on-everything/1.2.3:everything
+                  prerequisite/1.2.3
+                  local-only/1.2.3
+                      prerequisite/1.2.3
+                  remote-only/1.2.3
+                      prerequisite/1.2.3
+                  both/1.2.3
+                      prerequisite/1.2.3
         END_EXPECTED_OUTPUT
-        expected.chomp!
 
         (out, err, exitstatus) = fig(
           '--list-dependencies --list-tree depends-on-depends-on-everything/1.2.3:indirectly-everything'
@@ -507,19 +509,18 @@ depends-on-depends-on-everything/1.2.3:indirectly-everything
         set_up_local_and_remote_repository_with_depends_on_everything
         create_package_dot_fig_with_all_dependencies
 
-        expected = <<-END_EXPECTED_OUTPUT
-<unpublished>
-    depends-on-everything/1.2.3
-        depends-on-everything/1.2.3:everything
-            prerequisite/1.2.3
-            local-only/1.2.3
-                prerequisite/1.2.3
-            remote-only/1.2.3
-                prerequisite/1.2.3
-            both/1.2.3
-                prerequisite/1.2.3
+        expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+          <unpublished>
+              depends-on-everything/1.2.3
+                  depends-on-everything/1.2.3:everything
+                      prerequisite/1.2.3
+                      local-only/1.2.3
+                          prerequisite/1.2.3
+                      remote-only/1.2.3
+                          prerequisite/1.2.3
+                      both/1.2.3
+                          prerequisite/1.2.3
         END_EXPECTED_OUTPUT
-        expected.chomp!
 
         (out, err, exitstatus) = fig('--list-dependencies --list-tree')
         exitstatus.should == 0
