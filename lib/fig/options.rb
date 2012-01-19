@@ -208,27 +208,27 @@ Environment variables:
   end
 
   def new_parser
-    return OptionParser.new do |opts|
-      set_up_queries(opts)
-      set_up_commands(opts)
-      set_up_package_configuration_source(opts)
-      set_up_package_statements(opts)
-      set_up_remote_repository_access(opts)
-      set_up_program_configuration(opts)
+    return OptionParser.new do |parser|
+      set_up_queries(parser)
+      set_up_commands(parser)
+      set_up_package_configuration_source(parser)
+      set_up_package_statements(parser)
+      set_up_remote_repository_access(parser)
+      set_up_program_configuration(parser)
     end
   end
 
-  def set_up_queries(opts)
-    opts.banner = USAGE
-    opts.on('-?', '-h','--help','display this help text') do
-      help(opts)
+  def set_up_queries(parser)
+    parser.banner = USAGE
+    parser.on('-?', '-h','--help','display this help text') do
+      help(parser)
     end
 
-    opts.on('-v', '--version', 'Print fig version') do
+    parser.on('-v', '--version', 'Print fig version') do
       version()
     end
 
-    opts.on(
+    parser.on(
       '-g',
       '--get VARIABLE',
       'print value of environment variable VARIABLE'
@@ -236,12 +236,12 @@ Environment variables:
       @options[:get] = get
     end
 
-    set_up_listings(opts)
+    set_up_listings(parser)
 
     return
   end
 
-  def set_up_listings(opts)
+  def set_up_listings(parser)
     option_mapping = {
       :local_packages =>
         [ '--list-local', '--list', 'list packages in $FIG_HOME' ],
@@ -265,34 +265,34 @@ Environment variables:
     option_mapping.each_pair do
       | type, specification |
 
-      opts.on(*specification) do
+      parser.on(*specification) do
         @options[:listing] = type
       end
     end
 
-    opts.on('--list-tree', 'for listings, output a tree instead of a list') do
+    parser.on('--list-tree', 'for listings, output a tree instead of a list') do
       @options[:list_tree] = true
     end
 
-    opts.on('--list-all-configs', 'for listings, follow all configurations of the base package') do
+    parser.on('--list-all-configs', 'for listings, follow all configurations of the base package') do
       @options[:list_all_configs] = true
     end
 
     return
   end
 
-  def set_up_commands(opts)
-    opts.on('--clean', 'remove package from $FIG_HOME') do
+  def set_up_commands(parser)
+    parser.on('--clean', 'remove package from $FIG_HOME') do
       @options[:clean] = true
     end
 
-    opts.on(
+    parser.on(
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
       @options[:publish] = true
     end
 
-    opts.on(
+    parser.on(
       '--publish-local', 'install package only in $FIG_HOME'
     ) do |publish_local|
       @options[:publish_local] = true
@@ -301,8 +301,8 @@ Environment variables:
     return
   end
 
-  def set_up_package_configuration_source(opts)
-    opts.on(
+  def set_up_package_configuration_source(parser)
+    parser.on(
       '-c',
       '--config CONFIG',
       %q<apply configuration CONFIG, default is "default">
@@ -311,14 +311,14 @@ Environment variables:
     end
 
     @options[:package_config_file] = nil
-    opts.on(
+    parser.on(
       '--file FILE',
       %q<read fig file FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
       @options[:package_config_file] = path
     end
 
-    opts.on(
+    parser.on(
       '--no-file', 'ignore package.fig file in current directory'
     ) do |path|
       @options[:package_config_file] = :none
@@ -327,9 +327,9 @@ Environment variables:
     return
   end
 
-  def set_up_package_statements(opts)
+  def set_up_package_statements(parser)
     @options[:non_command_package_statements] = []
-    opts.on(
+    parser.on(
       '-p',
       '--append VARIABLE=VALUE',
       'append (actually, prepend) VALUE to environment variable VARIABLE, delimited by separator'
@@ -338,7 +338,7 @@ Environment variables:
       @options[:non_command_package_statements] << Fig::Statement::Path.new(var, val)
     end
 
-    opts.on(
+    parser.on(
       '-i',
       '--include DESCRIPTOR',
       'include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment'
@@ -347,7 +347,7 @@ Environment variables:
         Fig::Statement::Include.new(Fig::PackageDescriptor.parse(descriptor), {})
     end
 
-    opts.on(
+    parser.on(
       '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
     ) do |var_val|
       var, val = var_val.split('=')
@@ -355,7 +355,7 @@ Environment variables:
     end
 
     @options[:archives] = []
-    opts.on(
+    parser.on(
       '--archive PATH',
       'include PATH archive in package (when using --publish)'
     ) do |path|
@@ -363,7 +363,7 @@ Environment variables:
     end
 
     @options[:resources] =[]
-    opts.on(
+    parser.on(
       '--resource PATH',
       'include PATH resource in package (when using --publish)'
     ) do |path|
@@ -373,8 +373,8 @@ Environment variables:
     return
   end
 
-  def set_up_remote_repository_access(opts)
-    opts.on(
+  def set_up_remote_repository_access(parser)
+    parser.on(
       '-u',
       '--update',
       'check remote repo for updates and download to $FIG_HOME as necessary'
@@ -382,7 +382,7 @@ Environment variables:
       @options[:update] = true
     end
 
-    opts.on(
+    parser.on(
       '-m',
       '--update-if-missing',
       'check remote repo for updates only if package missing from $FIG_HOME'
@@ -390,14 +390,14 @@ Environment variables:
       @options[:update_if_missing] = true
     end
 
-    opts.on(
+    parser.on(
       '-l', '--login', 'login to remote repo as a non-anonymous user'
     ) do
       @options[:login] = true
     end
 
     @options[:force] = nil
-    opts.on(
+    parser.on(
       '--force',
       'force-overwrite existing version of a package to the remote repo'
     ) do |force|
@@ -407,23 +407,23 @@ Environment variables:
     return
   end
 
-  def set_up_program_configuration(opts)
-    opts.on(
+  def set_up_program_configuration(parser)
+    parser.on(
       '--figrc PATH', 'add PATH to configuration used for Fig'
     ) do |path|
       @options[:figrc] = path
     end
 
-    opts.on('--no-figrc', 'ignore ~/.figrc') { @options[:no_figrc] = true }
+    parser.on('--no-figrc', 'ignore ~/.figrc') { @options[:no_figrc] = true }
 
-    opts.on(
+    parser.on(
       '--log-config PATH', 'use PATH file as configuration for Log4r'
     ) do |path|
       @options[:log_config] = path
     end
 
     level_list = LOG_LEVELS.join(', ')
-    opts.on(
+    parser.on(
       '--log-level LEVEL',
       LOG_LEVELS,
       LOG_ALIASES,
@@ -436,8 +436,8 @@ Environment variables:
     return
   end
 
-  def help(opts)
-    puts opts.help
+  def help(parser)
+    puts parser.help
     puts "        --                           end of fig options; anything after this is used as a command to run\n\n"
 
     @exit_code = 0
