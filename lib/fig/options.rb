@@ -16,41 +16,40 @@ class Fig::Options
 
 Usage:
 
-  fig [...] [<descriptor>] [--update | --update-if-missing] [-- <command>]
+  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [-- COMMAND]
 
-  fig {--publish | --publish-local} <descriptor>
-      [--resource <fullpath>]
-      [--include <package name/version>]
+  fig {--publish | --publish-local} DESCRIPTOR
+      [--resource PATH]
+      [--archive  PATH]
+      [--include  DESCRIPTOR]
       [--force]
-      [--archive <path>]
       [...]
 
-  fig --clean <descriptor> [...]
+  fig --clean DESCRIPTOR [...]
 
-  fig --get <VAR>                                            [<descriptor>] [...]
-  fig --list-configs                                         [<descriptor>] [...]
-  fig --list-dependencies [--list-tree]                      [<descriptor>] [...]
-  fig {--list-local | --list-remote} [...]
+  fig --get VARIABLE                                         [DESCRIPTOR] [...]
+  fig --list-configs                                         [DESCRIPTOR] [...]
+  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig {--list-local | --list-remote}                                      [...]
 
   fig {--version | --help}
 
 Not yet implemented:
-  fig --list-dependencies [--list-all-configs]               [<descriptor>] [...]
-  fig --list-variables [--list-tree] [--list-all-configs]    [<descriptor>] [...]
+  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
 
-A <descriptor> looks like <package name>[:<config>][/<version>] e.g. "foo",
-"foo/1.2.3", and "foo:default/1.2.3". Whether ":<config>" and "/<version>" are
+A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",
+"foo/1.2.3", and "foo/1.2.3:default". Whether ":<config>" and "/<version>" are
 required or allowed is dependent upon what your are doing
 
-Standard options:
+Standard options (represented as "[...]" above):
 
-      [--set <VAR=value>]
-      [--append <VAR=val>]
-      [--file <path>] [--no-file]
-      [--config <config>]
+      [--set    VARIABLE=VALUE]
+      [--append VARIABLE=VALUE]
+      [--file PATH] [--no-file]
+      [--config CONFIG]
       [--login]
-      [--log-level <level>] [--log-config <path>]
-      [--figrc <path>] [--no-figrc]
+      [--log-level LEVEL] [--log-config PATH]
+      [--figrc PATH] [--no-figrc]
 
 Environment variables:
 
@@ -231,8 +230,8 @@ Environment variables:
 
     opts.on(
       '-g',
-      '--get VAR',
-      'print value of environment variable VAR'
+      '--get VARIABLE',
+      'print value of environment variable VARIABLE'
     ) do |get|
       @options[:get] = get
     end
@@ -275,7 +274,7 @@ Environment variables:
       @options[:list_tree] = true
     end
 
-    opts.on('--list-all-configs', 'for listings, follow all configurations') do
+    opts.on('--list-all-configs', 'for listings, follow all configurations of the base package') do
       @options[:list_all_configs] = true
     end
 
@@ -305,8 +304,8 @@ Environment variables:
   def set_up_package_configuration_source(opts)
     opts.on(
       '-c',
-      '--config CFG',
-      %q<apply configuration CFG, default is 'default'>
+      '--config CONFIG',
+      %q<apply configuration CONFIG, default is "default">
     ) do |config|
       @options[:config] = config
     end
@@ -332,8 +331,8 @@ Environment variables:
     @options[:non_command_package_statements] = []
     opts.on(
       '-p',
-      '--append VAR=VAL',
-      'append (actually, prepend) VAL to environment var VAR, delimited by separator'
+      '--append VARIABLE=VALUE',
+      'append (actually, prepend) VALUE to environment variable VARIABLE, delimited by separator'
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:non_command_package_statements] << Fig::Statement::Path.new(var, val)
@@ -341,15 +340,15 @@ Environment variables:
 
     opts.on(
       '-i',
-      '--include PKG',
-      'include PKG (with any variable prepends) in environment'
+      '--include DESCRIPTOR',
+      'include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment'
     ) do |descriptor|
       @options[:non_command_package_statements] <<
         Fig::Statement::Include.new(Fig::PackageDescriptor.parse(descriptor), {})
     end
 
     opts.on(
-      '-s', '--set VAR=VAL', 'set environment variable VAR to VAL'
+      '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:non_command_package_statements] << Fig::Statement::Set.new(var, val)
@@ -357,16 +356,16 @@ Environment variables:
 
     @options[:archives] = []
     opts.on(
-      '--archive FULLPATH',
-      'include FULLPATH archive in package (when using --publish)'
+      '--archive PATH',
+      'include PATH archive in package (when using --publish)'
     ) do |path|
       @options[:archives] << Fig::Statement::Archive.new(path)
     end
 
     @options[:resources] =[]
     opts.on(
-      '--resource FULLPATH',
-      'include FULLPATH resource in package (when using --publish)'
+      '--resource PATH',
+      'include PATH resource in package (when using --publish)'
     ) do |path|
       @options[:resources] << Fig::Statement::Resource.new(path)
     end
