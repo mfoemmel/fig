@@ -63,10 +63,10 @@ end
 #  spec.rcov = true
 #end
 
-desc 'Build gems and then fix fig18 gem file names.'
-task :figbuild => :build do
-  version = File.exist?('VERSION') ? File.read('VERSION').strip : ''
-end
+#desc 'Build gems and then fix fig18 gem file names.'
+#task :figbuild => :build do
+#  version = File.exist?('VERSION') ? File.read('VERSION').strip : ''
+#end
 
 task :simplecov do
   ENV['COVERAGE'] = 'true'
