@@ -7,10 +7,7 @@ begin
   require 'jeweler'
   gems = [
     ['java',        'fig',    nil,                        ['runtime']              ], # Java
-    ['ruby',        'fig',   'libarchive-static',         ['development','runtime']], # Linux (RHEL/Ubuntu) 1.9.2; Win 1.9.2
-    ['ruby',        'fig18', 'libarchive-static',         ['runtime']              ], # MacOS, Linux (RHEL/Ubuntu) 1.8.6
-    ['i386-mswin32',     'fig18', 'libarchive-static-ruby186', ['runtime']              ], # Win 1.8.6
-    ['i386-mingw32',     'fig18', 'libarchive-static-ruby186', ['runtime']              ]  # Win 1.8.6
+    ['ruby',        'fig',   'libarchive-static',         ['development','runtime']]
   ]
 
   gems.each do |platform, fig_name, libarchive_dep, deptypes|
@@ -33,9 +30,10 @@ begin
       gemspec.add_dependency              'net-sftp',   '>= 2.0.4'
       gemspec.add_dependency              'net-ssh',    '>= 2.0.15'
       gemspec.add_dependency              'polyglot',   '>= 0.2.9'
-      gemspec.add_dependency              'rdoc',       '= 2.4.2'
-      gemspec.add_dependency              'json',       '= 1.4.2'
+      gemspec.add_dependency              'rdoc',       '>= 3.12'
+      gemspec.add_dependency              'json',       '>= 1.6.5'
       gemspec.add_dependency              'treetop',    '>= 1.4.2'
+      gemspec.add_dependency              'ftp',        '>= 0.69'
       gemspec.add_development_dependency  'open4',      '>= 1.0.1'
       gemspec.add_development_dependency  'rspec',      '>= 2.8'
 
@@ -67,16 +65,7 @@ end
 
 desc 'Build gems and then fix fig18 gem file names.'
 task :figbuild => :build do
-  # Hack to fix "gem build"'s broken naming; if we leave it as 'x86', then a
-  # 'gem install fig18' will download fig for the wrong platform (the ruby
-  # platform), which will depend on the wrong libarchive-static (the
-  # non-ruby186 one), and a runtime error will result.  (This had to be done in
-  # libarchive-static as well).
   version = File.exist?('VERSION') ? File.read('VERSION').strip : ''
-  cd 'pkg' do
-    mv "fig18-#{version}-x86-mswin32.gem", "fig18-#{version}-i386-mswin32.gem"
-    mv "fig18-#{version}-x86-mingw32.gem", "fig18-#{version}-i386-mingw32.gem"
-  end
 end
 
 task :simplecov do
