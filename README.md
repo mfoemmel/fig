@@ -297,10 +297,6 @@ the version).
      $ cat lib/hello-lib/hello.foo
      print 'hello'
 
-## Building the gem ##
-
-rake build
-
 Package Statement Descriptions
 ==============================
 
@@ -492,15 +488,21 @@ package descriptor or the package.fig file.  This will not follow all
 configurations in all depended upon packages, only the ones reachable by one of
 the configurations in the starting package.
 
-Installation
-============
+Installation and Development
+============================
+
+## Installation ##
 
     gem install fig
 
-NOTE: When installing Fig on Windows you must first have installed the
+*NOTE*: When installing Fig on Windows you must first have installed the
 Development Kit available from http://rubyinstaller.org/downloads. Instructions
 for installation of the Development Kit are available at
 https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
+
+## Building the gem ##
+
+    rake build
 
 Community
 =========
