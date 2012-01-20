@@ -39,9 +39,9 @@ Installation
 
      $ gem install fig
 
-Or, if running Ruby 1.8.x...
-
-     $ gem install fig18
+     NOTE: When installing Fig on windows you must first have installed the Development Kit available 
+     from http://rubyinstaller.org/downloads. Instructions for installation of the Development Kit are available
+     at https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
 
 Usage
 =====
