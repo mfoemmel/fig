@@ -74,11 +74,17 @@ end
 def set_up_multiple_config_repository
   cleanup_home_and_remote
 
+  # Note: make sure that configs within each package are NOT in sorted order.
+  # Part of the output testing is ordering.
+
   input = <<-END_INPUT
     config default
     end
   END_INPUT
   fig('--publish no-dependencies/1.2.3', input)
+
+  # Configs in "--publish"es below are required because there is no "default"
+  # config in the packages.
 
   input = <<-END_INPUT
     config windows
@@ -99,7 +105,7 @@ def set_up_multiple_config_repository
   END_INPUT
   fig('--publish operatingsystem/1.2.3:windows', input)
 
-  # Ensure we have a case where two different configs's dependencies conflict.
+  # Ensure we have a case where two different configs' dependencies conflict.
   fig('--publish operatingsystem/3.4.5:redhat', input)
 
   input = <<-END_INPUT
@@ -118,6 +124,10 @@ def set_up_multiple_config_repository
     config unreferenced
       include this-should-not-show-up-in-any-output/942.29024.2939.209.1
     end
+
+    config mysql
+      include operatingsystem/1.2.3:ubuntu
+    end
   END_INPUT
   fig('--publish database/1.2.3:oracle', input)
 
@@ -126,16 +136,16 @@ def set_up_multiple_config_repository
       include operatingsystem/1.2.3:redhat
     end
 
-    config lighttpd
-      include operatingsystem/3.4.5:ubuntu
-    end
-
     config iis
       include operatingsystem/1.2.3:windows
     end
 
     config unreferenced
       include this-should-not-show-up-in-any-output/23.123.63.23
+    end
+
+    config lighttpd
+      include operatingsystem/3.4.5:ubuntu
     end
   END_INPUT
   fig('--publish web/1.2.3:apache', input)
@@ -146,14 +156,19 @@ def set_up_multiple_config_repository
       include web/1.2.3:apache
     end
 
+    config facilities
+      include web/1.2.3:lighttpd
+      include database/1.2.3:mysql
+    end
+
     config marketing
       include database/1.2.3:postgresql
       include web/1.2.3:lighttpd
     end
 
     config legal
-      include database/1.2.3:sqlserver
       include web/1.2.3:iis
+      include database/1.2.3:sqlserver
     end
   END_INPUT
   fig('--publish departments/1.2.3:accounting', input)
@@ -199,6 +214,16 @@ def test_list_configs(package_name)
   err.should == ''
 
   return
+end
+
+# Allow for indenting in expected output given in heredocs.
+def clean_expected(expected)
+  cleaned = expected.chomp
+
+  indent_count = cleaned.scan(/ ^ [ ]+ /x).collect(&:length).min
+  cleaned.gsub!(/ ^ [ ]{#{indent_count}} /x, '')
+
+  return cleaned
 end
 
 describe 'Fig' do
@@ -320,14 +345,13 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
 
-          expected = <<-END_EXPECTED_OUTPUT
-both/1.2.3
-depends-on-everything/1.2.3
-local-only/1.2.3
-prerequisite/1.2.3
-remote-only/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            both/1.2.3
+            depends-on-everything/1.2.3
+            local-only/1.2.3
+            prerequisite/1.2.3
+            remote-only/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig(
             '--list-dependencies depends-on-depends-on-everything/1.2.3:indirectly-everything'
@@ -341,14 +365,13 @@ remote-only/1.2.3
           set_up_local_and_remote_repository_with_depends_on_everything
           create_package_dot_fig_with_all_dependencies
 
-          expected = <<-END_EXPECTED_OUTPUT
-both/1.2.3
-depends-on-everything/1.2.3
-local-only/1.2.3
-prerequisite/1.2.3
-remote-only/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            both/1.2.3
+            depends-on-everything/1.2.3
+            local-only/1.2.3
+            prerequisite/1.2.3
+            remote-only/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig('--list-dependencies')
           exitstatus.should == 0
@@ -367,10 +390,9 @@ remote-only/1.2.3
           set_up_multiple_config_repository
           remove_any_package_dot_fig
 
-          expected = <<-END_EXPECTED_OUTPUT
-no-dependencies/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig(
             '--list-dependencies --list-all-configs no-dependencies/1.2.3'
@@ -384,10 +406,9 @@ no-dependencies/1.2.3
           set_up_multiple_config_repository
           create_package_dot_fig('no-dependencies')
 
-          expected = <<-END_EXPECTED_OUTPUT
-no-dependencies/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
-          expected.chomp!
 
           (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
           exitstatus.should == 0
@@ -395,119 +416,252 @@ no-dependencies/1.2.3
           err.should == ''
         end
 
-# TODO: Environment needs to handle multiple package versions.
-#        it %q<lists all recursive configuration dependencies without a package.fig> do
-#          set_up_multiple_config_repository
-#          remove_any_package_dot_fig
-#
-#        expected = <<-END_EXPECTED_OUTPUT
-#departments/1.2.3:accounting
-#departments/1.2.3:legal
-#departments/1.2.3:marketing
-#        END_EXPECTED_OUTPUT
-#        expected.chomp!
-#
-#          (out, err, exitstatus) = fig(
-#            '--list-dependencies --list-all-configs departments/1.2.3:legal'
-#          )
-#          exitstatus.should == 0
-#          out.should == expected
-#          err.should == ''
-#        end
-#
-#        it %q<lists all packages in the repository with a package.fig> do
-#          set_up_local_and_remote_repository_with_depends_on_everything
-#          create_package_dot_fig_with_all_dependencies
-#
-#          (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
-#          exitstatus.should == 0
-#          out.should ==
-#            "both/1.2.3\ndepends-on-everything/1.2.3:everything\nlocal-only/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
-#          err.should == ''
-#        end
+        it %q<lists all recursive configuration dependencies without a package.fig> do
+          set_up_multiple_config_repository
+          remove_any_package_dot_fig
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            database/1.2.3:mysql
+            database/1.2.3:oracle
+            database/1.2.3:postgresql
+            database/1.2.3:sqlserver
+            departments/1.2.3:accounting
+            departments/1.2.3:facilities
+            departments/1.2.3:legal
+            departments/1.2.3:marketing
+            operatingsystem/1.2.3:redhat
+            operatingsystem/1.2.3:ubuntu
+            operatingsystem/1.2.3:windows
+            operatingsystem/3.4.5:ubuntu
+            web/1.2.3:apache
+            web/1.2.3:iis
+            web/1.2.3:lighttpd
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig(
+            '--list-dependencies --list-all-configs departments/1.2.3:legal'
+          )
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists all packages in the repository with a package.fig> do
+          set_up_local_and_remote_repository_with_depends_on_everything
+          create_package_dot_fig_with_all_dependencies
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            both/1.2.3
+            depends-on-everything/1.2.3
+            depends-on-everything/1.2.3:everything
+            local-only/1.2.3
+            prerequisite/1.2.3
+            remote-only/1.2.3
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig('--list-dependencies --list-all-configs')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
       end
     end
 
     describe 'with --list-tree' do
-      before(:each) do
-        cleanup_test_environment
-        setup_test_environment
-        cleanup_home_and_remote
-      end
+      describe 'no --list-all-configs' do
+        before(:each) do
+          cleanup_test_environment
+          setup_test_environment
+          cleanup_home_and_remote
+        end
 
-      it %q<lists the package when there are no dependencies without a package.fig (and output is not a tty)> do
-        set_up_local_and_remote_repository_with_depends_on_everything
-        remove_any_package_dot_fig
+        it %q<lists the package when there are no dependencies without a package.fig (and output is not a tty)> do
+          set_up_local_and_remote_repository_with_depends_on_everything
+          remove_any_package_dot_fig
 
-        (out, err, exitstatus) = fig('--list-dependencies --list-tree prerequisite/1.2.3')
-        exitstatus.should == 0
-        out.should == 'prerequisite/1.2.3'
-        err.should == ''
-      end
+          (out, err, exitstatus) = fig('--list-dependencies --list-tree prerequisite/1.2.3')
+          exitstatus.should == 0
+          out.should == 'prerequisite/1.2.3'
+          err.should == ''
+        end
 
-      it %q<lists only the package and the dependency and not all in the repository with a package.fig> do
-        set_up_local_and_remote_repository_with_depends_on_everything
-        create_package_dot_fig_with_single_dependency
+        it %q<lists only the package and the dependency and not all in the repository with a package.fig> do
+          set_up_local_and_remote_repository_with_depends_on_everything
+          create_package_dot_fig_with_single_dependency
 
-        expected = <<-END_EXPECTED_OUTPUT
-<unpublished>
-    prerequisite/1.2.3
-        END_EXPECTED_OUTPUT
-        expected.chomp!
-
-        (out, err, exitstatus) = fig('--list-dependencies --list-tree')
-        exitstatus.should == 0
-        out.should == expected
-        err.should == ''
-      end
-
-      it %q<lists almost all packages in the repository without a package.fig> do
-        set_up_local_and_remote_repository_with_depends_on_everything
-        remove_any_package_dot_fig
-
-        expected = <<-END_EXPECTED_OUTPUT
-depends-on-depends-on-everything/1.2.3:indirectly-everything
-    depends-on-everything/1.2.3:everything
-        prerequisite/1.2.3
-        local-only/1.2.3
-            prerequisite/1.2.3
-        remote-only/1.2.3
-            prerequisite/1.2.3
-        both/1.2.3
-            prerequisite/1.2.3
-        END_EXPECTED_OUTPUT
-        expected.chomp!
-
-        (out, err, exitstatus) = fig(
-          '--list-dependencies --list-tree depends-on-depends-on-everything/1.2.3:indirectly-everything'
-        )
-        exitstatus.should == 0
-        out.should == expected
-        err.should == ''
-      end
-
-      it %q<lists all packages in the repository with a package.fig> do
-        set_up_local_and_remote_repository_with_depends_on_everything
-        create_package_dot_fig_with_all_dependencies
-
-        expected = <<-END_EXPECTED_OUTPUT
-<unpublished>
-    depends-on-everything/1.2.3
-        depends-on-everything/1.2.3:everything
-            prerequisite/1.2.3
-            local-only/1.2.3
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            <unpublished>
                 prerequisite/1.2.3
-            remote-only/1.2.3
-                prerequisite/1.2.3
-            both/1.2.3
-                prerequisite/1.2.3
-        END_EXPECTED_OUTPUT
-        expected.chomp!
+          END_EXPECTED_OUTPUT
 
-        (out, err, exitstatus) = fig('--list-dependencies --list-tree')
-        exitstatus.should == 0
-        out.should == expected
-        err.should == ''
+          (out, err, exitstatus) = fig('--list-dependencies --list-tree')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists almost all packages in the repository without a package.fig> do
+          set_up_local_and_remote_repository_with_depends_on_everything
+          remove_any_package_dot_fig
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            depends-on-depends-on-everything/1.2.3:indirectly-everything
+                depends-on-everything/1.2.3:everything
+                    prerequisite/1.2.3
+                    local-only/1.2.3
+                        prerequisite/1.2.3
+                    remote-only/1.2.3
+                        prerequisite/1.2.3
+                    both/1.2.3
+                        prerequisite/1.2.3
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig(
+            '--list-dependencies --list-tree depends-on-depends-on-everything/1.2.3:indirectly-everything'
+          )
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists all packages in the repository with a package.fig> do
+          set_up_local_and_remote_repository_with_depends_on_everything
+          create_package_dot_fig_with_all_dependencies
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            <unpublished>
+                depends-on-everything/1.2.3
+                    depends-on-everything/1.2.3:everything
+                        prerequisite/1.2.3
+                        local-only/1.2.3
+                            prerequisite/1.2.3
+                        remote-only/1.2.3
+                            prerequisite/1.2.3
+                        both/1.2.3
+                            prerequisite/1.2.3
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig('--list-dependencies --list-tree')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+      end
+
+      describe 'with --list-all-configs' do
+        before(:each) do
+          setup_test_environment
+          cleanup_home_and_remote
+        end
+
+        it %q<lists only the single configuration when there are no dependencies without a package.fig> do
+          set_up_multiple_config_repository
+          remove_any_package_dot_fig
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            no-dependencies/1.2.3
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig(
+            '--list-dependencies --list-tree --list-all-configs no-dependencies/1.2.3'
+          )
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists only the package and the dependency and not all in the repository with a package.fig> do
+          set_up_multiple_config_repository
+          create_package_dot_fig('no-dependencies')
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            <unpublished>
+                no-dependencies/1.2.3
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig('--list-dependencies --list-tree --list-all-configs')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists almost all packages in the repository without a package.fig> do
+          set_up_multiple_config_repository
+          remove_any_package_dot_fig
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            departments/1.2.3:accounting
+                database/1.2.3:oracle
+                    operatingsystem/1.2.3:redhat
+                web/1.2.3:apache
+                    operatingsystem/1.2.3:redhat
+            departments/1.2.3:facilities
+                web/1.2.3:lighttpd
+                    operatingsystem/3.4.5:ubuntu
+                database/1.2.3:mysql
+                    operatingsystem/1.2.3:ubuntu
+            departments/1.2.3:marketing
+                database/1.2.3:postgresql
+                    operatingsystem/3.4.5:ubuntu
+                web/1.2.3:lighttpd
+                    operatingsystem/3.4.5:ubuntu
+            departments/1.2.3:legal
+                web/1.2.3:iis
+                    operatingsystem/1.2.3:windows
+                database/1.2.3:sqlserver
+                    operatingsystem/1.2.3:windows
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig(
+            '--list-dependencies --list-tree --list-all-configs departments/1.2.3'
+          )
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists only the configs in a package.fig and not all configs in dependencies> do
+          set_up_multiple_config_repository
+
+          File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
+            |handle|
+            handle.print <<-END
+              config machineA
+                include departments/1.2.3:marketing
+                include departments/1.2.3:legal
+              end
+
+              config machineB
+                include departments/1.2.3:facilities
+              end
+            END
+          end
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            <unpublished>:machineA
+                departments/1.2.3:marketing
+                    database/1.2.3:postgresql
+                        operatingsystem/3.4.5:ubuntu
+                    web/1.2.3:lighttpd
+                        operatingsystem/3.4.5:ubuntu
+                departments/1.2.3:legal
+                    web/1.2.3:iis
+                        operatingsystem/1.2.3:windows
+                    database/1.2.3:sqlserver
+                        operatingsystem/1.2.3:windows
+            <unpublished>:machineB
+                departments/1.2.3:facilities
+                    web/1.2.3:lighttpd
+                        operatingsystem/3.4.5:ubuntu
+                    database/1.2.3:mysql
+                        operatingsystem/1.2.3:ubuntu
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig('--list-dependencies --list-tree --list-all-configs')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
       end
     end
   end

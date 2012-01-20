@@ -1,5 +1,13 @@
 v0.1.x
 
+  Notice:
+
+  A lot of internal changes have been made to make future changes easier and
+  test coverage is significantly better than it was before.  We believe that we
+  haven't broken anything (other than the purposeful changes below), but due to
+  the scope of the changes, we may have done so.  Please report any problems
+  you run into.
+
   Backwards incompatibilities:
 
   - Now requires at least ruby v1.8.7.
@@ -73,6 +81,11 @@ v0.1.x
         fig --list-dependencies package-with-no-dependencies/1.2.3 | cat
 
         [no output]
+
+    Additionally, you can specify "--list-all-configs"; this will follow all
+    the configurations in the base package.  Note that this will show multiple
+    versions of the same package if different configurations depend upon
+    different versions.
 
 v0.1.51
 
