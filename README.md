@@ -34,15 +34,6 @@ language agnostic (Java doesn't get preferential treatment), and work with
 executables as well as libraries. And unlike APT, fig is cross platform and
 project-oriented.
 
-Installation
-============
-
-     $ gem install fig
-
-     NOTE: When installing Fig on windows you must first have installed the Development Kit available 
-     from http://rubyinstaller.org/downloads. Instructions for installation of the Development Kit are available
-     at https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
-
 Usage
 =====
 
@@ -502,6 +493,16 @@ This will follow all of the dependencies using all the configurations in the
 package descriptor or the package.fig file.  This will not follow all
 configurations in all depended upon packages, only the ones reachable by one of
 the configurations in the starting package.
+
+Installation
+============
+
+    gem install fig
+
+NOTE: When installing Fig on Windows you must first have installed the
+Development Kit available from http://rubyinstaller.org/downloads. Instructions
+for installation of the Development Kit are available at
+https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
 
 Community
 =========
