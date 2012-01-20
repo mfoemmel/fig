@@ -23,6 +23,79 @@ module Fig; end
 class Fig::Command
   DEFAULT_FIG_FILE = 'package.fig'
 
+  def run_fig(argv)
+    @options = Fig::Options.new(argv)
+    if not @options.exit_code.nil?
+      return @options.exit_code
+    end
+    @descriptor = @options.descriptor
+
+    configure
+
+    if @options.clean?
+      check_required_package_descriptor('to clean')
+      @repository.clean(@descriptor.name, @descriptor.version)
+      return 0
+    end
+
+    if handle_pre_parse_list_options()
+      return 0
+    end
+
+    if @options.publishing?
+      return publish()
+    end
+
+    get_package()
+
+    if @options.listing()
+      handle_post_parse_list_options()
+    elsif @options.get()
+      puts @environment[@options.get()]
+    elsif @options.shell_command
+      @environment.execute_shell(@options.shell_command) do
+        |command| @operating_system.shell_exec command
+      end
+    elsif @descriptor
+      @environment.include_config(
+        @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
+      )
+      @environment.execute_config(
+        @package, @descriptor.name, @descriptor.config, nil, []
+      ) { |cmd| @operating_system.shell_exec cmd }
+    elsif not @repository.updating?
+      $stderr.puts "Nothing to do.\n"
+      $stderr.puts Fig::Options::USAGE
+      $stderr.puts %q<Run "fig --help" for a full list of commands.>
+      return 1
+    end
+
+    return 0
+  end
+
+  def run_with_exception_handling(argv)
+    begin
+      return_code = run_fig(argv)
+      return return_code
+    rescue Fig::URLAccessError => error
+      urls = error.urls.join(', ')
+      $stderr.puts "Access to #{urls} in #{error.package}/#{error.version} not allowed."
+      return 1
+    rescue Fig::UserInputError => error
+      log_error_message(error)
+      return 1
+    rescue OptionParser::InvalidOption => error
+      $stderr.puts error.to_s
+      $stderr.puts Fig::Options::USAGE
+      return 1
+    rescue Fig::RepositoryError => error
+      log_error_message(error)
+      return 1
+    end
+  end
+
+  private
+
   def derive_remote_url()
     if remote_operation_necessary?()
       if ENV['FIG_REMOTE_URL'].nil?
@@ -390,81 +463,10 @@ class Fig::Command
     return 0
   end
 
-  def run_fig(argv)
-    @options = Fig::Options.new(argv)
-    if not @options.exit_code.nil?
-      return @options.exit_code
-    end
-    @descriptor = @options.descriptor
-
-    configure
-
-    if @options.clean?
-      check_required_package_descriptor('to clean')
-      @repository.clean(@descriptor.name, @descriptor.version)
-      return 0
-    end
-
-    if handle_pre_parse_list_options()
-      return 0
-    end
-
-    if @options.publishing?
-      return publish()
-    end
-
-    get_package()
-
-    if @options.listing()
-      handle_post_parse_list_options()
-    elsif @options.get()
-      puts @environment[@options.get()]
-    elsif @options.shell_command
-      @environment.execute_shell(@options.shell_command) do
-        |command| @operating_system.shell_exec command
-      end
-    elsif @descriptor
-      @environment.include_config(
-        @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
-      )
-      @environment.execute_config(
-        @package, @descriptor.name, @descriptor.config, nil, []
-      ) { |cmd| @operating_system.shell_exec cmd }
-    elsif not @repository.updating?
-      $stderr.puts "Nothing to do.\n"
-      $stderr.puts Fig::Options::USAGE
-      $stderr.puts %q<Run "fig --help" for a full list of commands.>
-      return 1
-    end
-
-    return 0
-  end
-
   def log_error_message(error)
     # If there's no message, we assume that the cause has already been logged.
     if error_has_message?(error)
       Fig::Logging.fatal error.to_s
-    end
-  end
-
-  def run_with_exception_handling(argv)
-    begin
-      return_code = run_fig(argv)
-      return return_code
-    rescue Fig::URLAccessError => error
-      urls = error.urls.join(', ')
-      $stderr.puts "Access to #{urls} in #{error.package}/#{error.version} not allowed."
-      return 1
-    rescue Fig::UserInputError => error
-      log_error_message(error)
-      return 1
-    rescue OptionParser::InvalidOption => error
-      $stderr.puts error.to_s
-      $stderr.puts Fig::Options::USAGE
-      return 1
-    rescue Fig::RepositoryError => error
-      log_error_message(error)
-      return 1
     end
   end
 
