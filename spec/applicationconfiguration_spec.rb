@@ -53,17 +53,9 @@ describe 'ApplicationConfiguration' do
     config.url_access_allowed?('').should == false
   end
 
-  it 'disallows a url with a port whose url is whitelisted, but not the port' do
-    pending('disallow that')
-    config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
-    config.push_dataset({'url whitelist' => [WHITELIST_TEST_URL]})
-    config.url_access_allowed?(WHITELIST_TEST_URL + ':2001').should == false
-  end
-
   it 'disallows a url with a different port (but the first part matches)' do
     config = Fig::ApplicationConfiguration.new(REPOSITORY_TEST_URL)
     config.push_dataset({'url whitelist' => [WHITELIST_TEST_URL+':2000']})
     config.url_access_allowed?(WHITELIST_TEST_URL+':20001').should == false
   end
-
 end
