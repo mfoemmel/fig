@@ -58,5 +58,23 @@ describe 'Fig' do
       err.should =~ / bits /xi
       out.should == ''
     end
+
+    it %q<prints error when multiple --list-* options are given> do
+      (out, err, exitstatus) =
+        fig('--list-remote --list-variables', nil, :no_raise_on_error)
+      exitstatus.should == 1
+      out.should == ''
+
+      %w<
+        --list-configs
+        --list-dependencies
+        --list-local
+        --list-remote
+        --list-variables
+      >.each do
+        |option|
+        err.should =~ / #{option} /x
+      end
+    end
   end
 end

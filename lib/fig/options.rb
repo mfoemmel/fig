@@ -7,6 +7,7 @@ require 'fig/statement/include'
 require 'fig/statement/path'
 require 'fig/statement/resource'
 require 'fig/statement/set'
+require 'fig/userinputerror'
 
 module Fig; end
 
@@ -276,7 +277,17 @@ Environment variables:
       | type, specification |
 
       parser.on(*specification) do
-        @options[:listing] = type
+        if @options[:listing]
+          options_string =
+            (
+              option_mapping.values.collect {|specification| specification[0]}
+            ).join(', ')
+
+          $stderr.puts "Can only specify one of #{options_string}."
+          @exit_code = 1
+        else
+          @options[:listing] = type
+        end
       end
     end
 
