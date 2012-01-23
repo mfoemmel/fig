@@ -15,6 +15,7 @@ require 'highline/import'
 require 'fig/logging'
 require 'fig/networkerror'
 require 'fig/notfounderror'
+require 'fig/windows'
 
 module Fig
   # Does things requiring real O/S interaction, primarilly taking care of file
