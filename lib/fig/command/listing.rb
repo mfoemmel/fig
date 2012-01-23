@@ -56,6 +56,16 @@ module Fig::Command::Listing
     return
   end
 
+  def display_variables()
+    if @options.list_tree?
+      raise Fig::UserInputError.new('--list-variables --list-tree not yet implemented.')
+    else
+      display_variables_flat()
+    end
+
+    return
+  end
+
   def display_dependencies_in_tree(package, config_names, indent = 0)
     config_names.each do
       |config_name|
@@ -153,16 +163,29 @@ module Fig::Command::Listing
       display_configs_in_local_packages_list()
     when :dependencies
       display_dependencies()
-    when :dependencies_all_configs
-      raise Fig::UserInputError.new('--list-dependencies-all-configs not yet implemented.')
     when :variables
-      raise Fig::UserInputError.new('--list-variables not yet implemented.')
-    when :variables_all_configs
-      raise Fig::UserInputError.new('--list-variables-all-configs not yet implemented.')
+      display_variables()
     else
       raise %Q<Bug in code! Found unknown :listing option value "#{options.listing()}">
     end
 
     return
   end
+
+  def display_variables_flat()
+    register_package_with_environment()
+
+    variables = @environment.variables()
+
+    if variables.empty? and $stdout.tty?
+      puts '<no variables>'
+    else
+      variables.keys.sort.each do |variable|
+        puts variable + "=" + variables[variable]
+      end
+    end
+
+    return
+  end
+
 end

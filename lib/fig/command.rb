@@ -35,7 +35,7 @@ class Fig::Command
     end
     @descriptor = @options.descriptor
 
-    configure
+    configure()
 
     if @options.clean?
       check_required_package_descriptor('to clean')
@@ -146,7 +146,7 @@ class Fig::Command
     # Check to see if this is still happening with the new layers of abstraction.
     at_exit { @retriever.save }
 
-    @environment = Fig::Environment.new(@repository, nil, @retriever)
+    @environment = Fig::Environment.new(@repository, @options.reset_environment? ? {} : nil, @retriever)
 
     @options.non_command_package_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
@@ -206,6 +206,12 @@ class Fig::Command
   def register_package_with_environment_if_not_listing()
     return if @options.listing
 
+    register_package_with_environment()
+
+    return
+  end
+
+  def register_package_with_environment()
     if @options.updating?
       @package.retrieves.each do |var, path|
         @environment.add_retrieve(var, path)
@@ -218,7 +224,6 @@ class Fig::Command
       @options.config() || @descriptor && @descriptor.config() || 'default',
       nil
     )
-
     return
   end
 

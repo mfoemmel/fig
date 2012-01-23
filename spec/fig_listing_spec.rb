@@ -36,6 +36,71 @@ def set_up_local_and_remote_repository
   return
 end
 
+def setup_list_variables_packages
+  cleanup_home_and_remote
+
+  input_a = <<-END_INPUT
+    config default
+      set A_DEFAULT=BAR
+      include B/1.2.3
+      include C/1.2.3
+    end
+
+    config nondefault
+      set A_NONDEFAULT=BAZ
+    end
+  END_INPUT
+
+  input_b = <<-END_INPUT
+    config default
+      set B_DEFAULT=BAR
+      include D/1.2.3
+    end
+
+    config nondefault
+      set B_NONDEFAULT=BAZ
+    end
+
+    config should_not_show_up_in_output
+      set SHOULD_NOT_SHOW_UP_IN_OUTPUT_FROM_B=should_not_show_up
+    end
+  END_INPUT
+
+  input_c = <<-END_INPUT
+    config default
+      set C_DEFAULT=BAR
+      include D/1.2.3
+    end
+
+    config nondefault
+      set C_NONDEFAULT=BAZ
+    end
+
+    config should_not_show_up_in_output
+      set SHOULD_NOT_SHOW_UP_IN_OUTPUT_FROM_C=should_not_show_up
+    end
+  END_INPUT
+
+  input_d = <<-END_INPUT
+    config default
+      set D_DEFAULT=BAR
+    end
+
+    config nondefault
+      set D_NONDEFAULT=BAZ
+    end
+
+    config should_not_show_up_in_output
+      set SHOULD_NOT_SHOW_UP_IN_OUTPUT_FROM_D=should_not_show_up
+    end
+  END_INPUT
+  fig('--publish D/1.2.3', input_d)
+  fig('--publish C/1.2.3', input_c)
+  fig('--publish B/1.2.3', input_b)
+  fig('--publish A/1.2.3', input_a)
+
+end
+
 def set_up_local_and_remote_repository_with_depends_on_everything
   set_up_local_and_remote_repository
 
@@ -231,7 +296,6 @@ describe 'Fig' do
     before(:each) do
       cleanup_test_environment
       setup_test_environment
-      cleanup_home_and_remote
     end
 
     it %q<prints nothing with an empty repository> do
@@ -261,7 +325,6 @@ describe 'Fig' do
     before(:each) do
       cleanup_test_environment
       setup_test_environment
-      cleanup_home_and_remote
     end
 
     it %q<prints nothing with an empty repository> do
@@ -291,7 +354,6 @@ describe 'Fig' do
     before(:each) do
       cleanup_test_environment
       setup_test_environment
-      cleanup_home_and_remote
     end
 
     it %q<prints all the configurations for local-only> do
@@ -318,7 +380,6 @@ describe 'Fig' do
         before(:each) do
           cleanup_test_environment
           setup_test_environment
-          cleanup_home_and_remote
         end
 
         it %q<lists nothing when there are no dependencies without a package.fig (and output is not a tty)> do
@@ -472,7 +533,6 @@ describe 'Fig' do
         before(:each) do
           cleanup_test_environment
           setup_test_environment
-          cleanup_home_and_remote
         end
 
         it %q<lists the package when there are no dependencies without a package.fig (and output is not a tty)> do
@@ -662,6 +722,35 @@ describe 'Fig' do
           out.should == expected
           err.should == ''
         end
+      end
+    end
+  end
+
+  describe '--list-variables' do
+    describe 'no --list-tree' do
+      describe 'no --list-all-configs' do
+        before(:each) do
+          cleanup_test_environment
+          setup_test_environment
+        end
+
+        it %q<lists only the variables and the dependency and not all in the repository with a package.fig> do
+          setup_list_variables_packages
+          create_package_dot_fig('A')
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            A_DEFAULT=BAR
+            B_DEFAULT=BAR
+            C_DEFAULT=BAR
+            D_DEFAULT=BAR
+          END_EXPECTED_OUTPUT
+
+          (out, err, exitstatus) = fig('--list-variables')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
       end
     end
   end

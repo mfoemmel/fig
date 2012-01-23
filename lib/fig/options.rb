@@ -193,6 +193,10 @@ Environment variables:
     return update? || update_if_missing?
   end
 
+  def reset_environment?()
+    return listing() == :variables
+  end
+
   private
 
   def strip_shell_command(argv)

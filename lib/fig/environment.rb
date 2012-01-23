@@ -19,22 +19,19 @@ module Fig
 
     def initialize(repository, variables_override, retriever)
       @repository = repository
-      @variables = variables_override || get_environment_variables
+      @variables = variables_override || get_system_environment_variables
       @retrieve_vars = {}
       @packages = {}
       @retriever = retriever
     end
 
-    def get_environment_variables
-      vars = {}
-      ENV.each { |key,value| vars[key]=value }
-
-      return vars
-    end
-
     # Returns the value of an envirionment variable
     def [](name)
       return @variables[name]
+    end
+
+    def variables
+      return @variables.clone
     end
 
     # Indicates that the values from a particular envrionment variable path
@@ -166,6 +163,13 @@ module Fig
     end
 
     private
+
+    def get_system_environment_variables
+      vars = {}
+      ENV.each { |key,value| vars[key]=value }
+
+      return vars
+    end
 
     def set_variable(base_package, name, value)
       @variables[name] = expand_and_retrieve_variable_value(base_package, name, value)
