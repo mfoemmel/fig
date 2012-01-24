@@ -504,6 +504,15 @@ https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
 
     rake build
 
+## Building a gem for ruby 1.8.7 on Windows ##
+
+You can no longer use the rakefile to produce this specific gem. You will need
+to create a fig.gemspec file manually. Use the list of gem dependencies found
+in the rakefile as a guide. There are two specific gems that need to be
+depended on: json v 1.4.2 and libarchive-static-ruby186. Also, the spec.files
+should specificly list all the source files, pathed from the base directory
+of the project.
+
 Community
 =========
 

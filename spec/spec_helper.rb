@@ -15,7 +15,7 @@ require 'fig/command'
 require 'fig/logging'
 
 class Popen
-  if Fig::OperatingSystem.windows?
+  if Fig::OperatingSystem.windows? && ENV['RUBY_VERSION'].include?('1.8.7')
     require 'win32/open3'
     def self.popen(*cmd)
       Open3.popen3(*cmd) { |stdin,stdout,stderr|
