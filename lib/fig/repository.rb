@@ -31,7 +31,7 @@ module Fig
       @update = update
       @update_if_missing = update_if_missing
 
-      @parser = Parser.new(@application_config)
+      @parser = Parser.new(application_config)
       @packages = PackageCache.new()
     end
 
@@ -175,7 +175,9 @@ module Fig
         delete_local_package(package_name, version_name)
         raise RepositoryError.new
       ensure
-        FileUtils.rm_rf(temp_dir)
+        if temp_dir
+          FileUtils.rm_rf(temp_dir)
+        end
       end
     end
 
