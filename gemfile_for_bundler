@@ -18,7 +18,7 @@ gem 'Platform', '>= 0.4.0'
 
 group :development do
   platforms :jruby do
-    gem open3
+    gem 'open3'
   end
 
   platforms :ruby do
