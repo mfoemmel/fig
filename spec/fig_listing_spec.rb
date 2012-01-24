@@ -42,8 +42,17 @@ def setup_list_variables_packages
   input_a = <<-END_INPUT
     config default
       set A_DEFAULT=BAR
+      set D_OVERRIDES_A=A
+      set C_OVERRIDES_A_AND_B=A
+      append A_PATH_DEFAULT=BAR
+      append D_PATH_PREPENDS_A=A
+      append C_PATH_PREPENDS_A_AND_B=A
       include B/1.2.3
       include C/1.2.3
+      set A_OVERRIDES_B_AND_C=A
+      set A_OVERRIDES_D=A
+      append A_PATH_PREPENDS_B_AND_C=A
+      append A_PATH_PREPENDS_D=A
     end
 
     config nondefault
@@ -54,6 +63,11 @@ def setup_list_variables_packages
   input_b = <<-END_INPUT
     config default
       set B_DEFAULT=BAR
+      set C_OVERRIDES_B=B
+      set C_OVERRIDES_A_AND_B=B
+      set A_OVERRIDES_B_AND_C=B
+      append C_PATH_PREPENDS_A_AND_B=B
+      append A_PATH_PREPENDS_B_AND_C=B
       include D/1.2.3
     end
 
@@ -69,6 +83,11 @@ def setup_list_variables_packages
   input_c = <<-END_INPUT
     config default
       set C_DEFAULT=BAR
+      set C_OVERRIDES_B=C
+      set C_OVERRIDES_A_AND_B=C
+      set A_OVERRIDES_B_AND_C=C
+      append C_PATH_PREPENDS_A_AND_B=C
+      append A_PATH_PREPENDS_B_AND_C=C
       include D/1.2.3
     end
 
@@ -84,6 +103,10 @@ def setup_list_variables_packages
   input_d = <<-END_INPUT
     config default
       set D_DEFAULT=BAR
+      set A_OVERRIDES_D=D
+      set D_OVERRIDES_A=D
+      append D_PATH_PREPENDS_A=D
+      append A_PATH_PREPENDS_D=D
     end
 
     config nondefault
@@ -740,10 +763,22 @@ describe 'Fig' do
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
             A_DEFAULT=BAR
+            A_OVERRIDES_B_AND_C=A
+            A_OVERRIDES_D=A
+            A_PATH_DEFAULT=BAR
+            A_PATH_PREPENDS_B_AND_C=A:C:B
+            A_PATH_PREPENDS_D=A:D
             B_DEFAULT=BAR
             C_DEFAULT=BAR
+            C_OVERRIDES_A_AND_B=C
+            C_OVERRIDES_B=C
+            C_PATH_PREPENDS_A_AND_B=C:B:A
             D_DEFAULT=BAR
+            D_OVERRIDES_A=D
+            D_PATH_PREPENDS_A=D:A
           END_EXPECTED_OUTPUT
+
+          expected.gsub!(/:/,File::PATH_SEPARATOR)
 
           (out, err, exitstatus) = fig('--list-variables')
           exitstatus.should == 0
@@ -753,5 +788,6 @@ describe 'Fig' do
 
       end
     end
+
   end
 end
