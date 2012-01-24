@@ -12,7 +12,9 @@ end
 require 'fileutils'
 
 require 'fig/command'
+require 'fig/figrc'
 require 'fig/logging'
+require 'fig/repository'
 
 class Popen
   if Fig::OperatingSystem.windows? && ENV['RUBY_VERSION'].include?('1.8.7')
@@ -75,7 +77,6 @@ def fig(args, input = nil, no_raise_on_error = false)
     fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
     fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
 
-
     raise fig_failure
   end
 end
@@ -103,7 +104,17 @@ def setup_test_environment()
   FileUtils.mkdir_p(FIG_HOME)
 
   FileUtils.mkdir_p(FIG_REMOTE_DIR)
-  FileUtils.mkdir_p(File.join(FIG_REMOTE_DIR,'_meta'))
+
+  metadata_directory =
+    File.join(FIG_REMOTE_DIR, Fig::Repository::METADATA_SUBDIRECTORY)
+  FileUtils.mkdir_p(metadata_directory)
+
+  File.open(
+    File.join(FIG_REMOTE_DIR, Fig::FigRC::REPOSITORY_CONFIGURATION), 'w'
+  ) do
+    |handle|
+    handle.puts '{}' # Empty Javascript/JSON object
+  end
 
   return
 end

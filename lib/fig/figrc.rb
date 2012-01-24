@@ -3,13 +3,15 @@ require 'json'
 require 'fig/applicationconfiguration'
 require 'fig/configfileerror'
 require 'fig/operatingsystem'
-
-REPOSITORY_CONFIGURATION = '_meta/figrc'
+require 'fig/repository'
 
 module Fig
   # Parse multiple figrc files and assemble them into a single
   # ApplicationConfiguration object.
   class FigRC
+    REPOSITORY_CONFIGURATION =
+        "#{Repository::METADATA_SUBDIRECTORY}/figrc"
+
     def self.find(
       override_path, repository_url, login, fig_home, disable_figrc = false
     )
