@@ -11,6 +11,8 @@ module Fig
   # Overall management of a repository.  Handles local operations itself;
   # defers remote operations to others.
   class Repository
+    METADATA_SUBDIRECTORY = '_meta'
+
     def self.is_url?(url)
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
     end
@@ -44,11 +46,14 @@ module Fig
           end
         end
       end
-      results
+
+      return results
     end
 
     def list_remote_packages
-      @operating_system.download_list(@remote_repository_url)
+      paths = @operating_system.download_list(@remote_repository_url)
+
+      return paths.reject { |path| path =~ %r< ^ #{METADATA_SUBDIRECTORY} / >xs }
     end
 
     def get_package(package_name, version_name, disable_updating = false)

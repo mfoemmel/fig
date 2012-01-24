@@ -4,6 +4,7 @@ require 'stringio'
 require 'tempfile'
 
 require 'fig/figrc'
+require 'fig/repository'
 require 'fig/retriever'
 
 def create_override_file(foo, bar = nil)
@@ -18,8 +19,10 @@ def create_override_file(foo, bar = nil)
 end
 
 def create_remote_config(foo, bar = nil)
-    FileUtils.mkdir_p(File.join(FIG_REMOTE_DIR, '_meta'))
-    figrc_path = File.join(FIG_REMOTE_DIR,'_meta/figrc')
+    FileUtils.mkdir_p(
+      File.join(FIG_REMOTE_DIR, Fig::Repository::METADATA_SUBDIRECTORY)
+    )
+    figrc_path = File.join(FIG_REMOTE_DIR, Fig::FigRC::REPOSITORY_CONFIGURATION)
     file_handle = File.new(figrc_path,'w')
     file_handle.write( %Q< { "foo" : "#{foo}" > )
     if not bar.nil?
