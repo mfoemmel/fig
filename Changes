@@ -1,3 +1,7 @@
+v0.1.53
+
+  - Fix bug in doing "fig -u" when the remote repository has a figrc file.
+
 v0.1.52
 
   Notice:
