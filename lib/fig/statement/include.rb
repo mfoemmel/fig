@@ -12,7 +12,18 @@ class Fig::Statement::Include
 
   attr_reader :descriptor, :overrides
 
-  def initialize(descriptor, overrides)
+  def initialize(descriptor, overrides, containing_package_name)
+    if descriptor.name && ! descriptor.version
+      message =
+        %Q<Must specify a version in the package descriptor of "#{descriptor.name}" for an include statement>
+      if containing_package_name
+        message += %Q< in the .fig file for "#{containing_package_name}">
+      end
+      message += '.'
+
+      raise Fig::PackageError.new(message)
+    end
+
     @descriptor = descriptor
     @overrides = overrides
   end
