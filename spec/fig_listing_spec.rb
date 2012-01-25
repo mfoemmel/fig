@@ -47,8 +47,10 @@ def setup_list_variables_packages
       append A_PATH_DEFAULT=BAR
       append D_PATH_PREPENDS_A=A
       append C_PATH_PREPENDS_A_AND_B=A
+      set A_SET_GETS_PREPENDED_WITH_C_AND_B=A
       include B/1.2.3
       include C/1.2.3
+      set A_OVERRIDES_C_PREPENDING_B=A
       set A_OVERRIDES_B_AND_C=A
       set A_OVERRIDES_D=A
       append A_PATH_PREPENDS_B_AND_C=A
@@ -68,6 +70,8 @@ def setup_list_variables_packages
       set A_OVERRIDES_B_AND_C=B
       append C_PATH_PREPENDS_A_AND_B=B
       append A_PATH_PREPENDS_B_AND_C=B
+      append A_SET_GETS_PREPENDED_WITH_C_AND_B=B
+      append A_OVERRIDES_C_PREPENDING_B=B
       include D/1.2.3
     end
 
@@ -88,6 +92,8 @@ def setup_list_variables_packages
       set A_OVERRIDES_B_AND_C=C
       append C_PATH_PREPENDS_A_AND_B=C
       append A_PATH_PREPENDS_B_AND_C=C
+      append A_SET_GETS_PREPENDED_WITH_C_AND_B=C
+      append A_OVERRIDES_C_PREPENDING_B=C
       include D/1.2.3
     end
 
@@ -757,17 +763,49 @@ describe 'Fig' do
           setup_test_environment
         end
 
-        it %q<lists only the variables and the dependency and not all in the repository with a package.fig> do
+        it %q<lists all dependency variables without a package.fig> do
+          setup_list_variables_packages
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            A_DEFAULT=BAR
+            A_OVERRIDES_B_AND_C=A
+            A_OVERRIDES_C_PREPENDING_B=A
+            A_OVERRIDES_D=A
+            A_PATH_DEFAULT=BAR
+            A_PATH_PREPENDS_B_AND_C=A:C:B
+            A_PATH_PREPENDS_D=A:D
+            A_SET_GETS_PREPENDED_WITH_C_AND_B=C:B:A
+            B_DEFAULT=BAR
+            C_DEFAULT=BAR
+            C_OVERRIDES_A_AND_B=C
+            C_OVERRIDES_B=C
+            C_PATH_PREPENDS_A_AND_B=C:B:A
+            D_DEFAULT=BAR
+            D_OVERRIDES_A=D
+            D_PATH_PREPENDS_A=D:A
+          END_EXPECTED_OUTPUT
+
+          expected.gsub!(/:/,File::PATH_SEPARATOR)
+
+          (out, err, exitstatus) = fig('--list-variables A/1.2.3')
+          exitstatus.should == 0
+          out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists all dependency variables with a package.fig> do
           setup_list_variables_packages
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
             A_DEFAULT=BAR
             A_OVERRIDES_B_AND_C=A
+            A_OVERRIDES_C_PREPENDING_B=A
             A_OVERRIDES_D=A
             A_PATH_DEFAULT=BAR
             A_PATH_PREPENDS_B_AND_C=A:C:B
             A_PATH_PREPENDS_D=A:D
+            A_SET_GETS_PREPENDED_WITH_C_AND_B=C:B:A
             B_DEFAULT=BAR
             C_DEFAULT=BAR
             C_OVERRIDES_A_AND_B=C
@@ -785,7 +823,6 @@ describe 'Fig' do
           out.should == expected
           err.should == ''
         end
-
       end
     end
 
