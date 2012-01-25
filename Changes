@@ -1,3 +1,8 @@
+v0.1.55
+
+  - "include" of another package without specifying a version is now a warning
+    about its ability to work is dependent upon include ordering.
+
 v0.1.54
 
   - Emits an error when you've got an "include" of another package without
