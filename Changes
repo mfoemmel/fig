@@ -1,3 +1,11 @@
+v0.1.54
+
+  - Emits an error when you've got an "include" of another package without
+    specifying the version.  It used to be the case that you could leave the
+    version off, but that would only work if there was a "current" version of
+    the depended upon package published.  Which meant that you'd have to
+    --force the publication of the "current" version.
+
 v0.1.53
 
   - Fix bug in doing "fig -u" when the remote repository has a figrc file.
