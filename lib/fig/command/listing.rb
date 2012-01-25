@@ -66,21 +66,27 @@ module Fig::Command::Listing
     return
   end
 
-  def display_dependencies_in_tree(package, config_names, indent = 0)
+  def display_dependencies_in_tree(base_package, config_names, indent = 0)
     config_names.each do
       |config_name|
 
       print ' ' * (indent * 4)
-      puts package.to_s_with_config(config_name)
+      puts base_package.to_s_with_config(config_name)
 
-      package.package_dependencies(config_name).each do
+      base_package.package_dependencies(config_name).each do
         |descriptor|
 
-        display_dependencies_in_tree(
-          @repository.get_package(descriptor.name, descriptor.version),
-          [descriptor.config],
-          indent + 1
-        )
+        package = nil
+        if descriptor.name
+          package =
+            @repository.get_package(
+              descriptor.name, descriptor.version, false, :allow_any_version
+            )
+        else
+          package = base_package
+        end
+
+        display_dependencies_in_tree(package, [descriptor.config], indent + 1)
       end
     end
 

@@ -88,6 +88,10 @@ class Fig::Statement::Include
   end
 
   def referenced_version_name(package)
+    if package_name()
+      return version_name()
+    end
+
     return version_name() || package.version_name()
   end
 
