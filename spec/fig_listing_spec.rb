@@ -43,12 +43,16 @@ def setup_list_variables_packages
     config default
       set A_DEFAULT=BAR
       set D_OVERRIDES_A=A
-      set C_OVERRIDES_A_AND_B=A
+      set B_OVERRIDES_A_AND_C=A
       append A_PATH_DEFAULT=BAR
       append D_PATH_PREPENDS_A=A
-      append C_PATH_PREPENDS_A_AND_B=A
-      include B/1.2.3
+      append B_PATH_PREPENDS_A_AND_C=A
+
+      # Note includes not in alphabetical order in order to check that sorting
+      # does or does not happen.
       include C/1.2.3
+      include B/1.2.3
+
       set A_OVERRIDES_B_AND_C=A
       set A_OVERRIDES_D=A
       append A_PATH_PREPENDS_B_AND_C=A
@@ -63,12 +67,15 @@ def setup_list_variables_packages
   input_b = <<-END_INPUT
     config default
       set B_DEFAULT=BAR
-      set C_OVERRIDES_B=B
-      set C_OVERRIDES_A_AND_B=B
+      set B_OVERRIDES_C=B
+      set B_OVERRIDES_A_AND_C=B
       set A_OVERRIDES_B_AND_C=B
-      append C_PATH_PREPENDS_A_AND_B=B
+      append B_PATH_PREPENDS_A_AND_C=B
       append A_PATH_PREPENDS_B_AND_C=B
-      include D/1.2.3
+
+      # Note lack of version.  That this works depends upon another include of
+      # D to be encountered during parse to include the version.
+      include D
     end
 
     config nondefault
@@ -83,10 +90,10 @@ def setup_list_variables_packages
   input_c = <<-END_INPUT
     config default
       set C_DEFAULT=BAR
-      set C_OVERRIDES_B=C
-      set C_OVERRIDES_A_AND_B=C
+      set B_OVERRIDES_C=C
+      set B_OVERRIDES_A_AND_C=C
       set A_OVERRIDES_B_AND_C=C
-      append C_PATH_PREPENDS_A_AND_B=C
+      append B_PATH_PREPENDS_A_AND_C=C
       append A_PATH_PREPENDS_B_AND_C=C
       include D/1.2.3
     end
@@ -119,9 +126,8 @@ def setup_list_variables_packages
   END_INPUT
   fig('--publish D/1.2.3', input_d)
   fig('--publish C/1.2.3', input_c)
-  fig('--publish B/1.2.3', input_b)
+  fig('--publish B/1.2.3:nondefault', input_b)
   fig('--publish A/1.2.3', input_a)
-
 end
 
 def set_up_local_and_remote_repository_with_depends_on_everything
@@ -766,13 +772,13 @@ describe 'Fig' do
             A_OVERRIDES_B_AND_C=A
             A_OVERRIDES_D=A
             A_PATH_DEFAULT=BAR
-            A_PATH_PREPENDS_B_AND_C=A:C:B
+            A_PATH_PREPENDS_B_AND_C=A:B:C
             A_PATH_PREPENDS_D=A:D
             B_DEFAULT=BAR
+            B_OVERRIDES_A_AND_C=B
+            B_OVERRIDES_C=B
+            B_PATH_PREPENDS_A_AND_C=B:C:A
             C_DEFAULT=BAR
-            C_OVERRIDES_A_AND_B=C
-            C_OVERRIDES_B=C
-            C_PATH_PREPENDS_A_AND_B=C:B:A
             D_DEFAULT=BAR
             D_OVERRIDES_A=D
             D_PATH_PREPENDS_A=D:A
@@ -782,6 +788,9 @@ describe 'Fig' do
 
           (out, err, exitstatus) = fig('--list-variables')
           exitstatus.should == 0
+
+          warning = %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\n>
+          out.slice!(warning).should == warning
           out.should == expected
           err.should == ''
         end
