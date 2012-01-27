@@ -66,12 +66,21 @@ module Fig::Command::Listing
     return
   end
 
-  def display_dependencies_in_tree(base_package, config_names, indent = 0)
+  def display_dependencies_in_tree(base_package, config_names)
+    walk_dependency_tree(base_package, config_names, 0) do
+      |package, config_name, depth|
+      print ' ' * (depth * 4)
+      puts package.to_s_with_config(config_name)
+    end
+
+    return
+  end
+
+  def walk_dependency_tree(base_package, config_names, depth, &block)
     config_names.each do
       |config_name|
 
-      print ' ' * (indent * 4)
-      puts base_package.to_s_with_config(config_name)
+      yield base_package, config_name, depth
 
       base_package.package_dependencies(config_name).each do
         |descriptor|
@@ -86,7 +95,7 @@ module Fig::Command::Listing
           package = base_package
         end
 
-        display_dependencies_in_tree(package, [descriptor.config], indent + 1)
+        walk_dependency_tree(package, [descriptor.config], depth + 1, &block)
       end
     end
 
@@ -95,7 +104,23 @@ module Fig::Command::Listing
 
   def display_dependencies_flat()
     base_config_names = derive_base_display_config_names()
-    packages = gather_package_depencency_configurations(base_config_names)
+
+    packages = {}
+
+    walk_dependency_tree(@package, base_config_names, 0) do
+      |package, config_name, depth|
+      if (
+            ! package.package_name.nil?           \
+        &&  ! (
+                  ! @options.list_all_configs?    \
+              &&  @descriptor                     \
+              &&  package.package_name == @descriptor.name
+            )
+      )
+        packages[package] ||= Set.new
+        packages[package] << config_name
+      end
+    end
 
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
@@ -128,41 +153,6 @@ module Fig::Command::Listing
     ]
   end
 
-  def gather_package_depencency_configurations(starting_config_names)
-    packages = {}
-
-    if ! @package.package_name.nil?
-      packages[@package] = starting_config_names.to_set
-    end
-
-    starting_config_names.each do
-      |config_name|
-
-      @package[config_name].walk_statements_following_package_dependencies(
-        @repository, @package
-      ) do
-        |package, statement|
-
-        if (
-              ! package.package_name.nil?               \
-          &&  statement.is_a?(Fig::Statement::Configuration)
-        )
-          packages[package] ||= Set.new
-          packages[package] << statement.name
-        end
-      end
-    end
-
-    if ! @options.list_all_configs? && @descriptor
-      packages.reject! do
-        |package, config_names|
-        package.package_name == @descriptor.name
-      end
-    end
-
-    return packages
-  end
-
   def handle_post_parse_list_options()
     case @options.listing()
     when :configs
@@ -193,5 +183,4 @@ module Fig::Command::Listing
 
     return
   end
-
 end
