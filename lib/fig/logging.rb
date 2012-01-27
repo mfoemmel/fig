@@ -4,6 +4,7 @@ require 'log4r/yamlconfigurator'
 
 require 'fig/configfileerror'
 require 'fig/log4rconfigerror'
+require 'fig/log4r/outputter'
 
 module Fig; end
 
@@ -124,7 +125,7 @@ module Fig::Logging
   end
 
   def self.setup_default_outputter(logger)
-    outputter = Log4r::Outputter.stderr
+    outputter = Fig::Log4r::Outputter.new('fig stderr', $stderr)
     logger.add outputter
     outputter.formatter = Log4r::PatternFormatter.new :pattern => '%M'
 

@@ -1,6 +1,5 @@
 require 'rubygems'
 require 'net/ftp'
-require 'log4r'
 require 'set'
 
 require 'fig/environment'

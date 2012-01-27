@@ -1,6 +1,8 @@
 v0.1.xx
 
-  - Logging output now goes to stderr by default, instead of stdout.
+  - Logging output now goes to stderr by default, instead of stdout.  Logging
+    output is also colorized if going to a tty.  This is not the colorization
+    of package adds/removes that will eventually be restored.
 
 v0.1.55
 
