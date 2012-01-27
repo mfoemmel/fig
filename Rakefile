@@ -27,16 +27,17 @@ begin
         deptypes.each { |deptype| gemspec.send("add_#{deptype}_dependency", libarchive_dep, '>= 1.0.0') }
       end
 
+      gemspec.add_dependency              'colorize',   '>= 0.5.8'
+      gemspec.add_dependency              'ftp',        '>= 0.69'
       gemspec.add_dependency              'highline',   '>= 1.6.2'
+      gemspec.add_dependency              'json',       '>= 1.6.5'
       gemspec.add_dependency              'log4r',      '>= 1.1.5'
       gemspec.add_dependency              'net-netrc',  '>= 0.2.2'
       gemspec.add_dependency              'net-sftp',   '>= 2.0.4'
       gemspec.add_dependency              'net-ssh',    '>= 2.0.15'
       gemspec.add_dependency              'polyglot',   '>= 0.2.9'
       gemspec.add_dependency              'rdoc',       '>= 3.12'
-      gemspec.add_dependency              'json',       '>= 1.6.5'
       gemspec.add_dependency              'treetop',    '>= 1.4.2'
-      gemspec.add_dependency              'ftp',        '>= 0.69'
       gemspec.add_development_dependency  'open4',      '>= 1.0.1'
       gemspec.add_development_dependency  'rspec',      '>= 2.8'
 
