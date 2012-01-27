@@ -345,7 +345,8 @@ describe 'Fig' do
 
     it 'should complain if with a package descriptor' do
       out, err, exit_code = fig('--list-local foo', nil, :no_raise_on_error)
-      out.should_not be_empty
+      out.should     be_empty
+      err.should_not be_empty
       exit_code.should_not == 0
     end
   end
@@ -374,7 +375,7 @@ describe 'Fig' do
 
     it 'should complain if with a package descriptor' do
       out, err, exit_code = fig('--list-remote foo', nil, :no_raise_on_error)
-      out.should_not be_empty
+      err.should_not be_empty
       exit_code.should_not == 0
     end
   end
@@ -399,7 +400,7 @@ describe 'Fig' do
       (out, err, exitstatus) =
         fig("--list-configs remote-only}/1.2.3", nil, :no_raise_on_error)
       exitstatus.should_not == 0
-      out.should =~ /Fig file not found for package/
+      err.should =~ /Fig file not found for package/
     end
   end
 
@@ -789,10 +790,10 @@ describe 'Fig' do
           (out, err, exitstatus) = fig('--list-variables')
           exitstatus.should == 0
 
-          warning = %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\n>
-          out.slice!(warning).should == warning
           out.should == expected
-          err.should == ''
+
+          err.should ==
+            %q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
 
       end

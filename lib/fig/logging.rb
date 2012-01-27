@@ -124,7 +124,7 @@ module Fig::Logging
   end
 
   def self.setup_default_outputter(logger)
-    outputter = Log4r::Outputter.stdout
+    outputter = Log4r::Outputter.stderr
     logger.add outputter
     outputter.formatter = Log4r::PatternFormatter.new :pattern => '%M'
 

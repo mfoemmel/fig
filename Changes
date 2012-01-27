@@ -1,3 +1,7 @@
+v0.1.xx
+
+  - Logging output now goes to stderr by default, instead of stdout.
+
 v0.1.55
 
   - "include" of another package without specifying a version is now a warning
