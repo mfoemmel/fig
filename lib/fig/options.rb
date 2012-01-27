@@ -97,6 +97,17 @@ Environment variables:
     package_text = argv.first
     if package_text
       @descriptor = Fig::PackageDescriptor.parse(package_text)
+      if not @descriptor.name
+        $stderr.puts %Q<No package name specified in descriptor "#{package_text}".>
+        @exit_code = 1
+        return
+      end
+
+      if not @descriptor.version
+        $stderr.puts %Q<No version specified in descriptor "#{package_text}".>
+        @exit_code = 1
+        return
+      end
     end
 
     return
