@@ -25,6 +25,14 @@ class Fig::PackageCache
     return versions[version]
   end
 
+  # Don't care which one, just gimme.
+  def get_any_version_of_package(name)
+    versions = @packages[name]
+    return if not versions
+
+    return versions.values.first()
+  end
+
   def remove_package(name, version)
     versions = @packages[name]
     return if not versions

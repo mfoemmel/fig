@@ -365,7 +365,9 @@ Environment variables:
       'include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment'
     ) do |descriptor|
       @options[:non_command_package_statements] <<
-        Fig::Statement::Include.new(Fig::PackageDescriptor.parse(descriptor), {})
+        Fig::Statement::Include.new(
+          Fig::PackageDescriptor.parse(descriptor), {}, nil
+        )
     end
 
     parser.on(

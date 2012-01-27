@@ -56,7 +56,28 @@ module Fig
       return paths.reject { |path| path =~ %r< ^ #{METADATA_SUBDIRECTORY} / >xs }
     end
 
-    def get_package(package_name, version_name, disable_updating = false)
+    def get_package(
+      package_name,
+      version_name,
+      disable_updating = false,
+      allow_any_version = false
+    )
+      if not version_name
+        if allow_any_version
+          package = @packages.get_any_version_of_package(package_name)
+          if package
+            Logging.warn(
+              "Picked version #{package.version_name} of #{package.package_name} at random."
+            )
+            return package
+          end
+        end
+
+        raise RepositoryError.new(
+          %Q<Cannot retrieve "#{package_name}" without a version.>
+        )
+      end
+
       package = @packages.get_package(package_name, version_name)
       return package if package
 

@@ -57,7 +57,8 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
         Fig::PackageDescriptor.parse(
           "#{DEPENDED_UPON_PACKAGE_NAME}/#{depended_upon_package_version}"
         ),
-        []
+        [],
+        package_name
       )
     ]
     new_example_package(
