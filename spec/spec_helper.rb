@@ -58,6 +58,8 @@ def fig(args, input = nil, no_raise_on_error = false)
       end
 
       err = stderr.read.strip
+      # TODO: remove the following line as it exists only to eat a warning specific to the grid build machines
+      err = err.gsub(/((?:\/[a-zA-Z0-9. -:]+)+: warning: Insecure world writable dir (?:\/[a-zA-Z0-9. -:]+)+in PATH, mode 041777)/, '') if err.size > 0
       out = stdout.read.strip
     end
     result = $CHILD_STATUS
