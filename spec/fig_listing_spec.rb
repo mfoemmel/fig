@@ -50,8 +50,8 @@ def setup_list_variables_packages
       append B_PATH_PREPENDS_A_AND_C=A
       set A_SET_GETS_PREPENDED_WITH_B_AND_C=A
 
-      # Note includes not in alphabetical order in order to check that sorting
-      # does or does not happen.
+      # Note includes are not in alphabetical order in order to check that
+      # sorting does or does not happen.
       include C/1.2.3
       include B/1.2.3
       set A_OVERRIDES_C_PREPENDING_B=A
@@ -159,13 +159,14 @@ def setup_list_variables_packages
     config default
     end
   END_INPUT
+
   fig('--publish D/1.2.3', input_d)
   fig('--publish C/1.2.3', input_c123)
   fig('--publish C/4.5.6', input_c456)
+
+  # Use non-default config to avoid issue with "include D" without a version.
   fig('--publish B/1.2.3:nondefault', input_b)
-  # don't want to get bothered by the warning for "No version in the package
-  # descriptor of "D" in an include statement" when we publish package B.
-  fig('--publish B/1.2.3', input_b, true)
+
   fig('--publish A/1.2.3', input_a)
   fig('--publish E/1.2.3', input_e)
 end
