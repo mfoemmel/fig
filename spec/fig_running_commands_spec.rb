@@ -24,7 +24,9 @@ describe 'Fig' do
           command "echo bar"
         end
       END
-      fig('--publish foo/1.2.3.4', input, :no_raise_on_error).first.should == 'Multiple command statements cannot be processed.'
+      out, err, exit_code =
+        fig('--publish foo/1.2.3.4', input, :no_raise_on_error)
+      err.should == 'Multiple command statements cannot be processed.'
     end
   end
 end

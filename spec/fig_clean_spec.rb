@@ -35,7 +35,7 @@ describe 'Fig' do
 
     it 'should complain if you clean without a package descriptor' do
       out, err, exit_code = fig('--clean', nil, :no_raise_on_error)
-      out.should_not be_empty
+      err.should_not be_empty
       exit_code.should_not == 0
     end
   end
