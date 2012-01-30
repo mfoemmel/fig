@@ -48,8 +48,7 @@ def setup_list_variables_packages
       append A_PATH_DEFAULT=BAR
       append D_PATH_PREPENDS_A=A
       append B_PATH_PREPENDS_A_AND_C=A
-      append C_PATH_PREPENDS_A_AND_B=A
-      set A_SET_GETS_PREPENDED_WITH_C_AND_B=A
+      set A_SET_GETS_PREPENDED_WITH_B_AND_C=A
 
       # Note includes not in alphabetical order in order to check that sorting
       # does or does not happen.
@@ -78,7 +77,7 @@ def setup_list_variables_packages
       set A_OVERRIDES_B_AND_C=B
       append B_PATH_PREPENDS_A_AND_C=B
       append A_PATH_PREPENDS_B_AND_C=B
-      append A_SET_GETS_PREPENDED_WITH_C_AND_B=B
+      append A_SET_GETS_PREPENDED_WITH_B_AND_C=B
       append A_OVERRIDES_C_PREPENDING_B=B
 
       # Note lack of version.  That this works depends upon another include of
@@ -103,7 +102,7 @@ def setup_list_variables_packages
       set A_OVERRIDES_B_AND_C=C
       append B_PATH_PREPENDS_A_AND_C=C
       append A_PATH_PREPENDS_B_AND_C=C
-      append A_SET_GETS_PREPENDED_WITH_C_AND_B=C
+      append A_SET_GETS_PREPENDED_WITH_B_AND_C=C
       append A_OVERRIDES_C_PREPENDING_B=C
       include D/1.2.3
     end
@@ -123,9 +122,8 @@ def setup_list_variables_packages
       set C_OVERRIDES_B=C
       set C_OVERRIDES_A_AND_B=C
       set A_OVERRIDES_B_AND_C=C
-      append C_PATH_PREPENDS_A_AND_B=C
       append A_PATH_PREPENDS_B_AND_C=C
-      append A_SET_GETS_PREPENDED_WITH_C_AND_B=C
+      append A_SET_GETS_PREPENDED_WITH_B_AND_C=C
       append A_OVERRIDES_C_PREPENDING_B=C
       include D/1.2.3
     end
@@ -833,14 +831,14 @@ describe 'Fig' do
             A_OVERRIDES_C_PREPENDING_B=A
             A_OVERRIDES_D=A
             A_PATH_DEFAULT=BAR
-            A_PATH_PREPENDS_B_AND_C=A:C:B
+            A_PATH_PREPENDS_B_AND_C=A:B:C
             A_PATH_PREPENDS_D=A:D
-            A_SET_GETS_PREPENDED_WITH_C_AND_B=C:B:A
+            A_SET_GETS_PREPENDED_WITH_B_AND_C=B:C:A
             B_DEFAULT=BAR
+            B_OVERRIDES_A_AND_C=B
+            B_OVERRIDES_C=B
+            B_PATH_PREPENDS_A_AND_C=B:C:A
             C_DEFAULT=BAR
-            C_OVERRIDES_A_AND_B=C
-            C_OVERRIDES_B=C
-            C_PATH_PREPENDS_A_AND_B=C:B:A
             D_DEFAULT=BAR
             D_OVERRIDES_A=D
             D_PATH_PREPENDS_A=D:A
@@ -850,9 +848,9 @@ describe 'Fig' do
 
           (out, err, exitstatus) = fig('--list-variables A/1.2.3')
           exitstatus.should == 0
-          #out.should == expected
-          pending "Will sort this out later"
-          err.should == ''
+          out.should == expected
+          err.should ==
+            %q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
 
         it %q<lists all dependency variables with a package.fig> do
@@ -868,7 +866,7 @@ describe 'Fig' do
             A_PATH_DEFAULT=BAR
             A_PATH_PREPENDS_B_AND_C=A:B:C
             A_PATH_PREPENDS_D=A:D
-            A_SET_GETS_PREPENDED_WITH_C_AND_B=C:B:A
+            A_SET_GETS_PREPENDED_WITH_B_AND_C=B:C:A
             B_DEFAULT=BAR
             B_OVERRIDES_A_AND_C=B
             B_OVERRIDES_C=B
@@ -884,8 +882,7 @@ describe 'Fig' do
           (out, err, exitstatus) = fig('--list-variables')
           exitstatus.should == 0
 
-          pending "Will sort this out later"
-          #out.should == expected
+          out.should == expected
 
           err.should ==
             %q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
@@ -928,13 +925,12 @@ describe 'Fig' do
             A_PATH_DEFAULT
             A_PATH_PREPENDS_B_AND_C
             A_PATH_PREPENDS_D
-            A_SET_GETS_PREPENDED_WITH_C_AND_B
+            A_SET_GETS_PREPENDED_WITH_B_AND_C
             B_DEFAULT
             C_DEFAULT
             C_NONDEFAULT
             C_OVERRIDES_A_AND_B
             C_OVERRIDES_B
-            C_PATH_PREPENDS_A_AND_B
             D_DEFAULT
             D_OVERRIDES_A
             D_PATH_PREPENDS_A
@@ -963,13 +959,12 @@ describe 'Fig' do
             A_PATH_DEFAULT
             A_PATH_PREPENDS_B_AND_C
             A_PATH_PREPENDS_D
-            A_SET_GETS_PREPENDED_WITH_C_AND_B
+            A_SET_GETS_PREPENDED_WITH_B_AND_C
             B_DEFAULT
             C_DEFAULT
             C_NONDEFAULT
             C_OVERRIDES_A_AND_B
             C_OVERRIDES_B
-            C_PATH_PREPENDS_A_AND_B
             D_DEFAULT
             D_OVERRIDES_A
             D_PATH_PREPENDS_A
