@@ -16,6 +16,7 @@ gem 'libarchive-static', '>= 1.0.3'
 gem 'diff-lcs', '>= 1.1.3'
 gem 'Platform', '>= 0.4.0'
 gem 'colorize', '>= 0.5.8'
+gem 'sys-admin', '>= 1.5.6'
 
 group :development do
   platforms :jruby do
@@ -32,7 +33,6 @@ group :development do
 
   gem 'rspec', '~> 2'
   gem 'bundler', '>= 1.0.15'
-  gem 'jeweler', '>= 1.6.4'
   gem 'rspec-core', '>= 2.7.1'
   gem 'rspec-expectations', '>= 2.7.0'
   gem 'rspec-mocks', '>= 2.7.0'
