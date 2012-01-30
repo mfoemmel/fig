@@ -1,5 +1,8 @@
 v0.1.xx
 
+  - The .fig file created in a repository now contains metadata about
+    the publishing of the package (time/user/host).
+
   - Logging output now goes to stderr by default, instead of stdout.  Logging
     output is also colorized if going to a tty.  This is not the colorization
     of package adds/removes that will eventually be restored.

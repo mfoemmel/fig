@@ -1,3 +1,6 @@
+require 'socket'
+require 'sys/admin'
+
 require 'fig/logging'
 require 'fig/notfounderror'
 require 'fig/packagecache'
@@ -291,6 +294,50 @@ module Fig
     end
 
     def derive_package_content(
+      package_statements, package_name, version_name, local_dir, local_only
+    )
+      header_strings = derive_package_metadata_comments(
+        package_name, version_name
+      )
+      resource_statement_strings = derive_package_resources(
+        package_statements, package_name, version_name, local_dir, local_only
+      )
+
+      return [header_strings, resource_statement_strings].flatten()
+    end
+
+    def derive_package_metadata_comments(package_name, version_name)
+      now = Time.now()
+
+      return [
+        "# Publishing information for #{package_name}/#{version_name}:",
+        '#',
+        "#    Time: #{now} (epoch: #{now.to_i()})",
+        "#    User: #{derive_user_name()}",
+        "#    Host: #{Socket.gethostname()}",
+        '#'
+      ]
+    end
+
+    def derive_user_name()
+      login = Sys::Admin.get_login()
+      user = Sys::Admin.get_user(login)
+
+      user_name = nil
+      if user.respond_to?('full_name') # Windows
+        user_name = user.full_name()
+      elsif user.respond_to?('gecos')  # *nix
+        user_name = user.gecos()
+      end
+
+      if user_name
+        return "#{user_name} (#{login})"
+      end
+
+      return login
+    end
+
+    def derive_package_resources(
       package_statements, package_name, version_name, local_dir, local_only
     )
       return bundle_resources(package_statements).map do |statement|
