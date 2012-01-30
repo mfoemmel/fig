@@ -41,6 +41,7 @@ def setup_list_variables_packages
 
   input_a = <<-END_INPUT
     config default
+      set A_BOTH_CONFIGS=default
       set A_DEFAULT=BAR
       set D_OVERRIDES_A=A
       set C_OVERRIDES_A_AND_B=A
@@ -58,7 +59,9 @@ def setup_list_variables_packages
     end
 
     config nondefault
+      set A_BOTH_CONFIGS=nondefault
       set A_NONDEFAULT=BAZ
+      include C/4.5.6:nondefault
     end
   END_INPUT
 
@@ -84,7 +87,7 @@ def setup_list_variables_packages
     end
   END_INPUT
 
-  input_c = <<-END_INPUT
+  input_c123 = <<-END_INPUT
     config default
       set C_DEFAULT=BAR
       set C_OVERRIDES_B=C
@@ -99,6 +102,28 @@ def setup_list_variables_packages
 
     config nondefault
       set C_NONDEFAULT=BAZ
+    end
+
+    config should_not_show_up_in_output
+      set SHOULD_NOT_SHOW_UP_IN_OUTPUT_FROM_C=should_not_show_up
+    end
+  END_INPUT
+
+  input_c456 = <<-END_INPUT
+    config default
+      set C_DEFAULT=BAR
+      set C_OVERRIDES_B=C
+      set C_OVERRIDES_A_AND_B=C
+      set A_OVERRIDES_B_AND_C=C
+      append C_PATH_PREPENDS_A_AND_B=C
+      append A_PATH_PREPENDS_B_AND_C=C
+      append A_SET_GETS_PREPENDED_WITH_C_AND_B=C
+      append A_OVERRIDES_C_PREPENDING_B=C
+      include D/1.2.3
+    end
+
+    config nondefault
+      set C_ONLY_IN_C456=C
     end
 
     config should_not_show_up_in_output
@@ -123,10 +148,17 @@ def setup_list_variables_packages
       set SHOULD_NOT_SHOW_UP_IN_OUTPUT_FROM_D=should_not_show_up
     end
   END_INPUT
+
+  input_e = <<-END_INPUT
+    config default
+    end
+  END_INPUT
   fig('--publish D/1.2.3', input_d)
-  fig('--publish C/1.2.3', input_c)
+  fig('--publish C/1.2.3', input_c123)
+  fig('--publish C/4.5.6', input_c456)
   fig('--publish B/1.2.3', input_b)
   fig('--publish A/1.2.3', input_a)
+  fig('--publish E/1.2.3', input_e)
 
 end
 
@@ -763,10 +795,28 @@ describe 'Fig' do
           setup_test_environment
         end
 
+        it %q<lists no dependency variables when none should exist without a package.fig> do
+          setup_list_variables_packages
+          (out, err, exitstatus) = fig('--list-variables E/1.2.3')
+          exitstatus.should == 0
+          out.should == ''
+          err.should == ''
+        end
+
+        it %q<lists no dependency variables when none should exist with a package.fig> do
+          setup_list_variables_packages
+          create_package_dot_fig('E')
+          (out, err, exitstatus) = fig('--list-variables')
+          exitstatus.should == 0
+          out.should == ''
+          err.should == ''
+        end
+
         it %q<lists all dependency variables without a package.fig> do
           setup_list_variables_packages
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            A_BOTH_CONFIGS=default
             A_DEFAULT=BAR
             A_OVERRIDES_B_AND_C=A
             A_OVERRIDES_C_PREPENDING_B=A
@@ -798,6 +848,7 @@ describe 'Fig' do
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            A_BOTH_CONFIGS=default
             A_DEFAULT=BAR
             A_OVERRIDES_B_AND_C=A
             A_OVERRIDES_C_PREPENDING_B=A
@@ -821,6 +872,99 @@ describe 'Fig' do
           (out, err, exitstatus) = fig('--list-variables')
           exitstatus.should == 0
           out.should == expected
+          err.should == ''
+        end
+      end
+
+      describe 'with --list-all-configs' do
+        before(:each) do
+          cleanup_test_environment
+          setup_test_environment
+        end
+
+        it %q<lists no dependency variables when none should exist without a package.fig> do
+          setup_list_variables_packages
+          (out, err, exitstatus) = fig('--list-variables --list-all-configs E/1.2.3')
+          exitstatus.should == 0
+          out.should == ''
+          err.should == ''
+        end
+
+        it %q<lists no dependency variables when none should exist with a package.fig> do
+          setup_list_variables_packages
+          create_package_dot_fig('E')
+          (out, err, exitstatus) = fig('--list-variables --list-all-configs')
+          exitstatus.should == 0
+          out.should == ''
+          err.should == ''
+        end
+
+        it %q<lists all dependency variables without a package.fig> do
+          setup_list_variables_packages
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            A_BOTH_CONFIGS
+            A_DEFAULT
+            A_NONDEFAULT
+            A_OVERRIDES_B_AND_C
+            A_OVERRIDES_C_PREPENDING_B
+            A_OVERRIDES_D
+            A_PATH_DEFAULT
+            A_PATH_PREPENDS_B_AND_C
+            A_PATH_PREPENDS_D
+            A_SET_GETS_PREPENDED_WITH_C_AND_B
+            B_DEFAULT
+            C_DEFAULT
+            C_NONDEFAULT
+            C_OVERRIDES_A_AND_B
+            C_OVERRIDES_B
+            C_PATH_PREPENDS_A_AND_B
+            D_DEFAULT
+            D_OVERRIDES_A
+            D_PATH_PREPENDS_A
+          END_EXPECTED_OUTPUT
+
+          expected.gsub!(/:/,File::PATH_SEPARATOR)
+
+          (out, err, exitstatus) = fig('--list-variables --list-all-configs A/1.2.3')
+          exitstatus.should == 0
+          pending "Need to include all configs in --list-variables"
+          #out.should == expected
+          err.should == ''
+        end
+
+        it %q<lists all dependency variables with a package.fig> do
+          setup_list_variables_packages
+          create_package_dot_fig('A')
+
+          expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            A_BOTH_CONFIGS
+            A_DEFAULT
+            A_NONDEFAULT
+            A_OVERRIDES_B_AND_C
+            A_OVERRIDES_C_PREPENDING_B
+            A_OVERRIDES_D
+            A_PATH_DEFAULT
+            A_PATH_PREPENDS_B_AND_C
+            A_PATH_PREPENDS_D
+            A_SET_GETS_PREPENDED_WITH_C_AND_B
+            B_DEFAULT
+            C_DEFAULT
+            C_NONDEFAULT
+            C_OVERRIDES_A_AND_B
+            C_OVERRIDES_B
+            C_PATH_PREPENDS_A_AND_B
+            D_DEFAULT
+            D_OVERRIDES_A
+            D_PATH_PREPENDS_A
+          END_EXPECTED_OUTPUT
+
+          expected.gsub!(/:/,File::PATH_SEPARATOR)
+
+          (out, err, exitstatus) = fig('--list-variables --list-all-configs')
+          exitstatus.should == 0
+          pending "Need to include all configs in --list-variables"
+          #out.should == expected
           err.should == ''
         end
       end

@@ -89,7 +89,7 @@ module Fig::Command::Listing
 
   def display_dependencies_flat()
     base_config_names = derive_base_display_config_names()
-    packages = gather_package_depencency_configurations(base_config_names)
+    packages = gather_package_dependency_configurations(base_config_names)
 
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
@@ -122,7 +122,7 @@ module Fig::Command::Listing
     ]
   end
 
-  def gather_package_depencency_configurations(starting_config_names)
+  def gather_package_dependency_configurations(starting_config_names)
     packages = {}
 
     if ! @package.package_name.nil?
@@ -133,7 +133,7 @@ module Fig::Command::Listing
       |config_name|
 
       @package[config_name].walk_statements_following_package_dependencies(
-        @repository, @package
+        @repository, @package, self
       ) do
         |package, statement|
 
@@ -181,7 +181,11 @@ module Fig::Command::Listing
       puts '<no variables>'
     else
       variables.keys.sort.each do |variable|
-        puts variable + "=" + variables[variable]
+        if @options.list_all_configs?()
+          puts variable
+        else
+          puts variable + "=" + variables[variable]
+        end
       end
     end
 

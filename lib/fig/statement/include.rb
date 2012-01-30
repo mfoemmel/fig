@@ -52,7 +52,7 @@ class Fig::Statement::Include
 
   # Block will receive a Package and a Statement.
   def walk_statements_following_package_dependencies(
-    repository, package, &block
+    repository, package, configuration, &block
   )
     referenced_package = nil
     if package_name()
@@ -65,7 +65,7 @@ class Fig::Statement::Include
 
     yield referenced_package, configuration
     configuration.walk_statements_following_package_dependencies(
-      repository, referenced_package, &block
+      repository, referenced_package, nil, &block
     )
 
     return
