@@ -7,7 +7,6 @@ require 'rake/gempackagetask'
 require 'fileutils'
 include FileUtils
 
-<<<<<<< HEAD
 major_version = nil
 minor_version = nil
 patch_version = nil
