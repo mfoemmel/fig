@@ -105,22 +105,7 @@ module Fig::Command::Listing
   def display_dependencies_flat()
     base_config_names = derive_base_display_config_names()
 
-    packages = {}
-
-    walk_dependency_tree(@package, base_config_names, 0) do
-      |package, config_name, depth|
-      if (
-            ! package.package_name.nil?           \
-        &&  ! (
-                  ! @options.list_all_configs?    \
-              &&  @descriptor                     \
-              &&  package.package_name == @descriptor.name
-            )
-      )
-        packages[package] ||= Set.new
-        packages[package] << config_name
-      end
-    end
+    packages = gather_package_dependency_configurations(base_config_names)
 
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
@@ -153,6 +138,42 @@ module Fig::Command::Listing
     ]
   end
 
+  def gather_package_dependency_configurations(starting_config_names)
+    packages = {}
+
+    if ! @package.package_name.nil?
+      packages[@package] = starting_config_names.to_set
+    end
+
+    starting_config_names.each do |config_name|
+
+      @package[config_name].walk_statements_following_package_dependencies(
+        @repository, @package, self
+      ) do |package, statement|
+
+        if (
+              ! package.package_name.nil?           \
+          &&  ! (
+                    ! @options.list_all_configs?    \
+                &&  @descriptor                     \
+                &&  package.package_name == @descriptor.name
+              )
+        )
+          packages[package] ||= Set.new
+          packages[package] << statement.name
+        end
+      end
+    end
+
+    if ! @options.list_all_configs? && @descriptor
+      packages.reject! do |package, config_names|
+        package.package_name == @descriptor.name
+      end
+    end
+
+    return packages
+  end
+
   def handle_post_parse_list_options()
     case @options.listing()
     when :configs
@@ -177,7 +198,11 @@ module Fig::Command::Listing
       puts '<no variables>'
     else
       variables.keys.sort.each do |variable|
-        puts variable + "=" + variables[variable]
+        if @options.list_all_configs?()
+          puts variable
+        else
+          puts variable + "=" + variables[variable]
+        end
       end
     end
 

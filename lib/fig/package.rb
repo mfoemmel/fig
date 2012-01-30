@@ -120,7 +120,7 @@ class Fig::Package
     @statements.each do |statement|
       yield self, statement
       statement.walk_statements_following_package_dependencies(
-        repository, self, &block
+        repository, self, nil, &block
       )
     end
 

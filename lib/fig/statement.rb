@@ -8,7 +8,7 @@ module Fig::Statement
   end
 
   # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(repository, package, &block)
+  def walk_statements_following_package_dependencies(repository, package, configuration, &block)
     return
   end
 
