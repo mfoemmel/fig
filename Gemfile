@@ -11,12 +11,12 @@ gem 'net-ssh', '>= 2.0.15'
 gem 'polyglot', '>= 0.2.9'
 gem 'rdoc', '>= 3.12'
 gem 'json', '>= 1.6.5'
+gem 'sys-admin', '>= 1.5.6'
 gem 'treetop', '>= 1.4.2'
 gem 'libarchive-static', '>= 1.0.3'
 gem 'diff-lcs', '>= 1.1.3'
 gem 'Platform', '>= 0.4.0'
 gem 'colorize', '>= 0.5.8'
-gem 'sys-admin', '>= 1.5.6'
 
 group :development do
   platforms :jruby do
