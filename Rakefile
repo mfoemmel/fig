@@ -1,10 +1,14 @@
 # To build fig for ruby 1.8.7 on windows please see the README for instructions.
 # It is not possible to do from the rake file anymore.
 
-require 'rubygems'
-require 'rake'
-require 'rake/gempackagetask'
 require 'fileutils'
+require 'git'
+require 'rake'
+require 'rdoc/task'
+require 'rspec/core/rake_task'
+require 'rubygems'
+require 'rubygems/package_task'
+
 include FileUtils
 
 major_version = nil
@@ -12,9 +16,79 @@ minor_version = nil
 patch_version = nil
 version = nil
 
+def clean_git_working_directory?
+  return %x<git ls-files --deleted --modified --others --exclude-standard> == ''
+end
+
+def tag_doesnt_exist_in_local_repo(git_repo, tag)
+  return ! git_repo.tags.include?(tag)
+end
+
+def create_git_tag(git_repo)
+  new_tag = "v#{version}"
+  puts "Checking for an existing #{new_tag} tag."
+  if tag_doesnt_exist_in_local_repo(git_repo, new_tag)
+    puts "Creating #{new_tag} tag."
+    #git_repo.add_tag(new_tag)
+  end
+
+  if tag_doesnt_exist_in_local_repo(git_repo, new_tag)
+    "The tag was not successfully created. Aborting!"
+    return nil
+  end
+
+  return new_tag
+end
+
+def push_to_remote_repo(git_repo, new_tag)
+  if new_tag != nil
+    puts "Pushing #{new_tag} to 'origin'."
+    #git_repo.push('origin', new_tag)
+  end
+
+  return
+end
+
+def tag_and_push_to_git
+  if clean_git_working_directory?
+    git_repo = Git.open('.')
+    new_tag = create_git_tag(git_repo)
+    push_to_remote_repo(git_repo, new_tag)
+  else
+    puts "Cannot proceed with tag, push, and publish!"
+    puts "Your environment is not clean."
+    puts "The status of your local git repository:"
+    puts %x<git status>
+  end
+
+  return new_tag != nil
+end
+
+def local_repo_is_updated?
+  pull_results = %x{git pull 2>&1}
+  if pull_results.chomp != "Already up-to-date."
+    puts 'The local repository was not up-to-date:'
+    puts pull_results
+    puts 'Publish aborted.'
+
+    return false
+  end
+
+  return true
+end
+
+def push_to_rubygems
+  if File.exists?("pkg/fig-#{version}.gem")
+    puts "Pushing pkg/fig-#{version}.gem to rubygems.org."
+    %x<echo "gem pushe pkg/fig-#{version}.gem">
+  end
+
+  return
+end
+
 File.open('VERSION', 'r') do |file|
   version = file.gets
-  matches = version.match(/([0-9]+)\.(\d+)\.(\d+)/)
+  matches = version.match(/(\d+)\.(\d+)\.(\d+)/)
   major_version = matches[1]
   minor_version = matches[2]
   patch_version = matches[3]
@@ -56,7 +130,6 @@ fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.executables = ['fig', 'fig-download']
 end
 
-require 'rspec/core/rake_task'
 desc 'Run RSpec tests.'
 RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.rspec_opts = []
@@ -81,15 +154,17 @@ task :increment_patch_version do
     %x{echo #{major_version}.#{minor_version}.#{updated_patch_version} > 'VERSION'}
 end
 
-Rake::GemPackageTask.new(fig_gemspec).define
+Gem::PackageTask.new(fig_gemspec).define
 
 desc 'Alias for the gem task.'
 task :build => :gem
 
-desc 'Publishes the rubygem to Rubygems.org.'
+desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
 task :publish do
-  File.open('pkg/fig-*.gem', 'r') do |file|
-    %x<echo "gem pushe #{file}">
+  if local_repo_is_updated?
+    if tag_and_push_to_git
+      push_to_rubygems
+    end
   end
 end
 
@@ -104,7 +179,6 @@ end
 
 task :default => :spec
 
-require 'rdoc/task'
 RDoc::Task.new do |rdoc|
   version = File.exist?('VERSION') ? File.read('VERSION') : ''
 
