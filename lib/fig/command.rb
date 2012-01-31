@@ -143,8 +143,7 @@ class Fig::Command
 
     @retriever = Fig::Retriever.new('.')
 
-    # Check to see if this is still happening with the new layers of abstraction.
-    at_exit { @retriever.save }
+    at_exit { @retriever.save_metadata() }
 
     @environment = Fig::Environment.new(@repository, @options.reset_environment? ? {} : nil, @retriever)
 

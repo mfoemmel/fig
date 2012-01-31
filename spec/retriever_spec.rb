@@ -20,7 +20,7 @@ describe 'Retriever' do
 
     # Retrieve files A and B
     r = Fig::Retriever.new(test_dir)
-    r.with_package_config('foo', '1.2.3') do
+    r.with_package_version('foo', '1.2.3') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/foo.txt", 'foo.txt')
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/bar.txt", 'bar.txt')
       File.read(File.join(test_dir, 'foo.txt')).should == 'FOO'
@@ -28,7 +28,7 @@ describe 'Retriever' do
     end
 
     # Retrieve files B and C for a different version
-    r.with_package_config('foo', '4.5.6') do
+    r.with_package_version('foo', '4.5.6') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/bar.txt", 'bar.txt')
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/baz.txt", 'baz.txt')
       File.read(File.join(test_dir, 'bar.txt')).should == 'BAR'
@@ -37,11 +37,11 @@ describe 'Retriever' do
     end
 
     # Save and reload
-    r.save
+    r.save_metadata()
     r = Fig::Retriever.new(test_dir)
 
     # Switch back to original version
-    r.with_package_config('foo', '1.2.3') do
+    r.with_package_version('foo', '1.2.3') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/foo.txt", 'foo.txt')
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/bar.txt", 'bar.txt')
 
@@ -61,7 +61,7 @@ describe 'Retriever' do
     FileUtils.chmod(0755, "#{FIG_SPEC_BASE_DIRECTORY}/executable")
 
     r = Fig::Retriever.new(test_dir)
-    r.with_package_config('foo', '1.2.3') do
+    r.with_package_version('foo', '1.2.3') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/plain", 'plain')
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'executable')
 

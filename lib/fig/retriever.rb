@@ -13,31 +13,31 @@ module Fig; end
 class Fig::Retriever
   def initialize(base_dir)
     @base_dir = base_dir
-    @configs = {}
-    @fig_dir = File.join(@base_dir, '.fig')
+    @package_metadata_by_name = {}
+    @local_fig_data_directory = File.join(@base_dir, '.fig')
 
-    file = File.join(@fig_dir, 'retrieve')
+    file = File.join(@local_fig_data_directory, 'retrieve')
     if File.exist?(file)
-      load(file)
+      load_metadata(file)
     end
   end
 
-  def with_package_config(name, version)
+  def with_package_version(name, version)
     if name and version
-      @config = @configs[name]
-      if @config && @config.version != version
-        @config.files.each do |relpath|
-          Fig::Logging.info "- [#{@config.name}/#{@config.version}] #{relpath}"
+      @package_meta = @package_metadata_by_name[name]
+      if @package_meta && @package_meta.version != version
+        @package_meta.files.each do |relpath|
+          Fig::Logging.info "- [#{@package_meta.name}/#{@package_meta.version}] #{relpath}"
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
-        @config = nil
+        @package_meta = nil
       end
-      if not @config
-        @config = new_package_config(name, version)
-        @configs[name] = @config
+      if not @package_meta
+        @package_meta = new_package_metadata(name, version)
+        @package_metadata_by_name[name] = @package_meta
       end
     else
-      @config = nil
+      @package_meta = nil
     end
     yield
   end
@@ -46,12 +46,12 @@ class Fig::Retriever
     copy(source, relpath)
   end
 
-  def save
-    FileUtils.mkdir_p(@fig_dir)
-    File.open(File.join(@fig_dir, 'retrieve'), 'w') do |f|
-      @configs.each do |name,config|
-        config.files.each do |target|
-          f << target << '=' << config.name << '/' << config.version << "\n"
+  def save_metadata
+    FileUtils.mkdir_p(@local_fig_data_directory)
+    File.open(File.join(@local_fig_data_directory, 'retrieve'), 'w') do |f|
+      @package_metadata_by_name.each do |name, package_meta|
+        package_meta.files.each do |target|
+          f << target << '=' << package_meta.name << '/' << package_meta.version << "\n"
         end
       end
     end
@@ -59,35 +59,36 @@ class Fig::Retriever
 
   private
 
-  def load(file)
+  def load_metadata(file)
     File.open(file).each_line do |line|
       line = line.strip()
       if line =~ /^(.+)=(.+)\/(.+)$/
         target = $1
-        config_name = $2
-        config_version = $3
-        config = @configs[config_name]
-        if config
-          if config.version != config_version
+        package_name = $2
+        package_version = $3
+        package_meta = @package_metadata_by_name[package_name]
+        if package_meta
+          if package_meta.version != package_version
             raise 'version mismatch in .figretrieve'
           end
         else
-          config = new_package_config(config_name, config_version)
-          @configs[config_name] = config
+          package_meta = new_package_metadata(package_name, package_version)
+          @package_metadata_by_name[package_name] = package_meta
         end
-        config.files << target
+        package_meta.files << target
       else
         raise "parse error in #{file}: #{line}"
       end
     end
   end
 
-  def new_package_config(name, version)
-    config = OpenStruct.new
-    config.name = name
-    config.version = version
-    config.files = Set.new()
-    return config
+  def new_package_metadata(name, version)
+    package_meta = OpenStruct.new
+    package_meta.name = name
+    package_meta.version = version
+    package_meta.files = Set.new()
+
+    return package_meta
   end
 
   def copy(source, relpath)
@@ -103,17 +104,19 @@ class Fig::Retriever
         end
       end
     else
-      if !File.exist?(target) || File.mtime(source) > File.mtime(target)
+      if ! File.exist?(target) || File.mtime(source) > File.mtime(target)
         if Fig::Logging.debug?
-          Fig::Logging.debug "Copying package [#{@config.name}/#{@config.version}] from #{source} to #{target}."
+          Fig::Logging.debug \
+            "Copying package [#{@package_meta.name}/#{@package_meta.version}] from #{source} to #{target}."
         else
-          Fig::Logging.info "+ [#{@config.name}/#{@config.version}] #{relpath}"
+          Fig::Logging.info \
+            "+ [#{@package_meta.name}/#{@package_meta.version}] #{relpath}"
         end
         FileUtils.mkdir_p(File.dirname(target))
 
         FileUtils.cp(source, target, :preserve => true)
       end
-      @config.files << relpath if @config
+      @package_meta.files << relpath if @package_meta
     end
   end
 end

@@ -259,7 +259,7 @@ module Fig
             target = File.join(target, File.basename(file))
           end
         end
-        @retriever.with_package_config(
+        @retriever.with_package_version(
           base_package.package_name, base_package.version_name
         ) do
           @retriever.retrieve(file, target)
