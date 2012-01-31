@@ -16,6 +16,15 @@ minor_version = nil
 patch_version = nil
 version = nil
 
+File.open('VERSION', 'r') do |file|
+  version = file.gets
+  matches = version.match(/(\d+)\.(\d+)\.(\d+)/)
+  major_version = matches[1]
+  minor_version = matches[2]
+  patch_version = matches[3]
+end
+
+
 def clean_git_working_directory?
   return %x<git ls-files --deleted --modified --others --exclude-standard> == ''
 end
@@ -84,14 +93,6 @@ def push_to_rubygems
   end
 
   return
-end
-
-File.open('VERSION', 'r') do |file|
-  version = file.gets
-  matches = version.match(/(\d+)\.(\d+)\.(\d+)/)
-  major_version = matches[1]
-  minor_version = matches[2]
-  patch_version = matches[3]
 end
 
 fig_gemspec = Gem::Specification.new do |gemspec|
