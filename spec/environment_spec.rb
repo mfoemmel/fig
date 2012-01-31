@@ -33,7 +33,7 @@ end
 
 def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   retriever_double = double('retriever')
-  retriever_double.stub(:with_package_config)
+  retriever_double.stub(:with_package_version)
   environment =
     Fig::Environment.new(nil, {'FOO' => 'bar'}, retriever_double)
 
