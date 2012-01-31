@@ -242,11 +242,11 @@ Environment variables:
 
   def set_up_queries(parser)
     parser.banner = USAGE
-    parser.on('-?', '-h','--help','display this help text') do
+    parser.on_tail('-?', '-h','--help','display this help text') do
       help(parser)
     end
 
-    parser.on('-v', '--version', 'Print fig version') do
+    parser.on_tail('-v', '--version', 'Print fig version') do
       version()
     end
 
