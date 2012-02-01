@@ -24,25 +24,37 @@ File.open('VERSION', 'r') do |file|
   patch_version = matches[3]
 end
 
-
 def clean_git_working_directory?
   return %x<git ls-files --deleted --modified --others --exclude-standard> == ''
 end
 
-def tag_doesnt_exist_in_local_repo(git_repo, tag)
-  return ! git_repo.tags.include?(tag)
-end
-
-def create_git_tag(git_repo)
-  new_tag = "v#{version}"
-  puts "Checking for an existing #{new_tag} tag."
-  if tag_doesnt_exist_in_local_repo(git_repo, new_tag)
-    puts "Creating #{new_tag} tag."
-    #git_repo.add_tag(new_tag)
+def tag_exists_in_local_repo(git_repo, new_tag)
+  tag_exists = false
+  tag_list = %x<git tag>
+  tags = tag_list.split("\n")
+  tags.each do |tag|
+    if tag.chomp == new_tag
+      tag_exists = true
+    end
   end
 
-  if tag_doesnt_exist_in_local_repo(git_repo, new_tag)
-    "The tag was not successfully created. Aborting!"
+  return tag_exists
+end
+
+def create_git_tag(git_repo, version)
+  new_tag = "v#{version}"
+  print "Checking for an existing #{new_tag} git tag... "
+  if not tag_exists_in_local_repo(git_repo, new_tag)
+    puts 'Tag does not already exist.'
+    puts "Creating #{new_tag} tag."
+    git_repo.add_tag(new_tag)
+  else
+    puts 'Tag exists.'
+    return nil
+  end
+
+  if not tag_exists_in_local_repo(git_repo, new_tag)
+    puts "The tag was not successfully created. Aborting!"
     return nil
   end
 
@@ -51,23 +63,23 @@ end
 
 def push_to_remote_repo(git_repo, new_tag)
   if new_tag != nil
-    puts "Pushing #{new_tag} to 'origin'."
-    #git_repo.push('origin', new_tag)
+    puts %Q<Pushing #{new_tag} tag to "origin" remote repository.>
+    git_repo.push('origin', new_tag)
   end
 
   return
 end
 
-def tag_and_push_to_git
+def tag_and_push_to_git(version)
+  new_tag = nil
   if clean_git_working_directory?
     git_repo = Git.open('.')
-    new_tag = create_git_tag(git_repo)
+    new_tag = create_git_tag(git_repo, version)
     push_to_remote_repo(git_repo, new_tag)
   else
-    puts "Cannot proceed with tag, push, and publish!"
-    puts "Your environment is not clean."
-    puts "The status of your local git repository:"
-    puts %x<git status>
+    puts 'Cannot proceed with tag, push, and publish because your environment is not clean.'
+    puts 'The status of your local git repository:'
+    puts %x{git status 2>&1}
   end
 
   return new_tag != nil
@@ -86,10 +98,15 @@ def local_repo_is_updated?
   return true
 end
 
-def push_to_rubygems
+def push_to_rubygems(version)
+  print "Checking to see if pkg/fig-#{version}.gem exists... "
   if File.exists?("pkg/fig-#{version}.gem")
+    puts 'File exists.'
     puts "Pushing pkg/fig-#{version}.gem to rubygems.org."
-    %x<echo "gem pushe pkg/fig-#{version}.gem">
+    puts %x{gem push pkg/fig-#{version}.gem 2>&1}
+  else
+    puts 'File does not exist.'
+    puts 'Please build the gem before publishing.'
   end
 
   return
@@ -103,7 +120,7 @@ fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.homepage = 'http://github.com/mfoemmel/fig'
   gemspec.authors = ['Matthew Foemmel']
   gemspec.platform = Gem::Platform::RUBY
-  gemspec.version = version
+  gemspec.version = version.chomp
 
   gemspec.add_dependency              'sys-admin',         '>= 1.5.6'
   gemspec.add_dependency              'libarchive-static', '>= 1.0.0'
@@ -163,8 +180,8 @@ task :build => :gem
 desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
 task :publish do
   if local_repo_is_updated?
-    if tag_and_push_to_git
-      push_to_rubygems
+    if tag_and_push_to_git(version.chomp)
+      push_to_rubygems(version.chomp)
     end
   end
 end
