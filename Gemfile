@@ -33,7 +33,6 @@ group :development do
 
   gem 'rspec', '~> 2'
   gem 'bundler', '>= 1.0.15'
-  gem 'jeweler', '>= 1.6.4'
   gem 'rspec-core', '>= 2.7.1'
   gem 'rspec-expectations', '>= 2.7.0'
   gem 'rspec-mocks', '>= 2.7.0'
