@@ -58,7 +58,7 @@ module Fig::Command::Listing
 
   def display_variables()
     if @options.list_tree?
-      raise Fig::UserInputError.new('--list-variables --list-tree not yet implemented.')
+      display_variables_in_tree(@package, derive_base_display_config_names())
     else
       display_variables_flat()
     end
@@ -69,6 +69,7 @@ module Fig::Command::Listing
   def display_dependencies_in_tree(base_package, config_names)
     walk_dependency_tree(base_package, config_names, 0) do
       |package, config_name, depth|
+
       print ' ' * (depth * 4)
       puts package.to_s_with_config(config_name)
     end
@@ -146,11 +147,9 @@ module Fig::Command::Listing
     end
 
     starting_config_names.each do |config_name|
-
       @package[config_name].walk_statements_following_package_dependencies(
-        @repository, @package, self
+        @repository, @package, nil
       ) do |package, statement|
-
         if (
               ! package.package_name.nil?           \
           &&  ! (
@@ -184,6 +183,114 @@ module Fig::Command::Listing
       display_variables()
     else
       raise %Q<Bug in code! Found unknown :listing option value "#{options.listing()}">
+    end
+
+    return
+  end
+
+  VariableTreeNode =
+    Struct.new(:package, :config_name, :variable_statements, :children, :parent)
+
+  def display_variables_in_tree(base_package, config_names)
+    tree = build_variable_tree(base_package, config_names)
+
+    tree.children().each do
+      |child|
+
+      display_variable_tree_level(child, '', '')
+    end
+
+    return
+  end
+
+  def build_variable_tree(base_package, config_names)
+    tree = VariableTreeNode.new(nil, nil, nil, [], nil)
+    prior_depth = 0
+    prior_node = nil
+    current_parent = tree
+
+    walk_dependency_tree(base_package, config_names, 0) do
+      |package, config_name, depth|
+
+      if depth < prior_depth
+        (depth .. (prior_depth - 1)).each do
+          current_parent = current_parent.parent
+        end
+      elsif depth == prior_depth + 1
+        current_parent = prior_node
+      elsif depth > prior_depth
+        raise "Bug in code! Descended more than one level! (#{prior_depth} to #{depth}"
+      end
+
+      variable_statements = gather_variable_statements(package[config_name])
+      node = VariableTreeNode.new(
+        package, config_name, variable_statements, [], current_parent
+      )
+      current_parent.children() << node
+
+      prior_depth = depth
+      prior_node = node
+    end
+
+    return tree
+  end
+
+  def gather_variable_statements(config_statement)
+    variable_statements = []
+    config_statement.walk_statements() do |statement|
+      case statement
+        when Fig::Statement::Path
+          variable_statements << statement
+        when Fig::Statement::Set
+          variable_statements << statement
+      end
+    end
+
+    return variable_statements
+  end
+
+  def display_variable_tree_level(node, base_indent, package_indent)
+    print package_indent
+    puts node.package().to_s_with_config(node.config_name())
+
+    display_variable_tree_level_variables(node, base_indent)
+
+    children = node.children()
+    child_count = children.size()
+
+    new_indent = base_indent + (child_count > 0 ? '|' : ' ') + ' ' * 3
+    new_package_indent = base_indent + %q<'--->
+
+    (0 .. (child_count - 2)).each do
+      |child_index|
+
+      display_variable_tree_level(
+        children[child_index], new_indent, new_package_indent
+      )
+    end
+
+    if child_count > 0
+      display_variable_tree_level(
+        children[-1], (base_indent + ' ' * 4), new_package_indent
+      )
+    end
+  end
+
+  def display_variable_tree_level_variables(node, base_indent)
+    if node.children().size() > 0
+      variable_indent = base_indent + '|' + ' ' * 3
+    else
+      variable_indent = base_indent + ' ' * 4
+    end
+
+    node.variable_statements().each do
+      |statement|
+
+      if statement.is_a?(Fig::Statement::Path)
+        puts "#{variable_indent}#{statement.name} = #{statement.value}:$#{statement.name}"
+      else
+        puts "#{variable_indent}#{statement.name} = #{statement.value}"
+      end
     end
 
     return
