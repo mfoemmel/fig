@@ -48,7 +48,7 @@ module Fig::Command::Listing
 
   def display_dependencies()
     if @options.list_tree?
-      display_dependencies_in_tree(@package, derive_base_display_config_names())
+      display_dependencies_in_tree()
     else
       display_dependencies_flat()
     end
@@ -58,7 +58,7 @@ module Fig::Command::Listing
 
   def display_variables()
     if @options.list_tree?
-      display_variables_in_tree(@package, derive_base_display_config_names())
+      display_variables_in_tree()
     else
       display_variables_flat()
     end
@@ -66,8 +66,8 @@ module Fig::Command::Listing
     return
   end
 
-  def display_dependencies_in_tree(base_package, config_names)
-    walk_dependency_tree(base_package, config_names, 0) do
+  def display_dependencies_in_tree()
+    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
       |package, config_name, depth|
 
       print ' ' * (depth * 4)
@@ -193,11 +193,11 @@ module Fig::Command::Listing
       :package, :config_name, :variable_statements, :child_configs, :parent
     )
 
-  def display_variables_in_tree(base_package, config_names)
+  def display_variables_in_tree()
     # We can't just display as we walk the dependency tree because we need to
     # know in advance how many configurations we're going display under
     # another.
-    tree = build_variable_tree(base_package, config_names)
+    tree = build_variable_tree()
 
     tree.child_configs().each do
       |child|
@@ -208,13 +208,13 @@ module Fig::Command::Listing
     return
   end
 
-  def build_variable_tree(base_package, config_names)
+  def build_variable_tree()
     tree = VariableTreePackageConfig.new(nil, nil, nil, [], nil)
     prior_depth = 0
     prior_node = nil
     current_parent = tree
 
-    walk_dependency_tree(base_package, config_names, 0) do
+    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
       |package, config_name, depth|
 
       if depth < prior_depth
