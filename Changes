@@ -19,6 +19,8 @@ v0.1.xx
 
     See README.md for more.
 
+    Suggestions for changes to the output format welcome.
+
   - The .fig file created in a repository now contains metadata about
     the publishing of the package (time/user/host).
 
