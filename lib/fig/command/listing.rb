@@ -192,6 +192,9 @@ module Fig::Command::Listing
     Struct.new(:package, :config_name, :variable_statements, :children, :parent)
 
   def display_variables_in_tree(base_package, config_names)
+    # We can't just display as we walk the dependency tree because we need to
+    # know in advance how many configurations we're going display under
+    # another.
     tree = build_variable_tree(base_package, config_names)
 
     tree.children().each do
@@ -283,14 +286,21 @@ module Fig::Command::Listing
       variable_indent = base_indent + ' ' * 4
     end
 
-    node.variable_statements().each do
+    variable_statements = node.variable_statements()
+
+    name_width =
+      (variable_statements.map { |statement| statement.name().length() }).max()
+
+    variable_statements.each do
       |statement|
 
+      print "#{variable_indent}"
+      print "#{statement.name().ljust(name_width)}"
+      print " = #{statement.value}"
       if statement.is_a?(Fig::Statement::Path)
-        puts "#{variable_indent}#{statement.name} = #{statement.value}:$#{statement.name}"
-      else
-        puts "#{variable_indent}#{statement.name} = #{statement.value}"
+        print ":$#{statement.name}"
       end
+      print "\n"
     end
 
     return
