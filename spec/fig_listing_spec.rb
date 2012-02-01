@@ -945,6 +945,9 @@ describe 'Fig' do
           setup_list_variables_packages
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            ADDON_A
+            ADDON_B
+            ADDON_C
             A_BOTH_CONFIGS
             A_DEFAULT
             A_NONDEFAULT
@@ -956,10 +959,11 @@ describe 'Fig' do
             A_PATH_PREPENDS_D
             A_SET_GETS_PREPENDED_WITH_B_AND_C
             B_DEFAULT
+            B_OVERRIDES_A_AND_C
+            B_OVERRIDES_C
+            B_PATH_PREPENDS_A_AND_C
             C_DEFAULT
-            C_NONDEFAULT
-            C_OVERRIDES_A_AND_B
-            C_OVERRIDES_B
+            C_ONLY_IN_C456
             D_DEFAULT
             D_OVERRIDES_A
             D_PATH_PREPENDS_A
@@ -969,9 +973,9 @@ describe 'Fig' do
 
           (out, err, exitstatus) = fig('--list-variables --list-all-configs A/1.2.3')
           exitstatus.should == 0
-          pending "Need to include all configs in --list-variables"
-          #out.should == expected
-          err.should == ''
+          out.should == expected
+          err.should ==
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
         end
 
         it %q<lists all dependency variables with a package.fig> do
@@ -979,9 +983,11 @@ describe 'Fig' do
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+            ADDON_A
+            ADDON_B
+            ADDON_C
             A_BOTH_CONFIGS
             A_DEFAULT
-            A_NONDEFAULT
             A_OVERRIDES_B_AND_C
             A_OVERRIDES_C_PREPENDING_B
             A_OVERRIDES_D
@@ -990,10 +996,10 @@ describe 'Fig' do
             A_PATH_PREPENDS_D
             A_SET_GETS_PREPENDED_WITH_B_AND_C
             B_DEFAULT
+            B_OVERRIDES_A_AND_C
+            B_OVERRIDES_C
+            B_PATH_PREPENDS_A_AND_C
             C_DEFAULT
-            C_NONDEFAULT
-            C_OVERRIDES_A_AND_B
-            C_OVERRIDES_B
             D_DEFAULT
             D_OVERRIDES_A
             D_PATH_PREPENDS_A
@@ -1003,9 +1009,9 @@ describe 'Fig' do
 
           (out, err, exitstatus) = fig('--list-variables --list-all-configs')
           exitstatus.should == 0
-          pending "Need to include all configs in --list-variables"
-          #out.should == expected
-          err.should == ''
+          out.should == expected
+          err.should ==
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
         end
       end
     end

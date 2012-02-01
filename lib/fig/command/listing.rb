@@ -59,8 +59,10 @@ module Fig::Command::Listing
   def display_variables()
     if @options.list_tree?
       display_variables_in_tree()
+    elsif @options.list_all_configs?
+      display_variables_flat_from_repository()
     else
-      display_variables_flat()
+      display_variables_flat_from_environment()
     end
 
     return
@@ -308,7 +310,28 @@ module Fig::Command::Listing
     return
   end
 
-  def display_variables_flat()
+  def display_variables_flat_from_repository()
+    variable_names = Set.new()
+
+    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
+      |package, config_name, depth|
+
+      package[config_name].walk_statements() do |statement|
+        case statement
+          when Fig::Statement::Path
+            variable_names << statement.name()
+          when Fig::Statement::Set
+            variable_names << statement.name()
+        end
+      end
+    end
+
+    variable_names.sort.each { |name| puts name }
+
+    return
+  end
+
+  def display_variables_flat_from_environment()
     register_package_with_environment()
 
     variables = @environment.variables()
@@ -317,11 +340,7 @@ module Fig::Command::Listing
       puts '<no variables>'
     else
       variables.keys.sort.each do |variable|
-        if @options.list_all_configs?()
-          puts variable
-        else
-          puts variable + "=" + variables[variable]
-        end
+        puts variable + "=" + variables[variable]
       end
     end
 

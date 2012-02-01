@@ -31,12 +31,11 @@ Usage:
   fig --get VARIABLE                                         [DESCRIPTOR] [...]
   fig --list-configs                                         [DESCRIPTOR] [...]
   fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
   fig {--list-local | --list-remote}                                      [...]
 
   fig {--version | --help}
 
-Not yet implemented:
-  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
 
 A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",
 "foo/1.2.3", and "foo/1.2.3:default". Whether ":<config>" and "/<version>" are
