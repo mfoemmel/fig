@@ -11,17 +11,17 @@ require 'rubygems/package_task'
 
 include FileUtils
 
-major_version = nil
-minor_version = nil
-patch_version = nil
+$major_version = nil
+$minor_version = nil
+$patch_version = nil
 version = nil
 
 File.open('VERSION', 'r') do |file|
   version = file.gets
   matches = version.match(/(\d+)\.(\d+)\.(\d+)/)
-  major_version = matches[1]
-  minor_version = matches[2]
-  patch_version = matches[3]
+  $major_version = matches[1]
+  $minor_version = matches[2]
+  $patch_version = matches[3]
 end
 
 def clean_git_working_directory?
@@ -112,6 +112,12 @@ def push_to_rubygems(version)
   return
 end
 
+def write_version_file()
+  File.open('VERSION', 'w') do |file|
+    file.print "#{$major_version}.#{$minor_version}.#{$patch_version}"
+  end
+end
+
 fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.name = 'fig'
   gemspec.summary = 'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
@@ -156,20 +162,20 @@ end
 
 desc 'Increments the major version number by one.'
 task :increment_major_version do
-    updated_major_version = major_version.to_i + 1
-    %x{echo #{updated_major_version}.#{minor_version}.#{patch_version} > 'VERSION'}
+    $major_version.succ!
+    write_version_file()
 end
 
 desc 'Increments the minor version number by one.'
 task :increment_minor_version do
-    updated_minor_version = minor_version.to_i + 1
-    %x{echo #{major_version}.#{updated_minor_version}.#{patch_version} > 'VERSION'}
+    $minor_version.succ!
+    write_version_file()
 end
 
 desc 'Increments the patch version number by one.'
 task :increment_patch_version do
-    updated_patch_version = patch_version.to_i + 1
-    %x{echo #{major_version}.#{minor_version}.#{updated_patch_version} > 'VERSION'}
+    $patch_version.succ!
+    write_version_file()
 end
 
 Gem::PackageTask.new(fig_gemspec).define
