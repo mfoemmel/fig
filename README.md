@@ -39,7 +39,7 @@ Usage
 
 Fig recognizes the following options:
 
-## Flags ##
+## Flags
 
     -g, --get VARIABLE               print value of environment variable VARIABLE
         --list-local, --list         list packages in $FIG_HOME
@@ -85,7 +85,7 @@ specifying that same package's dependencies, since for example its "build-time"
 dependencies may differ from its "include-time" dependencies.  Multiple config
 sections may be helpful in organizing these concerns.
 
-## Environment Variables Influencing Fig's Behavior ##
+## Environment Variables Influencing Fig's Behavior
 
     FIG_FTP_THREADS     Optional - Size of FTP session pool. Defaults to 16.
     FIG_HOME            Optional - Location of local repo cache. Defaults to $HOME/.fighome.
@@ -95,14 +95,14 @@ sections may be helpful in organizing these concerns.
 
 ## Commands affected by environment variables
 
-#### `--list-remote` ####
+#### `--list-remote`
 
 When using the `--list-remote` command against an FTP server, Fig uses a pool
 of FTP sessions to improve performance. By default it opens 16 connections, but
 that number can be overridden by setting the `FIG_FTP_THREADS` environment
 variable.
 
-#### `--login` ####
+#### `--login`
 
 If the `--login` option is supplied, Fig will look for credentials.  If
 environment variables `FIG_REMOTE_USER` and/or `FIG_REMOTE_PASSWORD` are
@@ -123,7 +123,7 @@ Fig lets you configure environments three different ways:
 * From a "package.fig" file in the current directory
 * From packages included indirectly via one of the previous two methods
 
-## Command Line ##
+## Command Line
 
 To get started, let's define an environment variable via the command line and
 execute a command in the new environment. We'll set the "GREETING" variable to
@@ -149,7 +149,7 @@ PATH:
     $ fig -s GREETING=Hello -p PATH=bin -- hello
     Hello, World
 
-## Fig Files ##
+## Fig Files
 
 You can also specify environment modifiers in files. Fig looks for a file
 called "package.fig" in the current directory and automatically processes it.
@@ -185,7 +185,7 @@ A single Fig file may have multiple configurations:
       append PATH=@/bin
     end
 
-## Config Sections ##
+## Config Sections
 
 Configurations other than "default" can be specified using the "-c" option:
 
@@ -212,7 +212,7 @@ following is _invalid_:
       end
     end
 
-## Packages ##
+## Packages
 
 Let's share our little script with the rest of the team by bundling it into a
 package and publishing it. First, point the `FIG_REMOTE_URL` environment
@@ -259,7 +259,7 @@ appending it to the package name using a colon:
     $ fig -i hello/1.0.0:french -- hello
     Bonjour, World
 
-## Retrieves ##
+## Retrieves
 
 By default, the resources associated with a package live in the Fig home
 directory, which defaults to "$HOME/.fighome". This doesn't always play nicely
@@ -300,23 +300,23 @@ the version).
 Package Statement Descriptions
 ==============================
 
-## `add` ##
+## `add`
 
 Specifies a value to be appended to a `PATH`-like environment variable, e.g.
 `CLASSPATH` for Java.  Does not include the delimiter within the variable, just
 the component value.
 
-## `append` ##
+## `append`
 
 Synonym for `add`.
 
-## `archive` ##
+## `archive`
 
 Specifies an archive file (either a local path or a URL) that is supposed to be
 incorporated into the package.  This is different from a `resource` in that the
 contents will be extracted as part of installation.
 
-## `command` ##
+## `command`
 
 Specifies a default command to be run for a given `config` when no command is
 given on the command-line.
@@ -328,7 +328,7 @@ given on the command-line.
 Cannot be specified outside of a `config` statement.  There may not be multiple
 commands within a given `config`.
 
-## `config` ##
+## `config`
 
 A grouping of statements that specifies what is to be done.  There must either
 be a configuration named "default" or you will always have to specify a
@@ -337,12 +337,12 @@ configuration on the command-line.
 May not be nested.  If you wish to incorporate the effects of one configuration
 into another, use an `include` statement.
 
-## `include` ##
+## `include`
 
 Can be used in two ways: to affect configurations and to declare package
 dependencies.
 
-### Pull one configuration into another ###
+### Pull one configuration into another
 
 You can get the effects of one configuration in another by using the name of
 the other configuration preceded by a colon:
@@ -355,7 +355,7 @@ the other configuration preceded by a colon:
       ...
     end
 
-### Declare a package dependency ###
+### Declare a package dependency
 
 States that one package should be installed prior to the current one; can
 specify a configuration in the other package.
@@ -403,21 +403,21 @@ Or specify the same version to both:
 
 Multiple `override` clauses can be specified in a single `include` statement.
 
-## `path` ##
+## `path`
 
 Synonym for `add`.
 
-## `resource` ##
+## `resource`
 
 Specifies a file (either a local path or a URL) that is supposed to be
 incorporated into the package.  This is different from an `archive` in that the
 contents will not be extracted as part of installation.
 
-## `retrieve` ##
+## `retrieve`
 
 Gives the installation location for a dependency.
 
-## `set` ##
+## `set`
 
 Specifies the value of an environment variable.  Unlike `add`/`append`/`path`,
 this is the complete, final value.
@@ -429,7 +429,7 @@ If you've got a long chain of dependencies of packages, it can be challenging
 to figure out the full effects of it.  There are a number of commands for just
 figuring out what's going on.
 
-## `--list-dependencies` ##
+## `--list-dependencies`
 
 This will give you the total set of packages you're pulling in.
 
@@ -456,7 +456,7 @@ However, if stdout is not connected to a terminal:
 
     [no output]
 
-## `--list-variables` ##
+## `--list-variables`
 
 This gives you the environment variables and their values that Fig
 adds/overrides from the environment variables inherited by the invoking program
@@ -492,11 +492,11 @@ something like this:
 
     fig ... -- printenv | sort
 
-## Delving deeper ##
+## Delving deeper
 
 The following apply to both `--list-dependencies` and `--list-variables`.
 
-### `--list-all-configs`, a.k.a. "What's everything I can possibly get?" ###
+### `--list-all-configs`, a.k.a. "What's everything I can possibly get?"
 
 Unlike the default behavior which will only look at a single base
 configuration, this option will cause Fig to follow all of the dependencies
@@ -559,7 +559,7 @@ will emit
     foo/1.2.3
     foo/4.5.6
 
-### `--list-tree`, a.k.a. "Hey, where'd that come from?" ###
+### `--list-tree`, a.k.a. "Hey, where'd that come from?"
 
 Following the example from `--list-dependencies` above, if you additionally
 specify `--list-tree`, you'll get a nested dependency tree:
@@ -641,7 +641,7 @@ existing value of the variable.
 Installation and Development
 ============================
 
-## Installation ##
+## Installation
 
     gem install fig
 
@@ -650,11 +650,11 @@ Development Kit available from http://rubyinstaller.org/downloads. Instructions
 for installation of the Development Kit are available at
 https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
 
-## Building the gem ##
+## Building the gem
 
     rake build
 
-## Building a gem for ruby 1.8.7 on Windows ##
+## Building a gem for ruby 1.8.7 on Windows
 
 You can no longer use the rakefile to produce this specific gem. You will need
 to create a fig.gemspec file manually. Use the list of gem dependencies found
