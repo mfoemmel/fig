@@ -1,4 +1,4 @@
-v0.1.xx
+v0.1.56
 
   - "--list-variables" option.  This will display all variables manipulated by
     Fig, following package dependencies recursively.  Can have
