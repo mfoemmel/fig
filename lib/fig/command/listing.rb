@@ -188,8 +188,10 @@ module Fig::Command::Listing
     return
   end
 
-  VariableTreeNode =
-    Struct.new(:package, :config_name, :variable_statements, :children, :parent)
+  VariableTreePackageConfig =
+    Struct.new(
+      :package, :config_name, :variable_statements, :child_configs, :parent
+    )
 
   def display_variables_in_tree(base_package, config_names)
     # We can't just display as we walk the dependency tree because we need to
@@ -197,7 +199,7 @@ module Fig::Command::Listing
     # another.
     tree = build_variable_tree(base_package, config_names)
 
-    tree.children().each do
+    tree.child_configs().each do
       |child|
 
       display_variable_tree_level(child, '', '')
@@ -207,7 +209,7 @@ module Fig::Command::Listing
   end
 
   def build_variable_tree(base_package, config_names)
-    tree = VariableTreeNode.new(nil, nil, nil, [], nil)
+    tree = VariableTreePackageConfig.new(nil, nil, nil, [], nil)
     prior_depth = 0
     prior_node = nil
     current_parent = tree
@@ -226,10 +228,10 @@ module Fig::Command::Listing
       end
 
       variable_statements = gather_variable_statements(package[config_name])
-      node = VariableTreeNode.new(
+      node = VariableTreePackageConfig.new(
         package, config_name, variable_statements, [], current_parent
       )
-      current_parent.children() << node
+      current_parent.child_configs() << node
 
       prior_depth = depth
       prior_node = node
@@ -258,8 +260,8 @@ module Fig::Command::Listing
 
     display_variable_tree_level_variables(node, base_indent)
 
-    children = node.children()
-    child_count = children.size()
+    child_configs = node.child_configs()
+    child_count = child_configs.size()
 
     new_indent = base_indent + (child_count > 0 ? '|' : ' ') + ' ' * 3
     new_package_indent = base_indent + %q<'--->
@@ -268,19 +270,19 @@ module Fig::Command::Listing
       |child_index|
 
       display_variable_tree_level(
-        children[child_index], new_indent, new_package_indent
+        child_configs[child_index], new_indent, new_package_indent
       )
     end
 
     if child_count > 0
       display_variable_tree_level(
-        children[-1], (base_indent + ' ' * 4), new_package_indent
+        child_configs[-1], (base_indent + ' ' * 4), new_package_indent
       )
     end
   end
 
   def display_variable_tree_level_variables(node, base_indent)
-    if node.children().size() > 0
+    if node.child_configs().size() > 0
       variable_indent = base_indent + '|' + ' ' * 3
     else
       variable_indent = base_indent + ' ' * 4
