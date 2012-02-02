@@ -2,7 +2,6 @@
 # It is not possible to do from the rake file anymore.
 
 require 'fileutils'
-require 'git'
 require 'rake'
 require 'rdoc/task'
 require 'rspec/core/rake_task'
@@ -28,7 +27,7 @@ def clean_git_working_directory?
   return %x<git ls-files --deleted --modified --others --exclude-standard> == ''
 end
 
-def tag_exists_in_local_repo(git_repo, new_tag)
+def tag_exists_in_local_repo(new_tag)
   tag_exists = false
   tag_list = %x<git tag>
   tags = tag_list.split("\n")
@@ -41,19 +40,19 @@ def tag_exists_in_local_repo(git_repo, new_tag)
   return tag_exists
 end
 
-def create_git_tag(git_repo, version)
+def create_git_tag(version)
   new_tag = "v#{version}"
   print "Checking for an existing #{new_tag} git tag... "
-  if not tag_exists_in_local_repo(git_repo, new_tag)
+  if not tag_exists_in_local_repo(new_tag)
     puts 'Tag does not already exist.'
     puts "Creating #{new_tag} tag."
-    git_repo.add_tag(new_tag)
+    %x<git tag #{new_tag}>
   else
     puts 'Tag exists.'
     return nil
   end
 
-  if not tag_exists_in_local_repo(git_repo, new_tag)
+  if not tag_exists_in_local_repo(new_tag)
     puts "The tag was not successfully created. Aborting!"
     return nil
   end
@@ -61,10 +60,10 @@ def create_git_tag(git_repo, version)
   return new_tag
 end
 
-def push_to_remote_repo(git_repo, new_tag)
+def push_to_remote_repo(new_tag)
   if new_tag != nil
     puts %Q<Pushing #{new_tag} tag to "origin" remote repository.>
-    git_repo.push('origin', new_tag)
+    %x<git push origin #{new_tag}>
   end
 
   return
@@ -73,9 +72,8 @@ end
 def tag_and_push_to_git(version)
   new_tag = nil
   if clean_git_working_directory?
-    git_repo = Git.open('.')
-    new_tag = create_git_tag(git_repo, version)
-    push_to_remote_repo(git_repo, new_tag)
+    new_tag = create_git_tag(version)
+    push_to_remote_repo(new_tag)
   else
     puts 'Cannot proceed with tag, push, and publish because your environment is not clean.'
     puts 'The status of your local git repository:'
