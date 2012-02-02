@@ -48,7 +48,7 @@ module Fig::Command::Listing
 
   def display_dependencies()
     if @options.list_tree?
-      display_dependencies_in_tree(@package, derive_base_display_config_names())
+      display_dependencies_in_tree()
     else
       display_dependencies_flat()
     end
@@ -58,17 +58,20 @@ module Fig::Command::Listing
 
   def display_variables()
     if @options.list_tree?
-      raise Fig::UserInputError.new('--list-variables --list-tree not yet implemented.')
+      display_variables_in_tree()
+    elsif @options.list_all_configs?
+      display_variables_flat_from_repository()
     else
-      display_variables_flat()
+      display_variables_flat_from_environment()
     end
 
     return
   end
 
-  def display_dependencies_in_tree(base_package, config_names)
-    walk_dependency_tree(base_package, config_names, 0) do
+  def display_dependencies_in_tree()
+    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
       |package, config_name, depth|
+
       print ' ' * (depth * 4)
       puts package.to_s_with_config(config_name)
     end
@@ -146,11 +149,9 @@ module Fig::Command::Listing
     end
 
     starting_config_names.each do |config_name|
-
       @package[config_name].walk_statements_following_package_dependencies(
-        @repository, @package, self
+        @repository, @package, nil
       ) do |package, statement|
-
         if (
               ! package.package_name.nil?           \
           &&  ! (
@@ -189,7 +190,148 @@ module Fig::Command::Listing
     return
   end
 
-  def display_variables_flat()
+  VariableTreePackageConfig =
+    Struct.new(
+      :package, :config_name, :variable_statements, :child_configs, :parent
+    )
+
+  def display_variables_in_tree()
+    # We can't just display as we walk the dependency tree because we need to
+    # know in advance how many configurations we're going display under
+    # another.
+    tree = build_variable_tree()
+
+    tree.child_configs().each do
+      |child|
+
+      display_variable_tree_level(child, '', '')
+    end
+
+    return
+  end
+
+  def build_variable_tree()
+    tree = VariableTreePackageConfig.new(nil, nil, nil, [], nil)
+    prior_depth = 0
+    prior_node = nil
+    current_parent = tree
+
+    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
+      |package, config_name, depth|
+
+      if depth < prior_depth
+        (depth .. (prior_depth - 1)).each do
+          current_parent = current_parent.parent
+        end
+      elsif depth == prior_depth + 1
+        current_parent = prior_node
+      elsif depth > prior_depth
+        raise "Bug in code! Descended more than one level! (#{prior_depth} to #{depth}"
+      end
+
+      variable_statements = gather_variable_statements(package[config_name])
+      node = VariableTreePackageConfig.new(
+        package, config_name, variable_statements, [], current_parent
+      )
+      current_parent.child_configs() << node
+
+      prior_depth = depth
+      prior_node = node
+    end
+
+    return tree
+  end
+
+  def gather_variable_statements(config_statement)
+    variable_statements = []
+    config_statement.walk_statements() do |statement|
+      case statement
+        when Fig::Statement::Path
+          variable_statements << statement
+        when Fig::Statement::Set
+          variable_statements << statement
+      end
+    end
+
+    return variable_statements
+  end
+
+  def display_variable_tree_level(node, base_indent, package_indent)
+    print package_indent
+    puts node.package().to_s_with_config(node.config_name())
+
+    display_variable_tree_level_variables(node, base_indent)
+
+    child_configs = node.child_configs()
+    child_count = child_configs.size()
+
+    new_indent = base_indent + (child_count > 0 ? '|' : ' ') + ' ' * 3
+    new_package_indent = base_indent + %q<'--->
+
+    (0 .. (child_count - 2)).each do
+      |child_index|
+
+      display_variable_tree_level(
+        child_configs[child_index], new_indent, new_package_indent
+      )
+    end
+
+    if child_count > 0
+      display_variable_tree_level(
+        child_configs[-1], (base_indent + ' ' * 4), new_package_indent
+      )
+    end
+  end
+
+  def display_variable_tree_level_variables(node, base_indent)
+    if node.child_configs().size() > 0
+      variable_indent = base_indent + '|' + ' ' * 3
+    else
+      variable_indent = base_indent + ' ' * 4
+    end
+
+    variable_statements = node.variable_statements()
+
+    name_width =
+      (variable_statements.map { |statement| statement.name().length() }).max()
+
+    variable_statements.each do
+      |statement|
+
+      print "#{variable_indent}"
+      print "#{statement.name().ljust(name_width)}"
+      print " = #{statement.value}"
+      if statement.is_a?(Fig::Statement::Path)
+        print ":$#{statement.name}"
+      end
+      print "\n"
+    end
+
+    return
+  end
+
+  def display_variables_flat_from_repository()
+    variable_names = Set.new()
+
+    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
+      |package, config_name, depth|
+
+      package[config_name].walk_statements() do |statement|
+        case statement
+          when Fig::Statement::Path
+            variable_names << statement.name()
+          when Fig::Statement::Set
+            variable_names << statement.name()
+        end
+      end
+    end
+
+    variable_names.sort.each { |name| puts name }
+
+    return
+  end
+
+  def display_variables_flat_from_environment()
     register_package_with_environment()
 
     variables = @environment.variables()
@@ -198,11 +340,7 @@ module Fig::Command::Listing
       puts '<no variables>'
     else
       variables.keys.sort.each do |variable|
-        if @options.list_all_configs?()
-          puts variable
-        else
-          puts variable + "=" + variables[variable]
-        end
+        puts variable + "=" + variables[variable]
       end
     end
 

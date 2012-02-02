@@ -31,12 +31,11 @@ Usage:
   fig --get VARIABLE                                         [DESCRIPTOR] [...]
   fig --list-configs                                         [DESCRIPTOR] [...]
   fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
   fig {--list-local | --list-remote}                                      [...]
 
   fig {--version | --help}
 
-Not yet implemented:
-  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
 
 A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",
 "foo/1.2.3", and "foo/1.2.3:default". Whether ":<config>" and "/<version>" are
@@ -246,7 +245,7 @@ Environment variables:
       help(parser)
     end
 
-    parser.on_tail('-v', '--version', 'Print fig version') do
+    parser.on_tail('-v', '--version', 'Print Fig version') do
       version()
     end
 
@@ -345,7 +344,7 @@ Environment variables:
     @options[:package_config_file] = nil
     parser.on(
       '--file FILE',
-      %q<read fig file FILE. Use '-' for stdin. See also --no-file>
+      %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
       @options[:package_config_file] = path
     end
@@ -472,7 +471,7 @@ Environment variables:
 
   def help(parser)
     puts parser.help
-    puts "        --                           end of fig options; anything after this is used as a command to run\n\n"
+    puts "        --                           end of Fig options; anything after this is used as a command to run\n\n"
 
     @exit_code = 0
 
@@ -489,14 +488,14 @@ Environment variables:
         line = file.gets
       end
     rescue
-      $stderr.puts 'Could not retrieve version number. Something has mucked with your fig install.'
+      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
 
       @exit_code = 1
       return
     end
 
     if line !~ /\d+\.\d+\.\d+/
-      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your fig install.>
+      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
 
       @exit_code = 1
       return

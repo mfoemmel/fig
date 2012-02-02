@@ -29,9 +29,9 @@ changed by setting the $FIG_HOME environment variable.
 
 Fig is similar to a lot of other package/dependency-management tools. In
 particular, it steals a lot of ideas from Apache Ivy and Debian APT. However,
-unlike Ivy, fig is meant to be lightweight (no XML, no JVM startup time),
+unlike Ivy, Fig is meant to be lightweight (no XML, no JVM startup time),
 language agnostic (Java doesn't get preferential treatment), and work with
-executables as well as libraries. And unlike APT, fig is cross platform and
+executables as well as libraries. And unlike APT, Fig is cross platform and
 project-oriented.
 
 Usage
@@ -39,10 +39,8 @@ Usage
 
 Fig recognizes the following options:
 
-## Flags ##
+## Flags
 
-    -?, -h, --help                   display this help text
-    -v, --version                    Print fig version
     -g, --get VARIABLE               print value of environment variable VARIABLE
         --list-local, --list         list packages in $FIG_HOME
         --list-configs               list configurations
@@ -55,7 +53,7 @@ Fig recognizes the following options:
         --publish                    install package in $FIG_HOME and in remote repo
         --publish-local              install package only in $FIG_HOME
     -c, --config CONFIG              apply configuration CONFIG, default is "default"
-        --file FILE                  read fig file FILE. Use '-' for stdin. See also --no-file
+        --file FILE                  read Fig file FILE. Use '-' for stdin. See also --no-file
         --no-file                    ignore package.fig file in current directory
     -p, --append VARIABLE=VALUE      append (actually, prepend) VALUE to environment variable VARIABLE, delimited by separator
     -i, --include DESCRIPTOR         include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment
@@ -71,7 +69,9 @@ Fig recognizes the following options:
         --log-config PATH            use PATH file as configuration for Log4r
         --log-level LEVEL            set logging level to LEVEL
                                        (off, fatal, error, warn, info, debug, all)
-        --                           end of fig options; anything after this is used as a command to run
+    -?, -h, --help                   display this help text
+    -v, --version                    Print Fig version
+        --                           end of Fig options; anything after this is used as a command to run
 
 Some of these options may also be expressed as statements in a package.fig
 file.  For instance, `--append`, `--archive`, `--resource`, `include`.
@@ -85,7 +85,7 @@ specifying that same package's dependencies, since for example its "build-time"
 dependencies may differ from its "include-time" dependencies.  Multiple config
 sections may be helpful in organizing these concerns.
 
-## Environment Variables Influencing Fig's Behavior ##
+## Environment Variables Influencing Fig's Behavior
 
     FIG_FTP_THREADS     Optional - Size of FTP session pool. Defaults to 16.
     FIG_HOME            Optional - Location of local repo cache. Defaults to $HOME/.fighome.
@@ -95,23 +95,23 @@ sections may be helpful in organizing these concerns.
 
 ## Commands affected by environment variables
 
-#### `--list-remote` ####
+#### `--list-remote`
 
-When using the `--list-remote` command against an FTP server, fig uses a pool
+When using the `--list-remote` command against an FTP server, Fig uses a pool
 of FTP sessions to improve performance. By default it opens 16 connections, but
 that number can be overridden by setting the `FIG_FTP_THREADS` environment
 variable.
 
-#### `--login` ####
+#### `--login`
 
-If the `--login` option is supplied, fig will look for credentials.  If
+If the `--login` option is supplied, Fig will look for credentials.  If
 environment variables `FIG_REMOTE_USER` and/or `FIG_REMOTE_PASSWORD` are
-defined, fig will use them instead of prompting the user.  If ~/.netrc exists,
+defined, Fig will use them instead of prompting the user.  If ~/.netrc exists,
 with an entry corresponding to the host parsed from `FIG_REMOTE_URL`, that
 entry will take precedence over `FIG_REMOTE_USER` and `FIG_REMOTE_PASSWORD`.
-If sufficient credentials are still not found, fig will prompt for whatever is
+If sufficient credentials are still not found, Fig will prompt for whatever is
 still missing, and use the accumulated credentials to authenticate against the
-remote server.  Even if both environment variables are defined, fig will only
+remote server.  Even if both environment variables are defined, Fig will only
 use them if `--login` is given.
 
 Examples
@@ -123,7 +123,7 @@ Fig lets you configure environments three different ways:
 * From a "package.fig" file in the current directory
 * From packages included indirectly via one of the previous two methods
 
-## Command Line ##
+## Command Line
 
 To get started, let's define an environment variable via the command line and
 execute a command in the new environment. We'll set the "GREETING" variable to
@@ -132,7 +132,7 @@ execute a command in the new environment. We'll set the "GREETING" variable to
     $ fig -s GREETING=Hello -- echo '$GREETING, World'
     Hello, World
 
-Also note that when running fig, the original environment isn't affected:
+Also note that when running Fig, the original environment isn't affected:
 
      $ echo $GREETING
      <nothing>
@@ -149,7 +149,7 @@ PATH:
     $ fig -s GREETING=Hello -p PATH=bin -- hello
     Hello, World
 
-## Fig Files ##
+## Fig Files
 
 You can also specify environment modifiers in files. Fig looks for a file
 called "package.fig" in the current directory and automatically processes it.
@@ -170,10 +170,10 @@ NOTE: The '@' symbol in a given package.fig file (or in a published
 dependency's .fig file) represents the full path to that file's directory.  The
 above example would still work if we just used "bin", but later on when we
 publish our project to the shared repository we'll definitely need the '@',
-since the project directories will live in the fig-home rather than under our
+since the project directories will live in the Fig-home rather than under our
 current directory).
 
-A single fig file may have multiple configurations:
+A single Fig file may have multiple configurations:
 
     config default
       set GREETING=Hello
@@ -185,7 +185,7 @@ A single fig file may have multiple configurations:
       append PATH=@/bin
     end
 
-## Config Sections ##
+## Config Sections
 
 Configurations other than "default" can be specified using the "-c" option:
 
@@ -204,7 +204,7 @@ section via an `include` statement:
       append PATH=@/bin
     end
 
-Note that config statements cannot be nested within a fig file.  I.e. the
+Note that config statements cannot be nested within a Fig file.  I.e. the
 following is _invalid_:
 
     config foo
@@ -212,16 +212,16 @@ following is _invalid_:
       end
     end
 
-## Packages ##
+## Packages
 
 Let's share our little script with the rest of the team by bundling it into a
 package and publishing it. First, point the `FIG_REMOTE_URL` environment
-variable to the remote repository. If you just want to play around with fig,
+variable to the remote repository. If you just want to play around with Fig,
 you can have it point to a local directory:
 
     $ export FIG_REMOTE_URL=file://$(pwd)/remote
 
-Before we publish our package, we'll need to tell fig which files we want to
+Before we publish our package, we'll need to tell Fig which files we want to
 include. We do this by using the "resource" statement in our "package.fig"
 file:
 
@@ -237,7 +237,7 @@ option:
 Once the package has been published, we can include it in other environments
 with the `-i` or `--include` option.  (For the purpose of this example, let's
 first move the "package.fig" file out of the way, so that it doesn't confuse
-fig or us.) The "hello/1.0.0" string represents the name of the package and the
+Fig or us.) The "hello/1.0.0" string represents the name of the package and the
 version number.
 
     $ mv package.fig package.bak
@@ -245,8 +245,8 @@ version number.
     ...downloading files...
     Hello, World
 
-The `-u` (or `--update`) option tells fig to check the remote repository for
-packages if they aren't already installed locally (fig will never make any
+The `-u` (or `--update`) option tells Fig to check the remote repository for
+packages if they aren't already installed locally (Fig will never make any
 network connections unless this option is specified). Once the packages are
 downloaded, we can run the same command without the `-u` option:
 
@@ -259,11 +259,11 @@ appending it to the package name using a colon:
     $ fig -i hello/1.0.0:french -- hello
     Bonjour, World
 
-## Retrieves ##
+## Retrieves
 
-By default, the resources associated with a package live in the fig home
+By default, the resources associated with a package live in the Fig home
 directory, which defaults to "$HOME/.fighome". This doesn't always play nicely
-with IDE's however, so fig provides a "retrieve" statement to copy resources
+with IDE's however, so Fig provides a "retrieve" statement to copy resources
 from the repository to the current directory.
 
 For example, let's create a package that contains a library for the "foo"
@@ -300,23 +300,23 @@ the version).
 Package Statement Descriptions
 ==============================
 
-## `add` ##
+## `add`
 
 Specifies a value to be appended to a `PATH`-like environment variable, e.g.
 `CLASSPATH` for Java.  Does not include the delimiter within the variable, just
 the component value.
 
-## `append` ##
+## `append`
 
 Synonym for `add`.
 
-## `archive` ##
+## `archive`
 
 Specifies an archive file (either a local path or a URL) that is supposed to be
 incorporated into the package.  This is different from a `resource` in that the
 contents will be extracted as part of installation.
 
-## `command` ##
+## `command`
 
 Specifies a default command to be run for a given `config` when no command is
 given on the command-line.
@@ -328,7 +328,7 @@ given on the command-line.
 Cannot be specified outside of a `config` statement.  There may not be multiple
 commands within a given `config`.
 
-## `config` ##
+## `config`
 
 A grouping of statements that specifies what is to be done.  There must either
 be a configuration named "default" or you will always have to specify a
@@ -337,12 +337,12 @@ configuration on the command-line.
 May not be nested.  If you wish to incorporate the effects of one configuration
 into another, use an `include` statement.
 
-## `include` ##
+## `include`
 
 Can be used in two ways: to affect configurations and to declare package
 dependencies.
 
-### Pull one configuration into another ###
+### Pull one configuration into another
 
 You can get the effects of one configuration in another by using the name of
 the other configuration preceded by a colon:
@@ -355,13 +355,13 @@ the other configuration preceded by a colon:
       ...
     end
 
-### Declare a package dependency ###
+### Declare a package dependency
 
 States that one package should be installed prior to the current one; can
-specify a version.
+specify a configuration in the other package.
 
     config default
-      include somepackage/1.2.3
+      include somepackage/1.2.3:some_non_default_configuration
     end
 
 Dependency version conflicts can be resolved by using `override` clauses.
@@ -403,35 +403,35 @@ Or specify the same version to both:
 
 Multiple `override` clauses can be specified in a single `include` statement.
 
-## `path` ##
+## `path`
 
 Synonym for `add`.
 
-## `resource` ##
+## `resource`
 
 Specifies a file (either a local path or a URL) that is supposed to be
 incorporated into the package.  This is different from an `archive` in that the
 contents will not be extracted as part of installation.
 
-## `retrieve` ##
+## `retrieve`
 
 Gives the installation location for a dependency.
 
-## `set` ##
+## `set`
 
-Gives the value of an environment variable.  Unlike `add`/`append`/`path`, this
-is the complete, final value.
+Specifies the value of an environment variable.  Unlike `add`/`append`/`path`,
+this is the complete, final value.
 
 Querying Fig Net Effects
 ========================
 
 If you've got a long chain of dependencies of packages, it can be challenging
 to figure out the full effects of it.  There are a number of commands for just
-figuring out what things are coming from.
+figuring out what's going on.
 
-## `--list-dependencies` ##
+## `--list-dependencies`
 
-By itself, this will give you the total set of packages you're pulling in.
+This will give you the total set of packages you're pulling in.
 
 For example, if you have package A which depends upon packages B and C
 which both depend upon package D, running
@@ -456,10 +456,113 @@ However, if stdout is not connected to a terminal:
 
     [no output]
 
-### `--list-tree` ###
+## `--list-variables`
 
-If you additionally specify `--list-tree`, you'll get a nested dependency
-tree:
+This gives you the environment variables and their values that Fig
+adds/overrides from the environment variables inherited by the invoking program
+(e.g. shell, `cron`, etc.).
+
+Say you've got package A that looks like
+
+    config default
+        set FOO=from_a
+        set BAR=from_a
+
+        include B/1.2.3
+    end
+
+and package B that looks like
+
+    config default
+        set BAR=from_b
+    end
+
+then running
+
+    fig --list-variables A/1.2.3
+
+will give you
+
+    BAR=from_b
+    FOO=from_a
+
+Note that the output of `--list-variables` _only_ includes variables that Fig
+actually changes.  If you want to see the net environment produced by Fig, do
+something like this:
+
+    fig ... -- printenv | sort
+
+## Delving deeper
+
+The following apply to both `--list-dependencies` and `--list-variables`.
+
+### `--list-all-configs`, a.k.a. "What's everything I can possibly get?"
+
+Unlike the default behavior which will only look at a single base
+configuration, this option will cause Fig to follow all of the dependencies
+using all the configurations in the package descriptor or the package.fig file.
+This will not follow all configurations in all depended upon packages, only the
+ones reachable by one of the configurations in the starting package.
+
+For a simple package.fig file like
+
+    config default
+        set FOO=bing
+        set BAR=bang
+
+        include blah/1.2.3
+    end
+
+    config nondefault
+        set BAR=bong
+        set BAZ=beng
+    end
+
+and package "blah" like
+
+    config default
+        FROM_B_DEFAULT=x
+    end
+
+    config nondefault
+        FROM_B_NONDEFAULT=x
+    end
+
+running
+
+    fig --list-variables --list-all-configs
+
+will give you
+
+    BAR
+    BAZ
+    FOO
+    FROM_B_DEFAULT
+
+i.e. all of the variables that can be set via any dependency path starting with
+a configuration in the base package.  You only get variable names and not
+values because walking a single path through all dependencies cannot be done.
+
+Similarly, using `fig --list-dependencies --list-all-configs` with a
+package.fig containing
+
+    config default
+        include foo/1.2.3
+    end
+
+    config nondefault
+        include foo/4.5.6
+    end
+
+will emit
+
+    foo/1.2.3
+    foo/4.5.6
+
+### `--list-tree`, a.k.a. "Hey, where'd that come from?"
+
+Following the example from `--list-dependencies` above, if you additionally
+specify `--list-tree`, you'll get a nested dependency tree:
 
     fig --list-dependencies --list-tree A/1.2.3
 
@@ -481,17 +584,64 @@ above, you'll get
         C/3.4.5
             D/4.5.6
 
-### `--list-all-configs` ###
+For `--list-variables`, if you have package A
 
-This will follow all of the dependencies using all the configurations in the
-package descriptor or the package.fig file.  This will not follow all
-configurations in all depended upon packages, only the ones reachable by one of
-the configurations in the starting package.
+    config default
+        set A1=blah
+        set A2=blah
+
+        include C/1.2.3
+        include B/1.2.3
+    end
+
+package B
+
+    config default
+        set B1=blah
+        set B2=blah
+    end
+
+and package C
+
+    config default
+        set C1=blah
+        set C2=blah
+    end
+
+and you run `fig --list-variables --list-tree A/1.2.3`, you'll get
+
+    A/1.2.3
+    |   A1 = blah
+    |   A2 = blah
+    '---C/1.2.3
+    |       C1 = blah
+    |       C2 = blah
+    '---B/1.2.3
+            B1 = blah
+            B2 = blah
+
+You can tell the difference between a `set` statement and a
+`add`/`append`/`path` statement by the output indicating the behavior of the
+latter kind of statement.  E.g. for a package.fig
+
+    config default
+        set    FOO=bing
+        append BAR=bong
+    end
+
+running `fig --list-variables --list-tree` will get you
+
+    <unpublished>
+        BAR = bong:$BAR
+        FOO = bing
+
+as a `add`, `append`, or `path` statement will prepend the value to the
+existing value of the variable.
 
 Installation and Development
 ============================
 
-## Installation ##
+## Installation
 
     gem install fig
 
@@ -500,11 +650,11 @@ Development Kit available from http://rubyinstaller.org/downloads. Instructions
 for installation of the Development Kit are available at
 https://github.com/oneclick/rubyinstaller/wiki/Development-Kit.
 
-## Building the gem ##
+## Building the gem
 
     rake build
 
-## Building a gem for ruby 1.8.7 on Windows ##
+## Building a gem for ruby 1.8.7 on Windows
 
 You can no longer use the rakefile to produce this specific gem. You will need
 to create a fig.gemspec file manually. Use the list of gem dependencies found

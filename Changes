@@ -1,11 +1,35 @@
 v0.1.xx
 
+  - "--list-variables" option.  This will display all variables manipulated by
+    Fig, following package dependencies recursively.  Can have
+    "--list-all-configs" and "--list-tree" applied to it for tracking down
+    where that nasty setting of EDITOR to "emacs" comes from.
+
+    Example "--list-variables --list-tree" output:
+
+        A/1.2.3
+        |   CLASSPATH = something:$CLASSPATH
+        |   FROM_A    = blah
+        '---C/5.6.7
+        |       CLASSPATH = something_else:$CLASSPATH
+        |       FROM_C    = blah
+        '---B/1.2.3
+                CLASSPATH = planet_x:$CLASSPATH
+                FROM_B    = blah
+
+    See README.md for more.
+
+    Suggestions for changes to the output format welcome.
+
   - The .fig file created in a repository now contains metadata about
     the publishing of the package (time/user/host).
 
-  - Logging output now goes to stderr by default, instead of stdout.  Logging
-    output is also colorized if going to a tty.  This is not the colorization
-    of package adds/removes that will eventually be restored.
+  - Logging output is colorized if going to a tty.  This is not the
+    colorization of package adds/removes that will eventually be restored.
+
+v0.1.56
+
+  - Logging output now goes to stderr by default, instead of stdout.
 
 v0.1.55
 
