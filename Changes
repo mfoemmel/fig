@@ -1,4 +1,4 @@
-v0.1.56
+v0.1.xx
 
   - "--list-variables" option.  This will display all variables manipulated by
     Fig, following package dependencies recursively.  Can have
@@ -24,9 +24,12 @@ v0.1.56
   - The .fig file created in a repository now contains metadata about
     the publishing of the package (time/user/host).
 
-  - Logging output now goes to stderr by default, instead of stdout.  Logging
-    output is also colorized if going to a tty.  This is not the colorization
-    of package adds/removes that will eventually be restored.
+  - Logging output is colorized if going to a tty.  This is not the
+    colorization of package adds/removes that will eventually be restored.
+
+v0.1.56
+
+  - Logging output now goes to stderr by default, instead of stdout.
 
 v0.1.55
 
