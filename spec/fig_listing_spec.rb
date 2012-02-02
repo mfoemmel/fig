@@ -199,7 +199,7 @@ def create_package_dot_fig_with_all_dependencies()
   create_package_dot_fig('depends-on-everything', 'default')
 end
 
-def setup_list_variables_packages
+def set_up_list_variables_packages
   cleanup_home_and_remote
 
   input_a = <<-END_INPUT
@@ -356,6 +356,51 @@ def setup_list_variables_packages
   fig('--publish A/1.2.3', input_a)
 end
 
+def set_up_packages_with_overrides
+  cleanup_home_and_remote
+
+  input_a = <<-END_INPUT
+    config default
+      include B/1.2.3 override C/4.5.6 override D/4.5.6
+    end
+  END_INPUT
+
+  input_b = <<-END_INPUT
+    config default
+      include C/1.2.3
+      include D/1.2.3
+    end
+  END_INPUT
+
+  input_c123 = <<-END_INPUT
+    config default
+      set C=1.2.3
+
+      include D/1.2.3
+    end
+  END_INPUT
+
+  input_c456 = <<-END_INPUT
+    config default
+      set C=4.5.6
+
+      include D/1.2.3
+    end
+  END_INPUT
+
+  input_d = <<-END_INPUT
+    config default
+    end
+  END_INPUT
+
+  fig('--publish D/1.2.3', input_d)
+  fig('--publish D/4.5.6', input_d)
+  fig('--publish C/1.2.3', input_c123)
+  fig('--publish C/4.5.6', input_c456)
+  fig('--publish B/1.2.3', input_b)
+  fig('--publish A/1.2.3', input_a)
+end
+
 def remove_any_package_dot_fig
   FileUtils.rm_rf "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}"
 
@@ -468,13 +513,13 @@ describe 'Fig' do
   end
 
   describe '--list-dependencies' do
+    before(:each) do
+      setup_test_environment
+      cleanup_home_and_remote
+    end
+
     describe 'no --list-tree' do
       describe 'no --list-all-configs' do
-        before(:each) do
-          cleanup_test_environment
-          setup_test_environment
-        end
-
         it %q<lists nothing when there are no dependencies without a package.fig (and output is not a tty)> do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
@@ -535,11 +580,6 @@ describe 'Fig' do
       end
 
       describe 'with --list-all-configs' do
-        before(:each) do
-          setup_test_environment
-          cleanup_home_and_remote
-        end
-
         it %q<lists only the single configuration when there are no dependencies without a package.fig> do
           set_up_multiple_config_repository
           remove_any_package_dot_fig
@@ -623,11 +663,6 @@ describe 'Fig' do
 
     describe 'with --list-tree' do
       describe 'no --list-all-configs' do
-        before(:each) do
-          cleanup_test_environment
-          setup_test_environment
-        end
-
         it %q<lists the package when there are no dependencies without a package.fig (and output is not a tty)> do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
@@ -702,11 +737,6 @@ describe 'Fig' do
       end
 
       describe 'with --list-all-configs' do
-        before(:each) do
-          setup_test_environment
-          cleanup_home_and_remote
-        end
-
         it %q<lists only the single configuration when there are no dependencies without a package.fig> do
           set_up_multiple_config_repository
           remove_any_package_dot_fig
@@ -817,6 +847,22 @@ describe 'Fig' do
         end
       end
     end
+
+    it %q<handles "include ... override ...> do
+      set_up_packages_with_overrides
+      remove_any_package_dot_fig
+
+      expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+        B/1.2.3
+        C/4.5.6
+        D/4.5.6
+      END_EXPECTED_OUTPUT
+
+      (out, err, exitstatus) = fig('--list-dependencies A/1.2.3')
+      exitstatus.should == 0
+      out.should == expected
+      err.should == ''
+    end
   end
 
   describe '--list-variables' do
@@ -828,7 +874,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           (out, err, exitstatus) = fig('--list-variables E/1.2.3')
           exitstatus.should == 0
           out.should == ''
@@ -836,7 +882,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('E')
           (out, err, exitstatus) = fig('--list-variables')
           exitstatus.should == 0
@@ -845,7 +891,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
             ADDON_A=ding
@@ -880,7 +926,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
@@ -925,7 +971,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           (out, err, exitstatus) = fig('--list-variables --list-all-configs E/1.2.3')
           exitstatus.should == 0
           out.should == ''
@@ -933,7 +979,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('E')
           (out, err, exitstatus) = fig('--list-variables --list-all-configs')
           exitstatus.should == 0
@@ -942,7 +988,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
             ADDON_A
@@ -979,7 +1025,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
@@ -1024,7 +1070,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
 
           (out, err, exitstatus) = fig('--list-variables --list-tree E/1.2.3')
           exitstatus.should == 0
@@ -1033,7 +1079,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('E')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
@@ -1048,7 +1094,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
             A/1.2.3
@@ -1119,7 +1165,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
@@ -1200,7 +1246,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
 
           (out, err, exitstatus) = fig('--list-variables --list-all-configs --list-tree E/1.2.3')
           exitstatus.should == 0
@@ -1209,7 +1255,7 @@ describe 'Fig' do
         end
 
         it %q<lists no dependency variables when none should exist with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('E')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
@@ -1224,7 +1270,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables without a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
             A/1.2.3
@@ -1300,7 +1346,7 @@ describe 'Fig' do
         end
 
         it %q<lists all dependency variables with a package.fig> do
-          setup_list_variables_packages
+          set_up_list_variables_packages
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-'END_EXPECTED_OUTPUT')
@@ -1372,6 +1418,40 @@ describe 'Fig' do
           err.should ==
             %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
         end
+      end
+    end
+
+    describe %q<handles "include ... override ...> do
+      before(:each) do
+        set_up_packages_with_overrides
+        remove_any_package_dot_fig
+      end
+
+      it %<plain (goes through Environment object)> do
+        expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+          C=4.5.6
+        END_EXPECTED_OUTPUT
+
+        (out, err, exitstatus) = fig('--list-variables A/1.2.3')
+        exitstatus.should == 0
+        out.should == expected
+        err.should == ''
+      end
+
+      it %<with --list-tree (goes through PackageCache object)> do
+        expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+          A/1.2.3
+          '---B/1.2.3
+              '---C/4.5.6
+              |   |   C = 4.5.6
+              |   '---D/4.5.6
+              '---D/4.5.6
+        END_EXPECTED_OUTPUT
+
+        (out, err, exitstatus) = fig('--list-variables --list-tree A/1.2.3')
+        exitstatus.should == 0
+        out.should == expected
+        err.should == ''
       end
     end
   end
