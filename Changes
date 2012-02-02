@@ -1,9 +1,5 @@
 v0.1.xx
 
-  Known bugs:
-
-  - --list-dependencies and --list-variables don't take overrides into account.
-
   New features:
 
   - "--list-variables" option.  This will display all variables manipulated by

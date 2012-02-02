@@ -1021,7 +1021,7 @@ describe 'Fig' do
           exitstatus.should == 0
           out.should == expected
           err.should ==
-            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
 
         it %q<lists all dependency variables with a package.fig> do
@@ -1057,7 +1057,7 @@ describe 'Fig' do
           exitstatus.should == 0
           out.should == expected
           err.should ==
-            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
       end
     end
@@ -1161,7 +1161,7 @@ describe 'Fig' do
           exitstatus.should == 0
           out.should == expected
           err.should ==
-            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
 
         it %q<lists all dependency variables with a package.fig> do
@@ -1235,7 +1235,7 @@ describe 'Fig' do
 
           out.should == expected
           err.should ==
-            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
       end
 
@@ -1342,7 +1342,7 @@ describe 'Fig' do
           exitstatus.should == 0
           out.should == expected
           err.should ==
-            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
 
         it %q<lists all dependency variables with a package.fig> do
@@ -1416,7 +1416,7 @@ describe 'Fig' do
 
           out.should == expected
           err.should ==
-            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.\nPicked version 1.2.3 of D at random.>
+            %Q<No version in the package descriptor of "D" in an include statement in the .fig file for "B". Whether or not the include statement will work is dependent upon the recursive dependency load order.>
         end
       end
     end

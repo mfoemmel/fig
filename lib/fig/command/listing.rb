@@ -1,5 +1,6 @@
 require 'set'
 
+require 'fig/backtrace'
 require 'fig/package'
 require 'fig/userinputerror'
 
@@ -69,7 +70,7 @@ module Fig::Command::Listing
   end
 
   def display_dependencies_in_tree()
-    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
+    walk_dependency_tree(@package, derive_base_display_config_names(), nil, 0) do
       |package, config_name, depth|
 
       print ' ' * (depth * 4)
@@ -79,13 +80,20 @@ module Fig::Command::Listing
     return
   end
 
-  def walk_dependency_tree(base_package, config_names, depth, &block)
+  def walk_dependency_tree(base_package, config_names, backtrace, depth, &block)
     config_names.each do
       |config_name|
 
       yield base_package, config_name, depth
 
-      base_package.package_dependencies(config_name).each do
+      new_backtrace = Fig::Backtrace.new(
+        backtrace,
+        base_package.package_name(),
+        base_package.version_name(),
+        config_name
+      )
+
+      base_package.package_dependencies(config_name, new_backtrace).each do
         |descriptor|
 
         package = nil
@@ -98,7 +106,9 @@ module Fig::Command::Listing
           package = base_package
         end
 
-        walk_dependency_tree(package, [descriptor.config], depth + 1, &block)
+        walk_dependency_tree(
+          package, [descriptor.config], new_backtrace, depth + 1, &block
+        )
       end
     end
 
@@ -106,9 +116,7 @@ module Fig::Command::Listing
   end
 
   def display_dependencies_flat()
-    base_config_names = derive_base_display_config_names()
-
-    packages = gather_package_dependency_configurations(base_config_names)
+    packages = gather_package_dependency_configurations()
 
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
@@ -141,28 +149,27 @@ module Fig::Command::Listing
     ]
   end
 
-  def gather_package_dependency_configurations(starting_config_names)
+  def gather_package_dependency_configurations()
     packages = {}
+    starting_config_names = derive_base_display_config_names()
 
     if ! @package.package_name.nil?
       packages[@package] = starting_config_names.to_set
     end
 
-    starting_config_names.each do |config_name|
-      @package[config_name].walk_statements_following_package_dependencies(
-        @repository, @package, nil
-      ) do |package, statement|
-        if (
-              ! package.package_name.nil?           \
-          &&  ! (
-                    ! @options.list_all_configs?    \
-                &&  @descriptor                     \
-                &&  package.package_name == @descriptor.name
-              )
-        )
-          packages[package] ||= Set.new
-          packages[package] << statement.name
-        end
+    walk_dependency_tree(@package, starting_config_names, nil, 0) do
+      |package, config_name, depth|
+
+      if (
+            ! package.package_name.nil?           \
+        &&  ! (
+                  ! @options.list_all_configs?    \
+              &&  @descriptor                     \
+              &&  package.package_name == @descriptor.name
+            )
+      )
+        packages[package] ||= Set.new
+        packages[package] << config_name
       end
     end
 
@@ -216,7 +223,7 @@ module Fig::Command::Listing
     prior_node = nil
     current_parent = tree
 
-    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
+    walk_dependency_tree(@package, derive_base_display_config_names(), nil, 0) do
       |package, config_name, depth|
 
       if depth < prior_depth
@@ -313,7 +320,7 @@ module Fig::Command::Listing
   def display_variables_flat_from_repository()
     variable_names = Set.new()
 
-    walk_dependency_tree(@package, derive_base_display_config_names(), 0) do
+    walk_dependency_tree(@package, derive_base_display_config_names(), nil, 0) do
       |package, config_name, depth|
 
       package[config_name].walk_statements() do |statement|

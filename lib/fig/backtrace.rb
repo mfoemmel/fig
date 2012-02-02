@@ -19,8 +19,12 @@ class Fig::Backtrace
     @overrides[package_name] = version_name
   end
 
-  def get_override(package_name)
-    return @overrides[package_name] || (@parent ? @parent.get_override(package_name) : nil)
+  def get_override(package_name, default_version = nil)
+    version = @overrides[package_name]
+    return version if version
+
+    return @parent.get_override(package_name, default_version) if @parent
+    return default_version
   end
 
   def dump(out)

@@ -40,11 +40,12 @@ class Fig::Statement::Include
   end
 
   # Assume that this statement is part of the parameter and return a descriptor
-  # that represents the fully resolved dependency.
-  def resolved_dependency_descriptor(package)
+  # that represents the fully resolved dependency, taking into account that the
+  # version might have been overridden.
+  def resolved_dependency_descriptor(package, backtrace)
     return Fig::PackageDescriptor.new(
       referenced_package_name(package),
-      referenced_version_name(package),
+      referenced_version_name(package, backtrace),
       referenced_config_name()
     )
   end
@@ -87,12 +88,16 @@ class Fig::Statement::Include
     return package_name() || package.package_name()
   end
 
-  def referenced_version_name(package)
-    if package_name()
-      return version_name()
+  def referenced_version_name(package, backtrace)
+    overrides().each do
+      |override|
+      backtrace.add_override(override.package_name(), override.version_name())
     end
 
-    return version_name() || package.version_name()
+    package_name = package_name() || package.package_name()
+    original_version = version_name() || package.version_name()
+
+    return backtrace.get_override(package_name, original_version)
   end
 
   def referenced_config_name()

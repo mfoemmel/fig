@@ -91,14 +91,14 @@ class Fig::Package
   end
 
   # Returns an array of PackageDescriptors
-  def package_dependencies(config_name)
+  def package_dependencies(config_name, backtrace)
     descriptors = []
 
     self[config_name || DEFAULT_CONFIG].walk_statements do
       |statement|
 
       if statement.is_a?(Fig::Statement::Include)
-        descriptors << statement.resolved_dependency_descriptor(self)
+        descriptors << statement.resolved_dependency_descriptor(self, backtrace)
       end
     end
 

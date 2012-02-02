@@ -114,11 +114,6 @@ still missing, and use the accumulated credentials to authenticate against the
 remote server.  Even if both environment variables are defined, Fig will only
 use them if `--login` is given.
 
-Known Bugs
-==========
-
-`--list-dependencies` and `--list-variables` don't take overrides into account.
-
 Examples
 ========
 
