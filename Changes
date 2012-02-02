@@ -1,4 +1,4 @@
-v0.1.xx
+v0.1.56
 
   - Logging output now goes to stderr by default, instead of stdout.
 
