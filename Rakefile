@@ -46,7 +46,7 @@ def create_git_tag(version)
   if not tag_exists_in_local_repo(new_tag)
     puts 'Tag does not already exist.'
     puts "Creating #{new_tag} tag."
-    #%x<git tag #{new_tag}>
+    %x<git tag #{new_tag}>
   else
     puts 'Tag exists.'
     return nil
@@ -63,7 +63,7 @@ end
 def push_to_remote_repo(new_tag)
   if new_tag != nil
     puts %Q<Pushing #{new_tag} tag to "origin" remote repository.>
-    #%x<git push origin #{new_tag}"
+    %x<git push origin #{new_tag}>
   end
 
   return
@@ -101,7 +101,7 @@ def push_to_rubygems(version)
   if File.exists?("pkg/fig-#{version}.gem")
     puts 'File exists.'
     puts "Pushing pkg/fig-#{version}.gem to rubygems.org."
-    #puts %x{gem push pkg/fig-#{version}.gem 2>&1}
+    puts %x{gem push pkg/fig-#{version}.gem 2>&1}
   else
     puts 'File does not exist.'
     puts 'Please build the gem before publishing.'
