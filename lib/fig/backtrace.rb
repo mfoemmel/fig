@@ -13,23 +13,6 @@ class Fig::Backtrace
     @overrides = {}
   end
 
-  def collect(stack)
-    if @parent
-      @parent.collect(stack)
-    end
-    elem = ''
-    if @package_name
-      elem = @package_name
-    end
-    if @version_name
-      elem += '/' + @version_name
-    end
-    if @config_name
-      elem += ':' + @config_name
-    end
-    stack << elem
-  end
-
   def add_override(package_name, version_name)
     # Don't replace an existing override on the stack
     return if get_override(package_name)
@@ -50,5 +33,24 @@ class Fig::Backtrace
       out.puts indent+elem
       i += 1
     end
-   end
+  end
+
+  private
+
+  def collect(stack)
+    if @parent
+      @parent.collect(stack)
+    end
+    elem = ''
+    if @package_name
+      elem = @package_name
+    end
+    if @version_name
+      elem += '/' + @version_name
+    end
+    if @config_name
+      elem += ':' + @config_name
+    end
+    stack << elem
+  end
 end
