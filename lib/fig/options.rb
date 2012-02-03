@@ -256,7 +256,7 @@ Environment variables:
       help(parser)
     end
 
-    parser.on_tail('-v', '--version', 'Print Fig version') do
+    parser.on_tail('-v', '--version', 'print Fig version') do
       version()
     end
 
@@ -374,7 +374,7 @@ Environment variables:
     parser.on(
       '-p',
       '--append VARIABLE=VALUE',
-      'append (actually, prepend) VALUE to environment variable VARIABLE, delimited by separator'
+      'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:non_command_package_statements] << Fig::Statement::Path.new(var, val)
@@ -383,7 +383,7 @@ Environment variables:
     parser.on(
       '-i',
       '--include DESCRIPTOR',
-      'include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment'
+      'include package/version:config specified in DESCRIPTOR in environment'
     ) do |descriptor|
       @options[:non_command_package_statements] <<
         Fig::Statement::Include.new(
@@ -482,7 +482,12 @@ Environment variables:
 
   def help(parser)
     puts parser.help
-    puts "        --                           end of Fig options; anything after this is used as a command to run\n\n"
+    puts <<-'END_MESSAGE'
+        --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-argv         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
+
+    END_MESSAGE
 
     @exit_code = 0
 
