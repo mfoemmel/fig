@@ -139,8 +139,6 @@ fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.add_dependency              'polyglot',          '>= 0.2.9'
   gemspec.add_dependency              'rdoc',              '>= 3.12'
   gemspec.add_dependency              'treetop',           '>= 1.4.2'
-  gemspec.add_development_dependency  'open4',             '>= 1.0.1'
-  gemspec.add_development_dependency  'rspec',             '>= 2.8'
 
   gemspec.files = FileList[
     "Changes",

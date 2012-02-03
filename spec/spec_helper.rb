@@ -17,20 +17,29 @@ require 'fig/logging'
 require 'fig/repository'
 
 class Popen
-  if Fig::OperatingSystem.windows? && ENV['RUBY_VERSION'].include?('1.8.7')
-    require 'win32/open3'
-    def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  elsif Fig::OperatingSystem.java?
+  def setup_open3
     require 'open3'
     def self.popen(*cmd)
       Open3.popen3(*cmd) { |stdin,stdout,stderr|
         yield stdin, stdout, stderr
       }
     end
+  end
+
+  if Fig::OperatingSystem.windows?
+    ruby_version = %x<ruby -v>
+    if ruby_version.include?('1.8.7')
+      require 'win32/open3'
+      def self.popen(*cmd)
+        Open3.popen3(*cmd) { |stdin,stdout,stderr|
+          yield stdin, stdout, stderr
+        }
+      end
+    else
+      setup_open3
+    end
+  elsif Fig::OperatingSystem.java?
+    setup_open3
   else
     require 'open4'
     def self.popen(*cmd)
@@ -58,8 +67,9 @@ def fig(args, input = nil, no_raise_on_error = false)
       end
 
       err = stderr.read.strip
-      # TODO: remove the following line as it exists only to eat a warning specific to the grid build machines
+      # TODO: remove the following lines as it exists only to eat a warning specific to the grid build machines
       err = err.gsub(/((?:\/[a-zA-Z0-9. -:]+)+: warning: Insecure world writable dir (?:\/[a-zA-Z0-9. -:]+)+in PATH, mode 041777)/, '')
+      err = err.gsub(/(?:\/[a-zA-Z0-9\-.:]+)+[a-zA-Z0-9 `'<>():]+\\nIt seems your ruby installation is missing psych \(for YAML output\)\.\\nTo eliminate this warning, please install libyaml and reinstall your ruby\./, '')
       out = stdout.read.strip
     end
     result = $CHILD_STATUS
