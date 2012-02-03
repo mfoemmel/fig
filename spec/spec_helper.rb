@@ -17,20 +17,29 @@ require 'fig/logging'
 require 'fig/repository'
 
 class Popen
-  if Fig::OperatingSystem.windows? && ENV['RUBY_VERSION'].include?('1.8.7')
-    require 'win32/open3'
-    def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  elsif Fig::OperatingSystem.java?
+  def setup_open3
     require 'open3'
     def self.popen(*cmd)
       Open3.popen3(*cmd) { |stdin,stdout,stderr|
         yield stdin, stdout, stderr
       }
     end
+  end
+
+  if Fig::OperatingSystem.windows?
+    ruby_version = %x<ruby -v>
+    if ruby_version.include?('1.8.7')
+      require 'win32/open3'
+      def self.popen(*cmd)
+        Open3.popen3(*cmd) { |stdin,stdout,stderr|
+          yield stdin, stdout, stderr
+        }
+      end
+    else
+      setup_open3
+    end
+  elsif Fig::OperatingSystem.java?
+    setup_open3
   else
     require 'open4'
     def self.popen(*cmd)

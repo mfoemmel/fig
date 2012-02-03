@@ -27,8 +27,8 @@ group :development do
     gem 'open4', '>= 1.0.1'
   end
 
-  platforms :mingw_18 do
-    gem 'win32-open3'
+  platforms :mingw do
+    gem 'Open3'
   end
 
   gem 'rspec', '~> 2'
