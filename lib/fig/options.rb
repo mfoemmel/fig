@@ -18,6 +18,7 @@ class Fig::Options
 Usage:
 
   fig [...] [DESCRIPTOR] [--update | --update-if-missing] [-- COMMAND]
+  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [--command-extra-argv VALUES]
 
   fig {--publish | --publish-local} DESCRIPTOR
       [--resource PATH]
@@ -62,6 +63,7 @@ Environment variables:
   LOG_ALIASES = { 'warning' => 'warn' }
 
   attr_reader :shell_command
+  attr_reader :command_extra_argv
   attr_reader :descriptor
   attr_reader :exit_code
 
@@ -74,7 +76,6 @@ Environment variables:
 
     parser = new_parser()
 
-    # TODO: Need to catch the exception thrown from parser and retranslate into a fig exception
     begin
       parser.parse!(argv)
     rescue OptionParser::MissingArgument => error
@@ -218,8 +219,18 @@ Environment variables:
 
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|
-      if arg == '--'
-        @shell_command = argv[(i+1)..-1]
+      terminating_option = nil
+
+      case arg
+        when '--'
+          terminating_option = arg
+          @shell_command = argv[(i+1)..-1]
+        when '--command-extra-argv'
+          terminating_option = arg
+          @command_extra_argv = argv[(i+1)..-1]
+      end
+
+      if terminating_option
         argv.slice!(i..-1)
         break
       end
