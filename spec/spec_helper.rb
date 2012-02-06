@@ -17,7 +17,7 @@ require 'fig/logging'
 require 'fig/repository'
 
 class Popen
-  def setup_open3
+  def self.setup_open3
     require 'open3'
     def self.popen(*cmd)
       Open3.popen3(*cmd) { |stdin,stdout,stderr|
