@@ -1,5 +1,8 @@
 require 'colorize'
+require 'log4r/logger'
 require 'log4r/outputter/iooutputter'
+
+require 'fig/logging/colorizable'
 
 module Fig; end
 module Fig::Log4r; end
@@ -48,25 +51,44 @@ class Fig::Log4r::Outputter < Log4r::IOOutputter
       if not @colorize
         @out.print data
       else
-        color = @colors_by_level[logevent.level]
-        if color
-          @out.print data.colorize(color)
-          @out.print ''.uncolorize
+        if logevent.data.is_a? Fig::Logging::Colorizable
+          emit_colorizable(data, logevent.data)
         else
-          @out.print data
+          color = @colors_by_level[logevent.level]
+          if color
+            @out.print data.colorize(color)
+            @out.print ''.uncolorize
+          else
+            @out.print data
+          end
         end
       end
 
       @out.flush
     rescue IOError => error # recover from this instead of crash
-      Logger.log_internal {"IOError in Outputter '#{@name}'!"}
-      Logger.log_internal {error}
+      Log4r::Logger.log_internal {"IOError in Outputter '#{@name}'!"}
+      Log4r::Logger.log_internal {error}
       close
     rescue NameError => error
-      Logger.log_internal {"Outputter '#{@name}' IO is #{@out.class}!"}
-      Logger.log_internal {error}
+      Log4r::Logger.log_internal {"Outputter '#{@name}' IO is #{@out.class}!"}
+      Log4r::Logger.log_internal {error}
       close
     end
+
+    return
+  end
+
+  def emit_colorizable(formatted_data, raw_data)
+    color = {}
+    if raw_data.foreground
+      color[:color] = raw_data.foreground
+    end
+    if raw_data.background
+      color[:background] = raw_data.background
+    end
+
+    @out.print formatted_data.colorize(color)
+    @out.print ''.uncolorize
 
     return
   end

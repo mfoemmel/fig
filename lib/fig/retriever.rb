@@ -2,6 +2,7 @@ require 'ostruct'
 require 'set'
 
 require 'fig/logging'
+require 'fig/logging/colorizable'
 
 module Fig; end
 
@@ -27,7 +28,13 @@ class Fig::Retriever
       @package_meta = @package_metadata_by_name[name]
       if @package_meta && @package_meta.version != version
         @package_meta.files.each do |relpath|
-          Fig::Logging.info "- [#{@package_meta.name}/#{@package_meta.version}] #{relpath}"
+          Fig::Logging.info(
+            Fig::Logging::Colorizable.new(
+              "- [#{@package_meta.name}/#{@package_meta.version}] #{relpath}",
+              :magenta,
+              nil
+            )
+          )
           FileUtils.rm_f(File.join(@base_dir, relpath))
         end
         @package_meta = nil
@@ -109,8 +116,13 @@ class Fig::Retriever
           Fig::Logging.debug \
             "Copying package [#{@package_meta.name}/#{@package_meta.version}] from #{source} to #{target}."
         else
-          Fig::Logging.info \
-            "+ [#{@package_meta.name}/#{@package_meta.version}] #{relpath}"
+          Fig::Logging.info(
+            Fig::Logging::Colorizable.new(
+              "+ [#{@package_meta.name}/#{@package_meta.version}] #{relpath}",
+              :green,
+              nil
+            )
+          )
         end
         FileUtils.mkdir_p(File.dirname(target))
 
