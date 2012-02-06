@@ -31,7 +31,8 @@ v0.1.xx
     the publishing of the package (time/user/host).
 
   - Logging output is colorized if going to a tty.  This includes restoration
-    of the old colorization of local package downloads/deletions.
+    of the old colorization of local package downloads/deletions.  Colors are
+    not currently configurable.
 
   Significant Internals:
 
