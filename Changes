@@ -23,7 +23,7 @@ v0.1.xx
 
     Suggestions for changes to the output format welcome.
 
-  - "--command-extra-argv" option.  Allows you to say that the rest of the fig
+  - "--command-extra-args" option.  Allows you to say that the rest of the fig
     command-line is to be appended to the end of the command in a "command"
     statement.
 

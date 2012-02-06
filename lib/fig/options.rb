@@ -18,7 +18,7 @@ class Fig::Options
 Usage:
 
   fig [...] [DESCRIPTOR] [--update | --update-if-missing] [-- COMMAND]
-  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [--command-extra-argv VALUES]
+  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [--command-extra-args VALUES]
 
   fig {--publish | --publish-local} DESCRIPTOR
       [--resource PATH]
@@ -225,7 +225,7 @@ Environment variables:
         when '--'
           terminating_option = arg
           @shell_command = argv[(i+1)..-1]
-        when '--command-extra-argv'
+        when '--command-extra-args'
           terminating_option = arg
           @command_extra_argv = argv[(i+1)..-1]
       end
@@ -484,7 +484,7 @@ Environment variables:
     puts parser.help
     puts <<-'END_MESSAGE'
         --                           end of Fig options; anything after this is used as a command to run
-        --command-extra-argv         end of Fig options; anything after this is appended to the end of a
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
                                      "command" statement in a "config" block.
 
     END_MESSAGE

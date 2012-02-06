@@ -72,7 +72,7 @@ Fig recognizes the following options:
     -?, -h, --help                   display this help text
     -v, --version                    print Fig version
         --                           end of Fig options; anything after this is used as a command to run
-        --command-extra-argv         end of Fig options; anything after this is appended to the end of a
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
                                      "command" statement in a "config" block.
 
 Some of these options may also be expressed as statements in a package.fig
@@ -330,9 +330,9 @@ given on the command-line.
 Cannot be specified outside of a `config` statement.  There may not be multiple
 commands within a given `config`.
 
-You can use the `--command-extra-argv` option to add parameters to the command.
+You can use the `--command-extra-args` option to add parameters to the command.
 For example, given the above package declaration, if you were to run `fig
---command-extra-argv It is a nice day.`, you would get "Hello there. It is a
+--command-extra-args It is a nice day.`, you would get "Hello there. It is a
 nice day." as output.
 
 ## `config`

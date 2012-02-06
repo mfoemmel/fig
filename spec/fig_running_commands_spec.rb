@@ -30,7 +30,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
 
       (out, err, exitstatus) =
-        fig('foo/1.2.3 --command-extra-argv there', nil)
+        fig('foo/1.2.3 --command-extra-args there', nil)
       exitstatus.should == 0
       out.should == 'Hi there'
       err.should == ''
@@ -46,7 +46,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
 
       (out, err, exitstatus) =
-        fig('foo/1.2.3 --command-extra-argv yadda', nil, :no_raise_on_error)
+        fig('foo/1.2.3 --command-extra-args yadda', nil, :no_raise_on_error)
       exitstatus.should_not == 0
       out.should == ''
       err.should_not be_empty
