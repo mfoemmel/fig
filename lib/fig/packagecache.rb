@@ -13,7 +13,7 @@ class Fig::PackageCache
       @packages[package.name] = versions
     end
 
-    versions[package.version_name] = package
+    versions[package.version] = package
 
     return
   end

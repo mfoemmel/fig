@@ -91,7 +91,7 @@ module Fig::Command::Listing
         backtrace,
         Fig::PackageDescriptor.new(
           base_package.name(),
-          base_package.version_name(),
+          base_package.version(),
           config_name
         )
       )

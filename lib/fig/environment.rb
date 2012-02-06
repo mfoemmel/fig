@@ -167,7 +167,7 @@ module Fig
 
       new_backtrace = Backtrace.new(backtrace, resolved_descriptor)
       overrides.each do |override|
-        new_backtrace.add_override(override.package_name, override.version_name)
+        new_backtrace.add_override(override.package_name, override.version)
       end
       package = lookup_package(
         resolved_descriptor.name || base_package.name,
@@ -231,20 +231,20 @@ module Fig
       return
     end
 
-    def lookup_package(name, version_name, backtrace)
+    def lookup_package(name, version, backtrace)
       package = get_package(name)
       if package.nil?
-        if not version_name
+        if not version
           Logging.fatal "No version specified for #{name}."
           raise RepositoryError.new
         end
 
         package = @repository.get_package(
-          PackageDescriptor.new(name, version_name, nil)
+          PackageDescriptor.new(name, version, nil)
         )
         package.backtrace = backtrace
         @packages[name] = package
-      elsif version_name && version_name != package.version_name
+      elsif version && version != package.version
         string_handle = StringIO.new
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
@@ -283,7 +283,7 @@ module Fig
           end
         end
         @retriever.with_package_version(
-          base_package.name, base_package.version_name
+          base_package.name, base_package.version
         ) do
           @retriever.retrieve(file, target)
         end

@@ -31,7 +31,7 @@ class Fig::Statement::Include
     return @descriptor.name
   end
 
-  def version_name
+  def version
     return @descriptor.version
   end
 
@@ -45,7 +45,7 @@ class Fig::Statement::Include
   def resolved_dependency_descriptor(package, backtrace)
     return Fig::PackageDescriptor.new(
       referenced_package_name(package),
-      referenced_version_name(package, backtrace),
+      referenced_version(package, backtrace),
       referenced_config_name()
     )
   end
@@ -74,7 +74,7 @@ class Fig::Statement::Include
   def unparse(indent)
     text = ''
     text += package_name() if package_name()
-    text += "/#{version_name()}" if version_name()
+    text += "/#{version()}" if version()
     text += ":#{config_name()}" if config_name()
     @overrides.each do |override|
       text += override.unparse
@@ -88,14 +88,14 @@ class Fig::Statement::Include
     return package_name() || package.name()
   end
 
-  def referenced_version_name(package, backtrace)
+  def referenced_version(package, backtrace)
     overrides().each do
       |override|
-      backtrace.add_override(override.package_name(), override.version_name())
+      backtrace.add_override(override.package_name(), override.version())
     end
 
     package_name = package_name() || package.name()
-    original_version = version_name() || package.version_name()
+    original_version = version() || package.version()
 
     return backtrace.get_override(package_name, original_version)
   end

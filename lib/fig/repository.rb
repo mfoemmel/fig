@@ -44,8 +44,8 @@ module Fig
       results = []
       if File.exist?(@local_repository_dir)
         @operating_system.list(@local_repository_dir).each do |name|
-          @operating_system.list(File.join(@local_repository_dir, name)).each do |version_name|
-            results << "#{name}/#{version_name}"
+          @operating_system.list(File.join(@local_repository_dir, name)).each do |version|
+            results << "#{name}/#{version}"
           end
         end
       end
@@ -69,7 +69,7 @@ module Fig
           package = @packages.get_any_version_of_package(descriptor.name)
           if package
             Logging.warn(
-              "Picked version #{package.version_name} of #{package.name} at random."
+              "Picked version #{package.version} of #{package.name} at random."
             )
             return package
           end

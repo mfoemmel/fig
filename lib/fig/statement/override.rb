@@ -14,14 +14,14 @@ module Fig; end
 class Fig::Statement::Override
   include Fig::Statement
 
-  attr_reader :package_name, :version_name
+  attr_reader :package_name, :version
 
-  def initialize(package_name, version_name)
+  def initialize(package_name, version)
     @package_name = package_name
-    @version_name = version_name
+    @version = version
   end
 
   def unparse()
-    return ' override ' + @package_name + '/' + @version_name
+    return ' override ' + @package_name + '/' + @version
   end
 end

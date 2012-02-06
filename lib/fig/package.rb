@@ -18,12 +18,12 @@ class Fig::Package
   UNPUBLISHED     = '<unpublished>'
   DEFAULT_CONFIG  = 'default'
 
-  attr_reader   :name, :version_name, :directory, :statements
+  attr_reader   :name, :version, :directory, :statements
   attr_accessor :backtrace
 
-  def initialize(name, version_name, directory, statements)
+  def initialize(name, version, directory, statements)
     @name = name
-    @version_name = version_name
+    @version = version
     @directory = directory
     @statements = statements
     @applied_config_names = []
@@ -39,7 +39,7 @@ class Fig::Package
       'Configuration not found: ' +
       (@name || '<empty>')  +
       '/'                         +
-      (@version_name || '<empty>')  +
+      (@version || '<empty>')  +
       ':'                         +
       (config_name || '<empty>')
 
@@ -50,7 +50,7 @@ class Fig::Package
     compared = compare_components(name, other.name)
     return compared if compared != 0
 
-    return compare_components(version_name, other.version_name)
+    return compare_components(version, other.version)
   end
 
   def configs
@@ -138,14 +138,14 @@ class Fig::Package
     return false if other.nil?
 
     return @name == other.name &&
-           @version_name == other.version_name &&
+           @version == other.version &&
            @statements.to_yaml == other.statements.to_yaml
   end
 
   def to_s
     name = @name || '<empty>'
-    version_name = @version_name || '<empty>'
-    return name + '/' + version_name
+    version = @version || '<empty>'
+    return name + '/' + version
   end
 
   def to_s_with_config(config_name)
