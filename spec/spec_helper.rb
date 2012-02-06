@@ -68,8 +68,8 @@ def fig(args, input = nil, no_raise_on_error = false)
 
       err = stderr.read.strip
       # TODO: remove the following lines as it exists only to eat a warning specific to the grid build machines
-      err = err.gsub(/((?:\/[a-zA-Z0-9. -:]+)+: warning: Insecure world writable dir (?:\/[a-zA-Z0-9. -:]+)+in PATH, mode 041777)/, '')
-      err = err.gsub(/(?:\/[a-zA-Z0-9\-.:]+)+[a-zA-Z0-9 `'<>():]+\\nIt seems your ruby installation is missing psych \(for YAML output\)\.\\nTo eliminate this warning, please install libyaml and reinstall your ruby\./, '')
+      err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+: warning: Insecure world writable dir (?:\/[a-zA-Z0-9. -:]+)+in PATH, mode 041777/, '')
+      err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+[a-zA-Z0-9 `'<>():]+\nIt seems your ruby installation is missing psych \(for YAML output\)\.\nTo eliminate this warning, please install libyaml and reinstall your ruby\.\n?/, '')
       out = stdout.read.strip
     end
     result = $CHILD_STATUS
