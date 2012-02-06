@@ -353,6 +353,14 @@ module Fig
       end
     end
 
+    def self.add_shell_variable_expansion(variable_name)
+      if OperatingSystem.windows?
+        return "%#{variable_name}%"
+      else
+        return "$#{variable_name}"
+      end
+    end
+
     private
 
     def shell_exec_unix(cmd)

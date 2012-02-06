@@ -27,10 +27,6 @@ group :development do
     gem 'open4', '>= 1.0.1'
   end
 
-  platforms :mingw do
-    gem 'Open3'
-  end
-
   gem 'rspec', '~> 2'
   gem 'bundler', '>= 1.0.15'
   gem 'rspec-core', '>= 2.7.1'

@@ -91,14 +91,19 @@ def substitute_command(command)
   return substituted_command
 end
 
-def substitute_variable(variable_value)
-  environment = new_example_environment(variable_value)
+def setup_variables
+  variable_arguments = %w<WHATEVER_ONE WHATEVER_TWO WHATEVER_THREE>
+  return variable_arguments.map do |var_arg| 
+    Fig::OperatingSystem.add_shell_variable_expansion(var_arg)
+  end
+
+def substitute_variable(variable_value, retrieve_vars = {})
+  environment = new_example_environment(variable_value, retrieve_vars)
 
   output = nil
   environment.execute_shell([]) {
-    output = %x[
-      echo $WHATEVER_ONE; echo $WHATEVER_TWO; echo $WHATEVER_THREE;
-    ]
+    output =
+      %x[echo #{variables[0]}&& echo #{variables[1]}&& echo #{variables[2]}]
   }
 
   return output
@@ -184,14 +189,7 @@ describe 'Environment' do
 
     it 'does retrieve variables [package] substitution' do
       retrieve_vars = {'WHATEVER_ONE' => 'foo.[package].bar.[package].baz'}
-      environment = new_example_environment('blah', retrieve_vars)
-
-      output = nil
-      environment.execute_shell([]) {
-        output = %x[
-          echo $WHATEVER_ONE; echo $WHATEVER_TWO; echo $WHATEVER_THREE;
-        ]
-      }
+      output = substitute_variable('blah', retrieve_vars)
 
       output.should == "foo.one.bar.one.baz/blah\nblah\nblah\n"
     end
@@ -201,14 +199,7 @@ describe 'Environment' do
         'WHATEVER_ONE'   => 'foo.[package].//./bar.[package].baz',
         'WHATEVER_THREE' => 'phoo.//.bhar'
       }
-      environment = new_example_environment('blah.//.blez', retrieve_vars)
-
-      output = nil
-      environment.execute_shell([]) {
-        output = %x[
-          echo $WHATEVER_ONE; echo $WHATEVER_TWO; echo $WHATEVER_THREE;
-        ]
-      }
+      output = substitute_variable('blah.//.blez', retrieve_vars)
 
       output.should == "foo.one.//./bar.one.baz/.blez\nblah.//.blez\nphoo.//.bhar/.blez\n"
     end
