@@ -1,4 +1,5 @@
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/parser'
 
 module Fig; end
@@ -69,7 +70,7 @@ module Fig::Command::PackageLoad
 
     @package =
       Fig::Parser.new(@configuration).parse_package(
-        nil, nil, '.', config_raw_text
+        Fig::PackageDescriptor.new(nil, nil, nil), '.', config_raw_text
       )
 
     register_package_with_environment_if_not_listing()
@@ -88,10 +89,7 @@ module Fig::Command::PackageLoad
       load_package_file()
     else
       # TODO: complain if config file was specified on the command-line.
-      @package =
-        @repository.get_package(
-          @descriptor.name, @descriptor.version, :disable_updating
-        )
+      @package = @repository.get_package(@descriptor, :disable_updating)
 
       register_package_with_environment_if_not_listing()
     end

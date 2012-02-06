@@ -56,7 +56,7 @@ class Fig::Statement::Include
   )
     referenced_package = nil
     if package_name()
-      referenced_package = repository.get_package(package_name, version_name)
+      referenced_package = repository.get_package(descriptor())
     else
       referenced_package = package
     end

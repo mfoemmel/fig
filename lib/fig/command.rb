@@ -43,7 +43,7 @@ class Fig::Command
 
     if @options.clean?
       check_required_package_descriptor('to clean')
-      @repository.clean(@descriptor.name, @descriptor.version)
+      @repository.clean(@descriptor)
       return 0
     end
 
@@ -222,12 +222,9 @@ class Fig::Command
       end
     end
 
-    Fig::Logging.info "Publishing #{@descriptor.name}/#{@descriptor.version}."
+    Fig::Logging.info "Publishing #{@descriptor.to_string()}."
     @repository.publish_package(
-      publish_statements,
-      @descriptor.name,
-      @descriptor.version,
-      @options.publish_local?
+      publish_statements, @descriptor, @options.publish_local?
     )
 
     return 0

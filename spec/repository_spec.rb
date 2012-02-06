@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/applicationconfiguration'
+require 'fig/packagedescriptor'
 require 'fig/repository'
 require 'fig/statement/configuration'
 require 'fig/statement/path'
@@ -43,11 +44,12 @@ describe 'Repository' do
 
     package_statements = generate_package_statements
 
-    repository.publish_package(package_statements, 'foo', '1.0.0', false)
+    descriptor = Fig::PackageDescriptor.new('foo', '1.0.0', nil)
+    repository.publish_package(package_statements, descriptor, false)
 
     repository.list_packages.include?('foo/1.0.0').should be_true
 
-    repository.clean('foo','1.0.0')
+    repository.clean(descriptor)
 
     repository.list_packages.include?('foo/1.0.0').should be_false
 

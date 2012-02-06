@@ -239,7 +239,9 @@ module Fig
           raise RepositoryError.new
         end
 
-        package = @repository.get_package(package_name, version_name)
+        package = @repository.get_package(
+          PackageDescriptor.new(package_name, version_name, nil)
+        )
         package.backtrace = backtrace
         @packages[package_name] = package
       elsif version_name && version_name != package.version_name

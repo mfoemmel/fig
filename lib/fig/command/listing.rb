@@ -102,9 +102,7 @@ module Fig::Command::Listing
         package = nil
         if descriptor.name
           package =
-            @repository.get_package(
-              descriptor.name, descriptor.version, false, :allow_any_version
-            )
+            @repository.get_package(descriptor, false, :allow_any_version)
         else
           package = base_package
         end
