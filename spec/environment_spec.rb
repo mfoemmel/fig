@@ -218,14 +218,18 @@ describe 'Environment' do
     it 'issues an error when attempting to execute a command from a config which contains no command' do
       environment = new_example_environment('blah')
       expect {
-        environment.execute_config(nil, 'one', nil, nil, nil)
+        environment.execute_config(
+          nil, Fig::PackageDescriptor.new('one', nil, nil), nil
+        )
       }.to raise_error(Fig::UserInputError)
     end
 
     it 'executes a command successfully' do
       environment = new_example_environment('blah')
       received_command = nil
-      environment.execute_config(nil, 'has_command', nil, nil, []) { |command| received_command = command }
+      environment.execute_config(
+        nil, Fig::PackageDescriptor.new('has_command', nil, nil), []
+      ) { |command| received_command = command }
       received_command.should == %w<echo foo>
     end
   end

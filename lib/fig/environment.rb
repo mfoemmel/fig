@@ -105,12 +105,18 @@ module Fig
       return package.primary_config_name || Package::DEFAULT_CONFIG
     end
 
-    def execute_config(base_package, package_name, config_name, version_name, args, &block)
-      config_name ||= find_config_name_in_package(package_name)
+    def execute_config(base_package, descriptor, args, &block)
+      config_name =
+        descriptor.config || find_config_name_in_package(descriptor.name)
+
+      package_name = descriptor.name || base_package.package_name
       package = lookup_package(
-        package_name || base_package.package_name,
-        version_name,
-        Backtrace.new(nil, package_name, version_name, config_name)
+        package_name,
+        descriptor.version,
+        Backtrace.new(
+          nil,
+          PackageDescriptor.new(package_name, descriptor.version, config_name)
+        )
       )
 
       command = package[config_name].command
@@ -130,7 +136,9 @@ module Fig
       when Statement::Set
         set_variable(base_package, statement.name, statement.value)
       when Statement::Include
-        include_config(base_package, statement.package_name, statement.config_name, statement.version_name, statement.overrides, backtrace)
+        include_config(
+          base_package, statement.descriptor, statement.overrides, backtrace
+        )
       when Statement::Command
         # ignore
       else
@@ -140,23 +148,36 @@ module Fig
       return
     end
 
-    def include_config(base_package, package_name, config_name, version_name, overrides, backtrace)
+    def include_config(base_package, descriptor, overrides, backtrace)
+      resolved_descriptor = nil
+
       # Check to see if this include has been overridden.
       if backtrace
-        override = backtrace.get_override(package_name || base_package.package_name)
+        override = backtrace.get_override(
+          descriptor.name || base_package.package_name
+        )
         if override
-          version_name = override
+          resolved_descriptor =
+            PackageDescriptor.new(
+              descriptor.name, override, descriptor.config
+            )
         end
       end
-      new_backtrace = Backtrace.new(backtrace, package_name, version_name, config_name)
+      resolved_descriptor ||= descriptor
+
+      new_backtrace = Backtrace.new(backtrace, resolved_descriptor)
       overrides.each do |override|
         new_backtrace.add_override(override.package_name, override.version_name)
       end
       package = lookup_package(
-        package_name || base_package.package_name, version_name, new_backtrace
+        resolved_descriptor.name || base_package.package_name,
+        resolved_descriptor.version,
+        new_backtrace
       )
       apply_config(
-        package, config_name || Package::DEFAULT_CONFIG, new_backtrace
+        package,
+        resolved_descriptor.config || Package::DEFAULT_CONFIG,
+        new_backtrace
       )
 
       return

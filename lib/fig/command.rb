@@ -66,14 +66,10 @@ class Fig::Command
         |command| @operating_system.shell_exec command
       end
     elsif @descriptor
-      @environment.include_config(
-        @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
-      )
+      @environment.include_config(@package, @descriptor, {}, nil)
       @environment.execute_config(
         @package,
-        @descriptor.name,
-        @descriptor.config,
-        nil,
+        @descriptor,
         @options.command_extra_argv || []
       ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?

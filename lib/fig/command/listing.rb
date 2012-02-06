@@ -2,6 +2,7 @@ require 'set'
 
 require 'fig/backtrace'
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/userinputerror'
 
 module Fig; end
@@ -88,9 +89,11 @@ module Fig::Command::Listing
 
       new_backtrace = Fig::Backtrace.new(
         backtrace,
-        base_package.package_name(),
-        base_package.version_name(),
-        config_name
+        Fig::PackageDescriptor.new(
+          base_package.package_name(),
+          base_package.version_name(),
+          config_name
+        )
       )
 
       base_package.package_dependencies(config_name, new_backtrace).each do

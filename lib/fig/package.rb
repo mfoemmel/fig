@@ -7,8 +7,11 @@ require 'fig/statement/retrieve'
 
 module Fig; end
 
-# The parsed representation of a configuration file.  Contains the statement
-# objects.
+# The parsed representation of a configuration file for a specific version.
+# Contains the statement objects.
+#
+# Unique identifier for this object: name and version. A different version of
+# the same package will be a separate instance of this class.
 class Fig::Package
   include Comparable
 
