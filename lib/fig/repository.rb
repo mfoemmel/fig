@@ -43,9 +43,9 @@ module Fig
     def list_packages
       results = []
       if File.exist?(@local_repository_dir)
-        @operating_system.list(@local_repository_dir).each do |package_name|
-          @operating_system.list(File.join(@local_repository_dir, package_name)).each do |version_name|
-            results << "#{package_name}/#{version_name}"
+        @operating_system.list(@local_repository_dir).each do |name|
+          @operating_system.list(File.join(@local_repository_dir, name)).each do |version_name|
+            results << "#{name}/#{version_name}"
           end
         end
       end
@@ -69,14 +69,14 @@ module Fig
           package = @packages.get_any_version_of_package(descriptor.name)
           if package
             Logging.warn(
-              "Picked version #{package.version_name} of #{package.package_name} at random."
+              "Picked version #{package.version_name} of #{package.name} at random."
             )
             return package
           end
         end
 
         raise RepositoryError.new(
-          %Q<Cannot retrieve "#{package_name}" without a version.>
+          %Q<Cannot retrieve "#{descriptor.name}" without a version.>
         )
       end
 
@@ -258,7 +258,7 @@ module Fig
     end
 
     def delete_local_package(descriptor)
-      FileUtils.rm_rf(local_dir_for_package(package_name, version_name))
+      FileUtils.rm_rf(local_dir_for_package(descriptor))
     end
 
     def write_local_package(descriptor, package)

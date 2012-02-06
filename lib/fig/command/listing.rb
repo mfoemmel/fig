@@ -90,7 +90,7 @@ module Fig::Command::Listing
       new_backtrace = Fig::Backtrace.new(
         backtrace,
         Fig::PackageDescriptor.new(
-          base_package.package_name(),
+          base_package.name(),
           base_package.version_name(),
           config_name
         )
@@ -154,7 +154,7 @@ module Fig::Command::Listing
     packages = {}
     starting_config_names = derive_base_display_config_names()
 
-    if ! @package.package_name.nil?
+    if ! @package.name.nil?
       packages[@package] = starting_config_names.to_set
     end
 
@@ -162,11 +162,11 @@ module Fig::Command::Listing
       |package, config_name, depth|
 
       if (
-            ! package.package_name.nil?           \
+            ! package.name.nil?           \
         &&  ! (
                   ! @options.list_all_configs?    \
               &&  @descriptor                     \
-              &&  package.package_name == @descriptor.name
+              &&  package.name == @descriptor.name
             )
       )
         packages[package] ||= Set.new
@@ -176,7 +176,7 @@ module Fig::Command::Listing
 
     if ! @options.list_all_configs? && @descriptor
       packages.reject! do |package, config_names|
-        package.package_name == @descriptor.name
+        package.name == @descriptor.name
       end
     end
 

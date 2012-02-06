@@ -85,7 +85,7 @@ class Fig::Statement::Include
   private
 
   def referenced_package_name(package)
-    return package_name() || package.package_name()
+    return package_name() || package.name()
   end
 
   def referenced_version_name(package, backtrace)
@@ -94,7 +94,7 @@ class Fig::Statement::Include
       backtrace.add_override(override.package_name(), override.version_name())
     end
 
-    package_name = package_name() || package.package_name()
+    package_name = package_name() || package.name()
     original_version = version_name() || package.version_name()
 
     return backtrace.get_override(package_name, original_version)

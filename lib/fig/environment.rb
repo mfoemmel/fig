@@ -42,7 +42,7 @@ module Fig
     end
 
     def register_package(package)
-      name = package.package_name
+      name = package.name
 
       if get_package(name)
         Logging.fatal %Q<There is already a package with the name "#{name}".>
@@ -54,8 +54,8 @@ module Fig
       return
     end
 
-    def get_package(package_name)
-      return @packages[package_name]
+    def get_package(name)
+      return @packages[name]
     end
 
     def packages
@@ -96,8 +96,8 @@ module Fig
       return
     end
 
-    def find_config_name_in_package(package_name)
-      package = get_package(package_name)
+    def find_config_name_in_package(name)
+      package = get_package(name)
       if not package
         return Package::DEFAULT_CONFIG
       end
@@ -109,13 +109,13 @@ module Fig
       config_name =
         descriptor.config || find_config_name_in_package(descriptor.name)
 
-      package_name = descriptor.name || base_package.package_name
+      name = descriptor.name || base_package.name
       package = lookup_package(
-        package_name,
+        name,
         descriptor.version,
         Backtrace.new(
           nil,
-          PackageDescriptor.new(package_name, descriptor.version, config_name)
+          PackageDescriptor.new(name, descriptor.version, config_name)
         )
       )
 
@@ -154,7 +154,7 @@ module Fig
       # Check to see if this include has been overridden.
       if backtrace
         override = backtrace.get_override(
-          descriptor.name || base_package.package_name
+          descriptor.name || base_package.name
         )
         if override
           resolved_descriptor =
@@ -170,7 +170,7 @@ module Fig
         new_backtrace.add_override(override.package_name, override.version_name)
       end
       package = lookup_package(
-        resolved_descriptor.name || base_package.package_name,
+        resolved_descriptor.name || base_package.name,
         resolved_descriptor.version,
         new_backtrace
       )
@@ -231,26 +231,26 @@ module Fig
       return
     end
 
-    def lookup_package(package_name, version_name, backtrace)
-      package = get_package(package_name)
+    def lookup_package(name, version_name, backtrace)
+      package = get_package(name)
       if package.nil?
         if not version_name
-          Logging.fatal "No version specified for #{package_name}."
+          Logging.fatal "No version specified for #{name}."
           raise RepositoryError.new
         end
 
         package = @repository.get_package(
-          PackageDescriptor.new(package_name, version_name, nil)
+          PackageDescriptor.new(name, version_name, nil)
         )
         package.backtrace = backtrace
-        @packages[package_name] = package
+        @packages[name] = package
       elsif version_name && version_name != package.version_name
         string_handle = StringIO.new
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
         stacktrace = string_handle.string
         Logging.fatal                           \
-            "Version mismatch: #{package_name}" \
+            "Version mismatch: #{name}" \
           + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
         raise RepositoryError.new
       end
@@ -261,7 +261,7 @@ module Fig
     # Replace @ symbol with the package's directory, "[package]" with the
     # package name.
     def expand_and_retrieve_variable_value(base_package, name, value)
-      return value unless base_package && base_package.package_name
+      return value unless base_package && base_package.name
 
       file = expand_path(value, base_package)
 
@@ -283,7 +283,7 @@ module Fig
           end
         end
         @retriever.with_package_version(
-          base_package.package_name, base_package.version_name
+          base_package.name, base_package.version_name
         ) do
           @retriever.retrieve(file, target)
         end
@@ -358,10 +358,7 @@ module Fig
 
     def translate_retrieve_variables(base_package, name)
       return \
-        @retrieve_vars[name].gsub(
-          / \[package\] /x,
-          base_package.package_name
-        )
+        @retrieve_vars[name].gsub(/ \[package\] /x, base_package.name)
     end
   end
 end
