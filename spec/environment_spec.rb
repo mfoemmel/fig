@@ -102,6 +102,7 @@ def substitute_variable(variable_value, retrieve_vars = {})
   environment = new_example_environment(variable_value, retrieve_vars)
 
   output = nil
+  variables = setup_variables
   environment.execute_shell([]) {
     output =
       %x[echo #{variables[0]}&& echo #{variables[1]}&& echo #{variables[2]}]
