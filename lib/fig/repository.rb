@@ -43,9 +43,9 @@ module Fig
     def list_packages
       results = []
       if File.exist?(@local_repository_dir)
-        @operating_system.list(@local_repository_dir).each do |package_name|
-          @operating_system.list(File.join(@local_repository_dir, package_name)).each do |version_name|
-            results << "#{package_name}/#{version_name}"
+        @operating_system.list(@local_repository_dir).each do |name|
+          @operating_system.list(File.join(@local_repository_dir, name)).each do |version|
+            results << "#{name}/#{version}"
           end
         end
       end
@@ -60,69 +60,66 @@ module Fig
     end
 
     def get_package(
-      package_name,
-      version_name,
+      descriptor,
       disable_updating = false,
       allow_any_version = false
     )
-      if not version_name
+      if not descriptor.version
         if allow_any_version
-          package = @packages.get_any_version_of_package(package_name)
+          package = @packages.get_any_version_of_package(descriptor.name)
           if package
             Logging.warn(
-              "Picked version #{package.version_name} of #{package.package_name} at random."
+              "Picked version #{package.version} of #{package.name} at random."
             )
             return package
           end
         end
 
         raise RepositoryError.new(
-          %Q<Cannot retrieve "#{package_name}" without a version.>
+          %Q<Cannot retrieve "#{descriptor.name}" without a version.>
         )
       end
 
-      package = @packages.get_package(package_name, version_name)
+      package = @packages.get_package(descriptor.name, descriptor.version)
       return package if package
 
-      Logging.debug "Considering #{package_name}/#{version_name}."
+      Logging.debug "Considering #{descriptor.name}/#{descriptor.version}."
 
-      if should_update?(package_name, version_name, disable_updating)
-        update_package(package_name, version_name)
+      if should_update?(descriptor, disable_updating)
+        update_package(descriptor)
       end
 
-      return read_local_package(package_name, version_name)
+      return read_local_package(descriptor)
     end
 
-    def clean(package_name, version_name)
-      @packages.remove_package(package_name, version_name)
+    def clean(descriptor)
+      @packages.remove_package(descriptor.name, descriptor.version)
 
-      dir = File.join(@local_repository_dir, package_name)
-      dir = File.join(dir, version_name) if version_name
+      dir = File.join(@local_repository_dir, descriptor.name)
+      dir = File.join(dir, descriptor.version) if descriptor.version
 
       FileUtils.rm_rf(dir)
 
       return
     end
 
-    def publish_package(
-      package_statements, package_name, version_name, local_only
-    )
-      temp_dir = temp_dir_for_package(package_name, version_name)
+    def publish_package(package_statements, descriptor, local_only)
+      temp_dir = temp_dir_for_package(descriptor)
       @operating_system.clear_directory(temp_dir)
-      local_dir = local_dir_for_package(package_name, version_name)
+      local_dir = local_dir_for_package(descriptor)
       @operating_system.clear_directory(local_dir)
       fig_file = File.join(temp_dir, '.fig')
       content = derive_package_content(
-        package_statements, package_name, version_name, local_dir, local_only
+        package_statements, descriptor, local_dir, local_only
       )
       @operating_system.write(fig_file, content.join("\n").strip)
       @operating_system.upload(
         fig_file,
-        remote_fig_file_for_package(package_name, version_name),
+        remote_fig_file_for_package(descriptor),
         @remote_repository_user
       ) unless local_only
       @operating_system.copy(
-        fig_file, local_fig_file_for_package(package_name, version_name)
+        fig_file, local_fig_file_for_package(descriptor)
       )
 
       FileUtils.rm_rf(temp_dir)
@@ -134,18 +131,17 @@ module Fig
 
     private
 
-    def should_update?(package_name, version_name, disable_updating)
+    def should_update?(descriptor, disable_updating)
       return false if disable_updating
 
       return true if @update
 
-      return @update_if_missing &&
-        package_missing?(package_name, version_name)
+      return @update_if_missing && package_missing?(descriptor)
     end
 
-    def read_local_package(package_name, version_name)
-      dir = local_dir_for_package(package_name, version_name)
-      return read_package_from_directory(dir, package_name, version_name)
+    def read_local_package(descriptor)
+      directory = local_dir_for_package(descriptor)
+      return read_package_from_directory(directory, descriptor)
     end
 
     def bundle_resources(package_statements)
@@ -173,35 +169,36 @@ module Fig
       return new_package_statements
     end
 
-    def install_package(package_name, version_name)
+    def install_package(descriptor)
       temp_dir = nil
 
       begin
-        package = read_local_package(package_name, version_name)
-        temp_dir = temp_dir_for_package(package_name, version_name)
+        package = read_local_package(descriptor)
+        temp_dir = temp_dir_for_package(descriptor)
         @operating_system.clear_directory(temp_dir)
         package.archive_urls.each do |archive_url|
           if not Repository.is_url?(archive_url)
-            archive_url = remote_dir_for_package(package_name, version_name) + '/' + archive_url
+            archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
           end
           @operating_system.download_archive(archive_url, File.join(temp_dir))
         end
         package.resource_urls.each do |resource_url|
           if not Repository.is_url?(resource_url)
-            resource_url = remote_dir_for_package(package_name, version_name) + '/' + resource_url
+            resource_url =
+              remote_dir_for_package(descriptor) + '/' + resource_url
           end
           @operating_system.download_resource(resource_url, File.join(temp_dir))
         end
-        local_dir = local_dir_for_package(package_name, version_name)
+        local_dir = local_dir_for_package(descriptor)
         @operating_system.clear_directory(local_dir)
         # some packages contain no files, only a fig file.
         if not (package.archive_urls.empty? && package.resource_urls.empty?)
           FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
         end
-        write_local_package(package_name, version_name, package)
+        write_local_package(descriptor, package)
       rescue
         Logging.fatal 'Install failed, cleaning up.'
-        delete_local_package(package_name, version_name)
+        delete_local_package(descriptor)
         raise RepositoryError.new
       ensure
         if temp_dir
@@ -210,16 +207,16 @@ module Fig
       end
     end
 
-    def update_package(package_name, version_name)
-      remote_fig_file = remote_fig_file_for_package(package_name, version_name)
-      local_fig_file = local_fig_file_for_package(package_name, version_name)
+    def update_package(descriptor)
+      remote_fig_file = remote_fig_file_for_package(descriptor)
+      local_fig_file = local_fig_file_for_package(descriptor)
       begin
         if @operating_system.download(remote_fig_file, local_fig_file)
-          install_package(package_name, version_name)
+          install_package(descriptor)
         end
       rescue NotFoundError
-        Logging.fatal "Package not found in remote repository: #{package_name}/#{version_name}"
-        delete_local_package(package_name, version_name)
+        Logging.fatal "Package not found in remote repository: #{descriptor.to_string()}"
+        delete_local_package(descriptor)
         raise RepositoryError.new
       end
     end
@@ -231,28 +228,28 @@ module Fig
       expanded_files
     end
 
-    def read_package_from_directory(dir, package_name, version_name)
+    def read_package_from_directory(dir, descriptor)
       file = File.join(dir, '.fig')
       if not File.exist?(file)
         file = File.join(dir, 'package.fig')
       end
       if not File.exist?(file)
-        Logging.fatal %Q<Fig file not found for package "#{package_name || '<unnamed>'}": #{file}>
+        Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}": #{file}>
         raise RepositoryError.new
       end
 
-      return read_package_from_file(file, package_name, version_name)
+      return read_package_from_file(file, descriptor)
     end
 
-    def read_package_from_file(file_name, package_name, version_name)
+    def read_package_from_file(file_name, descriptor)
       if not File.exist?(file_name)
-        Logging.fatal "Package not found: #{package_name}/#{version_name}"
+        Logging.fatal "Package not found: #{descriptor.to_string()}"
         raise RepositoryError.new
       end
       content = File.read(file_name)
 
       package = @parser.parse_package(
-        package_name, version_name, File.dirname(file_name), content
+        descriptor, File.dirname(file_name), content
       )
 
       @packages.add_package(package)
@@ -260,57 +257,57 @@ module Fig
       return package
     end
 
-    def delete_local_package(package_name, version_name)
-      FileUtils.rm_rf(local_dir_for_package(package_name, version_name))
+    def delete_local_package(descriptor)
+      FileUtils.rm_rf(local_dir_for_package(descriptor))
     end
 
-    def write_local_package(package_name, version_name, package)
-      file = local_fig_file_for_package(package_name, version_name)
+    def write_local_package(descriptor, package)
+      file = local_fig_file_for_package(descriptor)
       @operating_system.write(file, package.unparse)
     end
 
-    def remote_fig_file_for_package(package_name, version_name)
-      "#{@remote_repository_url}/#{package_name}/#{version_name}/.fig"
+    def remote_fig_file_for_package(descriptor)
+      "#{@remote_repository_url}/#{descriptor.name}/#{descriptor.version}/.fig"
     end
 
-    def local_fig_file_for_package(package_name, version_name)
-      File.join(local_dir_for_package(package_name, version_name), '.fig')
+    def local_fig_file_for_package(descriptor)
+      File.join(local_dir_for_package(descriptor), '.fig')
     end
 
-    def remote_dir_for_package(package_name, version_name)
-      "#{@remote_repository_url}/#{package_name}/#{version_name}"
+    def remote_dir_for_package(descriptor)
+      "#{@remote_repository_url}/#{descriptor.name}/#{descriptor.version}"
     end
 
-    def local_dir_for_package(package_name, version_name)
-      return File.join(@local_repository_dir, package_name, version_name)
+    def local_dir_for_package(descriptor)
+      return File.join(
+        @local_repository_dir, descriptor.name, descriptor.version
+      )
     end
 
-    def temp_dir_for_package(package_name, version_name)
+    def temp_dir_for_package(descriptor)
       File.join(@local_repository_dir, 'tmp')
     end
 
-    def package_missing?(package_name, version_name)
-      not File.exist?(local_fig_file_for_package(package_name, version_name))
+    def package_missing?(descriptor)
+      not File.exist?(local_fig_file_for_package(descriptor))
     end
 
     def derive_package_content(
-      package_statements, package_name, version_name, local_dir, local_only
+      package_statements, descriptor, local_dir, local_only
     )
-      header_strings = derive_package_metadata_comments(
-        package_name, version_name
-      )
+      header_strings = derive_package_metadata_comments(descriptor)
       resource_statement_strings = derive_package_resources(
-        package_statements, package_name, version_name, local_dir, local_only
+        package_statements, descriptor, local_dir, local_only
       )
 
       return [header_strings, resource_statement_strings].flatten()
     end
 
-    def derive_package_metadata_comments(package_name, version_name)
+    def derive_package_metadata_comments(descriptor)
       now = Time.now()
 
       return [
-        "# Publishing information for #{package_name}/#{version_name}:",
+        "# Publishing information for #{descriptor.to_string()}:",
         '#',
         "#    Time: #{now} (epoch: #{now.to_i()})",
         "#    User: #{derive_user_name()}",
@@ -338,18 +335,18 @@ module Fig
     end
 
     def derive_package_resources(
-      package_statements, package_name, version_name, local_dir, local_only
+      package_statements, descriptor, local_dir, local_only
     )
       return bundle_resources(package_statements).map do |statement|
         if statement.is_a?(Statement::Publish)
           nil
         elsif statement.is_a?(Statement::Archive) || statement.is_a?(Statement::Resource)
-          if statement.is_a?(Statement::Resource) && !Repository.is_url?(statement.url)
+          if statement.is_a?(Statement::Resource) && ! Repository.is_url?(statement.url)
             archive_name = statement.url
-            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{statement.url}"
+            archive_remote = "#{remote_dir_for_package(descriptor)}/#{statement.url}"
           else
             archive_name = statement.url.split('/').last
-            archive_remote = "#{remote_dir_for_package(package_name, version_name)}/#{archive_name}"
+            archive_remote = "#{remote_dir_for_package(descriptor)}/#{archive_name}"
           end
           if Repository.is_url?(statement.url)
             archive_local = File.join(temp_dir, archive_name)

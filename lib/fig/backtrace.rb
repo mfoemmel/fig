@@ -5,20 +5,20 @@ module Fig; end
 class Fig::Backtrace
   attr_reader :overrides
 
-  def initialize(parent, package_name, version_name, config_name)
-    @parent = parent
-    @package_name = package_name
-    @version_name = version_name
-    @config_name = config_name || 'default'
-    @overrides = {}
+  def initialize(parent, descriptor)
+    @parent     = parent
+    @descriptor = descriptor
+    @overrides  = {}
   end
 
-  def add_override(package_name, version_name)
+  def add_override(package_name, version)
     # Don't replace an existing override on the stack
     return if get_override(package_name)
-    @overrides[package_name] = version_name
+
+    @overrides[package_name] = version
   end
 
+  # Returns a version.
   def get_override(package_name, default_version = nil)
     version = @overrides[package_name]
     return version if version
@@ -27,14 +27,15 @@ class Fig::Backtrace
     return default_version
   end
 
+  # Prints a stack trace to the IO object.
   def dump(out)
     stack = []
     collect(stack)
     i=0
-    for elem in stack
+    for descriptor in stack
       indent=''
       i.times { indent += '  ' }
-      out.puts indent+elem
+      out.puts indent + descriptor.to_string(:use_default_config)
       i += 1
     end
   end
@@ -45,16 +46,7 @@ class Fig::Backtrace
     if @parent
       @parent.collect(stack)
     end
-    elem = ''
-    if @package_name
-      elem = @package_name
-    end
-    if @version_name
-      elem += '/' + @version_name
-    end
-    if @config_name
-      elem += ':' + @config_name
-    end
-    stack << elem
+
+    stack << @descriptor
   end
 end

@@ -42,7 +42,7 @@ module Fig
     end
 
     def register_package(package)
-      name = package.package_name
+      name = package.name
 
       if get_package(name)
         Logging.fatal %Q<There is already a package with the name "#{name}".>
@@ -54,8 +54,8 @@ module Fig
       return
     end
 
-    def get_package(package_name)
-      return @packages[package_name]
+    def get_package(name)
+      return @packages[name]
     end
 
     def packages
@@ -96,8 +96,8 @@ module Fig
       return
     end
 
-    def find_config_name_in_package(package_name)
-      package = get_package(package_name)
+    def find_config_name_in_package(name)
+      package = get_package(name)
       if not package
         return Package::DEFAULT_CONFIG
       end
@@ -105,12 +105,18 @@ module Fig
       return package.primary_config_name || Package::DEFAULT_CONFIG
     end
 
-    def execute_config(base_package, package_name, config_name, version_name, args, &block)
-      config_name ||= find_config_name_in_package(package_name)
+    def execute_config(base_package, descriptor, args, &block)
+      config_name =
+        descriptor.config || find_config_name_in_package(descriptor.name)
+
+      name = descriptor.name || base_package.name
       package = lookup_package(
-        package_name || base_package.package_name,
-        version_name,
-        Backtrace.new(nil, package_name, version_name, config_name)
+        name,
+        descriptor.version,
+        Backtrace.new(
+          nil,
+          PackageDescriptor.new(name, descriptor.version, config_name)
+        )
       )
 
       command = package[config_name].command
@@ -130,7 +136,9 @@ module Fig
       when Statement::Set
         set_variable(base_package, statement.name, statement.value)
       when Statement::Include
-        include_config(base_package, statement.package_name, statement.config_name, statement.version_name, statement.overrides, backtrace)
+        include_config(
+          base_package, statement.descriptor, statement.overrides, backtrace
+        )
       when Statement::Command
         # ignore
       else
@@ -140,23 +148,36 @@ module Fig
       return
     end
 
-    def include_config(base_package, package_name, config_name, version_name, overrides, backtrace)
+    def include_config(base_package, descriptor, overrides, backtrace)
+      resolved_descriptor = nil
+
       # Check to see if this include has been overridden.
       if backtrace
-        override = backtrace.get_override(package_name || base_package.package_name)
+        override = backtrace.get_override(
+          descriptor.name || base_package.name
+        )
         if override
-          version_name = override
+          resolved_descriptor =
+            PackageDescriptor.new(
+              descriptor.name, override, descriptor.config
+            )
         end
       end
-      new_backtrace = Backtrace.new(backtrace, package_name, version_name, config_name)
+      resolved_descriptor ||= descriptor
+
+      new_backtrace = Backtrace.new(backtrace, resolved_descriptor)
       overrides.each do |override|
-        new_backtrace.add_override(override.package_name, override.version_name)
+        new_backtrace.add_override(override.package_name, override.version)
       end
       package = lookup_package(
-        package_name || base_package.package_name, version_name, new_backtrace
+        resolved_descriptor.name || base_package.name,
+        resolved_descriptor.version,
+        new_backtrace
       )
       apply_config(
-        package, config_name || Package::DEFAULT_CONFIG, new_backtrace
+        package,
+        resolved_descriptor.config || Package::DEFAULT_CONFIG,
+        new_backtrace
       )
 
       return
@@ -210,24 +231,26 @@ module Fig
       return
     end
 
-    def lookup_package(package_name, version_name, backtrace)
-      package = get_package(package_name)
+    def lookup_package(name, version, backtrace)
+      package = get_package(name)
       if package.nil?
-        if not version_name
-          Logging.fatal "No version specified for #{package_name}."
+        if not version
+          Logging.fatal "No version specified for #{name}."
           raise RepositoryError.new
         end
 
-        package = @repository.get_package(package_name, version_name)
+        package = @repository.get_package(
+          PackageDescriptor.new(name, version, nil)
+        )
         package.backtrace = backtrace
-        @packages[package_name] = package
-      elsif version_name && version_name != package.version_name
+        @packages[name] = package
+      elsif version && version != package.version
         string_handle = StringIO.new
         backtrace.dump(string_handle) if backtrace
         package.backtrace.dump(string_handle) if package.backtrace
         stacktrace = string_handle.string
         Logging.fatal                           \
-            "Version mismatch: #{package_name}" \
+            "Version mismatch: #{name}" \
           + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
         raise RepositoryError.new
       end
@@ -238,7 +261,7 @@ module Fig
     # Replace @ symbol with the package's directory, "[package]" with the
     # package name.
     def expand_and_retrieve_variable_value(base_package, name, value)
-      return value unless base_package && base_package.package_name
+      return value unless base_package && base_package.name
 
       file = expand_path(value, base_package)
 
@@ -260,7 +283,7 @@ module Fig
           end
         end
         @retriever.with_package_version(
-          base_package.package_name, base_package.version_name
+          base_package.name, base_package.version
         ) do
           @retriever.retrieve(file, target)
         end
@@ -335,10 +358,7 @@ module Fig
 
     def translate_retrieve_variables(base_package, name)
       return \
-        @retrieve_vars[name].gsub(
-          / \[package\] /x,
-          base_package.package_name
-        )
+        @retrieve_vars[name].gsub(/ \[package\] /x, base_package.name)
     end
   end
 end

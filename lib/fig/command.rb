@@ -43,7 +43,7 @@ class Fig::Command
 
     if @options.clean?
       check_required_package_descriptor('to clean')
-      @repository.clean(@descriptor.name, @descriptor.version)
+      @repository.clean(@descriptor)
       return 0
     end
 
@@ -66,14 +66,10 @@ class Fig::Command
         |command| @operating_system.shell_exec command
       end
     elsif @descriptor
-      @environment.include_config(
-        @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
-      )
+      @environment.include_config(@package, @descriptor, {}, nil)
       @environment.execute_config(
         @package,
-        @descriptor.name,
-        @descriptor.config,
-        nil,
+        @descriptor,
         @options.command_extra_argv || []
       ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?
@@ -226,12 +222,9 @@ class Fig::Command
       end
     end
 
-    Fig::Logging.info "Publishing #{@descriptor.name}/#{@descriptor.version}."
+    Fig::Logging.info "Publishing #{@descriptor.to_string()}."
     @repository.publish_package(
-      publish_statements,
-      @descriptor.name,
-      @descriptor.version,
-      @options.publish_local?
+      publish_statements, @descriptor, @options.publish_local?
     )
 
     return 0

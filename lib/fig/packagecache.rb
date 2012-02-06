@@ -7,13 +7,13 @@ class Fig::PackageCache
   end
 
   def add_package(package)
-    versions = @packages[package.package_name]
+    versions = @packages[package.name]
     if not versions
       versions = {}
-      @packages[package.package_name] = versions
+      @packages[package.name] = versions
     end
 
-    versions[package.version_name] = package
+    versions[package.version] = package
 
     return
   end

@@ -2,6 +2,7 @@ require 'set'
 
 require 'fig/backtrace'
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/userinputerror'
 
 module Fig; end
@@ -88,9 +89,11 @@ module Fig::Command::Listing
 
       new_backtrace = Fig::Backtrace.new(
         backtrace,
-        base_package.package_name(),
-        base_package.version_name(),
-        config_name
+        Fig::PackageDescriptor.new(
+          base_package.name(),
+          base_package.version(),
+          config_name
+        )
       )
 
       base_package.package_dependencies(config_name, new_backtrace).each do
@@ -99,9 +102,7 @@ module Fig::Command::Listing
         package = nil
         if descriptor.name
           package =
-            @repository.get_package(
-              descriptor.name, descriptor.version, false, :allow_any_version
-            )
+            @repository.get_package(descriptor, false, :allow_any_version)
         else
           package = base_package
         end
@@ -153,7 +154,7 @@ module Fig::Command::Listing
     packages = {}
     starting_config_names = derive_base_display_config_names()
 
-    if ! @package.package_name.nil?
+    if ! @package.name.nil?
       packages[@package] = starting_config_names.to_set
     end
 
@@ -161,11 +162,11 @@ module Fig::Command::Listing
       |package, config_name, depth|
 
       if (
-            ! package.package_name.nil?           \
+            ! package.name.nil?           \
         &&  ! (
                   ! @options.list_all_configs?    \
               &&  @descriptor                     \
-              &&  package.package_name == @descriptor.name
+              &&  package.name == @descriptor.name
             )
       )
         packages[package] ||= Set.new
@@ -175,7 +176,7 @@ module Fig::Command::Listing
 
     if ! @options.list_all_configs? && @descriptor
       packages.reject! do |package, config_names|
-        package.package_name == @descriptor.name
+        package.name == @descriptor.name
       end
     end
 

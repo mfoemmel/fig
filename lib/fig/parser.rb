@@ -16,7 +16,7 @@ module Fig
       @application_config = application_config
     end
 
-    def find_bad_urls(package, package_name, version_name)
+    def find_bad_urls(package, descriptor)
       bad_urls = []
       package.walk_statements do |statement|
         statement.urls.each do |url|
@@ -26,7 +26,7 @@ module Fig
         end
       end
 
-      raise URLAccessError.new(bad_urls, package_name, version_name) if not bad_urls.empty?
+      raise URLAccessError.new(bad_urls, descriptor) if not bad_urls.empty?
     end
 
     def find_multiple_command_statements(package)
@@ -43,7 +43,7 @@ module Fig
       end
     end
 
-    def parse_package(package_name, version_name, directory, input)
+    def parse_package(descriptor, directory, input)
       input = input.gsub(/#.*$/, '')
       result = @parser.parse(" #{input} ")
 
@@ -52,9 +52,11 @@ module Fig
         raise PackageError.new("#{directory}: #{@parser.failure_reason}")
       end
 
-      package = result.to_package(package_name, version_name, directory)
+      package = result.to_package(
+        descriptor.name, descriptor.version, directory
+      )
 
-      find_bad_urls(package, package_name, version_name)
+      find_bad_urls(package, descriptor)
       find_multiple_command_statements(package)
 
       return package
