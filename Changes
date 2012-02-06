@@ -33,6 +33,12 @@ v0.1.xx
   - Logging output is colorized if going to a tty.  This is not the
     colorization of package adds/removes that will eventually be restored.
 
+  Significant Internals:
+
+  - The definition of a package descriptor has become more restrictive in the
+    Ruby code.  This shouldn't be an issue because the Treetop grammar has
+    already restricted it this way; this is just a check from the Ruby side.
+
 v0.1.56
 
   - Logging output now goes to stderr by default, instead of stdout.

@@ -9,10 +9,14 @@ class Fig::PackageDescriptor
   attr_reader :name, :version, :config
 
   def self.parse(raw_string)
+    # Additional checks in validate_component() will take care of the looseness
+    # of the regexes.  These just need to ensure that the entire string gets
+    # assigned to one component or another.
+
     self.new(
-      raw_string =~ %r< ^ ( [^:/]+ ) >x ? $1 : nil,
-      raw_string =~ %r< / ( [^:/]+ ) >x ? $1 : nil,
-      raw_string =~ %r< : ( [^:/]+ ) >x ? $1 : nil
+      raw_string =~ %r< \A         ( [^:/]+ )    >x ? $1 : nil,
+      raw_string =~ %r< \A [^/]* / ( [^:]+  )    >x ? $1 : nil,
+      raw_string =~ %r< \A [^:]* : ( .+     ) \z >x ? $1 : nil
     )
   end
 
@@ -20,6 +24,14 @@ class Fig::PackageDescriptor
     @name     = name
     @version  = version
     @config   = config
+  end
+
+  def validate_component(value, name)
+    return if value.nil?
+
+    return if value =~ / \A [a-zA-Z0-9_.-]+ \z /x
+
+    raise %Q<Invalid #{name} for package descriptor: "#{value}".>
   end
 
   def to_string(use_default_config = false)
