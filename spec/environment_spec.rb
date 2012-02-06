@@ -96,6 +96,7 @@ def setup_variables
   return variable_arguments.map do |var_arg| 
     Fig::OperatingSystem.add_shell_variable_expansion(var_arg)
   end
+end
 
 def substitute_variable(variable_value, retrieve_vars = {})
   environment = new_example_environment(variable_value, retrieve_vars)
