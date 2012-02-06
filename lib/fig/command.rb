@@ -70,7 +70,11 @@ class Fig::Command
         @package, @descriptor.name, @descriptor.config, @descriptor.version, {}, nil
       )
       @environment.execute_config(
-        @package, @descriptor.name, @descriptor.config, nil, []
+        @package,
+        @descriptor.name,
+        @descriptor.config,
+        nil,
+        @options.command_extra_argv || []
       ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?
       $stderr.puts "Nothing to do.\n"

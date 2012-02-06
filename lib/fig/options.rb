@@ -18,6 +18,7 @@ class Fig::Options
 Usage:
 
   fig [...] [DESCRIPTOR] [--update | --update-if-missing] [-- COMMAND]
+  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [--command-extra-args VALUES]
 
   fig {--publish | --publish-local} DESCRIPTOR
       [--resource PATH]
@@ -62,6 +63,7 @@ Environment variables:
   LOG_ALIASES = { 'warning' => 'warn' }
 
   attr_reader :shell_command
+  attr_reader :command_extra_argv
   attr_reader :descriptor
   attr_reader :exit_code
 
@@ -74,7 +76,6 @@ Environment variables:
 
     parser = new_parser()
 
-    # TODO: Need to catch the exception thrown from parser and retranslate into a fig exception
     begin
       parser.parse!(argv)
     rescue OptionParser::MissingArgument => error
@@ -218,8 +219,18 @@ Environment variables:
 
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|
-      if arg == '--'
-        @shell_command = argv[(i+1)..-1]
+      terminating_option = nil
+
+      case arg
+        when '--'
+          terminating_option = arg
+          @shell_command = argv[(i+1)..-1]
+        when '--command-extra-args'
+          terminating_option = arg
+          @command_extra_argv = argv[(i+1)..-1]
+      end
+
+      if terminating_option
         argv.slice!(i..-1)
         break
       end
@@ -245,7 +256,7 @@ Environment variables:
       help(parser)
     end
 
-    parser.on_tail('-v', '--version', 'Print Fig version') do
+    parser.on_tail('-v', '--version', 'print Fig version') do
       version()
     end
 
@@ -363,7 +374,7 @@ Environment variables:
     parser.on(
       '-p',
       '--append VARIABLE=VALUE',
-      'append (actually, prepend) VALUE to environment variable VARIABLE, delimited by separator'
+      'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:non_command_package_statements] << Fig::Statement::Path.new(var, val)
@@ -372,7 +383,7 @@ Environment variables:
     parser.on(
       '-i',
       '--include DESCRIPTOR',
-      'include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment'
+      'include package/version:config specified in DESCRIPTOR in environment'
     ) do |descriptor|
       @options[:non_command_package_statements] <<
         Fig::Statement::Include.new(
@@ -471,7 +482,12 @@ Environment variables:
 
   def help(parser)
     puts parser.help
-    puts "        --                           end of Fig options; anything after this is used as a command to run\n\n"
+    puts <<-'END_MESSAGE'
+        --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
+
+    END_MESSAGE
 
     @exit_code = 0
 

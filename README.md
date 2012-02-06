@@ -55,8 +55,8 @@ Fig recognizes the following options:
     -c, --config CONFIG              apply configuration CONFIG, default is "default"
         --file FILE                  read Fig file FILE. Use '-' for stdin. See also --no-file
         --no-file                    ignore package.fig file in current directory
-    -p, --append VARIABLE=VALUE      append (actually, prepend) VALUE to environment variable VARIABLE, delimited by separator
-    -i, --include DESCRIPTOR         include package/version:config specified in DESCRIPTOR (with any variable prepends) in environment
+    -p, --append VARIABLE=VALUE      append (actually, prepend) VALUE to PATH-like environment variable VARIABLE
+    -i, --include DESCRIPTOR         include package/version:config specified in DESCRIPTOR in environment
     -s, --set VARIABLE=VALUE         set environment variable VARIABLE to VALUE
         --archive PATH               include PATH archive in package (when using --publish)
         --resource PATH              include PATH resource in package (when using --publish)
@@ -70,8 +70,10 @@ Fig recognizes the following options:
         --log-level LEVEL            set logging level to LEVEL
                                        (off, fatal, error, warn, info, debug, all)
     -?, -h, --help                   display this help text
-    -v, --version                    Print Fig version
+    -v, --version                    print Fig version
         --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
 
 Some of these options may also be expressed as statements in a package.fig
 file.  For instance, `--append`, `--archive`, `--resource`, `include`.
@@ -327,6 +329,11 @@ given on the command-line.
 
 Cannot be specified outside of a `config` statement.  There may not be multiple
 commands within a given `config`.
+
+You can use the `--command-extra-args` option to add parameters to the command.
+For example, given the above package declaration, if you were to run `fig
+--command-extra-args It is a nice day.`, you would get "Hello there. It is a
+nice day." as output.
 
 ## `config`
 

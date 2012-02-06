@@ -23,11 +23,21 @@ v0.1.xx
 
     Suggestions for changes to the output format welcome.
 
+  - "--command-extra-args" option.  Allows you to say that the rest of the fig
+    command-line is to be appended to the end of the command in a "command"
+    statement.
+
   - The .fig file created in a repository now contains metadata about
     the publishing of the package (time/user/host).
 
   - Logging output is colorized if going to a tty.  This is not the
     colorization of package adds/removes that will eventually be restored.
+
+  Significant Internals:
+
+  - The definition of a package descriptor has become more restrictive in the
+    Ruby code.  This shouldn't be an issue because the Treetop grammar has
+    already restricted it this way; this is just a check from the Ruby side.
 
 v0.1.56
 
