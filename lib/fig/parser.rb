@@ -52,9 +52,7 @@ module Fig
         raise PackageError.new("#{directory}: #{@parser.failure_reason}")
       end
 
-      package = result.to_package(
-        descriptor.name, descriptor.version, directory
-      )
+      package = result.to_package(descriptor, directory)
 
       find_bad_urls(package, descriptor)
       find_multiple_command_statements(package)
