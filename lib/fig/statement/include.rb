@@ -11,12 +11,12 @@ class Fig::Statement::Include
 
   attr_reader :descriptor, :overrides
 
-  def initialize(descriptor, overrides, containing_package_name)
+  def initialize(descriptor, overrides, containing_package_descriptor)
     if descriptor.name && ! descriptor.version
       message =
         %Q<No version in the package descriptor of "#{descriptor.name}" in an include statement>
-      if containing_package_name
-        message += %Q< in the .fig file for "#{containing_package_name}">
+      if containing_package_descriptor
+        message += %Q< in the .fig file for "#{containing_package_descriptor.to_string()}">
       end
       message += '. Whether or not the include statement will work is dependent upon the recursive dependency load order.'
 
