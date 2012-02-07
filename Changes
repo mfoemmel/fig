@@ -30,8 +30,15 @@ v0.1.xx
   - The .fig file created in a repository now contains metadata about
     the publishing of the package (time/user/host).
 
-  - Logging output is colorized if going to a tty.  This is not the
-    colorization of package adds/removes that will eventually be restored.
+  - Logging output is colorized if going to a tty.  This includes restoration
+    of the old colorization of local package downloads/deletions.  Colors are
+    not currently configurable.
+
+  - The primary package is now treated the same as other packages as far as
+    updates are concerned.  Previously, if you started with a new environment,
+    e.g. FIG_HOME was empty, running "fig foo/1.2.3 -- echo foo" would fall
+    over.  Even asking for updates ("fig --update foo/1.2.3 -- echo foo")
+    wouldn't change anything.  Now the latter case will work.
 
   Significant Internals:
 
