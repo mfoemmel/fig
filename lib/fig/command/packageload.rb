@@ -14,6 +14,8 @@ module Fig::Command::PackageLoad
 
   def read_in_package_config_file(config_file)
     if File.exist?(config_file)
+      @package_loaded_from_path = config_file
+
       return File.read(config_file)
     else
       raise Fig::UserInputError.new(%Q<File not found: "#{config_file}".>)
@@ -26,9 +28,13 @@ module Fig::Command::PackageLoad
     if package_config_file == :none
       return nil
     elsif package_config_file == '-'
+      @package_loaded_from_path = '<standard input>'
+
       return $stdin.read
     elsif package_config_file.nil?
       if File.exist?(DEFAULT_FIG_FILE)
+        @package_loaded_from_path = DEFAULT_FIG_FILE
+
         return File.read(DEFAULT_FIG_FILE)
       end
     else
@@ -59,7 +65,36 @@ module Fig::Command::PackageLoad
       @options.config()                       ||
       @descriptor && @descriptor.config()     ||
       Fig::Package::DEFAULT_CONFIG
-    @environment.apply_config(@package, config, nil)
+    begin
+      @environment.apply_config(@package, config, nil)
+    rescue Fig::NoSuchPackageConfigError => exception
+      raise exception if not @descriptor
+
+      descriptor = exception.descriptor
+
+      raise exception if
+        descriptor.name    && descriptor.name    != @descriptor.name
+      raise exception if
+        descriptor.version && descriptor.version != @descriptor.version
+      raise exception if      descriptor.config  != config
+
+      source = nil
+      if @package_loaded_from_path
+        source = @package_loaded_from_path
+      else
+        source = %Q<#{descriptor.name}/#{descriptor.version}>
+      end
+      source_component = source ? %Q< in #{source}> : ''
+
+      message =
+        %Q<There's no "#{config}" configuration#{source_component}. Specify one that does like this: "#{@descriptor.name}/#{@descriptor.version}:some_existing_config".>
+
+      if @options.publishing?
+        message += ' (Yes, this does work with --publish.)'
+      end
+
+      raise Fig::UserInputError.new(message)
+    end
 
     return
   end
