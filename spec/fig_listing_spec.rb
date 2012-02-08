@@ -514,6 +514,7 @@ describe 'Fig' do
 
   describe '--list-dependencies' do
     before(:each) do
+      cleanup_test_environment
       setup_test_environment
       cleanup_home_and_remote
     end
@@ -1423,6 +1424,8 @@ describe 'Fig' do
 
     describe %q<handles "include ... override ...> do
       before(:each) do
+        cleanup_test_environment
+        setup_test_environment
         set_up_packages_with_overrides
         remove_any_package_dot_fig
       end
