@@ -26,7 +26,8 @@ def generate_package_statements
       Fig::Statement::Configuration.new(
         Fig::Package::DEFAULT_CONFIG, [path_statement]
       )
-    publish_statement       = Fig::Statement::Publish.new('default', 'default')
+    publish_statement       = Fig::Statement::Publish.new()
+
     package_statements = [resource_statement] + [configuration_statement]
     package_statements << publish_statement
 

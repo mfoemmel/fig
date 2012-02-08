@@ -197,7 +197,7 @@ class Fig::Command
             @options.non_command_package_statements()
           )
         ]
-      publish_statements << Fig::Statement::Publish.new('default','default')
+      publish_statements << Fig::Statement::Publish.new()
     else
       load_package_file()
       if not @package.statements.empty?
