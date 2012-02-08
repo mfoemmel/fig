@@ -2,6 +2,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/applicationconfiguration'
 require 'fig/packagedescriptor'
+require 'fig/packageparseerror'
 require 'fig/parser'
 
 describe 'Parser' do
@@ -108,6 +109,24 @@ describe 'Parser' do
       )
     }.to raise_error(
       Fig::UserInputError
+    )
+  end
+
+  it 'throws the correct exception on syntax error' do
+    fig_package=<<-END
+      this is invalid syntax
+    END
+
+    application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+
+    expect {
+      Fig::Parser.new(application_configuration).parse_package(
+        Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
+        'foo_directory',
+        fig_package
+      )
+    }.to raise_error(
+      Fig::PackageParseError
     )
   end
 end

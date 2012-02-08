@@ -3,7 +3,7 @@ require 'treetop'
 
 require 'fig/grammar'
 require 'fig/logging'
-require 'fig/packageerror'
+require 'fig/packageparseerror'
 require 'fig/repository'
 require 'fig/urlaccesserror'
 require 'fig/userinputerror'
@@ -49,7 +49,7 @@ module Fig
 
       if result.nil?
         Logging.fatal "#{directory}: #{@parser.failure_reason}"
-        raise PackageError.new("#{directory}: #{@parser.failure_reason}")
+        raise PackageParseError.new("#{directory}: #{@parser.failure_reason}")
       end
 
       package = result.to_package(descriptor, directory)
