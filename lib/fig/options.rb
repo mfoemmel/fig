@@ -108,6 +108,13 @@ Environment variables:
         @exit_code = 1
         return
       end
+
+      if @descriptor.config && config()
+        $stderr.puts \
+          %Q<Cannot specify both --config and a config in the descriptor "#{package_text}".>
+        @exit_code = 1
+        return
+      end
     end
 
     return

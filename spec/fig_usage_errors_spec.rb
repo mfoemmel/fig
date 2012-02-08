@@ -72,6 +72,13 @@ describe 'Fig' do
       out.should == ''
     end
 
+    it %q<prints error when a descriptor contains a config and --config is specified> do
+      (out, err, exitstatus) = fig('package/version:default --config nondefault', nil, :no_raise_on_error)
+      exitstatus.should == 1
+      err.should =~ /Cannot specify both --config and a config in the descriptor/
+      out.should == ''
+    end
+
     it %q<prints error when extra parameters are given with a command> do
       (out, err, exitstatus) = fig('extra bits -- echo foo', nil, :no_raise_on_error)
       exitstatus.should == 1
