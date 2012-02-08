@@ -139,9 +139,9 @@ class Fig::Package
   end
 
   def to_s
-    name = @name || '<empty>'
+    name    = @name || '<empty>'
     version = @version || '<empty>'
-    return name + '/' + version
+    return Fig::PackageDescriptor.format(name, version, nil)
   end
 
   def to_s_with_config(config_name)

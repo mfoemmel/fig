@@ -209,10 +209,12 @@ class Fig::Command
     end
 
     if @options.publish?
-      Fig::Logging.info "Checking status of #{@descriptor.name}/#{@descriptor.version}..."
+      Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."
 
-      if @repository.list_remote_packages.include?("#{@descriptor.name}/#{@descriptor.version}")
-        Fig::Logging.info "#{@descriptor.name}/#{@descriptor.version} has already been published."
+      package_description =
+        Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
+      if @repository.list_remote_packages.include?("#{package_description}")
+        Fig::Logging.info "#{@descriptor.to_string()} has already been published."
 
         if not @options.force?
           Fig::Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'

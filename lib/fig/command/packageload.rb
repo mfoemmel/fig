@@ -82,12 +82,16 @@ module Fig::Command::PackageLoad
       if @package_loaded_from_path
         source = @package_loaded_from_path
       else
-        source = %Q<#{descriptor.name}/#{descriptor.version}>
+        source =
+          Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
       end
       source_component = source ? %Q< in #{source}> : ''
 
-      message =
-        %Q<There's no "#{config}" configuration#{source_component}. Specify one that does like this: "#{@descriptor.name}/#{@descriptor.version}:some_existing_config".>
+      message = %Q<There's no "#{config}" configuration#{source_component}.>
+      message += %q< Specify one that does like this: ">
+      message +=
+        Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
+      message += %q<".>
 
       if @options.publishing?
         message += ' (Yes, this does work with --publish.)'

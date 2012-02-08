@@ -1,3 +1,4 @@
+require 'fig/packagedescriptor'
 require 'fig/statement'
 
 module Fig; end
@@ -20,6 +21,6 @@ class Fig::Statement::Override
   end
 
   def unparse()
-    return ' override ' + @package_name + '/' + @version
+    return ' override ' + Fig::PackageDescriptor.format(@package_name, @version, nil)
   end
 end

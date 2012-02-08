@@ -4,6 +4,7 @@ require 'sys/admin'
 require 'fig/logging'
 require 'fig/notfounderror'
 require 'fig/packagecache'
+require 'fig/packagedescriptor'
 require 'fig/parser'
 require 'fig/repositoryerror'
 require 'fig/statement/archive'
@@ -45,7 +46,7 @@ module Fig
       if File.exist?(@local_repository_dir)
         @operating_system.list(@local_repository_dir).each do |name|
           @operating_system.list(File.join(@local_repository_dir, name)).each do |version|
-            results << "#{name}/#{version}"
+            results << PackageDescriptor.format(name, version, nil)
           end
         end
       end
@@ -83,7 +84,8 @@ module Fig
       package = @packages.get_package(descriptor.name, descriptor.version)
       return package if package
 
-      Logging.debug "Considering #{descriptor.name}/#{descriptor.version}."
+      Logging.debug \
+        "Considering #{PackageDescriptor.format(descriptor.name, descriptor.version, nil)}."
 
       if should_update?(descriptor, disable_updating)
         update_package(descriptor)

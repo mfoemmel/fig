@@ -1,10 +1,28 @@
 module Fig; end
 
-# Parsed representation of a package name:config/version.
+# Parsed representation of a package (name/version:config).
 class Fig::PackageDescriptor
   include Comparable
 
   attr_reader :name, :version, :config
+
+  def self.format(name, version, config, use_default_config = false)
+    string = name || ''
+
+    if version
+      string += '/'
+      string += version
+    end
+
+    if config
+      string += ':'
+      string += config
+    elsif use_default_config
+      string += ':default'
+    end
+
+    return string
+  end
 
   def self.parse(raw_string)
     # Additional checks in validate_component() will take care of the looseness
@@ -33,21 +51,7 @@ class Fig::PackageDescriptor
   end
 
   def to_string(use_default_config = false)
-    string = @name || ''
-
-    if @version
-      string += '/'
-      string += @version
-    end
-
-    if @config
-      string += ':'
-      string += @config
-    elsif use_default_config
-      string += ':default'
-    end
-
-    return string
+    return Fig::PackageDescriptor.format(@name, @version, @config, use_default_config)
   end
 
   def <=>(other)

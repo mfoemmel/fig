@@ -3,6 +3,7 @@ require 'set'
 
 require 'fig/logging'
 require 'fig/logging/colorizable'
+require 'fig/packagedescriptor'
 
 module Fig; end
 
@@ -30,7 +31,7 @@ class Fig::Retriever
         @package_meta.files.each do |relpath|
           Fig::Logging.info(
             Fig::Logging::Colorizable.new(
-              "- [#{@package_meta.name}/#{@package_meta.version}] #{relpath}",
+              "- [#{formatted_meta()}] #{relpath}",
               :magenta,
               nil
             )
@@ -58,7 +59,7 @@ class Fig::Retriever
     File.open(File.join(@local_fig_data_directory, 'retrieve'), 'w') do |f|
       @package_metadata_by_name.each do |name, package_meta|
         package_meta.files.each do |target|
-          f << target << '=' << package_meta.name << '/' << package_meta.version << "\n"
+          f << target << '=' << formatted_meta() << "\n"
         end
       end
     end
@@ -114,11 +115,11 @@ class Fig::Retriever
       if ! File.exist?(target) || File.mtime(source) > File.mtime(target)
         if Fig::Logging.debug?
           Fig::Logging.debug \
-            "Copying package [#{@package_meta.name}/#{@package_meta.version}] from #{source} to #{target}."
+            "Copying package [#{formatted_meta()}] from #{source} to #{target}."
         else
           Fig::Logging.info(
             Fig::Logging::Colorizable.new(
-              "+ [#{@package_meta.name}/#{@package_meta.version}] #{relpath}",
+              "+ [#{formatted_meta()}] #{relpath}",
               :green,
               nil
             )
@@ -130,5 +131,11 @@ class Fig::Retriever
       end
       @package_meta.files << relpath if @package_meta
     end
+  end
+
+  def formatted_meta()
+    return Fig::PackageDescriptor.format(
+      @package_meta.name, @package_meta.version, nil
+    )
   end
 end
