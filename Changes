@@ -1,5 +1,15 @@
 v0.1.xx
 
+  Backwards incompatibilities:
+
+  - Specifying a config in the descriptor and --config is now an error, i.e you
+    can't do:
+
+        fig package/1.2.3:some_config --config some_other_config
+
+    Allowing configurations in both locations was ambiguous and the developers,
+    let alone users, couldn't tell which configuration would prevail.
+
   New features:
 
   - "--list-variables" option.  This will display all variables manipulated by
