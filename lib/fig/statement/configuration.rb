@@ -1,5 +1,3 @@
-require 'fig/logging'
-require 'fig/packageerror'
 require 'fig/statement'
 require 'fig/statement/command'
 

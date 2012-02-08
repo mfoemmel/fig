@@ -1,4 +1,3 @@
-require 'fig/logging'
 require 'fig/packagedescriptor'
 require 'fig/statement'
 

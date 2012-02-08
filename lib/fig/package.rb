@@ -1,5 +1,6 @@
 require 'fig/logging'
-require 'fig/packageerror'
+require 'fig/nosuchpackageconfigerror'
+require 'fig/packagedescriptor'
 require 'fig/statement/archive'
 require 'fig/statement/configuration'
 require 'fig/statement/resource'
@@ -35,15 +36,10 @@ class Fig::Package
       return stmt if stmt.is_a?(Fig::Statement::Configuration) && stmt.name == config_name
     end
 
-    message =
-      'Configuration not found: ' +
-      (@name || '<empty>')  +
-      '/'                         +
-      (@version || '<empty>')  +
-      ':'                         +
-      (config_name || '<empty>')
+    descriptor = Fig::PackageDescriptor.new(@name, @version, config_name)
+    message = 'Configuration not found: ' + descriptor.to_string()
 
-    raise Fig::PackageError.new(message)
+    raise Fig::NoSuchPackageConfigError.new(message, descriptor)
   end
 
   def <=>(other)

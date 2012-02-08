@@ -1,5 +1,3 @@
-require 'fig/logging'
-require 'fig/packageerror'
 require 'fig/statement'
 
 module Fig; end
