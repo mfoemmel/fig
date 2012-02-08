@@ -22,7 +22,10 @@ end
 def generate_package_statements
     resource_statement      = Fig::Statement::Resource.new('fullpath')
     path_statement          = Fig::Statement::Path.new('FOO', 'bar')
-    configuration_statement = Fig::Statement::Configuration.new('default', [path_statement])
+    configuration_statement =
+      Fig::Statement::Configuration.new(
+        Fig::Package::DEFAULT_CONFIG, [path_statement]
+      )
     publish_statement       = Fig::Statement::Publish.new('default', 'default')
     package_statements = [resource_statement] + [configuration_statement]
     package_statements << publish_statement

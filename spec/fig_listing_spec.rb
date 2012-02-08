@@ -196,7 +196,9 @@ def create_package_dot_fig_with_single_dependency()
 end
 
 def create_package_dot_fig_with_all_dependencies()
-  create_package_dot_fig('depends-on-everything', 'default')
+  create_package_dot_fig(
+    'depends-on-everything', Fig::Package::DEFAULT_CONFIG
+  )
 end
 
 def set_up_list_variables_packages

@@ -4,8 +4,6 @@ module Fig; end
 class Fig::PackageDescriptor
   include Comparable
 
-  DEFAULT_CONFIG = 'default'
-
   attr_reader :name, :version, :config
 
   def self.parse(raw_string)

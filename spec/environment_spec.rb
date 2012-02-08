@@ -14,7 +14,11 @@ end
 
 def new_example_package(environment, name, extra_statements, variable_value)
   statements = extra_statements +
-      [Fig::Statement::Configuration.new('default', [])]
+      [
+        Fig::Statement::Configuration.new(
+          Fig::Package::DEFAULT_CONFIG, []
+        )
+      ]
 
   package =
     Fig::Package.new(
@@ -69,10 +73,12 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   environment.register_package(
     Fig::Package.new(
       'has_command', 'version', 'directory',
-      [Fig::Statement::Configuration.new(
-        'default',
-        [Fig::Statement::Command.new('echo foo')]
-      )]
+      [
+        Fig::Statement::Configuration.new(
+          Fig::Package::DEFAULT_CONFIG,
+          [Fig::Statement::Command.new('echo foo')]
+        )
+      ]
     )
   )
 

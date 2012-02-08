@@ -193,7 +193,8 @@ class Fig::Command
         @options.archives() +
         [
           Fig::Statement::Configuration.new(
-            'default', @options.non_command_package_statements()
+            Fig::Package::DEFAULT_CONFIG,
+            @options.non_command_package_statements()
           )
         ]
       publish_statements << Fig::Statement::Publish.new('default','default')

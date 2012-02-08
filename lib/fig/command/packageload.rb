@@ -54,11 +54,13 @@ module Fig::Command::PackageLoad
     end
 
     @environment.register_package(@package)
-    @environment.apply_config(
-      @package,
-      @options.config() || @descriptor && @descriptor.config() || 'default',
-      nil
-    )
+
+    config =
+      @options.config()                       ||
+      @descriptor && @descriptor.config()     ||
+      Fig::Package::DEFAULT_CONFIG
+    @environment.apply_config(@package, config, nil)
+
     return
   end
 
