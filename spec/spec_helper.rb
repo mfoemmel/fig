@@ -2,6 +2,7 @@ $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
 require 'rubygems'
+require 'rbconfig'
 require 'rspec'
 
 if ENV['COVERAGE']
@@ -58,7 +59,7 @@ def fig(args, input = nil, no_raise_on_error = false)
     out = nil
     err = nil
 
-    Popen.popen("#{Gem::Platform::RUBY} #{FIG_EXE} #{args}") do
+    Popen.popen(*("#{RUBY_EXE} #{FIG_EXE} #{args}".split)) do
       |stdin, stdout, stderr|
 
       if input
@@ -105,10 +106,16 @@ FIG_BIN =
     File.expand_path(File.dirname(__FILE__) + '/../bin')
 FIG_EXE =
     %Q<#{FIG_BIN}/fig>
+RUBY_EXE =
+  [
+    Config::CONFIG['bindir'],
+    '/',
+    Config::CONFIG['RUBY_INSTALL_NAME'],
+    Config::CONFIG['EXEEXT']
+  ].join
 
 ENV['FIG_HOME'] = FIG_HOME
 ENV['FIG_REMOTE_URL'] = %Q<file://#{FIG_REMOTE_DIR}>
-ENV['PATH'] = FIG_BIN + ':' + ENV['PATH']  # To find the correct fig-download
 
 def setup_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
