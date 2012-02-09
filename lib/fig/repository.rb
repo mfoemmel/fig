@@ -164,7 +164,7 @@ module Fig
         resources = expand_globs_from(resources)
         file = 'resources.tar.gz'
         @operating_system.create_archive(file, resources)
-        new_package_statements.unshift(Statement::Archive.new(file))
+        new_package_statements.unshift(Statement::Archive.new(nil, nil, file))
         at_exit { File.delete(file) }
       end
 
@@ -361,7 +361,7 @@ module Fig
           if statement.is_a?(Statement::Archive)
             @operating_system.unpack_archive(local_dir, archive_name)
           end
-          statement.class.new(archive_name).unparse('')
+          statement.class.new(nil, nil, archive_name).unparse('')
         else
           statement.unparse('')
         end

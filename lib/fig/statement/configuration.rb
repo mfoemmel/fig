@@ -4,12 +4,12 @@ require 'fig/statement/command'
 module Fig; end
 
 # A grouping of statements within a configuration.  May not be nested.
-class Fig::Statement::Configuration
-  include Fig::Statement
-
+class Fig::Statement::Configuration < Fig::Statement
   attr_reader :name, :statements
 
-  def initialize(name, statements)
+  def initialize(line, column, name, statements)
+    super(line, column)
+
     @name = name
     @statements = statements
   end

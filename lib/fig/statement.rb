@@ -1,7 +1,14 @@
 module Fig; end
 
 # A statement within a package configuration file (package.fig).
-module Fig::Statement
+class Fig::Statement
+  attr_reader :line, :column
+
+  def initialize(line, column)
+    @line   = line
+    @column = column
+  end
+
   # Block will receive a Statement.
   def walk_statements(&block)
     return

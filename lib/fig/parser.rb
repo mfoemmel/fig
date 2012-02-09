@@ -11,6 +11,16 @@ require 'fig/userinputerror'
 module Fig
   # Parses configuration files and deals with a few restrictions on them.
   class Parser
+    def self.node_location(node)
+      offset_from_start_of_file = node.interval.first
+      input = node.input
+
+      return [
+        input.line_of(offset_from_start_of_file),
+        input.column_of(offset_from_start_of_file)
+      ]
+    end
+
     def initialize(application_config)
       @parser = FigParser.new
       @application_config = application_config

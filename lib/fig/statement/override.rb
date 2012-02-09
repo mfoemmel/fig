@@ -10,12 +10,12 @@ module Fig; end
 #
 # indicates that, regardless of which version of somedependency the blah
 # package says it needs, the blah package will actually use v3.2.6.
-class Fig::Statement::Override
-  include Fig::Statement
-
+class Fig::Statement::Override < Fig::Statement
   attr_reader :package_name, :version
 
-  def initialize(package_name, version)
+  def initialize(line, column, package_name, version)
+    super(line, column)
+
     @package_name = package_name
     @version = version
   end

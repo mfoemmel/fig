@@ -5,12 +5,12 @@ module Fig; end
 
 # Dual role: "include :configname" incorporates one configuration into another;
 # "include package[/version]" declares a dependency upon another package.
-class Fig::Statement::Include
-  include Fig::Statement
-
+class Fig::Statement::Include < Fig::Statement
   attr_reader :descriptor, :overrides
 
-  def initialize(descriptor, overrides, containing_package_descriptor)
+  def initialize(line, column, descriptor, overrides, containing_package_descriptor)
+    super(line, column)
+
     if descriptor.name && ! descriptor.version
       message =
         %Q<No version in the package descriptor of "#{descriptor.name}" in an include statement>

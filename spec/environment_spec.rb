@@ -16,7 +16,7 @@ def new_example_package(environment, name, extra_statements, variable_value)
   statements = extra_statements +
       [
         Fig::Statement::Configuration.new(
-          Fig::Package::DEFAULT_CONFIG, []
+          nil, nil, Fig::Package::DEFAULT_CONFIG, []
         )
       ]
 
@@ -28,7 +28,7 @@ def new_example_package(environment, name, extra_statements, variable_value)
   environment.register_package(package)
 
   set_statement = Fig::Statement::Set.new(
-    "WHATEVER_#{name.upcase}", variable_value
+    nil, nil, "WHATEVER_#{name.upcase}", variable_value
   )
   environment.apply_config_statement(package, set_statement, nil)
 
@@ -58,6 +58,8 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
 
     extra_statements = [
       Fig::Statement::Include.new(
+        nil,
+        nil,
         Fig::PackageDescriptor.parse(
           "#{DEPENDED_UPON_PACKAGE_NAME}/#{depended_upon_package_version}"
         ),
@@ -75,8 +77,10 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
       'has_command', 'version', 'directory',
       [
         Fig::Statement::Configuration.new(
+          nil,
+          nil,
           Fig::Package::DEFAULT_CONFIG,
-          [Fig::Statement::Command.new('echo foo')]
+          [Fig::Statement::Command.new(nil, nil, 'echo foo')]
         )
       ]
     )
