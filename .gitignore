@@ -37,3 +37,7 @@ resources.tar.gz
 
 # Bundler lock file
 *.lock
+
+# Directory for holding working directories for DRW projects with real
+# package.fig files for testing.
+production-examples
