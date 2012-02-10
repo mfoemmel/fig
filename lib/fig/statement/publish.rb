@@ -6,7 +6,7 @@ module Fig; end
 # publishing.
 class Fig::Statement::Publish < Fig::Statement
   def initialize()
-    super(nil, nil)
+    super(nil)
   end
 
   def unparse(indent)

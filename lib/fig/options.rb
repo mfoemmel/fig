@@ -385,7 +385,7 @@ Environment variables:
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:non_command_package_statements] <<
-        Fig::Statement::Path.new(nil, nil, var, val)
+        Fig::Statement::Path.new(nil, var, val)
     end
 
     parser.on(
@@ -395,7 +395,7 @@ Environment variables:
     ) do |descriptor|
       @options[:non_command_package_statements] <<
         Fig::Statement::Include.new(
-          nil, nil, Fig::PackageDescriptor.parse(descriptor), {}, nil
+          nil, Fig::PackageDescriptor.parse(descriptor), {}, nil
         )
     end
 
@@ -404,7 +404,7 @@ Environment variables:
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:non_command_package_statements] <<
-        Fig::Statement::Set.new(nil, nil, var, val)
+        Fig::Statement::Set.new(nil, var, val)
     end
 
     @options[:archives] = []
@@ -412,7 +412,7 @@ Environment variables:
       '--archive PATH',
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] << Fig::Statement::Archive.new(nil, nil, path)
+      @options[:archives] << Fig::Statement::Archive.new(nil, path)
     end
 
     @options[:resources] =[]
@@ -420,7 +420,7 @@ Environment variables:
       '--resource PATH',
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] << Fig::Statement::Resource.new(nil, nil, path)
+      @options[:resources] << Fig::Statement::Resource.new(nil, path)
     end
 
     return

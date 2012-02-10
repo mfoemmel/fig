@@ -7,8 +7,8 @@ module Fig; end
 class Fig::Statement::Path < Fig::Statement
   attr_reader :name, :value
 
-  def initialize(line, column, name, value)
-    super(line, column)
+  def initialize(line_column, name, value)
+    super(line_column)
 
     @name = name
     @value = value

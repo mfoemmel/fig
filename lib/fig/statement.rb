@@ -4,9 +4,12 @@ module Fig; end
 class Fig::Statement
   attr_reader :line, :column
 
-  def initialize(line, column)
-    @line   = line
-    @column = column
+  # This mess of getting these as a single array necessary is due to
+  # limitations of the "*" array splat operator in ruby v1.8.
+  def initialize(line_column)
+    if line_column
+      @line, @column = @line_column
+    end
   end
 
   # Block will receive a Statement.

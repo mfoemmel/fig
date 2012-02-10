@@ -6,8 +6,8 @@ module Fig; end
 class Fig::Statement::Retrieve < Fig::Statement
   attr_reader :var, :path
 
-  def initialize(line, column, var, path)
-    super(line, column)
+  def initialize(line_column, var, path)
+    super(line_column)
 
     @var = var
     @path = path

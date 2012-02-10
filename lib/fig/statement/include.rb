@@ -8,8 +8,8 @@ module Fig; end
 class Fig::Statement::Include < Fig::Statement
   attr_reader :descriptor, :overrides
 
-  def initialize(line, column, descriptor, overrides, containing_package_descriptor)
-    super(line, column)
+  def initialize(line_column, descriptor, overrides, containing_package_descriptor)
+    super(line_column)
 
     if descriptor.name && ! descriptor.version
       message =

@@ -8,8 +8,8 @@ module Fig; end
 class Fig::Statement::Resource < Fig::Statement
   attr_reader :url
 
-  def initialize(line, column, url)
-    super(line, column)
+  def initialize(line_column, url)
+    super(line_column)
 
     @url = url
   end
