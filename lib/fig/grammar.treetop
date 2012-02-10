@@ -16,7 +16,7 @@ module Fig
 
 grammar Fig
   rule package
-    ws statements:(package_statement*) {
+    optional_ws statements:(package_statement*) optional_ws {
       def to_package(descriptor, directory)
         Package.new(
           descriptor.name,
@@ -214,6 +214,10 @@ grammar Fig
 
   rule ws
     [ \n\r\t]+
+  end
+
+  rule optional_ws
+    [ \n\r\t]*
   end
 end
 

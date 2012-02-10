@@ -129,4 +129,54 @@ describe 'Parser' do
       Fig::PackageParseError
     )
   end
+
+  it 'Assigns the correct line and column number to Statement objects.' do
+    fig_package=<<-FIG_PACKAGE
+
+      # Blank line above to ensure that we can handle starting whitespace.
+      resource http://example/is/awesome.tgz
+
+          # Indentation in here is weird to test we get things right.
+
+          # Also, we need a comment in here to make sure that cleaning them out
+          # does not affect values for statements.
+
+       archive http://svpsvn/my/repo/is/cool.jar
+
+      config default
+              include package/some-version
+
+         set VARIABLE=VALUE
+                end
+    FIG_PACKAGE
+
+    application_configuration = Fig::ApplicationConfiguration.new(nil)
+    package = Fig::Parser.new(application_configuration).parse_package(
+      Fig::PackageDescriptor.new('package_name', 'version', nil),
+      'foo_directory',
+      fig_package
+    )
+
+    package.walk_statements do
+      |statement|
+
+      case statement
+        when Fig::Statement::Resource
+          statement.line.should == 3
+          statement.column.should == 7
+        when Fig::Statement::Archive
+          statement.line.should == 10
+          statement.column.should == 8
+        when Fig::Statement::Configuration
+          statement.line.should == 12
+          statement.column.should == 7
+        when Fig::Statement::Include
+          statement.line.should == 13
+          statement.column.should == 15
+        when Fig::Statement::Set
+          statement.line.should == 15
+          statement.column.should == 10
+      end
+    end
+  end
 end

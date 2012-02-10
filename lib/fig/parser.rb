@@ -54,8 +54,12 @@ module Fig
     end
 
     def parse_package(descriptor, directory, input)
+      # Bye bye comments.
       input = input.gsub(/#.*$/, '')
-      result = @parser.parse(" #{input} ")
+
+      # Extra space at the end because most of the rules in the grammar require
+      # trailing whitespace.
+      result = @parser.parse(input + ' ')
 
       if result.nil?
         Logging.fatal "#{directory}: #{@parser.failure_reason}"

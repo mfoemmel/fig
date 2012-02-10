@@ -17,6 +17,9 @@ class Fig::Statement::Include < Fig::Statement
       if containing_package_descriptor
         message += %Q< in the .fig file for "#{containing_package_descriptor.to_string()}">
       end
+      if @line && @column
+        message += %Q< (line #{@line}, column #{@column})>
+      end
       message += '. Whether or not the include statement will work is dependent upon the recursive dependency load order.'
 
       Fig::Logging.warn(message)
