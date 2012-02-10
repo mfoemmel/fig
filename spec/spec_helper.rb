@@ -106,13 +106,7 @@ FIG_BIN =
     File.expand_path(File.dirname(__FILE__) + '/../bin')
 FIG_EXE =
     %Q<#{FIG_BIN}/fig>
-RUBY_EXE =
-  [
-    RbConfig::CONFIG['bindir'],
-    '/',
-    RbConfig::CONFIG['RUBY_INSTALL_NAME'],
-    RbConfig::CONFIG['EXEEXT']
-  ].join
+RUBY_EXE = RbConfig.ruby()
 
 ENV['FIG_HOME'] = FIG_HOME
 ENV['FIG_REMOTE_URL'] = %Q<file://#{FIG_REMOTE_DIR}>
