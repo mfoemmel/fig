@@ -44,7 +44,9 @@ module Fig
       package.walk_statements do |statement|
         if statement.is_a?(Statement::Command)
           if command_processed == true
-            raise UserInputError.new("Multiple command statements cannot be processed.")
+            raise UserInputError.new(
+              %Q<Found a second "command" statement within a "config" block#{statement.position_string()}.>
+            )
           end
           command_processed = true
         elsif statement.is_a?(Statement::Configuration)
