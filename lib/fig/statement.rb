@@ -25,4 +25,16 @@ class Fig::Statement
   def urls
     return []
   end
+
+  # Returns a representation of the position of this statement, if the position
+  # is known, empty string otherwise.  This is written with the idea that you
+  # can do something like "puts %Q<Found a
+  # statement%{statement.position_string()}.>" and get nice looking output
+  # regardless of whether the position is actually known or not.
+  def position_string
+    return '' if not @line
+    return '' if not @column
+
+    return " (line #{@line}, column #{@column})"
+  end
 end
