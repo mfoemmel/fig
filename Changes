@@ -1,6 +1,10 @@
-v0.1.56
+v0.1.57
 
   - Logging output now goes to stderr by default, instead of stdout.
+
+v0.1.56.alpha
+
+  - Test release
 
 v0.1.55
 
