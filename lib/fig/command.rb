@@ -202,6 +202,7 @@ class Fig::Command
         @options.archives() +
         [
           Fig::Statement::Configuration.new(
+            nil,
             Fig::Package::DEFAULT_CONFIG,
             @options.non_command_package_statements()
           )

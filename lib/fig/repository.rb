@@ -38,6 +38,11 @@ module Fig
       @update_if_missing = update_if_missing
 
       @parser = Parser.new(application_config)
+
+      reset_cached_data()
+    end
+
+    def reset_cached_data()
       @packages = PackageCache.new()
     end
 
@@ -164,7 +169,7 @@ module Fig
         resources = expand_globs_from(resources)
         file = 'resources.tar.gz'
         @operating_system.create_archive(file, resources)
-        new_package_statements.unshift(Statement::Archive.new(file))
+        new_package_statements.unshift(Statement::Archive.new(nil, file))
         at_exit { File.delete(file) }
       end
 
@@ -361,7 +366,7 @@ module Fig
           if statement.is_a?(Statement::Archive)
             @operating_system.unpack_archive(local_dir, archive_name)
           end
-          statement.class.new(archive_name).unparse('')
+          statement.class.new(nil, archive_name).unparse('')
         else
           statement.unparse('')
         end

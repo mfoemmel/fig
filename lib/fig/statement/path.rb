@@ -4,12 +4,12 @@ module Fig; end
 
 # A statement that specifies or modifies a path environment variable, e.g.
 # "append", "path", "add" (though those are all synonyms).
-class Fig::Statement::Path
-  include Fig::Statement
-
+class Fig::Statement::Path < Fig::Statement
   attr_reader :name, :value
 
-  def initialize(name, value)
+  def initialize(line_column, name, value)
+    super(line_column)
+
     @name = name
     @value = value
   end

@@ -5,12 +5,12 @@ module Fig; end
 # Specifies an archive file (possibly via a URL) that is part of the current package.
 #
 # Differs from a Resource in that the contents will be extracted.
-class Fig::Statement::Archive
-  include Fig::Statement
-
+class Fig::Statement::Archive < Fig::Statement
   attr_reader :url
 
-  def initialize(url)
+  def initialize(line_column, url)
+    super(line_column)
+
     @url = url
   end
 

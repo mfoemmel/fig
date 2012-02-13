@@ -1,5 +1,6 @@
 require 'fig/package'
 require 'fig/packagedescriptor'
+require 'fig/parser'
 require 'fig/statement/archive'
 require 'fig/statement/command'
 require 'fig/statement/configuration'
@@ -15,7 +16,7 @@ module Fig
 
 grammar Fig
   rule package
-    ws statements:(package_statement*) {
+    optional_ws statements:(package_statement*) optional_ws {
       def to_package(descriptor, directory)
         Package.new(
           descriptor.name,
@@ -35,25 +36,33 @@ grammar Fig
   end
 
   rule archive
-    "archive" ws url {
+    statement_start:"archive" ws url {
       def to_package_statement(descriptor)
-        Statement::Archive.new(url.value.text_value)
+        Statement::Archive.new(
+          Parser.node_location(statement_start), url.value.text_value
+        )
       end
     }
   end
 
   rule resource
-    "resource" ws url {
+    statement_start:"resource" ws url {
       def to_package_statement(descriptor)
-        Statement::Resource.new(url.value.text_value)
+        Statement::Resource.new(
+          Parser.node_location(statement_start), url.value.text_value
+        )
       end
     }
   end
 
   rule retrieve
-    "retrieve" ws var:retrieve_variable "->" path:retrieve_path ws {
+    statement_start:"retrieve" ws var:retrieve_variable "->" path:retrieve_path ws {
       def to_package_statement(descriptor)
-        Statement::Retrieve.new(var.text_value, path.text_value)
+        Statement::Retrieve.new(
+          Parser.node_location(statement_start),
+          var.text_value,
+          path.text_value
+        )
       end
     }
   end
@@ -67,9 +76,10 @@ grammar Fig
   end
 
   rule config
-    "config" ws config_name ws statements:config_statement* "end" ws {
+    statement_start:"config" ws config_name ws statements:config_statement* "end" ws {
       def to_package_statement(descriptor)
         Statement::Configuration.new(
+          Parser.node_location(statement_start),
           config_name.text_value,
           statements.elements.map do
             |statement|
@@ -85,9 +95,10 @@ grammar Fig
   end
 
   rule include
-    "include" ws descriptor overrides:(override*) {
+    statement_start:"include" ws descriptor overrides:(override*) {
       def to_config_statement(containing_package_descriptor)
         Statement::Include.new(
+          Parser.node_location(statement_start),
           PackageDescriptor.parse(descriptor.text_value.strip),
           overrides.elements.map{ |e| e.to_override },
           containing_package_descriptor
@@ -97,17 +108,25 @@ grammar Fig
   end
 
   rule override
-    "override" ws package_name "/" version_name ws {
+    statement_start:"override" ws package_name "/" version_name ws {
       def to_override
-        return Statement::Override.new(package_name.text_value, version_name.text_value)
+        return Statement::Override.new(
+          Parser.node_location(statement_start),
+          package_name.text_value,
+          version_name.text_value
+        )
       end
     }
   end
 
   rule path
-    ("append" / "path" / "add") ws name:path_name "=" value:path_value ws {
+    statement_start:("append" / "path" / "add") ws name:path_name "=" value:path_value ws {
       def to_config_statement(descriptor)
-        Statement::Path.new(name.text_value, value.text_value)
+        Statement::Path.new(
+          Parser.node_location(statement_start),
+          name.text_value,
+          value.text_value
+        )
       end
     }
   end
@@ -121,9 +140,13 @@ grammar Fig
   end
 
   rule set
-    "set" ws name:set_name "=" value:set_value ws {
+    statement_start:"set" ws name:set_name "=" value:set_value ws {
       def to_config_statement(descriptor)
-        Statement::Set.new(name.text_value, value.text_value)
+        Statement::Set.new(
+          Parser.node_location(statement_start),
+          name.text_value,
+          value.text_value
+        )
       end
     }
   end
@@ -137,9 +160,11 @@ grammar Fig
   end
 
   rule command
-    "command" ws string {
+    statement_start:"command" ws string {
       def to_config_statement(descriptor)
-        Statement::Command.new(string.value.text_value)
+        Statement::Command.new(
+          Parser.node_location(statement_start), string.value.text_value
+        )
       end
     }
   end
@@ -189,6 +214,10 @@ grammar Fig
 
   rule ws
     [ \n\r\t]+
+  end
+
+  rule optional_ws
+    [ \n\r\t]*
   end
 end
 

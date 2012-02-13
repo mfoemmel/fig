@@ -108,10 +108,10 @@ FIG_EXE =
     %Q<#{FIG_BIN}/fig>
 RUBY_EXE =
   [
-    Config::CONFIG['bindir'],
+    RbConfig::CONFIG['bindir'],
     '/',
-    Config::CONFIG['RUBY_INSTALL_NAME'],
-    Config::CONFIG['EXEEXT']
+    RbConfig::CONFIG['RUBY_INSTALL_NAME'],
+    RbConfig::CONFIG['EXEEXT']
   ].join
 
 ENV['FIG_HOME'] = FIG_HOME

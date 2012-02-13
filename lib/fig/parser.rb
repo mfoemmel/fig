@@ -11,6 +11,16 @@ require 'fig/userinputerror'
 module Fig
   # Parses configuration files and deals with a few restrictions on them.
   class Parser
+    def self.node_location(node)
+      offset_from_start_of_file = node.interval.first
+      input = node.input
+
+      return [
+        input.line_of(offset_from_start_of_file),
+        input.column_of(offset_from_start_of_file)
+      ]
+    end
+
     def initialize(application_config)
       @parser = FigParser.new
       @application_config = application_config
@@ -44,8 +54,12 @@ module Fig
     end
 
     def parse_package(descriptor, directory, input)
+      # Bye bye comments.
       input = input.gsub(/#.*$/, '')
-      result = @parser.parse(" #{input} ")
+
+      # Extra space at the end because most of the rules in the grammar require
+      # trailing whitespace.
+      result = @parser.parse(input + ' ')
 
       if result.nil?
         Logging.fatal "#{directory}: #{@parser.failure_reason}"

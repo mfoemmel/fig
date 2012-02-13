@@ -85,6 +85,10 @@ module Fig::Command::Listing
     config_names.each do
       |config_name|
 
+      if depth < 1
+        @repository.reset_cached_data
+      end
+
       yield base_package, config_name, depth
 
       new_backtrace = Fig::Backtrace.new(
@@ -122,19 +126,23 @@ module Fig::Command::Listing
     if packages.empty? and $stdout.tty?
       puts '<no dependencies>'
     else
-      packages.keys.sort.each do
+      strings = []
+
+      packages.keys.each do
         |package|
 
         if @options.list_all_configs?
-          packages[package].sort.each do
+          packages[package].each do
             |config_name|
 
-            puts package.to_s_with_config(config_name)
+            strings << package.to_s_with_config(config_name)
           end
         else
-          puts package
+          strings << package
         end
       end
+
+      puts strings.uniq.sort.join("\n")
     end
 
     return
