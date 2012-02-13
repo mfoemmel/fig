@@ -3,7 +3,8 @@ require 'fig/environmentvariables'
 module Fig; end;
 module EnvironmentVariables; end
 
-
+# Manager of a set of environment variables where the variable names are
+# case-insensitive, e.g. on MS Windows.
 class Fig::EnvironmentVariables::CaseInsensitive
   include Fig::EnvironmentVariables
 

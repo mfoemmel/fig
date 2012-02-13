@@ -1,5 +1,6 @@
 module Fig; end;
 
+# Abstract manager of a set of environment variables.
 module Fig::EnvironmentVariables
   def initialize(variables_override = nil)
     @original_variables = variables_override || get_system_environment_variables
