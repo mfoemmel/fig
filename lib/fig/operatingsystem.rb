@@ -12,6 +12,7 @@ require 'uri'
 
 require 'highline/import'
 
+require 'fig/environmentvariables'
 require 'fig/logging'
 require 'fig/networkerror'
 require 'fig/notfounderror'
@@ -359,6 +360,10 @@ module Fig
       else
         return "$#{variable_name}"
       end
+    end
+
+    def self.get_environment_variables
+      return EnvironmentVariables.new(OperatingSystem.windows?)
     end
 
     private
