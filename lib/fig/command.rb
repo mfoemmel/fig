@@ -149,11 +149,20 @@ class Fig::Command
 
     at_exit { @retriever.save_metadata() }
 
-    @environment = Fig::Environment.new(@repository, @options.reset_environment? ? {} : nil, @retriever)
+    @environment = prepare_environment
 
     @options.non_command_package_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
     end
+  end
+
+  def prepare_environment
+    environment_variables = nil
+    if @options.reset_environment?
+      environment_variables = Fig::EnvironmentVariables.new(Fig::OperatingSystem.windows?, {})
+    end
+
+    return Fig::Environment.new(@repository, environment_variables, @retriever)
   end
 
   def check_required_package_descriptor(operation_description)

@@ -19,7 +19,7 @@ module Fig
 
     def initialize(repository, variables_override, retriever)
       @repository = repository
-      @variables = variables_override || get_system_environment_variables
+      @variables = variables_override || OperatingSystem.get_environment_variables
       @retrieve_vars = {}
       @packages = {}
       @retriever = retriever
@@ -185,13 +185,6 @@ module Fig
 
     private
 
-    def get_system_environment_variables
-      vars = {}
-      ENV.each { |key,value| vars[key]=value }
-
-      return vars
-    end
-
     def set_variable(base_package, name, value)
       @variables[name] = expand_and_retrieve_variable_value(base_package, name, value)
 
@@ -200,32 +193,17 @@ module Fig
 
     def append_variable(base_package, name, value)
       value = expand_and_retrieve_variable_value(base_package, name, value)
-      # TODO: converting all environment variables to upcase is not a robust
-      #       comparison. It also assumes all env vars will be in upcase
-      #       in package.fig
-      prev = nil
-      @variables.each do |key, val|
-        if key.upcase == name.upcase
-          name = key
-          prev = val
-        end
-      end
-      if prev
-        @variables[name] = value + File::PATH_SEPARATOR + prev
-      else
-        @variables[name] = value
-      end
+      @variables.append_variable(name, value)
 
       return
     end
 
     def with_environment
-      old_env = {}
       begin
-        @variables.each { |key,value| old_env[key] = ENV[key]; ENV[key] = value }
+        @variables.set_system_environment_variables
         yield
       ensure
-        old_env.each { |key,value| ENV[key] = value }
+        @variables.reset_system_environment_variables
       end
 
       return
