@@ -132,7 +132,7 @@ module Fig
     def apply_config_statement(base_package, statement, backtrace)
       case statement
       when Statement::Path
-        append_variable(base_package, statement.name, statement.value)
+        prepend_variable(base_package, statement.name, statement.value)
       when Statement::Set
         set_variable(base_package, statement.name, statement.value)
       when Statement::Include
@@ -191,7 +191,7 @@ module Fig
       return
     end
 
-    def append_variable(base_package, name, value)
+    def prepend_variable(base_package, name, value)
       value = expand_and_retrieve_variable_value(base_package, name, value)
       @variables.prepend_variable(name, value)
 
