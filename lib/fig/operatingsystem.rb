@@ -12,7 +12,8 @@ require 'uri'
 
 require 'highline/import'
 
-require 'fig/environmentvariables'
+require 'fig/environmentvariables/caseinsensitive'
+require 'fig/environmentvariables/casesensitive'
 require 'fig/logging'
 require 'fig/networkerror'
 require 'fig/notfounderror'
@@ -362,8 +363,12 @@ module Fig
       end
     end
 
-    def self.get_environment_variables
-      return EnvironmentVariables.new(OperatingSystem.windows?)
+    def self.get_environment_variables(initial_values = nil)
+      if OperatingSystem.windows?
+        return EnvironmentVariables::CaseInsensitive.new(initial_values)
+      end
+
+      return EnvironmentVariables::CaseSensitive.new(initial_values)
     end
 
     private

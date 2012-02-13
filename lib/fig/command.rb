@@ -159,7 +159,7 @@ class Fig::Command
   def prepare_environment
     environment_variables = nil
     if @options.reset_environment?
-      environment_variables = Fig::EnvironmentVariables.new(Fig::OperatingSystem.windows?, {})
+      environment_variables = Fig::OperatingSystem.get_environment_variables({})
     end
 
     return Fig::Environment.new(@repository, environment_variables, @retriever)

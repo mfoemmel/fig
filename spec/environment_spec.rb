@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/environment'
+require 'fig/environmentvariables/casesensitive'
 require 'fig/package'
 require 'fig/packagedescriptor'
 require 'fig/statement/configuration'
@@ -37,7 +38,11 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   retriever_double = double('retriever')
   retriever_double.stub(:with_package_version)
   environment =
-    Fig::Environment.new(nil, Fig::EnvironmentVariables.new(false, {'FOO' => 'bar'}), retriever_double)
+    Fig::Environment.new(
+      nil,
+      Fig::EnvironmentVariables::CaseSensitive.new({'FOO' => 'bar'}),
+      retriever_double
+    )
 
   if retrieve_vars
     retrieve_vars.each do |name, path|

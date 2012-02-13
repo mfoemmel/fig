@@ -193,7 +193,7 @@ module Fig
 
     def append_variable(base_package, name, value)
       value = expand_and_retrieve_variable_value(base_package, name, value)
-      @variables.append_variable(name, value)
+      @variables.prepend_variable(name, value)
 
       return
     end
