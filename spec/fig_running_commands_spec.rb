@@ -61,7 +61,8 @@ describe 'Fig' do
       END
       out, err, exit_code =
         fig('--publish foo/1.2.3.4', input, :no_raise_on_error)
-      err.should == 'Multiple command statements cannot be processed.'
+      err.should =~
+        %r<Found a second "command" statement within a "config" block \(line>
     end
   end
 end
