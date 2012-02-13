@@ -56,9 +56,13 @@ v0.1.xx
     Ruby code.  This shouldn't be an issue because the Treetop grammar has
     already restricted it this way; this is just a check from the Ruby side.
 
-v0.1.56
+v0.1.57
 
   - Logging output now goes to stderr by default, instead of stdout.
+
+v0.1.56.alpha
+
+  - Test release
 
 v0.1.55
 
