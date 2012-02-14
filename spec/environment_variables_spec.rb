@@ -3,7 +3,44 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fig/environmentvariables/caseinsensitive'
 require 'fig/environmentvariables/casesensitive'
 
+def find_diffs(primary_hash, secondary_hash, diff_hash)
+  primary_hash.each do |key, value|
+    if ! secondary_hash.has_key?(key)
+      diff_hash[key] = value
+    elsif primary_hash[key] != secondary_hash[key]
+      diff_hash[key] = value
+    end
+  end
+
+  return diff_hash
+end
+
+def hash_differences(hash_one, hash_two)
+  hash_differences = {}
+  hash_differences = find_diffs(hash_one, hash_two, hash_differences)
+  hash_differences = find_diffs(hash_two, hash_one, hash_differences)
+
+  return hash_differences
+end
+
 describe 'EnvironmentVariables' do
+  it 'correctly sets and unsets the system environment variables' do
+    env_vars = Fig::EnvironmentVariables::CaseSensitive.new({ 'Foo' => 'BAR' })
+
+    sys_vars_prior = {}
+    sys_vars_prior.merge!(ENV.to_hash)
+    sys_vars_set = {}
+    sys_vars_after = {}
+
+    env_vars['FOO'] = 'BAR'
+    env_vars.with_environment { sys_vars_set.merge!(ENV.to_hash) }
+    sys_vars_after.merge!(ENV.to_hash)
+
+    hash_differences(sys_vars_prior, sys_vars_after).should be_empty
+    before_and_during_diff = hash_differences(sys_vars_prior, sys_vars_set)
+    hash_differences(before_and_during_diff, {'FOO' => 'BAR', 'Foo' => 'BAR'}).should be_empty
+  end
+
   describe 'case sensitive' do
     it 'sets and retrieves variables' do
       env_vars = Fig::EnvironmentVariables::CaseSensitive.new({ 'Foo' => 'BAR' })
