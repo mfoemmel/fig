@@ -59,7 +59,7 @@ class Fig::Retriever
     File.open(File.join(@local_fig_data_directory, 'retrieve'), 'w') do |f|
       @package_metadata_by_name.each do |name, package_meta|
         package_meta.files.each do |target|
-          f << target << '=' << formatted_meta() << "\n"
+          f << target << '=' << formatted_meta(package_meta) << "\n"
         end
       end
     end
@@ -133,9 +133,9 @@ class Fig::Retriever
     end
   end
 
-  def formatted_meta()
+  def formatted_meta(package_meta = @package_meta)
     return Fig::PackageDescriptor.format(
-      @package_meta.name, @package_meta.version, nil
+      package_meta.name, package_meta.version, nil
     )
   end
 end

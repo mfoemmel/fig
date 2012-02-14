@@ -26,18 +26,18 @@ module Fig
       local_repository_dir,
       remote_repository_url,
       application_config,
-      remote_repository_user  = nil,
-      update                  = false,
-      update_if_missing       = true
+      remote_repository_user,
+      update,
+      update_if_missing
     )
-      @operating_system = os
-      @local_repository_dir = local_repository_dir
-      @remote_repository_url = remote_repository_url
+      @operating_system       = os
+      @local_repository_dir   = local_repository_dir
+      @remote_repository_url  = remote_repository_url
       @remote_repository_user = remote_repository_user
-      @update = update
-      @update_if_missing = update_if_missing
+      @update                 = update
+      @update_if_missing      = update_if_missing
 
-      @parser = Parser.new(application_config)
+      @parser = Parser.new(application_config, true)
 
       reset_cached_data()
     end

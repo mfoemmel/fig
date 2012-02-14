@@ -392,11 +392,13 @@ Environment variables:
       '-i',
       '--include DESCRIPTOR',
       'include package/version:config specified in DESCRIPTOR in environment'
-    ) do |descriptor|
-      @options[:non_command_package_statements] <<
+    ) do |descriptor_string|
+      statement =
         Fig::Statement::Include.new(
-          nil, Fig::PackageDescriptor.parse(descriptor), {}, nil
+          nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
         )
+      statement.complain_if_version_missing()
+      @options[:non_command_package_statements] << statement
     end
 
     parser.on(

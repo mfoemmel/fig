@@ -110,7 +110,7 @@ module Fig::Command::PackageLoad
     end
 
     @package =
-      Fig::Parser.new(@configuration).parse_package(
+      Fig::Parser.new(@configuration, :check_include_versions).parse_package(
         Fig::PackageDescriptor.new(nil, nil, nil), '.', config_raw_text
       )
 

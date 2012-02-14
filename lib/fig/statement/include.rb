@@ -6,24 +6,14 @@ module Fig; end
 # Dual role: "include :configname" incorporates one configuration into another;
 # "include package[/version]" declares a dependency upon another package.
 class Fig::Statement::Include < Fig::Statement
-  attr_reader :descriptor, :overrides
+  attr_reader :descriptor, :overrides, :containing_package_descriptor
 
   def initialize(line_column, descriptor, overrides, containing_package_descriptor)
     super(line_column)
 
-    if descriptor.name && ! descriptor.version
-      message =
-        %Q<No version in the package descriptor of "#{descriptor.name}" in an include statement>
-      if containing_package_descriptor
-        message += %Q< in the .fig file for "#{containing_package_descriptor.to_string()}">
-      end
-      message += %Q<#{position_string()}. Whether or not the include statement will work is dependent upon the recursive dependency load order.>
-
-      Fig::Logging.warn(message)
-    end
-
-    @descriptor = descriptor
-    @overrides = overrides
+    @descriptor                    = descriptor
+    @overrides                     = overrides
+    @containing_package_descriptor = containing_package_descriptor
   end
 
   def package_name
@@ -36,6 +26,19 @@ class Fig::Statement::Include < Fig::Statement
 
   def config_name
     return @descriptor.config
+  end
+
+  def complain_if_version_missing()
+    if @descriptor.name && ! @descriptor.version
+      message =
+        %Q<No version in the package descriptor of "#{@descriptor.name}" in an include statement>
+      if @containing_package_descriptor
+        message += %Q< in the .fig file for "#{@containing_package_descriptor.to_string()}">
+      end
+      message += %Q<#{position_string()}. Whether or not the include statement will work is dependent upon the recursive dependency load order.>
+
+      Fig::Logging.warn(message)
+    end
   end
 
   # Assume that this statement is part of the parameter and return a descriptor
