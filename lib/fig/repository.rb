@@ -228,7 +228,8 @@ module Fig
       end
     end
 
-    # 'resources' is an Array of filenames: ['tmp/foo/file1', 'tmp/foo/*.jar']
+    # 'resources' is an Array of fileglob patterns: ['tmp/foo/file1',
+    # 'tmp/foo/*.jar']
     def expand_globs_from(resources)
       expanded_files = []
       resources.each {|f| expanded_files.concat(Dir.glob(f))}
@@ -236,13 +237,18 @@ module Fig
     end
 
     def read_package_from_directory(dir, descriptor)
-      file = File.join(dir, '.fig')
-      if not File.exist?(file)
-        file = File.join(dir, 'package.fig')
-      end
-      if not File.exist?(file)
-        Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}": #{file}>
-        raise RepositoryError.new
+      file = nil
+      dot_fig_file = File.join(dir, '.fig')
+      if File.exist?(dot_fig_file)
+        file = dot_fig_file
+      else
+        package_dot_fig_file = File.join(dir, 'package.fig')
+        if not File.exist?(package_dot_fig_file)
+          Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}". Looked for "#{dot_fig_file}" and "#{package_dot_fig_file}" and found neither.>
+          raise RepositoryError.new
+        end
+
+        file = package_dot_fig_file
       end
 
       return read_package_from_file(file, descriptor)
