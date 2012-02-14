@@ -32,13 +32,13 @@ describe 'EnvironmentVariables' do
     sys_vars_set = {}
     sys_vars_after = {}
 
-    env_vars['FOO'] = 'BAR'
+    env_vars['BAR'] = 'BAZ'
     env_vars.with_environment { sys_vars_set.merge!(ENV.to_hash) }
     sys_vars_after.merge!(ENV.to_hash)
 
     hash_differences(sys_vars_prior, sys_vars_after).should be_empty
     before_and_during_diff = hash_differences(sys_vars_prior, sys_vars_set)
-    hash_differences(before_and_during_diff, {'FOO' => 'BAR', 'Foo' => 'BAR'}).should be_empty
+    hash_differences(before_and_during_diff, {'BAR' => 'BAZ', 'Foo' => 'BAR'}).should be_empty
   end
 
   describe 'case sensitive' do
