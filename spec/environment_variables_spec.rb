@@ -12,13 +12,13 @@ def find_diffs(primary_hash, secondary_hash, diff_hash)
     end
   end
 
-  return diff_hash
+  return
 end
 
 def hash_differences(hash_one, hash_two)
   hash_differences = {}
-  hash_differences = find_diffs(hash_one, hash_two, hash_differences)
-  hash_differences = find_diffs(hash_two, hash_one, hash_differences)
+  find_diffs(hash_one, hash_two, hash_differences)
+  find_diffs(hash_two, hash_one, hash_differences)
 
   return hash_differences
 end
