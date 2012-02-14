@@ -76,7 +76,7 @@ module Fig
     end
 
     def execute_shell(command)
-      with_environment do
+      @variables.with_environment do
         yield command.map{|arg| expand_command_line_argument(arg)}
       end
 
@@ -84,7 +84,7 @@ module Fig
     end
 
     def execute_command(command, args, package)
-      with_environment do
+      @variables.with_environment do
         argument =
           expand_command_line_argument(
             "#{command.command} #{args.join(' ')}"
@@ -194,17 +194,6 @@ module Fig
     def prepend_variable(base_package, name, value)
       value = expand_and_retrieve_variable_value(base_package, name, value)
       @variables.prepend_variable(name, value)
-
-      return
-    end
-
-    def with_environment
-      begin
-        @variables.set_system_environment_variables
-        yield
-      ensure
-        @variables.reset_system_environment_variables
-      end
 
       return
     end
