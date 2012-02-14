@@ -45,6 +45,7 @@ class Fig::Parser
 
     check_for_bad_urls(package, descriptor)
     check_for_multiple_command_statements(package)
+    check_for_missing_versions_on_include_statements(package)
 
     return package
   end
@@ -62,6 +63,8 @@ class Fig::Parser
     end
 
     raise Fig::URLAccessError.new(bad_urls, descriptor) if not bad_urls.empty?
+
+    return
   end
 
   def check_for_multiple_command_statements(package)
@@ -78,5 +81,17 @@ class Fig::Parser
         command_processed = false
       end
     end
+
+    return
+  end
+
+  def check_for_missing_versions_on_include_statements(package)
+    package.walk_statements do |statement|
+      if statement.is_a?(Fig::Statement::Include)
+        statement.complain_if_version_missing()
+      end
+    end
+
+    return
   end
 end

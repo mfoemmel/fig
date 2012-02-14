@@ -156,7 +156,7 @@ class Fig::Command
     end
   end
 
-  def prepare_environment
+  def prepare_environment()
     environment_variables = nil
     if @options.reset_environment?
       environment_variables = Fig::OperatingSystem.get_environment_variables({})
