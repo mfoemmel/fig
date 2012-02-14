@@ -37,7 +37,7 @@ module Fig
       @update = update
       @update_if_missing = update_if_missing
 
-      @parser = Parser.new(application_config)
+      @parser = Parser.new(application_config, true)
 
       reset_cached_data()
     end

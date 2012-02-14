@@ -23,9 +23,10 @@ class Fig::Parser
     ]
   end
 
-  def initialize(application_config)
-    @parser = Fig::FigParser.new
-    @application_config = application_config
+  def initialize(application_config, check_include_versions)
+    @parser                 = Fig::FigParser.new
+    @application_config     = application_config
+    @check_include_versions = check_include_versions
   end
 
   def parse_package(descriptor, directory, input)
@@ -86,6 +87,8 @@ class Fig::Parser
   end
 
   def check_for_missing_versions_on_include_statements(package)
+    return if not @check_include_versions
+
     package.walk_statements do |statement|
       if statement.is_a?(Fig::Statement::Include)
         statement.complain_if_version_missing()

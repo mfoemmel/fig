@@ -15,7 +15,7 @@ describe 'Parser' do
     application_configuration = Fig::ApplicationConfiguration.new('http://example/')
     application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
-    package = Fig::Parser.new(application_configuration).parse_package(
+    package = Fig::Parser.new(application_configuration, false).parse_package(
       Fig::PackageDescriptor.new('package_name', 'version', nil),
       'foo_directory',
       fig_package
@@ -34,7 +34,7 @@ describe 'Parser' do
 
     exception = nil
     begin
-      package = Fig::Parser.new(application_configuration).parse_package(
+      package = Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
         'foo_directory',
         fig_package
@@ -59,7 +59,7 @@ describe 'Parser' do
       Fig::ApplicationConfiguration.new('http://example/')
 
     expect {
-      Fig::Parser.new(application_configuration).parse_package(
+      Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
         'foo_directory',
         fig_package
@@ -80,7 +80,7 @@ describe 'Parser' do
     END
 
     application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-    Fig::Parser.new(application_configuration).parse_package(
+    Fig::Parser.new(application_configuration, false).parse_package(
       Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
       'foo_directory',
       fig_package
@@ -102,7 +102,7 @@ describe 'Parser' do
     application_configuration = Fig::ApplicationConfiguration.new('http://example/')
 
     expect {
-      Fig::Parser.new(application_configuration).parse_package(
+      Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
         'foo_directory',
         fig_package
@@ -120,7 +120,7 @@ describe 'Parser' do
     application_configuration = Fig::ApplicationConfiguration.new('http://example/')
 
     expect {
-      Fig::Parser.new(application_configuration).parse_package(
+      Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
         'foo_directory',
         fig_package
@@ -151,7 +151,7 @@ describe 'Parser' do
     FIG_PACKAGE
 
     application_configuration = Fig::ApplicationConfiguration.new(nil)
-    package = Fig::Parser.new(application_configuration).parse_package(
+    package = Fig::Parser.new(application_configuration, false).parse_package(
       Fig::PackageDescriptor.new('package_name', 'version', nil),
       'foo_directory',
       fig_package
