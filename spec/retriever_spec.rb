@@ -8,7 +8,6 @@ describe 'Retriever' do
   end
 
   it 'retrieves single file' do
-
     # Set up some test files
     test_dir = "#{FIG_SPEC_BASE_DIRECTORY}/retrieve-test"
     FileUtils.rm_rf(test_dir)
