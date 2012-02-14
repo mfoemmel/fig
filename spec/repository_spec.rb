@@ -14,7 +14,10 @@ def create_local_repository()
     Fig::OperatingSystem.new(nil),
     FIG_SPEC_BASE_DIRECTORY,
     "file://#{FIG_REMOTE_DIR}",
-    application_config
+    application_config,
+    nil,   # remote user
+    false, # unconditional update
+    :update_if_missing
   )
   return repository
 end
