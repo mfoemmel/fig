@@ -28,35 +28,6 @@ class Fig::Parser
     @application_config = application_config
   end
 
-  def find_bad_urls(package, descriptor)
-    bad_urls = []
-    package.walk_statements do |statement|
-      statement.urls.each do |url|
-        # collect all bad urls in bad_urls
-        next if not Fig::Repository.is_url?(url)
-        bad_urls << url if not @application_config.url_access_allowed?(url)
-      end
-    end
-
-    raise Fig::URLAccessError.new(bad_urls, descriptor) if not bad_urls.empty?
-  end
-
-  def find_multiple_command_statements(package)
-    command_processed = false
-    package.walk_statements do |statement|
-      if statement.is_a?(Fig::Statement::Command)
-        if command_processed == true
-          raise Fig::UserInputError.new(
-            %Q<Found a second "command" statement within a "config" block#{statement.position_string()}.>
-          )
-        end
-        command_processed = true
-      elsif statement.is_a?(Fig::Statement::Configuration)
-        command_processed = false
-      end
-    end
-  end
-
   def parse_package(descriptor, directory, input)
     # Bye bye comments.
     input = input.gsub(/#.*$/, '')
@@ -72,9 +43,40 @@ class Fig::Parser
 
     package = result.to_package(descriptor, directory)
 
-    find_bad_urls(package, descriptor)
-    find_multiple_command_statements(package)
+    check_for_bad_urls(package, descriptor)
+    check_for_multiple_command_statements(package)
 
     return package
+  end
+
+  private
+
+  def check_for_bad_urls(package, descriptor)
+    bad_urls = []
+    package.walk_statements do |statement|
+      statement.urls.each do |url|
+        # collect all bad urls in bad_urls
+        next if not Fig::Repository.is_url?(url)
+        bad_urls << url if not @application_config.url_access_allowed?(url)
+      end
+    end
+
+    raise Fig::URLAccessError.new(bad_urls, descriptor) if not bad_urls.empty?
+  end
+
+  def check_for_multiple_command_statements(package)
+    command_processed = false
+    package.walk_statements do |statement|
+      if statement.is_a?(Fig::Statement::Command)
+        if command_processed == true
+          raise Fig::UserInputError.new(
+            %Q<Found a second "command" statement within a "config" block#{statement.position_string()}.>
+          )
+        end
+        command_processed = true
+      elsif statement.is_a?(Fig::Statement::Configuration)
+        command_processed = false
+      end
+    end
   end
 end
