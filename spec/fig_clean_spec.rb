@@ -1,7 +1,5 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'English'
-
 describe 'Fig' do
   describe '--clean' do
     before(:each) do

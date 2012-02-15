@@ -21,30 +21,26 @@ class Popen
   def self.setup_open3
     require 'open3'
     def self.popen(*cmd)
-      Open3.popen3(*cmd) { |stdin,stdout,stderr|
+      exit_code = nil
+
+      Open3.popen3(*cmd) { |stdin, stdout, stderr, wait_thread|
         yield stdin, stdout, stderr
+
+        exit_code = wait_thread.value
       }
+
+      return exit_code
     end
   end
 
   if Fig::OperatingSystem.windows?
-    ruby_version = %x<ruby -v>
-    if ruby_version.include?('1.8.7')
-      require 'win32/open3'
-      def self.popen(*cmd)
-        Open3.popen3(*cmd) { |stdin,stdout,stderr|
-          yield stdin, stdout, stderr
-        }
-      end
-    else
-      setup_open3
-    end
+    setup_open3
   elsif Fig::OperatingSystem.java?
     setup_open3
   else
     require 'open4'
     def self.popen(*cmd)
-      Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
+      return Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
         yield stdin, stdout, stderr
       }
     end
@@ -59,7 +55,7 @@ def fig(args, input = nil, no_raise_on_error = false)
     out = nil
     err = nil
 
-    Popen.popen(*("#{RUBY_EXE} #{FIG_EXE} #{args}".split)) do
+    result = Popen.popen(*("#{RUBY_EXE} #{FIG_EXE} #{args}".split)) do
       |stdin, stdout, stderr|
 
       if input
@@ -73,7 +69,7 @@ def fig(args, input = nil, no_raise_on_error = false)
       err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+[a-zA-Z0-9 `'<>():]+\nIt seems your ruby installation is missing psych \(for YAML output\)\.\nTo eliminate this warning, please install libyaml and reinstall your ruby\.\n?/, '')
       out = stdout.read.strip
     end
-    result = $CHILD_STATUS
+
 
     if not result or result.success? or no_raise_on_error
       return out, err, result.nil? ? 0 : result.exitstatus
