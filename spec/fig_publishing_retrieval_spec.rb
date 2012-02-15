@@ -168,6 +168,10 @@ describe 'Fig' do
         fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'bar'
       end
 
+      it 'can publish a file containing an include statement without a version' do
+        pending 'Write test and fix code. Need to change register_package_with_environment_if_not_listing() to register_package_with_environment_if_not_listing_or_publishing().'
+      end
+
       it 'retrieves resource' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
         File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
