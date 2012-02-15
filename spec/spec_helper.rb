@@ -67,6 +67,9 @@ def fig(args, input = nil, no_raise_on_error = false)
       # TODO: remove the following lines as it exists only to eat a warning specific to the grid build machines
       err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+: warning: Insecure world writable dir (?:\/[a-zA-Z0-9. -:]+)+in PATH, mode 041777/, '')
       err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+[a-zA-Z0-9 `'<>():]+\nIt seems your ruby installation is missing psych \(for YAML output\)\.\nTo eliminate this warning, please install libyaml and reinstall your ruby\.\n?/, '')
+
+      # TODO: remove the following lines as it exists only to eat a warning specific to windows machines
+      err = err.gsub(/(?:[a-zA-Z]:)?(?:\/[a-zA-Z0-9 -:]+)+\.rb:\d+: warning: failed to set environment variable\. Ruby 1\.9\.3 will raise SystemCallError in this case\./, '')
       out = stdout.read.strip
     end
 
