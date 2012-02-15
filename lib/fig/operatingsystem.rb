@@ -103,6 +103,7 @@ module Fig
         packages
       when 'file'
         packages = []
+        return packages if ! File.exist?(uri.path)
 
         ls = ''
         Find.find(uri.path) { |file| ls << file.to_s; ls << "\n" }
