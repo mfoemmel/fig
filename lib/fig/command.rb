@@ -142,7 +142,8 @@ class Fig::Command
       @configuration,
       nil, # remote_user
       @options.update?,
-      @options.update_if_missing?
+      @options.update_if_missing?,
+      ! @options.suppress_warning_include_statement_missing_version?
     )
 
     @retriever = Fig::Retriever.new('.')

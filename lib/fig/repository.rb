@@ -28,7 +28,8 @@ module Fig
       application_config,
       remote_repository_user,
       update,
-      update_if_missing
+      update_if_missing,
+      check_include_versions
     )
       @operating_system       = os
       @local_repository_dir   = local_repository_dir
@@ -37,7 +38,7 @@ module Fig
       @update                 = update
       @update_if_missing      = update_if_missing
 
-      @parser = Parser.new(application_config, true)
+      @parser = Parser.new(application_config, check_include_versions)
 
       reset_cached_data()
     end

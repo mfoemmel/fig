@@ -17,7 +17,8 @@ def create_local_repository()
     application_config,
     nil,   # remote user
     false, # unconditional update
-    :update_if_missing
+    :update_if_missing,
+    false, # check include statement versions
   )
   return repository
 end

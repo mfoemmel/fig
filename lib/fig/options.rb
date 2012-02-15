@@ -51,6 +51,7 @@ Standard options (represented as "[...]" above):
       [--login]
       [--log-level LEVEL] [--log-config PATH]
       [--figrc PATH] [--no-figrc]
+      [--suppress-warning-include-statement-missing-version]
 
 Environment variables:
 
@@ -198,6 +199,10 @@ Environment variables:
 
   def resources()
     return @options[:resources]
+  end
+
+  def suppress_warning_include_statement_missing_version?()
+    return @options[:suppress_warning_include_statement_missing_version]
   end
 
   def update?()
@@ -486,6 +491,13 @@ Environment variables:
       "  (#{level_list})"
     ) do |log_level|
       @options[:log_level] = log_level
+    end
+
+    parser.on(
+      '--suppress-warning-include-statement-missing-version',
+      %q<don't complain about "include package" without a version>
+    ) do
+      @options[:suppress_warning_include_statement_missing_version] = true
     end
 
     return
