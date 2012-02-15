@@ -3,6 +3,7 @@ require 'log4r/logger'
 require 'log4r/outputter/iooutputter'
 
 require 'fig/logging/colorizable'
+require 'fig/operatingsystem'
 
 module Fig; end
 module Fig::Log4r; end
@@ -17,7 +18,7 @@ class Fig::Log4r::Outputter < Log4r::IOOutputter
       :error => :red,
       :fatal => {:color => :light_yellow, :background => :red}
     }
-    @colorize = file_handle.tty?
+    @colorize = file_handle.tty? && Fig::OperatingSystem.unix?
 
     super(name, file_handle, hash)
 
