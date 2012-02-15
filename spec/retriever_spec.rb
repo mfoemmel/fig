@@ -56,16 +56,16 @@ describe 'Retriever' do
     FileUtils.mkdir_p(test_dir)
 
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/plain", 'w') {|f| f << 'plain'}
-    File.open("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'w') {|f| f << 'executable'}
+    File.open("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'w') {|f| f << 'executable.exe'}
     FileUtils.chmod(0755, "#{FIG_SPEC_BASE_DIRECTORY}/executable")
 
     r = Fig::Retriever.new(test_dir)
     r.with_package_version('foo', '1.2.3') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/plain", 'plain')
-      r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'executable')
+      r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'executable.exe')
 
       File.stat(File.join(test_dir, 'plain')).executable?.should == false
-      File.stat(File.join(test_dir, 'executable')).executable?.should == true
+      File.stat(File.join(test_dir, 'executable.exe')).executable?.should == true
     end
   end
 end
