@@ -324,28 +324,10 @@ module Fig
         "# Publishing information for #{descriptor.to_string()}:",
         '#',
         "#    Time: #{now} (epoch: #{now.to_i()})",
-        "#    User: #{derive_user_name()}",
+        "#    User: #{Sys::Admin.get_login()}",
         "#    Host: #{Socket.gethostname()}",
         '#'
       ]
-    end
-
-    def derive_user_name()
-      login = Sys::Admin.get_login()
-      user = Sys::Admin.get_user(login)
-
-      user_name = nil
-      if user.respond_to?('full_name') # Windows
-        user_name = user.full_name()
-      elsif user.respond_to?('gecos')  # *nix
-        user_name = user.gecos()
-      end
-
-      if user_name
-        return "#{user_name} (#{login})"
-      end
-
-      return login
     end
 
     def derive_package_resources(
