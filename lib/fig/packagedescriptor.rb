@@ -50,8 +50,11 @@ class Fig::PackageDescriptor
     raise %Q<Invalid #{name} for package descriptor: "#{value}".>
   end
 
+  # Specifically not named :to_s because it doesn't act like that should.
   def to_string(use_default_config = false)
-    return Fig::PackageDescriptor.format(@name, @version, @config, use_default_config)
+    return Fig::PackageDescriptor.format(
+      @name, @version, @config, use_default_config
+    )
   end
 
   def <=>(other)
