@@ -116,6 +116,15 @@ class Fig::Command
     return nil
   end
 
+  def check_include_statements_versions?()
+    return false if @options.suppress_warning_include_statement_missing_version?
+
+    suppressed_warnings = @configuration['suppress warnings']
+    return true if not suppressed_warnings
+
+    return ! suppressed_warnings.include?('include statement missing version')
+  end
+
   def configure()
     Fig::Logging.initialize_pre_configuration(@options.log_level())
 
@@ -143,7 +152,7 @@ class Fig::Command
       nil, # remote_user
       @options.update?,
       @options.update_if_missing?,
-      ! @options.suppress_warning_include_statement_missing_version?
+      check_include_statements_versions?
     )
 
     @retriever = Fig::Retriever.new('.')
