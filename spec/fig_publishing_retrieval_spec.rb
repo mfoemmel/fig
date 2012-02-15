@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'English'
+require 'fig/operatingsystem'
 
 describe 'Fig' do
   describe 'publishing/retrieval' do
@@ -135,10 +135,12 @@ describe 'Fig' do
 
       it 'publishes resource to remote repository' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo bar' }
-        fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo bar' }
+        if Fig::OperatingSystem.unix?
+          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+        end
         input = <<-END
-          resource bin/hello
+          resource bin/hello.bat
           config default
             append PATH=@/bin
           end
@@ -146,26 +148,30 @@ describe 'Fig' do
         fig('--publish foo/1.2.3', input)
         fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update --include foo/1.2.3 -- hello')[0].should == 'bar'
+        fig('--update --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
       end
 
       it 'publishes resource to remote repository using command line' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo bar' }
-        fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
-        fig("--publish foo/1.2.3 --resource bin/hello --append PATH=@/bin")
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo bar' }
+        if Fig::OperatingSystem.unix?
+          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+        end
+        fig("--publish foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin")
         fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update --include foo/1.2.3 -- hello')[0].should == 'bar'
+        fig('--update --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
       end
 
       it 'publishes to the local repo only when told to' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo bar' }
-        fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
-        fig("--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin")
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo bar' }
+        if Fig::OperatingSystem.unix?
+          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+        end
+        fig("--publish-local foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin")
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'bar'
+        fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
       end
 
       it 'can publish a file containing an include statement without a version' do
@@ -174,11 +180,11 @@ describe 'Fig' do
 
       it 'retrieves resource' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/a-library", 'w') { |f| f << 'some library' }
         input = <<-END
-          resource lib/hello
+          resource lib/a-library
           config default
-            append FOOPATH=@/lib/hello
+            append FOOPATH=@/lib/a-library
           end
         END
         fig('--publish foo/1.2.3', input)
@@ -189,16 +195,16 @@ describe 'Fig' do
           end
         END
         fig('--update-if-missing', input)
-        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
+        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/a-library").should == 'some library'
       end
 
       it 'retrieves resource and ignores the append statement in the updating config' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/a-library", 'w') { |f| f << 'some library' }
         input = <<-END
-          resource lib/hello
+          resource lib/a-library
           config default
-            append FOOPATH=@/lib/hello
+            append FOOPATH=@/lib/a-library
           end
         END
         fig('--publish foo/1.2.3', input)
@@ -210,17 +216,17 @@ describe 'Fig' do
           end
         END
         fig('--update-if-missing', input)
-        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
+        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/a-library").should == 'some library'
       end
 
 
       it 'retrieves resource that is a directory' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/a-library", 'w') { |f| f << 'some library' }
         # To copy the contents of a directory, instead of the directory itself,
         # use '/.' as a suffix to the directory name in 'append'.
         input = <<-END
-          resource lib/hello
+          resource lib/a-library
           config default
             append FOOPATH=@/lib/.
           end
@@ -233,7 +239,7 @@ describe 'Fig' do
           end
         END
         fig('--update-if-missing', input)
-        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
+        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/a-library").should == 'some library'
       end
 
       it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
@@ -292,14 +298,14 @@ describe 'Fig' do
 
       it 'packages multiple resources' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/lib")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello", 'w') { |f| f << 'some library' }
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/hello2", 'w') { |f| f << 'some other library' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/a-library", 'w') { |f| f << 'some library' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/lib/a-library2", 'w') { |f| f << 'some other library' }
         input = <<-END
-          resource lib/hello
-          resource lib/hello2
+          resource lib/a-library
+          resource lib/a-library2
           config default
-            append FOOPATH=@/lib/hello
-            append FOOPATH=@/lib/hello2
+            append FOOPATH=@/lib/a-library
+            append FOOPATH=@/lib/a-library2
           end
         END
         fig('--publish foo/1.2.3', input)
@@ -310,8 +316,8 @@ describe 'Fig' do
           end
         END
         fig('-m', input)
-        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello").should == 'some library'
-        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/hello2").should == 'some other library'
+        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/a-library").should == 'some library'
+        File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/a-library2").should == 'some other library'
       end
 
       it 'packages multiple resources with wildcards' do
@@ -337,17 +343,21 @@ describe 'Fig' do
 
       it 'updates local packages if they already exist' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo sheep' }
-        fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
-        fig('--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin')
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo sheep' }
+        if Fig::OperatingSystem.unix?
+          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+        end
+        fig('--publish-local foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin')
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'sheep'
+        fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'sheep'
 
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello", 'w') { |f| f << 'echo cheese' }
-        fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello"
-        fig('--publish-local foo/1.2.3 --resource bin/hello --append PATH=@/bin')
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo cheese' }
+        if Fig::OperatingSystem.unix?
+          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+        end
+        fig('--publish-local foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin')
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update-if-missing --include foo/1.2.3 -- hello')[0].should == 'cheese'
+        fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'cheese'
       end
     end
   end
