@@ -1,4 +1,5 @@
 require 'fileutils'
+require 'find'
 # Must specify absolute path of ::Archive when using
 # this module to avoid conflicts with Fig::Statement::Archive
 require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
@@ -102,7 +103,10 @@ module Fig
         packages
       when 'file'
         packages = []
-        ls = %x<[ -d #{uri.path} ] && find #{uri.path}>
+
+        ls = ''
+        Find.find(uri.path) { |file| ls << file.to_s; ls << "\n" }
+
         strip_paths_for_list(ls, packages, uri.path)
         return packages
       else
