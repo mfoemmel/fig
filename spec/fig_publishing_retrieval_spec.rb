@@ -2,6 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/operatingsystem'
 
+ECHO_COMMAND = Fig::OperatingSystem.windows? ? '@echo' : 'echo'
+
 describe 'Fig' do
   describe 'publishing/retrieval' do
     context 'starting with a clean home and remote repository' do
@@ -135,7 +137,7 @@ describe 'Fig' do
 
       it 'publishes resource to remote repository' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo bar' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
@@ -153,7 +155,7 @@ describe 'Fig' do
 
       it 'publishes resource to remote repository using command line' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo bar' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
@@ -165,7 +167,7 @@ describe 'Fig' do
 
       it 'publishes to the local repo only when told to' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo bar' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
@@ -343,7 +345,7 @@ describe 'Fig' do
 
       it 'updates local packages if they already exist' do
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo sheep' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} sheep" }
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
@@ -351,7 +353,7 @@ describe 'Fig' do
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
         fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'sheep'
 
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << 'echo cheese' }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} cheese" }
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
