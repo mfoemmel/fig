@@ -354,9 +354,9 @@ module Fig
 
     def shell_exec(cmd)
       if OperatingSystem.windows?
-        Windows.shell_exec_windows(cmd)
+        Kernel.exec(ENV['ComSpec'], '/c', cmd.join(' '))
       else
-        shell_exec_unix(cmd)
+        Kernel.exec(ENV['SHELL'], '-c', cmd.join(' '))
       end
     end
 
@@ -377,10 +377,6 @@ module Fig
     end
 
     private
-
-    def shell_exec_unix(cmd)
-      Kernel.exec(ENV['SHELL'], '-c', cmd.join(' '))
-    end
 
     def shell_exec_windows(cmd)
       #command = ['C:/WINDOWS/system32/cmd.exe', '/C', 'call'] + cmd
