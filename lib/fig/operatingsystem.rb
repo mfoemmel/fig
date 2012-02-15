@@ -377,13 +377,6 @@ module Fig
 
     private
 
-    def shell_exec_windows(cmd)
-      #command = ['C:/WINDOWS/system32/cmd.exe', '/C', 'call'] + cmd
-      command = ['cmd.exe', '/C'] + cmd
-      command = command.join(' ')
-      Kernel.exec(command)
-    end
-
     # path = The local path the file should be downloaded to.
     # cmd = The command to be run on the remote host.
     def ssh_download(user, host, path, cmd)
