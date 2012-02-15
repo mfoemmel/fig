@@ -37,8 +37,6 @@ describe 'Fig' do
     end
 
     it %q<fails if command-line arguments specified but no command found> do
-      pending %q<Fig correctly returns an error exit code, but, for whatever reason, ruby/Popen isn't setting $CHILD_STATUS.>
-
       input = <<-END
         config default
         end
