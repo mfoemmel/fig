@@ -52,7 +52,7 @@ def set_up_local_and_remote_repository_with_depends_on_everything
     end
   END_INPUT
 
-  fig('--update-if-missing --publish depends-on-everything/1.2.3', input)
+  fig('--publish depends-on-everything/1.2.3', input)
 
   input = <<-END_INPUT
     config default
@@ -63,8 +63,9 @@ def set_up_local_and_remote_repository_with_depends_on_everything
     end
   END_INPUT
 
+  fig('--publish depends-on-depends-on-everything/1.2.3', input)
   fig(
-    '--update-if-missing --publish depends-on-depends-on-everything/1.2.3',
+    '--update-if-missing --include depends-on-depends-on-everything/1.2.3:indirectly-everything',
     input
   )
 

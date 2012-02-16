@@ -44,8 +44,8 @@ module Fig::Command::PackageLoad
     return
   end
 
-  def register_package_with_environment_if_not_listing()
-    return if @options.listing
+  def register_package_with_environment_if_not_listing_or_publishing()
+    return if @options.listing || @options.publishing?
 
     register_package_with_environment()
 
@@ -114,7 +114,7 @@ module Fig::Command::PackageLoad
         Fig::PackageDescriptor.new(nil, nil, nil), '.', config_raw_text
       )
 
-    register_package_with_environment_if_not_listing()
+    register_package_with_environment_if_not_listing_or_publishing()
 
     return
   end
@@ -132,7 +132,7 @@ module Fig::Command::PackageLoad
       # TODO: complain if config file was specified on the command-line.
       @package = @repository.get_package(@descriptor)
 
-      register_package_with_environment_if_not_listing()
+      register_package_with_environment_if_not_listing_or_publishing()
     end
 
     return

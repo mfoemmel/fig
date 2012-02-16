@@ -68,7 +68,6 @@ module Fig
 
     def get_package(
       descriptor,
-      disable_updating = false,
       allow_any_version = false
     )
       if not descriptor.version
@@ -93,7 +92,7 @@ module Fig
       Logging.debug \
         "Considering #{PackageDescriptor.format(descriptor.name, descriptor.version, nil)}."
 
-      if should_update?(descriptor, disable_updating)
+      if should_update?(descriptor)
         update_package(descriptor)
       end
 
@@ -139,9 +138,7 @@ module Fig
 
     private
 
-    def should_update?(descriptor, disable_updating)
-      return false if disable_updating
-
+    def should_update?(descriptor)
       return true if @update
 
       return @update_if_missing && package_missing?(descriptor)

@@ -1,5 +1,11 @@
 v0.1.58.alpha.2
 
+  Bug fixes:
+
+  - You can publish packages that have versionless includes again.
+
+  New features:
+
   - The test suite passes on MS Windows!
 
 v0.1.58.alpha.1

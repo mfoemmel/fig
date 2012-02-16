@@ -176,8 +176,21 @@ describe 'Fig' do
         fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
       end
 
-      it 'can publish a file containing an include statement without a version' do
-        pending 'Write test and fix code. Need to change register_package_with_environment_if_not_listing() to register_package_with_environment_if_not_listing_or_publishing().'
+      it 'publishs a file containing an include statement without a version' do
+        setup_test_environment()
+
+        input = <<-END_INPUT
+          config default
+            include foo # no version; need to be able to publish anyway. *sigh*
+          end
+        END_INPUT
+
+        out, err, exit_code = fig('--publish foo/1.2.3', input, :no_raise_on_error)
+
+        out.should == ''
+        err.should =~
+          /No version in the package descriptor of "foo" in an include statement in the \.fig file for "" \(line/
+        exit_code.should == 0
       end
 
       it 'retrieves resource' do
