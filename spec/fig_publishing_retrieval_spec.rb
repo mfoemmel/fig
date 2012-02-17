@@ -189,7 +189,7 @@ describe 'Fig' do
 
         out.should == ''
         err.should =~
-          /No version in the package descriptor of "foo" in an include statement in the \.fig file for "" \(line/
+          /No version in the package descriptor of "foo" in an include statement \(line/
         exit_code.should == 0
       end
 
