@@ -65,6 +65,25 @@ describe 'Fig' do
           end
         END
 
+        (out, err, exit_code) = fig('--list-configs --suppress-warning-include-statement-missing-version', input)
+        out.should == 'default'
+        err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
+        exit_code.should == 0
+      end
+
+      it 'with figrc' do
+        figrc = File.join(FIG_SPEC_BASE_DIRECTORY, 'test-figrc')
+        File.open(figrc, 'w') do
+          |handle|
+          handle.puts %q< { "suppress warnings": ["include statement missing version"] } >
+        end
+
+        input = <<-END
+          config default
+            include foo
+          end
+        END
+
         (out, err, exit_code) = fig('--list-configs', input)
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
@@ -81,6 +100,25 @@ describe 'Fig' do
         END
 
         (out, err, exit_code) = fig('--list-dependencies --suppress-warning-include-statement-missing-version', input)
+        out.should == "bar/1.2.3\nfoo/1.2.3"
+        err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
+        exit_code.should == 0
+      end
+
+      it 'with figrc' do
+        figrc = File.join(FIG_SPEC_BASE_DIRECTORY, 'test-figrc')
+        File.open(figrc, 'w') do
+          |handle|
+          handle.puts %q< { "suppress warnings": ["include statement missing version"] } >
+        end
+
+        input = <<-END
+          config default
+            include foo/1.2.3
+          end
+        END
+
+        (out, err, exit_code) = fig('--list-dependencies', input, false, figrc)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
         exit_code.should == 0

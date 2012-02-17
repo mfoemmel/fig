@@ -47,11 +47,17 @@ class Popen
   end
 end
 
-def fig(args, input = nil, no_raise_on_error = false)
+def fig(args, input = nil, no_raise_on_error = false, figrc = nil)
   Dir.chdir FIG_SPEC_BASE_DIRECTORY do
     args = "--log-level warn #{args}"
-    args = "--no-figrc #{args}"
     args = "--file - #{args}" if input
+
+    if figrc
+      args = "--figrc #{figrc} #{args}"
+    else
+      args = "--no-figrc #{args}"
+    end
+
     out = nil
     err = nil
 
@@ -105,6 +111,8 @@ FIG_BIN =
     File.expand_path(File.dirname(__FILE__) + '/../bin')
 FIG_EXE =
     %Q<#{FIG_BIN}/fig>
+
+# If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
 RUBY_EXE =
   [
     RbConfig::CONFIG['bindir'],
