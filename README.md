@@ -34,6 +34,9 @@ language agnostic (Java doesn't get preferential treatment), and work with
 executables as well as libraries. And unlike APT, Fig is cross platform and
 project-oriented.
 
+Also, Fig is intended to be used at execution time and not just at installation
+time.
+
 Usage
 =====
 
@@ -69,6 +72,8 @@ Fig recognizes the following options:
         --log-config PATH            use PATH file as configuration for Log4r
         --log-level LEVEL            set logging level to LEVEL
                                        (off, fatal, error, warn, info, debug, all)
+        --suppress-warning-include-statement-missing-version
+                                     don't complain about "include package" without a version
     -?, -h, --help                   display this help text
     -v, --version                    print Fig version
         --                           end of Fig options; anything after this is used as a command to run
@@ -298,6 +303,11 @@ the version).
      ...retrieving...
      $ cat lib/hello-lib/hello.foo
      print 'hello'
+
+Configuration
+=============
+
+Need a description of `.figrc` here.
 
 Package Statement Descriptions
 ==============================

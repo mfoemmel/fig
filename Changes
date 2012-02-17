@@ -1,3 +1,17 @@
+v0.1.xxx
+
+  New features:
+
+  - "--suppress-warning-include-statement-missing-version" option and "suppress
+    warnings" entry in figrc will, unsurprisingly, turn off warnings for things
+    like "include foo" in included packages.  Note that this will NOT turn off
+    these warnings for the contents of a package.fig file.
+
+    The idea is that, while not having a version on an include is a bad idea,
+    you don't decide on the contents of your dependencies.  So, this allows you
+    to stop Fig from complaining about things you can't control, while still
+    yelling at you for things that you do.
+
 v0.1.58.alpha.2
 
   Bug fixes:
