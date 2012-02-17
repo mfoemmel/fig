@@ -33,7 +33,10 @@ class Fig::Statement::Include < Fig::Statement
       message =
         %Q<No version in the package descriptor of "#{@descriptor.name}" in an include statement>
       if @containing_package_descriptor
-        message += %Q< in the .fig file for "#{@containing_package_descriptor.to_string()}">
+        package_string = @containing_package_descriptor.to_string()
+        if package_string && package_string != ''
+          message += %Q< in the .fig file for "#{package_string}">
+        end
       end
       message += %Q<#{position_string()}. Whether or not the include statement will work is dependent upon the recursive dependency load order.>
 
