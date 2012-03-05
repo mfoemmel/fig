@@ -900,7 +900,7 @@ describe 'Fig' do
       end
     end
 
-    it %q<handles "include ... override ...> do
+    it %q<handles "include ... override ..."> do
       set_up_packages_with_overrides
       remove_any_package_dot_fig
 
@@ -914,6 +914,39 @@ describe 'Fig' do
       exitstatus.should == 0
       out.should == expected
       err.should == ''
+    end
+
+    it %q<handles --config> do
+      input_prerequisite = <<-END_INPUT
+        config default
+        end
+      END_INPUT
+
+      fig('--publish prerequisite/1.2.3', input_prerequisite)
+
+      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
+        |handle|
+        handle.print <<-END
+          config default
+            # No version, which would cause load to fail if it is hit first.
+            include prerequisite
+          end
+
+          config nondefault
+            include prerequisite/1.2.3
+            include :default
+          end
+        END
+      end
+
+      expected = clean_expected(<<-END_EXPECTED_OUTPUT)
+        prerequisite/1.2.3
+      END_EXPECTED_OUTPUT
+
+      (out, err, exitstatus) = fig('--list-dependencies --config nondefault')
+      exitstatus.should == 0
+      out.should == expected
+      err.should_not be_empty
     end
   end
 

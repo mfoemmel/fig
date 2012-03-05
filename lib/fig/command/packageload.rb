@@ -61,10 +61,7 @@ module Fig::Command::PackageLoad
 
     @environment.register_package(@package)
 
-    config =
-      @options.config()                       ||
-      @descriptor && @descriptor.config()     ||
-      Fig::Package::DEFAULT_CONFIG
+    config = base_config()
     begin
       @environment.apply_config(@package, config, nil)
     rescue Fig::NoSuchPackageConfigError => exception
