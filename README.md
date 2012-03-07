@@ -1,6 +1,21 @@
 Description
 ===========
 
+## Short version
+
+Fig is a package management tool with both install time and run time behavior;
+by the use of environment variables defined within a Fig package file, at run
+time your code does not need to know precisely where resources are installed.
+
+Fig is similar to a lot of other package/dependency-management tools. In
+particular, it steals a lot of ideas from Apache Ivy and Debian APT. However,
+unlike Ivy, Fig is meant to be lightweight (no XML, no JVM startup time),
+language agnostic (Java doesn't get preferential treatment), and work with
+executables as well as libraries. And unlike APT, Fig is cross platform and
+project-oriented.
+
+## Long version
+
 Fig is a utility for configuring environments and managing dependencies across
 a team of developers.
 
@@ -27,18 +42,8 @@ install them in the fig-home as needed.  Fig does not contact the remote
 repository unless it needs to.  The fig-home is $HOME/.fighome, but may be
 changed by setting the $FIG_HOME environment variable.
 
-Fig is similar to a lot of other package/dependency-management tools. In
-particular, it steals a lot of ideas from Apache Ivy and Debian APT. However,
-unlike Ivy, Fig is meant to be lightweight (no XML, no JVM startup time),
-language agnostic (Java doesn't get preferential treatment), and work with
-executables as well as libraries. And unlike APT, Fig is cross platform and
-project-oriented.
-
-Also, Fig is intended to be used at execution time and not just at installation
-time.
-
-Usage
-=====
+Command-line Usage
+==================
 
 Fig recognizes the following options:
 
@@ -94,11 +99,12 @@ sections may be helpful in organizing these concerns.
 
 ## Environment Variables Influencing Fig's Behavior
 
-    FIG_FTP_THREADS     Optional - Size of FTP session pool. Defaults to 16.
+    FIG_REMOTE_URL      Required for operations involving the remote repository.
     FIG_HOME            Optional - Location of local repo cache. Defaults to $HOME/.fighome.
+
     FIG_REMOTE_LOGIN    Required for --login, unless $HOME/.netrc is configured.
-    FIG_REMOTE_URL      Require for operations involving the remote repository.
     FIG_REMOTE_USER     Required for --login, unless $HOME/.netrc is configured.
+    FIG_FTP_THREADS     Optional - Size of FTP session pool. Defaults to 16.
 
 ## Commands affected by environment variables
 
@@ -120,6 +126,34 @@ If sufficient credentials are still not found, Fig will prompt for whatever is
 still missing, and use the accumulated credentials to authenticate against the
 remote server.  Even if both environment variables are defined, Fig will only
 use them if `--login` is given.
+
+Usage
+=====
+
+## Overview
+
+Like other package management tools, Fig requires a file describing the
+contents and dependencies of a given package.  You then publish a package to a
+repository, which can simply be local or a remote one.  There is no explicit
+installation; you just use the package from another.  Unlike other tools, you
+don't specify where (other than via the `FIG_HOME` environment variable) or how
+an installed set of packages are structured.
+
+In order to use the contents of one package from another, you define
+environment variables with in a package definition that will have portions
+substituted with locations from a given depended upon package.
+
+## Package definition
+
+
+## Publishing
+
+
+## Installing/Updating
+
+
+## Runtime use
+
 
 Examples
 ========
