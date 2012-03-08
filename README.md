@@ -134,10 +134,10 @@ Usage
 
 Like other package management tools, Fig requires a file describing the
 contents and dependencies of a given package.  You then publish a package to a
-repository, which can simply be local or a remote one.  There is no explicit
-installation; you just use the package from another.  Unlike other tools, you
-don't specify where (other than via the `FIG_HOME` environment variable) or how
-an installed set of packages are structured.
+repository, which can simply be local or additionally a remote one.  There is
+no explicit installation; you just use the package from another.  Unlike other
+tools, you don't specify where (other than via the `FIG_HOME` environment
+variable) or how an installed set of packages are structured.
 
 In order to use the contents of one package from another, you define
 environment variables with in a package definition that will have portions
@@ -145,6 +145,50 @@ substituted with locations from a given depended upon package.
 
 ## Package definition
 
+The definition of a package for Fig is done using a file (by default
+"package.fig") with a simple language.  Comments consist of an octothorpe ("#")
+though end of line.  At the top level of a file, you can put "archive",
+"resource", or "retrieve" statement and "config" blocks.  At this level, order
+of statements is not significant.  A "config" block can contain "set", path,
+"include" and "command" statements; order of statements within "config" blocks
+is significant.  "config" blocks are not nestable.
+
+A simple example "package.fig" file that contains one of each kind of statement:
+
+    archive path/somefile.tar.gz
+    resource foo/*.jar
+    retrieve LOCATION_VARIABLE->some-relative-path/[package]
+    config default
+        set VARIABLE=value
+        add CLASSPATH=foo.jar
+        include dependency/1.2.3 override indirect-dependency/4.5.6
+        command "echo foo"
+    end
+
+### Package contents
+
+You tell Fig what to include in your package using "resource" and "archive"
+statements.  These two kinds of statements behave identically except that the
+contents of the files referenced by "archive" statements are extracted upon
+installation.
+
+### Where to put the contents of a depended upon package
+
+Done via a "retrieve" statement.
+
+### Declaring dependencies
+
+Done via an "include" statement.
+
+### Specifying runtime environment
+
+"set" and path statements.  A path statement is specified as "add", "append",
+or "path"; all are synonymous.
+
+### Default commands
+
+If a command to run is not given on the `fig` command-line, the command in a
+"command" statement is executed.
 
 ## Publishing
 
