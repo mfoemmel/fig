@@ -1,6 +1,21 @@
 Description
 ===========
 
+## Short version
+
+Fig is a package management tool with both install time and run time behavior;
+by the use of environment variables defined within a Fig package file, at run
+time your code does not need to know precisely where resources are installed.
+
+Fig is similar to a lot of other package/dependency-management tools. In
+particular, it steals a lot of ideas from Apache Ivy and Debian APT. However,
+unlike Ivy, Fig is meant to be lightweight (no XML, no JVM startup time),
+language agnostic (Java doesn't get preferential treatment), and work with
+executables as well as libraries. And unlike APT, Fig is cross platform and
+project-oriented.
+
+## Long version
+
 Fig is a utility for configuring environments and managing dependencies across
 a team of developers.
 
@@ -27,18 +42,8 @@ install them in the fig-home as needed.  Fig does not contact the remote
 repository unless it needs to.  The fig-home is $HOME/.fighome, but may be
 changed by setting the $FIG_HOME environment variable.
 
-Fig is similar to a lot of other package/dependency-management tools. In
-particular, it steals a lot of ideas from Apache Ivy and Debian APT. However,
-unlike Ivy, Fig is meant to be lightweight (no XML, no JVM startup time),
-language agnostic (Java doesn't get preferential treatment), and work with
-executables as well as libraries. And unlike APT, Fig is cross platform and
-project-oriented.
-
-Also, Fig is intended to be used at execution time and not just at installation
-time.
-
-Usage
-=====
+Command-line Usage
+==================
 
 Fig recognizes the following options:
 
@@ -94,11 +99,12 @@ sections may be helpful in organizing these concerns.
 
 ## Environment Variables Influencing Fig's Behavior
 
-    FIG_FTP_THREADS     Optional - Size of FTP session pool. Defaults to 16.
+    FIG_REMOTE_URL      Required for operations involving the remote repository.
     FIG_HOME            Optional - Location of local repo cache. Defaults to $HOME/.fighome.
+
     FIG_REMOTE_LOGIN    Required for --login, unless $HOME/.netrc is configured.
-    FIG_REMOTE_URL      Require for operations involving the remote repository.
     FIG_REMOTE_USER     Required for --login, unless $HOME/.netrc is configured.
+    FIG_FTP_THREADS     Optional - Size of FTP session pool. Defaults to 16.
 
 ## Commands affected by environment variables
 
@@ -120,6 +126,78 @@ If sufficient credentials are still not found, Fig will prompt for whatever is
 still missing, and use the accumulated credentials to authenticate against the
 remote server.  Even if both environment variables are defined, Fig will only
 use them if `--login` is given.
+
+Usage
+=====
+
+## Overview
+
+Like other package management tools, Fig requires a file describing the
+contents and dependencies of a given package.  You then publish a package to a
+repository, which can simply be local or additionally a remote one.  There is
+no explicit installation; you just use the package from another.  Unlike other
+tools, you don't specify where (other than via the `FIG_HOME` environment
+variable) or how an installed set of packages are structured.
+
+In order to use the contents of one package from another, you define
+environment variables with in a package definition that will have portions
+substituted with locations from a given depended upon package.
+
+## Package definition
+
+The definition of a package for Fig is done using a file (by default
+"package.fig") with a simple language.  Comments consist of an octothorpe ("#")
+though end of line.  At the top level of a file, you can put "archive",
+"resource", or "retrieve" statement and "config" blocks.  At this level, order
+of statements is not significant.  A "config" block can contain "set", path,
+"include" and "command" statements; order of statements within "config" blocks
+is significant.  "config" blocks are not nestable.
+
+A simple example "package.fig" file that contains one of each kind of statement:
+
+    archive path/somefile.tar.gz
+    resource foo/*.jar
+    retrieve LOCATION_VARIABLE->some-relative-path/[package]
+    config default
+        set VARIABLE=value
+        add CLASSPATH=foo.jar
+        include dependency/1.2.3 override indirect-dependency/4.5.6
+        command "echo foo"
+    end
+
+### Package contents
+
+You tell Fig what to include in your package using "resource" and "archive"
+statements.  These two kinds of statements behave identically except that the
+contents of the files referenced by "archive" statements are extracted upon
+installation.
+
+### Where to put the contents of a depended upon package
+
+Done via a "retrieve" statement.
+
+### Declaring dependencies
+
+Done via an "include" statement.
+
+### Specifying runtime environment
+
+"set" and path statements.  A path statement is specified as "add", "append",
+or "path"; all are synonymous.
+
+### Default commands
+
+If a command to run is not given on the `fig` command-line, the command in a
+"command" statement is executed.
+
+## Publishing
+
+
+## Installing/Updating
+
+
+## Runtime use
+
 
 Examples
 ========

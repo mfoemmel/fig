@@ -104,7 +104,7 @@ end
 
 def setup_variables
   variable_arguments = %w<WHATEVER_ONE WHATEVER_TWO WHATEVER_THREE>
-  return variable_arguments.map do |var_arg| 
+  return variable_arguments.map do |var_arg|
     Fig::OperatingSystem.add_shell_variable_expansion(var_arg)
   end
 end

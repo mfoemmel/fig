@@ -69,6 +69,7 @@ Environment variables:
   attr_reader :exit_code
 
   def initialize(argv)
+    argv = argv.clone
     strip_shell_command(argv)
 
     @options = {}

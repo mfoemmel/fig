@@ -153,9 +153,7 @@ module Fig::Command::Listing
       return @package.config_names
     end
 
-    return [
-      @descriptor && @descriptor.config || Fig::Package::DEFAULT_CONFIG
-    ]
+    return [ base_config() ]
   end
 
   def gather_package_dependency_configurations()

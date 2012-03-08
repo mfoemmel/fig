@@ -318,12 +318,13 @@ module Fig
       now = Time.now()
 
       return [
-        "# Publishing information for #{descriptor.to_string()}:",
-        '#',
-        "#    Time: #{now} (epoch: #{now.to_i()})",
-        "#    User: #{Sys::Admin.get_login()}",
-        "#    Host: #{Socket.gethostname()}",
-        '#'
+        %Q<# Publishing information for #{descriptor.to_string()}:>,
+        %q<#>,
+        %Q<#    Time: #{now} (epoch: #{now.to_i()})>,
+        %Q<#    User: #{Sys::Admin.get_login()}>,
+        %Q<#    Host: #{Socket.gethostname()}>,
+        %Q<#    Args: "#{ARGV.join %q[", "]}">,
+        %q<#>
       ]
     end
 
@@ -356,7 +357,7 @@ module Fig
         else
           statement.unparse('')
         end
-      end.select { |s|not s.nil? }
+      end.select { |s| not s.nil? }
     end
   end
 end

@@ -175,6 +175,12 @@ class Fig::Command
     return Fig::Environment.new(@repository, environment_variables, @retriever)
   end
 
+  def base_config()
+    return @options.config()                 ||
+           @descriptor && @descriptor.config ||
+           Fig::Package::DEFAULT_CONFIG
+  end
+
   def check_required_package_descriptor(operation_description)
     if not @descriptor
       raise Fig::UserInputError.new(
