@@ -1,28 +1,4 @@
-v0.1.58.beta.1
-
-  New features:
-
-  - "--suppress-warning-include-statement-missing-version" option and "suppress
-    warnings" entry in figrc will, unsurprisingly, turn off warnings for things
-    like "include foo" in included packages.  Note that this will NOT turn off
-    these warnings for the contents of a package.fig file.
-
-    The idea is that, while not having a version on an include is a bad idea,
-    you don't decide on the contents of your dependencies.  So, this allows you
-    to stop Fig from complaining about things you can't control, while still
-    yelling at you for things that you do.
-
-v0.1.58.alpha.2
-
-  Bug fixes:
-
-  - You can publish packages that have versionless includes again.
-
-  New features:
-
-  - The test suite passes on MS Windows!
-
-v0.1.58.alpha.1
+v0.1.59
 
   Backwards incompatibilities:
 
@@ -74,11 +50,33 @@ v0.1.58.alpha.1
     over.  Even asking for updates ("fig --update foo/1.2.3 -- echo foo")
     wouldn't change anything.  Now the latter case will work.
 
+  - "--suppress-warning-include-statement-missing-version" option and "suppress
+    warnings" entry in figrc will, unsurprisingly, turn off warnings for things
+    like "include foo" in included packages.  Note that this will NOT turn off
+    these warnings for the contents of a package.fig file.
+
+    The idea is that, while not having a version on an include is a bad idea,
+    you don't decide on the contents of your dependencies.  So, this allows you
+    to stop Fig from complaining about things you can't control, while still
+    yelling at you for things that you do.
+
+  - The test suite passes on MS Windows!
+
+  Bug fixes:
+
+  - You can publish packages that have versionless includes again.
+
   Significant Internals:
 
   - The definition of a package descriptor has become more restrictive in the
     Ruby code.  This shouldn't be an issue because the Treetop grammar has
     already restricted it this way; this is just a check from the Ruby side.
+
+v0.1.58.beta.1
+v0.1.58.alpha.2
+v0.1.58.alpha.1
+
+  - Test releases
 
 v0.1.57
 
