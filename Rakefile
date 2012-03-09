@@ -102,12 +102,14 @@ def push_to_rubygems(version)
     puts 'File exists.'
     puts "Pushing pkg/fig-#{version}.gem to rubygems.org."
     puts %x{gem push pkg/fig-#{version}.gem 2>&1}
+
+    return true
   else
     puts 'File does not exist.'
     puts 'Please build the gem before publishing.'
-  end
 
-  return
+    return false
+  end
 end
 
 def write_version_file()
@@ -182,8 +184,8 @@ task :build => :gem
 desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
 task :publish do
   if local_repo_is_updated?
-    if tag_and_push_to_git(version.chomp)
-      push_to_rubygems(version.chomp)
+    if push_to_rubygems(version.chomp)
+      tag_and_push_to_git(version.chomp)
     end
   end
 end
