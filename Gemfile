@@ -2,7 +2,6 @@ source 'http://gems'
 source 'http://gems-mirror'
 
 # All environments
-gem 'ftp', '>= 0.69'
 gem 'highline', '>= 1.6.2'
 gem 'log4r', '>= 1.1.5'
 gem 'net-netrc', '>= 0.2.2'

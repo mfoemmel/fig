@@ -6,6 +6,10 @@ v0.1.60.alpha.1
     publish a package with an underscore in the name but would be unable to
     subsequently use it.
 
+  Bug fixes:
+
+  - Removed dependency on the 'ftp' gem.
+
 v0.1.59
 
   Backwards incompatibilities:

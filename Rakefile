@@ -131,7 +131,6 @@ fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.add_dependency              'sys-admin',         '>= 1.5.6'
   gemspec.add_dependency              'libarchive-static', '>= 1.0.0'
   gemspec.add_dependency              'colorize',          '>= 0.5.8'
-  gemspec.add_dependency              'ftp',               '>= 0.69'
   gemspec.add_dependency              'highline',          '>= 1.6.2'
   gemspec.add_dependency              'json',              '>= 1.6.5'
   gemspec.add_dependency              'log4r',             '>= 1.1.5'
