@@ -197,7 +197,7 @@ grammar Fig
   end
 
   rule package_name
-    [a-zA-Z0-9.-]+
+    [a-zA-Z0-9_.-]+
   end
 
   rule version_name

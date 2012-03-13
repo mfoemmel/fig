@@ -509,7 +509,7 @@ describe 'Fig' do
       set_up_local_and_remote_repository
 
       (out, err, exitstatus) =
-        fig("--list-configs remote-only}/1.2.3", nil, :no_raise_on_error)
+        fig("--list-configs remote-only/1.2.3", nil, :no_raise_on_error)
       exitstatus.should_not == 0
       err.should =~ /Fig file not found for package/
     end

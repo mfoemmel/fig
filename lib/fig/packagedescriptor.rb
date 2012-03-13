@@ -37,6 +37,10 @@ class Fig::PackageDescriptor
   end
 
   def initialize(name, version, config)
+    validate_component name, 'name'
+    validate_component version, 'version'
+    validate_component config, 'config'
+
     @name     = name
     @version  = version
     @config   = config

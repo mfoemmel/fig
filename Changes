@@ -1,3 +1,11 @@
+v0.1.60.alpha.1
+
+  New features:
+
+  - The package name can now include a "_" for parsing. Previously you could
+    publish a package with an underscore in the name but would be unable to
+    subsequently use it.
+
 v0.1.59
 
   Backwards incompatibilities:
