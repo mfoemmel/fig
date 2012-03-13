@@ -209,7 +209,7 @@ grammar Fig
   end
 
   rule url
-    (value:[a-zA-Z0-9:/\\._*-+]+ ws) / ('"' value:[a-zA-Z0-9:/\\._-+]+ '"' ws)
+    (value:[a-zA-Z0-9:/\\._*-]+ ws) / ('"' value:[a-zA-Z0-9:/\\._-]+ '"' ws)
   end
 
   rule ws
