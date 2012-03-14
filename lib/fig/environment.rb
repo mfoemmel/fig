@@ -291,11 +291,12 @@ module Fig
 
     def expand_named_package_references(arg)
       return arg.gsub(
+        # TODO: Refactor package name regex into PackageDescriptor constant.
         %r<
           (?: ^ | \G)           # Zero-width anchor.
           ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
           \@                    # The package indicator
-          ( [a-zA-Z0-9.-]+ )    # Package name
+          ( [a-zA-Z0-9_.-]+ )   # Package name
         >x
       ) do |match|
         backslashes = $1 || ''
