@@ -6,117 +6,37 @@ require 'fig/packageparseerror'
 require 'fig/parser'
 
 describe 'Parser' do
-  describe 'validating URLs' do
-    it 'passes valid, whitelisted ones' do
-      fig_package=<<-FIG_PACKAGE
-        resource http://example/is/awesome.tgz
+  def test_no_parse_exception(fig_input)
+    application_configuration =
+      Fig::ApplicationConfiguration.new('http://example/')
+    Fig::Parser.new(application_configuration, false).parse_package(
+      Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
+      'foo_directory',
+      fig_input
+    )
+    # Got no exception.
 
-        archive http://svpsvn/my/repo/is/cool.jar
-      FIG_PACKAGE
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-      application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
-
-      package = Fig::Parser.new(application_configuration, false).parse_package(
-        Fig::PackageDescriptor.new('package_name', 'version', nil),
-        'foo_directory',
-        fig_package
-      )
-      package.should_not == nil
-    end
-
-    it 'rejects non-whitelisted ones' do
-      fig_package=<<-FIG_PACKAGE
-        resource http://evil_url/is/bad.tgz
-
-        archive http://evil_repo/my/repo/is/bad.jar
-      FIG_PACKAGE
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-      application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
-
-      exception = nil
-      begin
-        package = Fig::Parser.new(application_configuration, false).parse_package(
-          Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-          'foo_directory',
-          fig_package
-        )
-      rescue Fig::URLAccessError => exception
-      end
-      exception.should_not == nil
-      exception.urls.should =~ %w<http://evil_url/is/bad.tgz http://evil_repo/my/repo/is/bad.jar>
-      exception.descriptor.name.should == 'package_name'
-      exception.descriptor.version.should == '0.1.1'
-    end
+    return
   end
 
-  describe 'command statements' do
-    it 'rejects multiple commands in config file' do
-      fig_package=<<-END
-        config default
-          command "echo foo"
-          command "echo bar"
-        end
-      END
+  def test_user_input_error(fig_input)
+    application_configuration =
+      Fig::ApplicationConfiguration.new('http://example/')
 
-      application_configuration =
-        Fig::ApplicationConfiguration.new('http://example/')
-
-      expect {
-        Fig::Parser.new(application_configuration, false).parse_package(
-          Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-          'foo_directory',
-          fig_package
-        )
-      }.to raise_error(
-        Fig::UserInputError
-      )
-    end
-
-    it 'accepts multiple configs, each with a single command' do
-      fig_package=<<-END
-        config default
-          command "echo foo"
-        end
-        config another
-          command "echo bar"
-        end
-      END
-
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+    expect {
       Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
         'foo_directory',
-        fig_package
+        fig_input
       )
-      # Got no exception.
-    end
+    }.to raise_error(
+      Fig::UserInputError
+    )
 
-    it 'rejects multiple configs where one has multiple commands' do
-      fig_package=<<-END
-        config default
-          command "echo foo"
-        end
-        config another
-          command "echo bar"
-          command "echo baz"
-        end
-      END
-
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-
-      expect {
-        Fig::Parser.new(application_configuration, false).parse_package(
-          Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-          'foo_directory',
-          fig_package
-        )
-      }.to raise_error(
-        Fig::UserInputError
-      )
-    end
+    return
   end
 
-  describe 'syntax' do
+  describe 'base syntax' do
     it 'throws the correct exception on syntax error' do
       fig_package=<<-END
         this is invalid syntax
@@ -184,22 +104,114 @@ describe 'Parser' do
         end
       end
     end
+  end
 
+  describe 'validating URLs' do
+    it 'passes valid, whitelisted ones' do
+      fig_package=<<-FIG_PACKAGE
+        resource http://example/is/awesome.tgz
+
+        archive http://svpsvn/my/repo/is/cool.jar
+      FIG_PACKAGE
+      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+      application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
+
+      package = Fig::Parser.new(application_configuration, false).parse_package(
+        Fig::PackageDescriptor.new('package_name', 'version', nil),
+        'foo_directory',
+        fig_package
+      )
+      package.should_not == nil
+    end
+
+    it 'rejects non-whitelisted ones' do
+      fig_package=<<-FIG_PACKAGE
+        resource http://evil_url/is/bad.tgz
+
+        archive http://evil_repo/my/repo/is/bad.jar
+      FIG_PACKAGE
+      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+      application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
+
+      exception = nil
+      begin
+        package = Fig::Parser.new(application_configuration, false).parse_package(
+          Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
+          'foo_directory',
+          fig_package
+        )
+      rescue Fig::URLAccessError => exception
+      end
+      exception.should_not == nil
+      exception.urls.should =~ %w<http://evil_url/is/bad.tgz http://evil_repo/my/repo/is/bad.jar>
+      exception.descriptor.name.should == 'package_name'
+      exception.descriptor.version.should == '0.1.1'
+    end
+  end
+
+  describe 'commands' do
+    it 'rejects multiple commands in config file' do
+      test_user_input_error(<<-END)
+        config default
+          command "echo foo"
+          command "echo bar"
+        end
+      END
+    end
+
+    it 'accepts multiple configs, each with a single command' do
+      test_no_parse_exception(<<-END_PACKAGE)
+        config default
+          command "echo foo"
+        end
+        config another
+          command "echo bar"
+        end
+      END_PACKAGE
+    end
+
+    it 'rejects multiple configs where one has multiple commands' do
+      test_user_input_error(<<-END)
+        config default
+          command "echo foo"
+        end
+        config another
+          command "echo bar"
+          command "echo baz"
+        end
+      END
+    end
+  end
+
+  describe 'resources' do
     it 'handles resources with plus signs in the path (e.g. for C++ libraries)' do
-      fig_package=<<-END
+      # http://tickets/issues/29116
+      test_no_parse_exception(<<-END_PACKAGE)
         resource testlib++/*.so
         config default
           append LIBPATH=@/testlib++
         end
-      END
+      END_PACKAGE
+    end
 
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
-      Fig::Parser.new(application_configuration, false).parse_package(
-        Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-        'foo_directory',
-        fig_package
-      )
-      # Got no exception.
+    {
+      '@'  => '@',
+      '"'  => '"',
+      '<'  => '<',
+      '>'  => '>',
+      '|'  => '|',
+      ' '  => ' ',
+      '\t' => "\t",
+      '\r' => "\r",
+      '\n' => "\n"
+    }.each do
+      |display, character|
+
+      it %Q<rejects "#{display}" in a URL> do
+        test_user_input_error(<<-"END_PACKAGE")
+          resource #{character}
+        END_PACKAGE
+      end
     end
   end
 end

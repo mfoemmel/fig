@@ -212,9 +212,9 @@ grammar Fig
     # Unquoted allows globbing for files, quoted does not.
     #
     # Unquoted, anything but:
-    #    @            - To allow for package substitution
-    #    "<>|         - Characters not allowed in filenames on Windows
-    #    space \n\r\t - Necessary for the "ws" token to work
+    #    @      - To allow for package substitution
+    #    "<>|   - Characters not allowed in filenames on Windows
+    #    \s     - Necessary for the "ws" token to work
     (value:[^@"<>|\s]+ ws)
 
     # Unquoted, anything but:
