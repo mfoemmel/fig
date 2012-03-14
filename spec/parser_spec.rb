@@ -149,7 +149,7 @@ describe 'Parser' do
     end
   end
 
-  describe 'commands' do
+  describe 'command statements' do
     it 'rejects multiple commands in config file' do
       test_user_input_error(<<-END)
         config default
@@ -183,7 +183,32 @@ describe 'Parser' do
     end
   end
 
-  describe 'resources' do
+  describe 'path statements' do
+    {
+      ';'  => ';',
+      ':'  => ':',
+      '"'  => '"',
+      '<'  => '<',
+      '>'  => '>',
+      '|'  => '|',
+      ' '  => ' ',
+      '\t' => "\t",
+      '\r' => "\r",
+      '\n' => "\n"
+    }.each do
+      |display, character|
+
+      it %Q<rejects "#{display}" in a PATH component> do
+        test_user_input_error(<<-"END_PACKAGE")
+          config default
+            append PATH_VARIABLE=#{character}
+          end
+        END_PACKAGE
+      end
+    end
+  end
+
+  describe 'resource statements' do
     it 'handles resources with plus signs in the path (e.g. for C++ libraries)' do
       # http://tickets/issues/29116
       test_no_parse_exception(<<-END_PACKAGE)
