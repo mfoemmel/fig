@@ -1,3 +1,11 @@
+v0.1.60.alpha.???
+
+  New features:
+
+  - Constraints on the values of "resource", "append", "path", "add", and "set"
+    statements greatly relaxed (prompted by C++ libraries with "++" in their
+    names).
+
 v0.1.60.alpha.1
 
   New features:
