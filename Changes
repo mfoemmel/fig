@@ -1,3 +1,10 @@
+v0.1.62
+
+  Bug fixes:
+
+  - Fixed stack trace when encountering conflicting dependency package
+    versions.
+
 v0.1.61
 
   New features:
