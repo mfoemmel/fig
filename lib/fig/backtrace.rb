@@ -40,7 +40,7 @@ class Fig::Backtrace
     end
   end
 
-  private
+  protected
 
   def collect(stack)
     if @parent
