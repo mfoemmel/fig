@@ -1,3 +1,17 @@
+v0.1.??
+
+  Bug fixes:
+
+  - Now checks that archive base names are unique before allowing publishing.
+    Previously, if you had something like
+
+        archive http://somewhere/archive.tar.gz
+        archive foo/archive.tar.gz
+
+    everything would work locally, but the version of the package published to
+    the remote repository was corrupt.  Given the current repository layout,
+    this is not fixable, so we now disallow publishing packages like this.
+
 v0.1.62
 
   Bug fixes:

@@ -13,6 +13,20 @@ describe 'Fig' do
         cleanup_home_and_remote
       end
 
+      it 'complains when multiple archives have the same base name' do
+        input = <<-END
+          archive http://some-host/duplicate-archive.tar.gz
+          archive http://some-other-host/duplicate-archive.tar.gz
+        END
+
+        out, err, exit_code =
+            fig('--publish foo/1.2.3', input, :no_raise_on_error)
+
+        err.should =~ /multiple archives/
+        err.should =~ /duplicate-archive\.tar\.gz/
+        exit_code.should_not == 0
+      end
+
       it 'publishes to remote repository' do
         input = <<-END
           config default
@@ -21,9 +35,6 @@ describe 'Fig' do
         END
 
         fig('--publish foo/1.2.3', input)
-        fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
-        fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update --include foo/1.2.3 --get FOO')[0].should == 'BAR'
       end
 
       it 'allows single and multiple override' do
@@ -176,7 +187,7 @@ describe 'Fig' do
         fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
       end
 
-      it 'publishs a file containing an include statement without a version' do
+      it 'publishes a file containing an include statement without a version' do
         setup_test_environment()
 
         input = <<-END_INPUT

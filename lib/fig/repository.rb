@@ -1,3 +1,4 @@
+require 'set'
 require 'socket'
 require 'sys/admin'
 
@@ -112,6 +113,8 @@ module Fig
 
     # TODO: check for conflicting archive names.
     def publish_package(package_statements, descriptor, local_only)
+      check_for_unique_asset_names(package_statements)
+
       temp_dir = temp_dir_for_package(descriptor)
       @operating_system.clear_directory(temp_dir)
       local_dir = local_dir_for_package(descriptor)
@@ -131,6 +134,28 @@ module Fig
       )
 
       FileUtils.rm_rf(temp_dir)
+
+      return true
+    end
+
+    def check_for_unique_asset_names(package_statements)
+      asset_statements = package_statements.select { |s| s.is_asset? }
+
+      asset_names = Set.new()
+      asset_statements.each do
+        |statement|
+
+        asset_name = statement.asset_name()
+        if not asset_name.nil?
+          if asset_names.include?(asset_name)
+            Logging.fatal \
+              %Q<Found multiple archives with the name "#{asset_name}". If these were allowed, archives would overwrite each other.>
+            raise RepositoryError.new
+          else
+            asset_names.add(asset_name)
+          end
+        end
+      end
     end
 
     def updating?
@@ -317,23 +342,23 @@ module Fig
       return create_resource_archive(package_statements).map do |statement|
         if statement.is_a?(Statement::Publish)
           nil
-        elsif statement.is_a?(Statement::Archive) || statement.is_a?(Statement::Resource)
-          archive_name = statement.url.split('/').last
-          archive_remote = "#{remote_dir_for_package(descriptor)}/#{archive_name}"
+        elsif statement.is_asset?
+          asset_name = statement.asset_name()
+          asset_remote = "#{remote_dir_for_package(descriptor)}/#{asset_name}"
 
           if Repository.is_url?(statement.url)
-            archive_local = File.join(temp_dir_for_package(descriptor), archive_name)
-            @operating_system.download(statement.url, archive_local)
+            asset_local = File.join(temp_dir_for_package(descriptor), asset_name)
+            @operating_system.download(statement.url, asset_local)
           else
-            archive_local = statement.url
+            asset_local = statement.url
           end
 
-          @operating_system.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
-          @operating_system.copy(archive_local, local_dir + '/' + archive_name)
+          @operating_system.upload(asset_local, asset_remote, @remote_repository_user) unless local_only
+          @operating_system.copy(asset_local, local_dir + '/' + asset_name)
           if statement.is_a?(Statement::Archive)
-            @operating_system.unpack_archive(local_dir, archive_name)
+            @operating_system.unpack_archive(local_dir, asset_name)
           end
-          statement.class.new(nil, archive_name).unparse('')
+          statement.class.new(nil, asset_name).unparse('')
         else
           statement.unparse('')
         end

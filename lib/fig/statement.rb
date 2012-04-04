@@ -22,8 +22,12 @@ class Fig::Statement
     return
   end
 
-  def urls
+  def urls()
     return []
+  end
+
+  def is_asset?()
+    return false
   end
 
   # Returns a representation of the position of this statement, if the position

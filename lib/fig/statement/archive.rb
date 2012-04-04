@@ -1,4 +1,5 @@
 require 'fig/statement'
+require 'fig/statement/asset'
 
 module Fig; end
 
@@ -6,6 +7,8 @@ module Fig; end
 #
 # Differs from a Resource in that the contents will be extracted.
 class Fig::Statement::Archive < Fig::Statement
+  include Fig::Statement::Asset
+
   attr_reader :url
 
   def initialize(line_column, url)
@@ -14,8 +17,8 @@ class Fig::Statement::Archive < Fig::Statement
     @url = url
   end
 
-  def urls
-    return [@url]
+  def asset_name()
+    return standard_asset_name()
   end
 
   def unparse(indent)
