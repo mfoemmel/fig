@@ -322,7 +322,7 @@ module Fig
           archive_remote = "#{remote_dir_for_package(descriptor)}/#{archive_name}"
 
           if Repository.is_url?(statement.url)
-            archive_local = File.join(temp_dir, archive_name)
+            archive_local = File.join(temp_dir_for_package(descriptor), archive_name)
             @operating_system.download(statement.url, archive_local)
           else
             archive_local = statement.url
