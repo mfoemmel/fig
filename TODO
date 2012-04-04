@@ -1,1 +1,2 @@
 - Detect a "archive resources.tar.gz" statement and complain because Fig uses a file by that name to bundle up the files referenced in "resource" statements.
+- Detect archive/resource URLs with the same final path component.  E.g., given "archive http://somewhere/foo.tar.gz" and "archive http://somewhere-else/foo.tar.gz" statements, one of those will clobber the other.
