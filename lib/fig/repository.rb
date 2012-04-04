@@ -110,13 +110,14 @@ module Fig
       return
     end
 
+    # TODO: check for conflicting archive names.
     def publish_package(package_statements, descriptor, local_only)
       temp_dir = temp_dir_for_package(descriptor)
       @operating_system.clear_directory(temp_dir)
       local_dir = local_dir_for_package(descriptor)
       @operating_system.clear_directory(local_dir)
       fig_file = File.join(temp_dir, '.fig')
-      content = derive_package_content(
+      content = publish_package_content_and_derive_dot_fig_contents(
         package_statements, descriptor, local_dir, local_only
       )
       @operating_system.write(fig_file, content.join("\n").strip)
@@ -147,36 +148,6 @@ module Fig
     def read_local_package(descriptor)
       directory = local_dir_for_package(descriptor)
       return read_package_from_directory(directory, descriptor)
-    end
-
-    # Grabs all of the Resource statements that don't reference URLs, creates a
-    # "resources.tar.gz" file containing all the referenced files, strips the
-    # Resouces statements out of the statements, replacing them with a single
-    # Archive statement.  Thus the caller should substitute its set of
-    # statements with the return value.
-    def bundle_resources(package_statements)
-      resources = []
-      new_package_statements = package_statements.reject do |statement|
-        if (
-          statement.is_a?(Statement::Resource) &&
-          ! Repository.is_url?(statement.url)
-        )
-          resources << statement.url
-          true
-        else
-          false
-        end
-      end
-
-      if resources.size > 0
-        resources = expand_globs_from(resources)
-        file = 'resources.tar.gz'
-        @operating_system.create_archive(file, resources)
-        new_package_statements.unshift(Statement::Archive.new(nil, file))
-        at_exit { File.delete(file) }
-      end
-
-      return new_package_statements
     end
 
     def install_package(descriptor)
@@ -308,15 +279,15 @@ module Fig
       not File.exist?(local_fig_file_for_package(descriptor))
     end
 
-    def derive_package_content(
+    def publish_package_content_and_derive_dot_fig_contents(
       package_statements, descriptor, local_dir, local_only
     )
       header_strings = derive_package_metadata_comments(descriptor)
-      resource_statement_strings = derive_package_resources(
+      deparsed_statement_strings = publish_package_content(
         package_statements, descriptor, local_dir, local_only
       )
 
-      return [header_strings, resource_statement_strings].flatten()
+      return [header_strings, deparsed_statement_strings].flatten()
     end
 
     def derive_package_metadata_comments(descriptor)
@@ -338,22 +309,17 @@ module Fig
     # file) and then copies all files into the local repository and the remote
     # repository (if not a local-only publish).
     #
-    # Returns the unparsed strings for the resource statements with URLs
+    # Returns the deparsed strings for the resource statements with URLs
     # replaced with in-package paths.
-    def derive_package_resources(
+    def publish_package_content(
       package_statements, descriptor, local_dir, local_only
     )
-      return bundle_resources(package_statements).map do |statement|
+      return create_resource_archive(package_statements).map do |statement|
         if statement.is_a?(Statement::Publish)
           nil
         elsif statement.is_a?(Statement::Archive) || statement.is_a?(Statement::Resource)
-          if statement.is_a?(Statement::Resource) && ! Repository.is_url?(statement.url)
-            archive_name = statement.url
-            archive_remote = "#{remote_dir_for_package(descriptor)}/#{statement.url}"
-          else
-            archive_name = statement.url.split('/').last
-            archive_remote = "#{remote_dir_for_package(descriptor)}/#{archive_name}"
-          end
+          archive_name = statement.url.split('/').last
+          archive_remote = "#{remote_dir_for_package(descriptor)}/#{archive_name}"
 
           if Repository.is_url?(statement.url)
             archive_local = File.join(temp_dir, archive_name)
@@ -372,6 +338,36 @@ module Fig
           statement.unparse('')
         end
       end.select { |s| not s.nil? }
+    end
+
+    # Grabs all of the Resource statements that don't reference URLs, creates a
+    # "resources.tar.gz" file containing all the referenced files, strips the
+    # Resource statements out of the statements, replacing them with a single
+    # Archive statement.  Thus the caller should substitute its set of
+    # statements with the return value.
+    def create_resource_archive(package_statements)
+      resource_paths = []
+      new_package_statements = package_statements.reject do |statement|
+        if (
+          statement.is_a?(Statement::Resource) &&
+          ! Repository.is_url?(statement.url)
+        )
+          resource_paths << statement.url
+          true
+        else
+          false
+        end
+      end
+
+      if resource_paths.size > 0
+        resource_paths = expand_globs_from(resource_paths)
+        file = 'resources.tar.gz'
+        @operating_system.create_archive(file, resource_paths)
+        new_package_statements.unshift(Statement::Archive.new(nil, file))
+        at_exit { File.delete(file) }
+      end
+
+      return new_package_statements
     end
   end
 end
