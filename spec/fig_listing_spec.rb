@@ -946,7 +946,7 @@ describe 'Fig' do
       (out, err, exitstatus) = fig('--list-dependencies --config nondefault')
       exitstatus.should == 0
       out.should == expected
-      err.should_not be_empty
+      err.should =~ /No version in the package descriptor of "prerequisite" in an include statement/
     end
   end
 

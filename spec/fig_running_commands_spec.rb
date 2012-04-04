@@ -47,7 +47,7 @@ describe 'Fig' do
         fig('foo/1.2.3 --command-extra-args yadda', nil, :no_raise_on_error)
       exitstatus.should_not == 0
       out.should == ''
-      err.should_not be_empty
+      err.should =~ /does not contain a command/
     end
 
     it %q<prints a warning message when attempting to run multiple commands> do

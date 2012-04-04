@@ -103,13 +103,13 @@ describe 'Fig' do
 
       it 'should complain if you publish without a package descriptor' do
         out, err, exit_code = fig('--publish', nil, :no_raise_on_error)
-        err.should_not be_empty
+        err.should =~ /Need to specify a package to publish/
         exit_code.should_not == 0
       end
 
       it 'should complain if you publish without a package version' do
         out, err, exit_code = fig('--publish foo', nil, :no_raise_on_error)
-        err.should_not be_empty
+        err.should =~ /No version specified/
         exit_code.should_not == 0
       end
 
