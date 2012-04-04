@@ -1,4 +1,1 @@
-Cleanup tasks:
-
-- Clean up method names in Fig::Command, probably by breaking out package loading into a separate class.
-- Make everything use PackageDescriptors rather than passing name/version/config around.
+- Detect a "archive resources.tar.gz" statement and complain because Fig uses a file by that name to bundle up the files referenced in "resource" statements.
