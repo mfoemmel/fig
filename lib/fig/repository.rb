@@ -149,6 +149,11 @@ module Fig
       return read_package_from_directory(directory, descriptor)
     end
 
+    # Grabs all of the Resource statements that don't reference URLs, creates a
+    # "resources.tar.gz" file containing all the referenced files, strips the
+    # Resouces statements out of the statements, replacing them with a single
+    # Archive statement.  Thus the caller should substitute its set of
+    # statements with the return value.
     def bundle_resources(package_statements)
       resources = []
       new_package_statements = package_statements.reject do |statement|
@@ -328,6 +333,13 @@ module Fig
       ]
     end
 
+    # Deals with Archive and Resource statements.  It downloads any remote
+    # files (those where the statement references a URL as opposed to a local
+    # file) and then copies all files into the local repository and the remote
+    # repository (if not a local-only publish).
+    #
+    # Returns the unparsed strings for the resource statements with URLs
+    # replaced with in-package paths.
     def derive_package_resources(
       package_statements, descriptor, local_dir, local_only
     )
@@ -342,12 +354,14 @@ module Fig
             archive_name = statement.url.split('/').last
             archive_remote = "#{remote_dir_for_package(descriptor)}/#{archive_name}"
           end
+
           if Repository.is_url?(statement.url)
             archive_local = File.join(temp_dir, archive_name)
             @operating_system.download(statement.url, archive_local)
           else
             archive_local = statement.url
           end
+
           @operating_system.upload(archive_local, archive_remote, @remote_repository_user) unless local_only
           @operating_system.copy(archive_local, local_dir + '/' + archive_name)
           if statement.is_a?(Statement::Archive)
