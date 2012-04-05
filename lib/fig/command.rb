@@ -128,11 +128,10 @@ class Fig::Command
   def configure()
     Fig::Logging.initialize_pre_configuration(@options.log_level())
 
-    remote_url = derive_remote_url()
 
     @configuration = Fig::FigRC.find(
       @options.figrc(),
-      remote_url,
+      derive_remote_url(),
       @options.login?,
       @options.home(),
       @options.no_figrc?
@@ -147,7 +146,6 @@ class Fig::Command
     @repository = Fig::Repository.new(
       @operating_system,
       File.expand_path(File.join(@options.home(), 'repos')),
-      remote_url,
       @configuration,
       nil, # remote_user
       @options.update?,

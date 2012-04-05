@@ -9,11 +9,10 @@ require 'fig/statement/publish'
 require 'fig/statement/resource'
 
 def create_local_repository()
-  application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_DIR)
+  application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_URL)
   repository = Fig::Repository.new(
     Fig::OperatingSystem.new(nil),
     FIG_SPEC_BASE_DIRECTORY,
-    "file://#{FIG_REMOTE_DIR}",
     application_config,
     nil,   # remote user
     false, # unconditional update

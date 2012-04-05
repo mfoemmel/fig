@@ -25,7 +25,6 @@ module Fig
     def initialize(
       os,
       local_repository_dir,
-      remote_repository_url,
       application_config,
       remote_repository_user,
       update,
@@ -34,7 +33,7 @@ module Fig
     )
       @operating_system       = os
       @local_repository_dir   = local_repository_dir
-      @remote_repository_url  = remote_repository_url
+      @application_config     = application_config
       @remote_repository_user = remote_repository_user
       @update                 = update
       @update_if_missing      = update_if_missing
@@ -62,7 +61,7 @@ module Fig
     end
 
     def list_remote_packages
-      paths = @operating_system.download_list(@remote_repository_url)
+      paths = @operating_system.download_list(remote_repository_url())
 
       return paths.reject { |path| path =~ %r< ^ #{METADATA_SUBDIRECTORY} / >xs }
     end
@@ -163,6 +162,10 @@ module Fig
     end
 
     private
+
+    def remote_repository_url()
+      return @application_config.remote_repository_url()
+    end
 
     def should_update?(descriptor)
       return true if @update
@@ -279,7 +282,7 @@ module Fig
     end
 
     def remote_fig_file_for_package(descriptor)
-      "#{@remote_repository_url}/#{descriptor.name}/#{descriptor.version}/.fig"
+      "#{remote_repository_url()}/#{descriptor.name}/#{descriptor.version}/.fig"
     end
 
     def local_fig_file_for_package(descriptor)
@@ -287,7 +290,7 @@ module Fig
     end
 
     def remote_dir_for_package(descriptor)
-      "#{@remote_repository_url}/#{descriptor.name}/#{descriptor.version}"
+      "#{remote_repository_url()}/#{descriptor.name}/#{descriptor.version}"
     end
 
     def local_dir_for_package(descriptor)

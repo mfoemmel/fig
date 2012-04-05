@@ -105,14 +105,11 @@ Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
 FIG_SPEC_BASE_DIRECTORY =
     File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
-FIG_HOME =
-    File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
-FIG_REMOTE_DIR =
-    File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
-FIG_BIN =
-    File.expand_path(File.dirname(__FILE__) + '/../bin')
-FIG_EXE =
-    %Q<#{FIG_BIN}/fig>
+FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
+FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
+FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
+FIG_BIN        = File.expand_path(File.dirname(__FILE__) + '/../bin')
+FIG_EXE        = %Q<#{FIG_BIN}/fig>
 
 # If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
 RUBY_EXE =
@@ -124,7 +121,7 @@ RUBY_EXE =
   ].join
 
 ENV['FIG_HOME'] = FIG_HOME
-ENV['FIG_REMOTE_URL'] = %Q<file://#{FIG_REMOTE_DIR}>
+ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
 
 def setup_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
