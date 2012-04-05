@@ -115,9 +115,9 @@ module Fig
       check_for_unique_asset_names(package_statements)
 
       temp_dir = temp_dir_for_package(descriptor)
-      @operating_system.clear_directory(temp_dir)
+      @operating_system.delete_and_recreate_directory(temp_dir)
       local_dir = local_dir_for_package(descriptor)
-      @operating_system.clear_directory(local_dir)
+      @operating_system.delete_and_recreate_directory(local_dir)
       fig_file = File.join(temp_dir, '.fig')
       content = publish_package_content_and_derive_dot_fig_contents(
         package_statements, descriptor, local_dir, local_only
@@ -184,7 +184,7 @@ module Fig
       begin
         package = read_local_package(descriptor)
         temp_dir = temp_dir_for_package(descriptor)
-        @operating_system.clear_directory(temp_dir)
+        @operating_system.delete_and_recreate_directory(temp_dir)
         package.archive_urls.each do |archive_url|
           if not Repository.is_url?(archive_url)
             archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
@@ -199,7 +199,7 @@ module Fig
           @operating_system.download_resource(resource_url, File.join(temp_dir))
         end
         local_dir = local_dir_for_package(descriptor)
-        @operating_system.clear_directory(local_dir)
+        @operating_system.delete_and_recreate_directory(local_dir)
         # some packages contain no files, only a fig file.
         if not (package.archive_urls.empty? && package.resource_urls.empty?)
           FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)

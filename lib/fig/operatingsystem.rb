@@ -268,7 +268,7 @@ module Fig
       end
     end
 
-    def clear_directory(dir)
+    def delete_and_recreate_directory(dir)
       FileUtils.rm_rf(dir)
       FileUtils.mkdir_p(dir)
     end
