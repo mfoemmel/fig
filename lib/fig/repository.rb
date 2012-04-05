@@ -137,6 +137,12 @@ module Fig
       return true
     end
 
+    def updating?
+      return @update || @update_if_missing
+    end
+
+    private
+
     def check_for_unique_asset_names(package_statements)
       asset_statements = package_statements.select { |s| s.is_asset? }
 
@@ -156,12 +162,6 @@ module Fig
         end
       end
     end
-
-    def updating?
-      return @update || @update_if_missing
-    end
-
-    private
 
     def remote_repository_url()
       return @application_config.remote_repository_url()
