@@ -88,15 +88,6 @@ Fig recognizes the following options:
 Some of these options may also be expressed as statements in a package.fig
 file.  For instance, `--append`, `--archive`, `--resource`, `include`.
 
-One point of frequent confusion revolves around which statements are concerned
-with publishing packages, and which are for downloading packages and otherwise
-modifying the Fig environment.  The same Fig file can contain both publish
-(e.g., `append`, `resource`) and download (e.g., `include`) statements, but you
-may not want to use the same dependency file for both publishing a package and
-specifying that same package's dependencies, since for example its "build-time"
-dependencies may differ from its "include-time" dependencies.  Multiple config
-sections may be helpful in organizing these concerns.
-
 ## Environment Variables Influencing Fig's Behavior
 
     FIG_REMOTE_URL      Required for operations involving the remote repository.
@@ -108,14 +99,14 @@ sections may be helpful in organizing these concerns.
 
 ## Commands affected by environment variables
 
-#### `--list-remote`
+### `--list-remote`
 
 When using the `--list-remote` command against an FTP server, Fig uses a pool
 of FTP sessions to improve performance. By default it opens 16 connections, but
 that number can be overridden by setting the `FIG_FTP_THREADS` environment
 variable.
 
-#### `--login`
+### `--login`
 
 If the `--login` option is supplied, Fig will look for credentials.  If
 environment variables `FIG_REMOTE_USER` and/or `FIG_REMOTE_PASSWORD` are
@@ -170,7 +161,15 @@ A simple example "package.fig" file that contains one of each kind of statement:
 You tell Fig what to include in your package using "resource" and "archive"
 statements.  These two kinds of statements behave identically except that the
 contents of the files referenced by "archive" statements are extracted upon
-installation.
+installation.  Thus, given a package.fig file containing the statements
+
+    archive path/somefile.tar.gz
+    resource foo/*.jar
+
+the bundled up package will contain all of the jar files in the `foo/`
+subdirectory of the current directory and the `somefile.tar.gz` archive.  When
+package is installed, the jar files will be in a `foo` subdirectory of the
+package directory and the `somefile.tar.gz` contents will be extracted.
 
 ### Where to put the contents of a depended upon package
 
@@ -382,13 +381,22 @@ the version).
      $ cat lib/hello-lib/hello.foo
      print 'hello'
 
-Configuration
-=============
+Fig Configuration
+=================
 
 Need a description of `.figrc` here.
 
 Package Statement Descriptions
 ==============================
+
+One point of frequent confusion revolves around which statements are concerned
+with publishing packages, and which are for downloading packages and otherwise
+modifying the Fig environment.  The same Fig file can contain both publish
+(e.g., `append`, `resource`) and download (e.g., `include`) statements, but you
+may not want to use the same dependency file for both publishing a package and
+specifying that same package's dependencies, since for example its "build-time"
+dependencies may differ from its "include-time" dependencies.  Multiple config
+sections may be helpful in organizing these concerns.
 
 ## `add`
 
