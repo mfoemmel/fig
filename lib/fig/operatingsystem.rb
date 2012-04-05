@@ -135,10 +135,15 @@ module Fig
                 packages << pkg + '/' + ver
               end
             rescue Net::FTPPermError
-              # Ignore this error because it's indicative of the FTP library encountering a file
-              # or directory that it does not have permission to open.
-              # Fig needs to be able to have secure repos/packages
-              # and there is no way easy way to deal with the permissions issues other than consuming these errors.
+              # Ignore this error because it's indicative of the FTP library
+              # encountering a file or directory that it does not have
+              # permission to open.  Fig needs to be able to have secure
+              # repos/packages and there is no way easy way to deal with the
+              # permissions issues other than consuming these errors.
+              #
+              # Actually, with FTP, you can't tell the difference between a
+              # file not existing and not having permission to access it (which
+              # is probably a good thing).
             end
             pos += num_threads
           end
@@ -149,6 +154,8 @@ module Fig
       all_packages.flatten.sort
     end
 
+    # Returns whether the file was not downloaded because the file already
+    # exists and is already up-to-date.
     def download(url, path)
       FileUtils.mkdir_p(File.dirname(path))
       uri = URI.parse(url)

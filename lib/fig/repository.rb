@@ -17,6 +17,7 @@ module Fig
   # defers remote operations to others.
   class Repository
     METADATA_SUBDIRECTORY = '_meta'
+    VERSION_FILE_NAME     = 'repository-format-version'
 
     def self.is_url?(url)
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
@@ -114,7 +115,7 @@ module Fig
     def publish_package(package_statements, descriptor, local_only)
       check_for_unique_asset_names(package_statements)
 
-      temp_dir = temp_dir_for_package(descriptor)
+      temp_dir = temp_dir()
       @operating_system.delete_and_recreate_directory(temp_dir)
       local_dir = local_dir_for_package(descriptor)
       @operating_system.delete_and_recreate_directory(local_dir)
@@ -142,6 +143,51 @@ module Fig
     end
 
     private
+
+    def get_local_repository_version()
+      if @local_repository_version.nil?
+        version_file = File.join(@local_repository_dir, VERSION_FILE_NAME)
+
+        @local_repository_version =
+          parse_repository_version(version_file, version_file)
+      end
+
+      return @local_repository_version
+    end
+
+    def get_remote_repository_version()
+      if @remote_repository_version.nil?
+        temp_dir = temp_dir()
+        @operating_system.delete_and_recreate_directory(temp_dir)
+        remote_version_file = "#{remote_repository_url()}/#{VERSION_FILE_NAME}"
+        local_version_file = File.join(temp_dir, VERSION_FILE_NAME)
+        begin
+          @operating_system.download(remote_version_file, local_version_file)
+        rescue NotFoundError
+        end
+
+        @remote_repository_version =
+          parse_repository_version(local_version_file, remote_version_file)
+      end
+
+      return @remote_repository_version
+    end
+
+    def parse_repository_version(version_file, description)
+      if not File.exist?(version_file)
+        return 1
+      end
+
+      version_string = IO.read(version_file)
+      version_string.strip!()
+      if version_string !~ / \A \d+ \z /x
+        Logging.fatal \
+          %Q<Could not parse the contents of "#{description}" ("#{version_string}") as a version.>
+        raise RepositoryError.new
+      end
+
+      return version_string.to_i()
+    end
 
     def check_for_unique_asset_names(package_statements)
       asset_statements = package_statements.select { |s| s.is_asset? }
@@ -183,20 +229,20 @@ module Fig
 
       begin
         package = read_local_package(descriptor)
-        temp_dir = temp_dir_for_package(descriptor)
+        temp_dir = temp_dir()
         @operating_system.delete_and_recreate_directory(temp_dir)
         package.archive_urls.each do |archive_url|
           if not Repository.is_url?(archive_url)
             archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
           end
-          @operating_system.download_archive(archive_url, File.join(temp_dir))
+          @operating_system.download_archive(archive_url, temp_dir)
         end
         package.resource_urls.each do |resource_url|
           if not Repository.is_url?(resource_url)
             resource_url =
               remote_dir_for_package(descriptor) + '/' + resource_url
           end
-          @operating_system.download_resource(resource_url, File.join(temp_dir))
+          @operating_system.download_resource(resource_url, temp_dir)
         end
         local_dir = local_dir_for_package(descriptor)
         @operating_system.delete_and_recreate_directory(local_dir)
@@ -205,7 +251,8 @@ module Fig
           FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
         end
         write_local_package(descriptor, package)
-      rescue
+      rescue StandardError => exception
+        Logging.debug exception
         Logging.fatal 'Install failed, cleaning up.'
         delete_local_package(descriptor)
         raise RepositoryError.new
@@ -224,7 +271,8 @@ module Fig
           install_package(descriptor)
         end
       rescue NotFoundError
-        Logging.fatal "Package not found in remote repository: #{descriptor.to_string()}"
+        Logging.fatal \
+          "Package not found in remote repository: #{descriptor.to_string()}"
         delete_local_package(descriptor)
         raise RepositoryError.new
       end
@@ -282,7 +330,7 @@ module Fig
     end
 
     def remote_fig_file_for_package(descriptor)
-      "#{remote_repository_url()}/#{descriptor.name}/#{descriptor.version}/.fig"
+      "#{remote_dir_for_package(descriptor)}/.fig"
     end
 
     def local_fig_file_for_package(descriptor)
@@ -299,7 +347,7 @@ module Fig
       )
     end
 
-    def temp_dir_for_package(descriptor)
+    def temp_dir()
       File.join(@local_repository_dir, 'tmp')
     end
 
@@ -350,7 +398,7 @@ module Fig
           asset_remote = "#{remote_dir_for_package(descriptor)}/#{asset_name}"
 
           if Repository.is_url?(statement.url)
-            asset_local = File.join(temp_dir_for_package(descriptor), asset_name)
+            asset_local = File.join(temp_dir(), asset_name)
             @operating_system.download(statement.url, asset_local)
           else
             asset_local = statement.url
