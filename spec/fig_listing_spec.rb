@@ -1573,6 +1573,8 @@ describe 'Fig' do
     end
 
     it %q<should complain if local repository isn't in the expected format version> do
+      cleanup_test_environment
+      setup_test_environment
       set_up_packages_with_overrides
       remove_any_package_dot_fig
       set_local_repository_format_to_future_version
