@@ -18,6 +18,7 @@ module Fig
   class Repository
     METADATA_SUBDIRECTORY = '_meta'
     VERSION_FILE_NAME     = 'repository-format-version'
+    VERSION_SUPPORTED     = 1
 
     def self.is_url?(url)
       not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
@@ -25,22 +26,23 @@ module Fig
 
     def initialize(
       os,
-      local_repository_dir,
+      local_repository_directory,
       application_config,
       remote_repository_user,
       update,
       update_if_missing,
       check_include_versions
     )
-      @operating_system       = os
-      @local_repository_dir   = local_repository_dir
-      @application_config     = application_config
-      @remote_repository_user = remote_repository_user
-      @update                 = update
-      @update_if_missing      = update_if_missing
+      @operating_system             = os
+      @local_repository_directory   = local_repository_directory
+      @application_config           = application_config
+      @remote_repository_user       = remote_repository_user
+      @update                       = update
+      @update_if_missing            = update_if_missing
 
       @parser = Parser.new(application_config, check_include_versions)
 
+      initialize_local_repository()
       reset_cached_data()
     end
 
@@ -50,9 +52,10 @@ module Fig
 
     def list_packages
       results = []
-      if File.exist?(@local_repository_dir)
-        @operating_system.list(@local_repository_dir).each do |name|
-          @operating_system.list(File.join(@local_repository_dir, name)).each do |version|
+      if File.exist?(local_package_directory())
+        @operating_system.list(local_package_directory()).each do |name|
+          @operating_system.list(File.join(local_package_directory(), name)).each do
+            |version|
             results << PackageDescriptor.format(name, version, nil)
           end
         end
@@ -103,10 +106,7 @@ module Fig
     def clean(descriptor)
       @packages.remove_package(descriptor.name, descriptor.version)
 
-      dir = File.join(@local_repository_dir, descriptor.name)
-      dir = File.join(dir, descriptor.version) if descriptor.version
-
-      FileUtils.rm_rf(dir)
+      FileUtils.rm_rf(local_dir_for_package(descriptor))
 
       return
     end
@@ -144,9 +144,33 @@ module Fig
 
     private
 
-    def get_local_repository_version()
+    def initialize_local_repository()
+      if not File.exist?(@local_repository_directory)
+        Dir.mkdir(@local_repository_directory)
+      end
+
+      version_file = local_version_file()
+      if not File.exist?(version_file)
+        File.open(version_file, 'w') { |handle| handle.write(VERSION_SUPPORTED) }
+      end
+
+      return
+    end
+
+    def check_local_repository_format()
+      local_version = local_repository_version()
+      if local_version != VERSION_SUPPORTED
+        Logging.fatal \
+          "Local repository is in version #{local_version} format. This version of fig can only deal with repositories in version #{VERSION_SUPPORTED} format."
+        raise RepositoryError.new
+      end
+
+      return
+    end
+
+    def local_repository_version()
       if @local_repository_version.nil?
-        version_file = File.join(@local_repository_dir, VERSION_FILE_NAME)
+        version_file = local_version_file()
 
         @local_repository_version =
           parse_repository_version(version_file, version_file)
@@ -155,12 +179,20 @@ module Fig
       return @local_repository_version
     end
 
-    def get_remote_repository_version()
+    def local_version_file()
+      return File.join(@local_repository_directory, VERSION_FILE_NAME)
+    end
+
+    def local_package_directory()
+      return File.expand_path(File.join(@local_repository_directory, 'repos'))
+    end
+
+    def remote_repository_version()
       if @remote_repository_version.nil?
         temp_dir = temp_dir()
         @operating_system.delete_and_recreate_directory(temp_dir)
         remote_version_file = "#{remote_repository_url()}/#{VERSION_FILE_NAME}"
-        local_version_file = File.join(temp_dir, VERSION_FILE_NAME)
+        local_version_file = File.join(temp_dir, "remote-#{VERSION_FILE_NAME}")
         begin
           @operating_system.download(remote_version_file, local_version_file)
         rescue NotFoundError
@@ -175,7 +207,7 @@ module Fig
 
     def parse_repository_version(version_file, description)
       if not File.exist?(version_file)
-        return 1
+        return 1 # Since there was no version file early in Fig development.
       end
 
       version_string = IO.read(version_file)
@@ -343,12 +375,12 @@ module Fig
 
     def local_dir_for_package(descriptor)
       return File.join(
-        @local_repository_dir, descriptor.name, descriptor.version
+        local_package_directory(), descriptor.name, descriptor.version
       )
     end
 
     def temp_dir()
-      File.join(@local_repository_dir, 'tmp')
+      File.join(@local_repository_directory, 'tmp')
     end
 
     def package_missing?(descriptor)

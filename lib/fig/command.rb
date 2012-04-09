@@ -145,7 +145,7 @@ class Fig::Command
     @operating_system = Fig::OperatingSystem.new(@options.login?)
     @repository = Fig::Repository.new(
       @operating_system,
-      File.expand_path(File.join(@options.home(), 'repos')),
+      @options.home(),
       @configuration,
       nil, # remote_user
       @options.update?,
