@@ -34,7 +34,8 @@ module Fig
       return @variables.clone
     end
 
-    # Indicates that the values from a particular envrionment variable path
+    # Indicates that the values from a particular environment variable path
+    # should be copied to a local directory.
     def add_retrieve(name, path)
       @retrieve_vars[name] = path
 
@@ -233,6 +234,8 @@ module Fig
       file = expand_path(value, base_package)
 
       if @retrieve_vars.member?(name)
+        target = nil
+
         # A '//' in the source file's path tells us to preserve path
         # information after the '//' when doing a retrieve.
         if file.split('//').size > 1
@@ -264,7 +267,7 @@ module Fig
       expanded_path = expand_at_sign_package_references(path, base_package)
       check_for_bad_escape(expanded_path, path)
 
-      return expanded_path.gsub(%r< \\ ([\\@]) >x, '\1')
+      return collapse_backslashes_for_escaped_at_signs(expanded_path)
     end
 
     def expand_at_sign_package_references(arg, base_package)
@@ -286,7 +289,7 @@ module Fig
       package_substituted = expand_named_package_references(arg)
       check_for_bad_escape(package_substituted, arg)
 
-      return package_substituted.gsub(%r< \\ ([\\@]) >x, '\1')
+      return collapse_backslashes_for_escaped_at_signs(package_substituted)
     end
 
     def expand_named_package_references(arg)
@@ -322,6 +325,12 @@ module Fig
       end
 
       return
+    end
+
+    # After @ substitution, we need to get rid of the backslashes in front of
+    # any escaped @ signs.
+    def collapse_backslashes_for_escaped_at_signs(string)
+      return string.gsub(%r< \\ ([\\@]) >x, '\1')
     end
 
     def translate_retrieve_variables(base_package, name)
