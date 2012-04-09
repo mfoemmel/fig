@@ -77,7 +77,7 @@ class Fig::Retriever
         package_meta = @package_metadata_by_name[package_name]
         if package_meta
           if package_meta.version != package_version
-            raise 'version mismatch in .figretrieve'
+            raise 'version mismatch in .fig/retrieve'
           end
         else
           package_meta = new_package_metadata(package_name, package_version)
