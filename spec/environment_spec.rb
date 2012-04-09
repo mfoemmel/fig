@@ -35,13 +35,13 @@ def new_example_package(environment, name, extra_statements, variable_value)
 end
 
 def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
-  retriever_double = double('retriever')
-  retriever_double.stub(:with_package_version)
+  maintainer_double = double('working directory maintainer')
+  maintainer_double.stub(:with_package_version)
   environment =
     Fig::Environment.new(
       nil,
       Fig::EnvironmentVariables::CaseSensitive.new({'FOO' => 'bar'}),
-      retriever_double
+      maintainer_double
     )
 
   if retrieve_vars

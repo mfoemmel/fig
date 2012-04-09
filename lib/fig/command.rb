@@ -153,9 +153,9 @@ class Fig::Command
       check_include_statements_versions?
     )
 
-    @retriever = Fig::WorkingDirectoryMaintainer.new('.')
+    @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
-    at_exit { @retriever.save_metadata() }
+    at_exit { @working_directory_maintainer.save_metadata() }
 
     @environment = prepare_environment
 
@@ -170,7 +170,9 @@ class Fig::Command
       environment_variables = Fig::OperatingSystem.get_environment_variables({})
     end
 
-    return Fig::Environment.new(@repository, environment_variables, @retriever)
+    return Fig::Environment.new(
+      @repository, environment_variables, @working_directory_maintainer
+    )
   end
 
   def base_config()

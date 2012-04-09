@@ -17,12 +17,12 @@ module Fig
   class Environment
     DEFAULT_VERSION_NAME = 'current'
 
-    def initialize(repository, variables_override, retriever)
+    def initialize(repository, variables_override, working_directory_maintainer)
       @repository = repository
       @variables = variables_override || OperatingSystem.get_environment_variables
       @retrieve_vars = {}
       @packages = {}
-      @retriever = retriever
+      @working_directory_maintainer = working_directory_maintainer
     end
 
     # Returns the value of an envirionment variable
@@ -252,10 +252,10 @@ module Fig
             target = File.join(target, File.basename(file))
           end
         end
-        @retriever.with_package_version(
+        @working_directory_maintainer.with_package_version(
           base_package.name, base_package.version
         ) do
-          @retriever.retrieve(file, target)
+          @working_directory_maintainer.retrieve(file, target)
         end
         file = target
       end
