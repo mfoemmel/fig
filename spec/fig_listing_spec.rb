@@ -460,6 +460,15 @@ describe 'Fig' do
       err.should_not be_empty
       exit_code.should_not == 0
     end
+
+    it %q<should complain if local repository isn't in the expected format version> do
+      set_local_repository_format_to_future_version()
+
+      out, err, exit_code = fig('--list-local', nil, :no_raise_on_error)
+      err.should =~
+        /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
+      exit_code.should_not == 0
+    end
   end
 
   describe '--list-remote' do
@@ -487,6 +496,15 @@ describe 'Fig' do
     it 'should complain if with a package descriptor' do
       out, err, exit_code = fig('--list-remote foo', nil, :no_raise_on_error)
       err.should_not be_empty
+      exit_code.should_not == 0
+    end
+
+    it %q<should complain if remote repository isn't in the expected format version> do
+      set_remote_repository_format_to_future_version()
+
+      out, err, exit_code = fig('--list-remote', nil, :no_raise_on_error)
+      err.should =~
+        /Remote repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
       exit_code.should_not == 0
     end
   end
@@ -947,6 +965,18 @@ describe 'Fig' do
       exitstatus.should == 0
       out.should == expected
       err.should =~ /No version in the package descriptor of "prerequisite" in an include statement/
+    end
+
+    it %q<should complain if local repository isn't in the expected format version> do
+      set_up_packages_with_overrides
+      remove_any_package_dot_fig
+      set_local_repository_format_to_future_version
+
+      (out, err, exitstatus) =
+        fig('--list-dependencies A/1.2.3', nil, :no_raise_on_error)
+      exitstatus.should_not == 0
+      err.should =~
+        /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
     end
   end
 
@@ -1540,6 +1570,18 @@ describe 'Fig' do
         out.should == expected
         err.should == ''
       end
+    end
+
+    it %q<should complain if local repository isn't in the expected format version> do
+      set_up_packages_with_overrides
+      remove_any_package_dot_fig
+      set_local_repository_format_to_future_version
+
+      (out, err, exitstatus) =
+        fig('--list-variables A/1.2.3', nil, :no_raise_on_error)
+      exitstatus.should_not == 0
+      err.should =~
+        /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
     end
   end
 end

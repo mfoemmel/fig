@@ -189,7 +189,7 @@ module Fig
     def check_repository_format(name, version)
       if version != VERSION_SUPPORTED
         Logging.fatal \
-          "#{name} repository is in version #{local_version} format. This version of fig can only deal with repositories in version #{VERSION_SUPPORTED} format."
+          "#{name} repository is in version #{version} format. This version of fig can only deal with repositories in version #{VERSION_SUPPORTED} format."
         raise RepositoryError.new
       end
 

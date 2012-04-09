@@ -156,3 +156,21 @@ def cleanup_home_and_remote()
 
   return
 end
+
+def set_local_repository_format_to_future_version()
+  version_file = File.join(FIG_HOME, Fig::Repository::VERSION_FILE_NAME)
+  File.open(version_file, 'w') {
+    |handle| handle.write(Fig::Repository::VERSION_SUPPORTED + 1)
+  }
+
+  return
+end
+
+def set_remote_repository_format_to_future_version()
+  version_file = File.join(FIG_REMOTE_DIR, Fig::Repository::VERSION_FILE_NAME)
+  File.open(version_file, 'w') {
+    |handle| handle.write(Fig::Repository::VERSION_SUPPORTED + 1)
+  }
+
+  return
+end
