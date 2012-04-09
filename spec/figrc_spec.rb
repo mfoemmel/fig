@@ -5,7 +5,7 @@ require 'tempfile'
 
 require 'fig/figrc'
 require 'fig/repository'
-require 'fig/retriever'
+require 'fig/workingdirectorymaintainer'
 
 def create_override_file(foo, bar = nil)
     tempfile = Tempfile.new('some_json_tempfile')

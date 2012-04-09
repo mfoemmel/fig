@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/retriever'
+require 'fig/workingdirectorymaintainer'
 
-describe 'Retriever' do
+describe 'WorkingDirectoryMaintainer' do
   before(:all) do
     setup_test_environment
   end
@@ -18,7 +18,7 @@ describe 'Retriever' do
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/baz.txt", 'w') {|f| f << 'BAZ'}
 
     # Retrieve files A and B
-    r = Fig::Retriever.new(test_dir)
+    r = Fig::WorkingDirectoryMaintainer.new(test_dir)
     r.with_package_version('foo', '1.2.3') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/foo.txt", 'foo.txt')
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/bar.txt", 'bar.txt')
@@ -37,7 +37,7 @@ describe 'Retriever' do
 
     # Save and reload
     r.save_metadata()
-    r = Fig::Retriever.new(test_dir)
+    r = Fig::WorkingDirectoryMaintainer.new(test_dir)
 
     # Switch back to original version
     r.with_package_version('foo', '1.2.3') do
@@ -59,7 +59,7 @@ describe 'Retriever' do
     File.open("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'w') {|f| f << 'executable.exe'}
     FileUtils.chmod(0755, "#{FIG_SPEC_BASE_DIRECTORY}/executable")
 
-    r = Fig::Retriever.new(test_dir)
+    r = Fig::WorkingDirectoryMaintainer.new(test_dir)
     r.with_package_version('foo', '1.2.3') do
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/plain", 'plain')
       r.retrieve("#{FIG_SPEC_BASE_DIRECTORY}/executable", 'executable.exe')

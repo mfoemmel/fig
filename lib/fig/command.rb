@@ -11,10 +11,10 @@ require 'fig/package'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/repositoryerror'
-require 'fig/retriever'
 require 'fig/statement/configuration'
 require 'fig/statement/publish'
 require 'fig/userinputerror'
+require 'fig/workingdirectorymaintainer'
 
 # These are a breakout of parts of this class simply to keep the file size down.
 
@@ -153,7 +153,7 @@ class Fig::Command
       check_include_statements_versions?
     )
 
-    @retriever = Fig::Retriever.new('.')
+    @retriever = Fig::WorkingDirectoryMaintainer.new('.')
 
     at_exit { @retriever.save_metadata() }
 

@@ -12,7 +12,7 @@ module Fig; end
 # package/versions they came from, and deletes files as necessary to ensure
 # that we never have files from two different versions of the same package in
 # the user's working directory.
-class Fig::Retriever
+class Fig::WorkingDirectoryMaintainer
   def initialize(base_dir)
     @base_dir = base_dir
     @package_metadata_by_name = {}
