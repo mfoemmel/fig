@@ -171,6 +171,30 @@ subdirectory of the current directory and the `somefile.tar.gz` archive.  When
 package is installed, the jar files will be in a `foo` subdirectory of the
 package directory and the `somefile.tar.gz` contents will be extracted.
 
+If multiple archives contain the same file, one version will end up overwriting
+the other.  There are no guarantees as to which version of a file will be the
+last one written.
+
+#### Caveat
+
+In the current repository format, archives in a package are stored in a single
+flat directory.  This means that if the last component of the path for an
+"archive" statement or a URL for a "resource" statement are not unique, you
+will run into problems.  In a package.fig file containing:
+
+    archive a-path/somefile.tar.gz
+    archive another-path/somefile.tar.gz
+    archive http://example/some/path/somefile.tar.gz
+    resource ftp://whatever/foo/bar/somefile.tar.gz
+
+all of the files would end up clobbering each other.  Fig actually checks for
+this situation and will prevent publishing such a package, but it's something
+you need to look out for.  Note that local "resource"s with different paths are
+fine:
+
+    resource something/somefile.tgz
+    resource wherever/somefile.tgz
+
 ### Where to put the contents of a depended upon package
 
 Done via a "retrieve" statement.

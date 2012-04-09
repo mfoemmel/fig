@@ -291,6 +291,7 @@ module Fig
         package = read_local_package(descriptor)
         temp_dir = temp_dir()
         @operating_system.delete_and_recreate_directory(temp_dir)
+
         package.archive_urls.each do |archive_url|
           if not Repository.is_url?(archive_url)
             archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
@@ -304,13 +305,15 @@ module Fig
           end
           @operating_system.download_resource(resource_url, temp_dir)
         end
+
         local_dir = local_dir_for_package(descriptor)
         @operating_system.delete_and_recreate_directory(local_dir)
         # some packages contain no files, only a fig file.
         if not (package.archive_urls.empty? && package.resource_urls.empty?)
           FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
         end
-        write_local_package(descriptor, package)
+
+        write_local_fig_file_for_package(descriptor, package)
       rescue StandardError => exception
         Logging.debug exception
         Logging.fatal 'Install failed, cleaning up.'
@@ -384,7 +387,7 @@ module Fig
       FileUtils.rm_rf(local_dir_for_package(descriptor))
     end
 
-    def write_local_package(descriptor, package)
+    def write_local_fig_file_for_package(descriptor, package)
       file = local_fig_file_for_package(descriptor)
       @operating_system.write(file, package.unparse)
     end
