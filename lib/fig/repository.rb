@@ -295,7 +295,7 @@ module Fig
           if not Repository.is_url?(archive_url)
             archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
           end
-          @operating_system.download_archive(archive_url, temp_dir)
+          @operating_system.download_and_unpack_archive(archive_url, temp_dir)
         end
         package.resource_urls.each do |resource_url|
           if not Repository.is_url?(resource_url)

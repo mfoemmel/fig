@@ -214,7 +214,7 @@ module Fig
       download(url, File.join(dir, URI.parse(url).path.split('/').last))
     end
 
-    def download_archive(url, dir)
+    def download_and_unpack_archive(url, dir)
       FileUtils.mkdir_p(dir)
       basename = URI.parse(url).path.split('/').last
       path = File.join(dir, basename)
