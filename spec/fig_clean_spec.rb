@@ -36,5 +36,21 @@ describe 'Fig' do
       err.should =~ /Need to specify a package to clean/
       exit_code.should_not == 0
     end
+
+    it %q<should complain if local repository isn't in the expected format version> do
+
+      input = <<-END
+        config default
+          set FOO=BAR
+        end
+      END
+      fig('--publish foo/1.2.3', input)[2].should == 0
+
+      set_local_repository_format_to_future_version()
+      out, err, exit_code = fig('--clean foo/1.2.3', nil, :no_raise_on_error)
+      err.should =~
+        /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
+      exit_code.should_not == 0
+    end
   end
 end

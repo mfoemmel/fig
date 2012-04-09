@@ -5,6 +5,10 @@ describe 'Fig' do
     before(:each) do
       cleanup_test_environment
       setup_test_environment
+
+      # These shouldn't matter because the commands shouldn't look at the repositories.
+      set_local_repository_format_to_future_version()
+      set_remote_repository_format_to_future_version()
     end
 
     it 'sets variable from command line' do

@@ -37,6 +37,51 @@ describe 'Fig' do
         fig('--publish foo/1.2.3', input)
       end
 
+      it %q<--publish should complain if local repository isn't in the expected format version> do
+        input = <<-END
+          config default
+            set FOO=BAR
+          end
+        END
+
+        set_local_repository_format_to_future_version()
+        out, err, exit_code =
+            fig('--publish foo/1.2.3', input, :no_raise_on_error)
+        err.should =~
+          /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
+        exit_code.should_not == 0
+      end
+
+      it %q<--publish-local should complain if local repository isn't in the expected format version> do
+        input = <<-END
+          config default
+            set FOO=BAR
+          end
+        END
+
+        set_local_repository_format_to_future_version()
+        out, err, exit_code =
+            fig('--publish-local foo/1.2.3', input, :no_raise_on_error)
+        err.should =~
+          /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
+        exit_code.should_not == 0
+      end
+
+      it %q<should complain if remote repository isn't in the expected format version> do
+        input = <<-END
+          config default
+            set FOO=BAR
+          end
+        END
+
+        set_remote_repository_format_to_future_version()
+        out, err, exit_code =
+            fig('--publish foo/1.2.3', input, :no_raise_on_error)
+        err.should =~
+          /Remote repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
+        exit_code.should_not == 0
+      end
+
       it 'allows single and multiple override' do
         [3,4,5].each do |point_ver|   # Publish some versions of foo
           input = <<-END
@@ -176,7 +221,10 @@ describe 'Fig' do
         fig('--update --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
       end
 
-      it 'publishes to the local repo only when told to' do
+      it 'publishes only to the local repo when told to' do
+        # This shouldn't matter because the remote repo shouldn't be looked at.
+        set_remote_repository_format_to_future_version()
+
         FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
         File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?

@@ -159,6 +159,7 @@ end
 
 def set_local_repository_format_to_future_version()
   version_file = File.join(FIG_HOME, Fig::Repository::VERSION_FILE_NAME)
+  FileUtils.mkdir_p(FIG_HOME)
   File.open(version_file, 'w') {
     |handle| handle.write(Fig::Repository::VERSION_SUPPORTED + 1)
   }
@@ -168,6 +169,7 @@ end
 
 def set_remote_repository_format_to_future_version()
   version_file = File.join(FIG_REMOTE_DIR, Fig::Repository::VERSION_FILE_NAME)
+  FileUtils.mkdir_p(FIG_REMOTE_DIR)
   File.open(version_file, 'w') {
     |handle| handle.write(Fig::Repository::VERSION_SUPPORTED + 1)
   }

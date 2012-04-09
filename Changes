@@ -1,5 +1,16 @@
 v0.1.??
 
+  New features:
+
+  - Now checks repository format version and fails if it's different from what
+    it knows about.
+
+    There are no immediate plans to change the repository format, but
+    considering the inability to fix the non-unique archive name issue below,
+    it behooves us to allow for a format change in the future.  If the layout
+    does change, then current code could possibly corrupt the future
+    repository.
+
   Bug fixes:
 
   - Now checks that archive base names are unique before allowing publishing.
