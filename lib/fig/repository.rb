@@ -51,6 +51,8 @@ module Fig
     end
 
     def list_packages
+      check_local_repository_format()
+
       results = []
       if File.exist?(local_package_directory())
         @operating_system.list(local_package_directory()).each do |name|
@@ -65,6 +67,8 @@ module Fig
     end
 
     def list_remote_packages
+      check_remote_repository_format()
+
       paths = @operating_system.download_list(remote_repository_url())
 
       return paths.reject { |path| path =~ %r< ^ #{METADATA_SUBDIRECTORY} / >xs }
@@ -74,6 +78,8 @@ module Fig
       descriptor,
       allow_any_version = false
     )
+      check_local_repository_format()
+
       if not descriptor.version
         if allow_any_version
           package = @packages.get_any_version_of_package(descriptor.name)
@@ -97,6 +103,8 @@ module Fig
         "Considering #{PackageDescriptor.format(descriptor.name, descriptor.version, nil)}."
 
       if should_update?(descriptor)
+        check_remote_repository_format()
+
         update_package(descriptor)
       end
 
@@ -104,6 +112,8 @@ module Fig
     end
 
     def clean(descriptor)
+      check_local_repository_format()
+
       @packages.remove_package(descriptor.name, descriptor.version)
 
       FileUtils.rm_rf(local_dir_for_package(descriptor))
@@ -111,8 +121,12 @@ module Fig
       return
     end
 
-    # TODO: check for conflicting archive names.
     def publish_package(package_statements, descriptor, local_only)
+      check_local_repository_format()
+      if not local_only
+        check_remote_repository_format()
+      end
+
       check_for_unique_asset_names(package_statements)
 
       temp_dir = temp_dir()
@@ -124,11 +138,14 @@ module Fig
         package_statements, descriptor, local_dir, local_only
       )
       @operating_system.write(fig_file, content.join("\n").strip)
-      @operating_system.upload(
-        fig_file,
-        remote_fig_file_for_package(descriptor),
-        @remote_repository_user
-      ) unless local_only
+
+      if not local_only
+        @operating_system.upload(
+          fig_file,
+          remote_fig_file_for_package(descriptor),
+          @remote_repository_user
+        )
+      end
       @operating_system.copy(
         fig_file, local_fig_file_for_package(descriptor)
       )
@@ -158,10 +175,21 @@ module Fig
     end
 
     def check_local_repository_format()
-      local_version = local_repository_version()
-      if local_version != VERSION_SUPPORTED
+      check_repository_format('Local', local_repository_version())
+
+      return
+    end
+
+    def check_remote_repository_format()
+      check_repository_format('Remote', remote_repository_version())
+
+      return
+    end
+
+    def check_repository_format(name, version)
+      if version != VERSION_SUPPORTED
         Logging.fatal \
-          "Local repository is in version #{local_version} format. This version of fig can only deal with repositories in version #{VERSION_SUPPORTED} format."
+          "#{name} repository is in version #{local_version} format. This version of fig can only deal with repositories in version #{VERSION_SUPPORTED} format."
         raise RepositoryError.new
       end
 
@@ -436,7 +464,12 @@ module Fig
             asset_local = statement.url
           end
 
-          @operating_system.upload(asset_local, asset_remote, @remote_repository_user) unless local_only
+          if not local_only
+            @operating_system.upload(
+              asset_local, asset_remote, @remote_repository_user
+            )
+          end
+
           @operating_system.copy(asset_local, local_dir + '/' + asset_name)
           if statement.is_a?(Statement::Archive)
             @operating_system.unpack_archive(local_dir, asset_name)
