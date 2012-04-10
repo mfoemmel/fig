@@ -19,8 +19,6 @@ module Fig
     # noun and not a verb, e.g. "retrieve value" means the value of a retrieve
     # and not the action of retrieving a value.
 
-    DEFAULT_VERSION_NAME = 'current'
-
     def initialize(repository, variables_override, working_directory_maintainer)
       @repository = repository
       @variables =
