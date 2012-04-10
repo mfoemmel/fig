@@ -36,11 +36,11 @@ of the source files, ensuring that all developers on a team are using the same
 environments.
 
 Packages exist in two places: a "local" repository cache in the user's home
-directory--also called the fig-home--and a "remote" repository on a shared
+directory-- also called the fig-home --and a "remote" repository on a shared
 server. Fig will automatically download packages from the remote repository and
 install them in the fig-home as needed.  Fig does not contact the remote
-repository unless it needs to.  The fig-home is $HOME/.fighome, but may be
-changed by setting the $FIG_HOME environment variable.
+repository unless it needs to.  The default fig-home is `$HOME/.fighome`, but
+may be changed by setting the `$FIG_HOME` environment variable.
 
 Command-line Usage
 ==================
@@ -542,7 +542,31 @@ contents will not be extracted as part of installation.
 
 ## `retrieve`
 
-Gives the installation location for a dependency.
+Specifies where, relative to the current directory, to copy files from packages
+when an environment variable is modified.
+
+Fig would prefer to keep the files for all dependencies in the local repository
+and have your code find the actual locations via environment variables.  The
+reason that this kind of statement exists is to support tools that manage their
+own runtime environments, e.g. IDEs.  If you have no need for such programs,
+then you don't need this kind of statement.  If you are in such a situation,
+you will need to point your program configuration to the correct locations
+within your project directory and you will want to periodically do:
+
+    cd base/directory/for/project
+    fig --update
+
+If nothing uses the environment variable indicated by the statement, the
+statement will have no effect.  So, given a package.fig like
+
+    retrieve CLASSPATH->some/path/to/copy/jar/files/to
+    config default
+      set FOO=BAR
+      add WHATEVER=some/path
+    end
+
+no copying will happen because no manipulation of the CLASSPATH environment
+variable is done.
 
 ## `set`
 
