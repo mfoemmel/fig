@@ -115,8 +115,10 @@ def substitute_variable(variable_value, retrieve_vars = {})
   output = nil
   variables = setup_variables
   environment.execute_shell([]) {
+    # No space between the closing curly of an interpolation and the double
+    # ampersand due to the way that echo works on MS Windows.
     output =
-      %x[echo #{variables[0]} && echo #{variables[1]} && echo #{variables[2]}]
+      %x[echo #{variables[0]}&& echo #{variables[1]}&& echo #{variables[2]}]
   }
 
   return output
