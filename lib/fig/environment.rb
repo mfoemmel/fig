@@ -15,12 +15,17 @@ module Fig
   # variables, and sets things up for running commands (from "command"
   # statements in configuration files).
   class Environment
+    # Note: when reading this code, understand that the word "retrieve" is a
+    # noun and not a verb, e.g. "retrieve value" means the value of a retrieve
+    # and not the action of retrieving a value.
+
     DEFAULT_VERSION_NAME = 'current'
 
     def initialize(repository, variables_override, working_directory_maintainer)
       @repository = repository
-      @variables = variables_override || OperatingSystem.get_environment_variables
-      @retrieve_vars = {}
+      @variables =
+        variables_override || OperatingSystem.get_environment_variables()
+      @retrieves = {}
       @packages = {}
       @working_directory_maintainer = working_directory_maintainer
     end
@@ -37,7 +42,12 @@ module Fig
     # Indicates that the values from a particular environment variable path
     # should be copied to a local directory.
     def add_retrieve(name, path)
-      @retrieve_vars[name] = path
+      if @retrieves.has_key?(name)
+        Logging.warn \
+          %q<About to overwrite "#{name}" retrieve value of "#{@retrieves[name]}" with "#{path}".>
+      end
+
+      @retrieves[name] = path
 
       return
     end
@@ -187,14 +197,17 @@ module Fig
     private
 
     def set_variable(base_package, name, value)
-      @variables[name] = expand_and_retrieve_variable_value(base_package, name, value)
+      @variables[name] =
+        expand_variable_as_path_and_process_retrieves(name, value, base_package)
 
       return
     end
 
     def prepend_variable(base_package, name, value)
-      value = expand_and_retrieve_variable_value(base_package, name, value)
-      @variables.prepend_variable(name, value)
+      @variables.prepend_variable(
+        name,
+        expand_variable_as_path_and_process_retrieves(name, value, base_package)
+      )
 
       return
     end
@@ -226,14 +239,18 @@ module Fig
       return package
     end
 
-    # Replace @ symbol with the package's directory, "[package]" with the
-    # package name.
-    def expand_and_retrieve_variable_value(base_package, name, value)
-      return value unless base_package && base_package.name
+    # Consider the variable to be a file/directory path; if there's a package,
+    # replace @ symbols with the package's directory, "[package]" with the
+    # package name and copy any files indicated by a retrieve with the same
+    # name.
+    def expand_variable_as_path_and_process_retrieves(
+      variable_name, variable_value, base_package
+    )
+      return variable_value unless base_package && base_package.name
 
-      file = expand_path(value, base_package)
+      file = expand_path(variable_value, base_package)
 
-      if @retrieve_vars.member?(name)
+      if @retrieves.member?(variable_name)
         target = nil
 
         # A '//' in the source file's path tells us to preserve path
@@ -241,12 +258,12 @@ module Fig
         if file.split('//').size > 1
           preserved_path = file.split('//').last
           target = File.join(
-            translate_retrieve_variables(base_package, name),
+            get_retrieve_value_with_substitution(variable_name, base_package),
             preserved_path
           )
         else
           target = File.join(
-            translate_retrieve_variables(base_package, name)
+            get_retrieve_value_with_substitution(variable_name, base_package)
           )
           if not File.directory?(file)
             target = File.join(target, File.basename(file))
@@ -333,9 +350,8 @@ module Fig
       return string.gsub(%r< \\ ([\\@]) >x, '\1')
     end
 
-    def translate_retrieve_variables(base_package, name)
-      return \
-        @retrieve_vars[name].gsub(/ \[package\] /x, base_package.name)
+    def get_retrieve_value_with_substitution(name, base_package)
+      return @retrieves[name].gsub(/ \[package\] /x, base_package.name)
     end
   end
 end
