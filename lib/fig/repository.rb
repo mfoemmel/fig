@@ -224,6 +224,10 @@ module Fig
         begin
           @operating_system.download(remote_version_file, local_version_file)
         rescue NotFoundError
+          # The download may create an empty file, so get rid of it.
+          if File.exist?(local_version_file)
+            File.unlink(local_version_file)
+          end
         end
 
         @remote_repository_version =

@@ -174,10 +174,10 @@ module Fig
             return true
           end
         rescue Net::FTPPermError => error
-          Logging.warn error.message
+          Logging.debug error.message
           raise NotFoundError.new
         rescue SocketError => error
-          Logging.warn error.message
+          Logging.debug error.message
           raise NotFoundError.new
         end
       when 'http'
