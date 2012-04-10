@@ -16,8 +16,8 @@ module Fig
   # statements in configuration files).
   class Environment
     # Note: when reading this code, understand that the word "retrieve" is a
-    # noun and not a verb, e.g. "retrieve value" means the value of a retrieve
-    # and not the action of retrieving a value.
+    # noun and not a verb, e.g. "retrieve path" means the value of a retrieve
+    # and not the action of retrieving a path.
 
     def initialize(repository, variables_override, working_directory_maintainer)
       @repository = repository
@@ -42,7 +42,7 @@ module Fig
     def add_retrieve(name, path)
       if @retrieves.has_key?(name)
         Logging.warn \
-          %q<About to overwrite "#{name}" retrieve value of "#{@retrieves[name]}" with "#{path}".>
+          %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name]}" with "#{path}".>
       end
 
       @retrieves[name] = path
@@ -99,7 +99,7 @@ module Fig
             "#{command.command} #{args.join(' ')}"
           )
 
-        yield expand_path(argument, package).split(' ')
+        yield expand_at_signs_in_path(argument, package).split(' ')
       end
 
       return
@@ -246,46 +246,52 @@ module Fig
     )
       return variable_value unless base_package && base_package.name
 
-      file = expand_path(variable_value, base_package)
+      variable_value = expand_at_signs_in_path(variable_value, base_package)
 
-      if @retrieves.member?(variable_name)
-        target = nil
+      return variable_value if not @retrieves.member?(variable_name)
 
-        # A '//' in the source file's path tells us to preserve path
-        # information after the '//' when doing a retrieve.
-        if file.split('//').size > 1
-          preserved_path = file.split('//').last
-          target = File.join(
-            get_retrieve_value_with_substitution(variable_name, base_package),
-            preserved_path
-          )
-        else
-          target = File.join(
-            get_retrieve_value_with_substitution(variable_name, base_package)
-          )
-          if not File.directory?(file)
-            target = File.join(target, File.basename(file))
-          end
-        end
-        @working_directory_maintainer.with_package_version(
-          base_package.name, base_package.version
-        ) do
-          @working_directory_maintainer.retrieve(file, target)
-        end
-        file = target
-      end
-
-      return file
+      return retrieve_files(variable_name, variable_value, base_package)
     end
 
-    def expand_path(path, base_package)
-      expanded_path = expand_at_sign_package_references(path, base_package)
+    def retrieve_files(variable_name, variable_value, base_package)
+      destination_path = nil
+
+      # A '//' in the variable value tells us to preserve path
+      # information after the '//' when doing a retrieve.
+      if variable_value.split('//').size > 1
+        preserved_path = variable_value.split('//').last
+        destination_path = File.join(
+          get_retrieve_path_with_substitution(variable_name, base_package),
+          preserved_path
+        )
+      else
+        destination_path = File.join(
+          get_retrieve_path_with_substitution(variable_name, base_package)
+        )
+        if not File.directory?(variable_value)
+          destination_path =
+            File.join(destination_path, File.basename(variable_value))
+        end
+      end
+
+      @working_directory_maintainer.with_package_version(
+        base_package.name, base_package.version
+      ) do
+        @working_directory_maintainer.retrieve(variable_value, destination_path)
+      end
+
+      return destination_path
+    end
+
+    def expand_at_signs_in_path(path, base_package)
+      expanded_path =
+        replace_at_signs_with_package_references(path, base_package)
       check_for_bad_escape(expanded_path, path)
 
       return collapse_backslashes_for_escaped_at_signs(expanded_path)
     end
 
-    def expand_at_sign_package_references(arg, base_package)
+    def replace_at_signs_with_package_references(arg, base_package)
       return arg.gsub(
         %r<
           (?: ^ | \G)           # Zero-width anchor.
@@ -296,8 +302,6 @@ module Fig
         backslashes = $1 || ''
         backslashes + base_package.directory
       end
-
-      return
     end
 
     def expand_command_line_argument(arg)
@@ -348,7 +352,7 @@ module Fig
       return string.gsub(%r< \\ ([\\@]) >x, '\1')
     end
 
-    def get_retrieve_value_with_substitution(name, base_package)
+    def get_retrieve_path_with_substitution(name, base_package)
       return @retrieves[name].gsub(/ \[package\] /x, base_package.name)
     end
   end
