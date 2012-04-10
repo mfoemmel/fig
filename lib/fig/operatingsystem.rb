@@ -366,7 +366,7 @@ module Fig
       end
     end
 
-    def self.add_shell_variable_expansion(variable_name)
+    def self.wrap_variable_name_with_shell_expansion(variable_name)
       if OperatingSystem.windows?
         return "%#{variable_name}%"
       else

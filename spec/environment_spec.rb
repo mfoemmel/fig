@@ -105,7 +105,7 @@ end
 def setup_variables
   variable_arguments = %w<WHATEVER_ONE WHATEVER_TWO WHATEVER_THREE>
   return variable_arguments.map do |var_arg|
-    Fig::OperatingSystem.add_shell_variable_expansion(var_arg)
+    Fig::OperatingSystem.wrap_variable_name_with_shell_expansion(var_arg)
   end
 end
 
@@ -116,7 +116,7 @@ def substitute_variable(variable_value, retrieve_vars = {})
   variables = setup_variables
   environment.execute_shell([]) {
     output =
-      %x[echo #{variables[0]}&& echo #{variables[1]}&& echo #{variables[2]}]
+      %x[echo #{variables[0]} && echo #{variables[1]} && echo #{variables[2]}]
   }
 
   return output
