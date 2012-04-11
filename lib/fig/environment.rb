@@ -201,7 +201,7 @@ module Fig
 
       if Logging.debug?
         expanded_message =
-          expanded_value == value ? ''
+          expanded_value == value ? ''  \
                                   : %Q< (expanded from "#{value}")>
 
         Logging.debug(
