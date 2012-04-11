@@ -436,7 +436,8 @@ Synonym for `add`.
 
 Specifies an archive file (either a local path or a URL) that is supposed to be
 incorporated into the package.  This is different from a `resource` in that the
-contents will be extracted as part of installation.
+contents will be extracted as part of installation.  Also unlike a `resource`,
+if the value is a local path, no file globbing will be performed.
 
 ## `command`
 
@@ -536,9 +537,12 @@ Synonym for `add`.
 
 ## `resource`
 
-Specifies a file (either a local path or a URL) that is supposed to be
-incorporated into the package.  This is different from an `archive` in that the
-contents will not be extracted as part of installation.
+Specifies either a URL or a local path (that will have file globbing performed
+on it) that is supposed to be incorporated into the package.  This is different
+from an `archive` in that the contents will not be extracted as part of
+installation.  If the value is a local path, then file globbing will be
+performed on it, allowing you to do things like include all jar files below a
+directory, e.g. "`resource jars/**/*.jar`".
 
 ## `retrieve`
 
