@@ -195,17 +195,37 @@ module Fig
     private
 
     def set_variable(base_package, name, value)
-      @variables[name] =
+      expanded_value =
         expand_variable_as_path_and_process_retrieves(name, value, base_package)
+      @variables[name] = expanded_value
+
+      if Logging.debug?
+        expanded_message =
+          expanded_value == value ? ''
+                                  : %Q< (expanded from "#{value}")>
+
+        Logging.debug(
+          %Q<Set #{name} to "#{expanded_value}"#{expanded_message}.>
+        )
+      end
 
       return
     end
 
     def prepend_variable(base_package, name, value)
-      @variables.prepend_variable(
-        name,
+      expanded_value =
         expand_variable_as_path_and_process_retrieves(name, value, base_package)
-      )
+      @variables.prepend_variable(name, expanded_value)
+
+      if Logging.debug?
+        expanded_message =
+          expanded_value == value ? ''
+                                  : %Q< ("#{value}" expanded to "#{expanded_value}")>
+
+        Logging.debug(
+          %Q<Prepending to #{name} resulted in "#{@variables[name]}"#{expanded_message}.>
+        )
+      end
 
       return
     end
