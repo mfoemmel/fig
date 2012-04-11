@@ -572,6 +572,24 @@ statement will have no effect.  So, given a package.fig like
 no copying will happen because no manipulation of the CLASSPATH environment
 variable is done.
 
+Also, only statements in the base package (whether the package.fig in the
+current directory or from a package descriptor specified on the command line)
+will have any effect.  So, if you have a package "prerequisite" with the
+following
+
+    retrieve CLASSPATH->from-prerequisite
+    config default
+      set CLASSPATH=whatever
+    end
+
+and a package.fig in the current directory like
+
+    config default
+      include prerequisite/1
+    end
+
+then no copying will take place despite the CLASSPATH variable being set.
+
 ## `set`
 
 Specifies the value of an environment variable.  Unlike `add`/`append`/`path`,
