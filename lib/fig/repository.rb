@@ -425,7 +425,9 @@ module Fig
     def publish_package_content_and_derive_dot_fig_contents(
       package_statements, descriptor, local_dir, local_only
     )
-      header_strings = derive_package_metadata_comments(descriptor)
+      header_strings = derive_package_metadata_comments(
+        package_statements, descriptor
+      )
       deparsed_statement_strings = publish_package_content(
         package_statements, descriptor, local_dir, local_only
       )
@@ -433,17 +435,26 @@ module Fig
       return [header_strings, deparsed_statement_strings].flatten()
     end
 
-    def derive_package_metadata_comments(descriptor)
+    def derive_package_metadata_comments(package_statements, descriptor)
       now = Time.now()
+
+      asset_statements =
+        package_statements.select { |statement| statement.is_asset? }
+      asset_strings =
+        asset_statements.collect { |statement| statement.unparse('#    ') }
 
       return [
         %Q<# Publishing information for #{descriptor.to_string()}:>,
         %q<#>,
-        %Q<#    Time: #{now} (epoch: #{now.to_i()})>,
-        %Q<#    User: #{Sys::Admin.get_login()}>,
-        %Q<#    Host: #{Socket.gethostname()}>,
-        %Q<#    Args: "#{ARGV.join %q[", "]}">,
-        %q<#>
+        %Q<#     Time: #{now} (epoch: #{now.to_i()})>,
+        %Q<#     User: #{Sys::Admin.get_login()}>,
+        %Q<#     Host: #{Socket.gethostname()}>,
+        %Q<#     Args: "#{ARGV.join %q[", "]}">,
+        %q<#>,
+        %q<# Original asset statements: >,
+        %q<#>,
+        asset_strings.join("\n"),
+        %Q<\n>,
       ]
     end
 
