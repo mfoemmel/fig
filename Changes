@@ -9,6 +9,13 @@ v0.1.??
     were ignored and package.fig locating would happen and the publish would be
     based only on that.  Probably not what was intended.
 
+    E.g.:
+
+      fig --publish foo/1 --resource=something.txt
+
+    would ignore the --resource option, look for a package.fig file and publish
+    based upon that.
+
   New features:
 
   - Now checks repository format version and fails if it's different from what
