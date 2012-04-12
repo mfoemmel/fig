@@ -225,6 +225,10 @@ class Fig::Command
           )
         ]
       publish_statements << Fig::Statement::Publish.new()
+    elsif not @options.resources().empty? or not @options.archives().empty?
+      raise Fig::UserInputError.new(
+        '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
+      )
     else
       load_package_file()
       if not @package.statements.empty?
