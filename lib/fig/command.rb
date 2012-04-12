@@ -159,7 +159,7 @@ class Fig::Command
 
     @environment = prepare_environment
 
-    @options.non_command_package_statements().each do |statement|
+    @options.environment_variable_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
     end
   end
@@ -212,7 +212,8 @@ class Fig::Command
       raise Fig::UserInputError.new('Please specify a package name and a version name.')
     end
 
-    if not @options.non_command_package_statements().empty?
+    publish_statements = nil
+    if not @options.environment_variable_statements().empty?
       publish_statements =
         @options.resources() +
         @options.archives() +
@@ -220,7 +221,7 @@ class Fig::Command
           Fig::Statement::Configuration.new(
             nil,
             Fig::Package::DEFAULT_CONFIG,
-            @options.non_command_package_statements()
+            @options.environment_variable_statements()
           )
         ]
       publish_statements << Fig::Statement::Publish.new()
