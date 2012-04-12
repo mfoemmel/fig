@@ -181,12 +181,18 @@ module Fig
           raise NotFoundError.new
         end
       when 'http'
-        http = Net::HTTP.new(uri.host)
         log_download(url, path)
         File.open(path, 'wb') do |file|
           file.binmode
-          http.get(uri.path) do |block|
-            file.write(block)
+
+          begin
+            download_via_http_get(url, file)
+          rescue SystemCallError => error
+            Logging.debug error.message
+            raise NotFoundError.new
+          rescue SocketError => error
+            Logging.debug error.message
+            raise NotFoundError.new
           end
         end
       when 'ssh'
@@ -430,7 +436,28 @@ module Fig
       end
     end
 
-    private
+    def download_via_http_get(uri_string, file, redirection_limit = 10)
+      if redirection_limit < 1
+        Logging.debug 'Too many HTTP redirects.'
+        raise NotFoundError.new
+      end
+
+      response = Net::HTTP.get_response(URI(uri_string))
+
+      case response
+      when Net::HTTPSuccess then
+        file.write(response.body)
+      when Net::HTTPRedirection then
+        location = response['location']
+        Logging.debug "Redirecting to #{location}."
+        download_via_http_get(location, file, limit - 1)
+      else
+        Logging.debug "Download failed: #{response.code} #{response.message}."
+        raise NotFoundError.new
+      end
+
+      return
+    end
 
     def log_download(url, path)
       Logging.debug "Downloading #{url} to #{path}."
