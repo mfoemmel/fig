@@ -182,7 +182,7 @@ describe 'Fig' do
       END
       out, err, exit_code = fig('--update-if-missing', input)
 
-      err.should =~ /UNREFERENCED_VARIABLE was never referenced, so.*retrieve UNREFERENCED_VARIABLE->somewhere.*was ignored/
+      err.should =~ /UNREFERENCED_VARIABLE.*was never referenced.*retrieve UNREFERENCED_VARIABLE->somewhere.*was ignored/
     end
   end
 end

@@ -201,7 +201,7 @@ module Fig
         statement = @retrieves[name]
         if statement.loaded_but_not_referenced?
           Logging.warn \
-            %Q<#{name} was never referenced, so "#{statement.unparse('')}"#{statement.position_string} was ignored.>
+            %Q<The #{name} variable was never referenced or didn't need expansion, so "#{statement.unparse('')}"#{statement.position_string} was ignored.>
         end
       end
     end
