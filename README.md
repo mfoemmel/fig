@@ -428,6 +428,8 @@ Specifies a value to be appended to a `PATH`-like environment variable, e.g.
 `CLASSPATH` for Java.  Does not include the delimiter within the variable, just
 the component value.
 
+At sign ("@") and retrieve variable substitution is done on the value.
+
 ## `append`
 
 Synonym for `add`.
@@ -549,6 +551,14 @@ directory, e.g. "`resource jars/**/*.jar`".
 Specifies where, relative to the current directory, to copy files from packages
 when an environment variable is modified.
 
+### Syntax
+
+    retrieve VARIABLE->some/path
+
+Note that there is no whitespace allowed around the "`->`".
+
+### Reason for existence
+
 Fig would prefer to keep the files for all dependencies in the local repository
 and have your code find the actual locations via environment variables.  The
 reason that this kind of statement exists is to support tools that manage their
@@ -559,6 +569,11 @@ within your project directory and you will want to periodically do:
 
     cd base/directory/for/project
     fig --update
+
+### Conditions in which statement will be processed
+
+For a retrieve to do anything, the environment variable that it refers to must
+be manipulated in a way that requires variable expansion.
 
 If nothing uses the environment variable indicated by the statement, the
 statement will have no effect.  So, given a package.fig like
@@ -572,14 +587,39 @@ statement will have no effect.  So, given a package.fig like
 no copying will happen because no manipulation of the CLASSPATH environment
 variable is done.
 
-Also, only statements in the base package (whether the package.fig in the
-current directory or from a package descriptor specified on the command line)
-will have any effect.  So, if you have a package "prerequisite" with the
+Even if the variable is referenced, the statement will have no effect if the
+variable doesn't require any expansion, which is always the case within a
+package with no prerequisites, e.g.
+
+    # Not going to do any copying here, either.
+    retrieve CLASSPATH->some/path/to/copy/jar/files/to
+    config default
+      set CLASSPATH=whatever
+    end
+
+The simplest form of a retrieve that will actually execute something looks like
+the following.  You need to have a prerequisite package that manipulates the
+variable in a way that requires expansion:
+
+    config default
+      add CLASSPATH=@/some.jar
+    end
+
+And then you need to depend upon that:
+
+    retrieve CLASSPATH->from-dependent
+    config default
+      include prerequisite/1
+    end
+
+Also, only retrieve statements in the base package (whether the package.fig in
+the current directory or from a package descriptor specified on the command
+line) will have any effect.  So, if you have a package "prerequisite" with the
 following
 
     retrieve CLASSPATH->from-prerequisite
     config default
-      set CLASSPATH=whatever
+      set CLASSPATH=@/whatever
     end
 
 and a package.fig in the current directory like
@@ -590,10 +630,16 @@ and a package.fig in the current directory like
 
 then no copying will take place despite the CLASSPATH variable being set.
 
+### Other
+
+Substitution of the string "[package]" is done.
+
 ## `set`
 
 Specifies the value of an environment variable.  Unlike `add`/`append`/`path`,
 this is the complete, final value.
+
+At sign ("@") and retrieve variable substitution is done on the value.
 
 Querying Fig Net Effects
 ========================
