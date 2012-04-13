@@ -103,7 +103,7 @@ def substitute_command(command)
   return substituted_command
 end
 
-def setup_variables
+def generate_shell_variable_expansions
   variable_arguments = %w<WHATEVER_ONE WHATEVER_TWO WHATEVER_THREE>
   return variable_arguments.map do |var_arg|
     Fig::OperatingSystem.wrap_variable_name_with_shell_expansion(var_arg)
@@ -114,7 +114,7 @@ def substitute_variable(variable_value, retrieve_vars = {})
   environment = new_example_environment(variable_value, retrieve_vars)
 
   output = nil
-  variables = setup_variables
+  variables = generate_shell_variable_expansions
   environment.execute_shell([]) {
     # No space between the closing curly of an interpolation and the double
     # ampersand due to the way that echo works on MS Windows.
@@ -126,6 +126,10 @@ def substitute_variable(variable_value, retrieve_vars = {})
 end
 
 describe 'Environment' do
+  before(:all) do
+    setup_test_environment()
+  end
+
   it 'can hand back a variable' do
     environment = new_example_environment
 
@@ -204,26 +208,42 @@ describe 'Environment' do
     end
 
     it 'does retrieve variables [package] substitution' do
-      retrieve_vars = {'WHATEVER_ONE' => 'foo.[package].bar.[package].baz'}
-      output = substitute_variable('blah', retrieve_vars)
+      retrieve_vars = {
+        'WHATEVER_ONE' => 'foo.[package].bar.[package].baz',
+        'WHATEVER_TWO' => 'foo.[package].bar.[package].baz',
+        'WHATEVER_THREE' => 'foo.[package].bar.[package].baz'
+      }
+      output = substitute_variable(FIG_FILE_GUARANTEED_TO_EXIST, retrieve_vars)
 
-      output.should == "foo.one.bar.one.baz/blah\nblah\nblah\n"
+      destination = File.basename(FIG_FILE_GUARANTEED_TO_EXIST)
+      output.should ==
+        "foo.one.bar.one.baz/#{destination}\nfoo.two.bar.two.baz/#{destination}\nfoo.three.bar.three.baz/#{destination}\n"
     end
 
     it 'truncates before //' do
+      if FIG_FILE_GUARANTEED_TO_EXIST !~
+          %r< \A (.+ [^/]) ( (?: / [^/]+ ){2} ) \z >x
+        fail "Test assumes that FIG_FILE_GUARANTEED_TO_EXIST (#{FIG_FILE_GUARANTEED_TO_EXIST}) has at least two parent directories."
+      end
+      base_path = $1
+      to_be_preserved = $2
+      mangled_path = "#{base_path}/#{to_be_preserved}"
+
       retrieve_vars = {
+        # Just checking that double slashes aren't mangled in the retrieves.
         'WHATEVER_ONE'   => 'foo.[package].//./bar.[package].baz',
+        # No WHATEVER_TWO here means that the value should pass through unmolested.
         'WHATEVER_THREE' => 'phoo.//.bhar'
       }
-      output = substitute_variable('blah.//.blez', retrieve_vars)
+      output = substitute_variable(mangled_path, retrieve_vars)
 
-      output.should == "foo.one.//./bar.one.baz/.blez\nblah.//.blez\nphoo.//.bhar/.blez\n"
+      output.should == "foo.one.//./bar.one.baz#{to_be_preserved}\n#{mangled_path}\nphoo.//.bhar#{to_be_preserved}\n"
     end
   end
 
   describe 'command execution' do
     it 'issues an error when attempting to execute a command from a config which contains no command' do
-      environment = new_example_environment('blah')
+      environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       expect {
         environment.execute_config(
           nil, Fig::PackageDescriptor.new('one', nil, nil), nil
@@ -232,7 +252,7 @@ describe 'Environment' do
     end
 
     it 'executes a command successfully' do
-      environment = new_example_environment('blah')
+      environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       received_command = nil
       environment.execute_config(
         nil, Fig::PackageDescriptor.new('has_command', nil, nil), []

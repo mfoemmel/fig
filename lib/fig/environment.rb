@@ -308,6 +308,8 @@ module Fig
         end
       end
 
+      check_source_existence(variable_name, variable_value, base_package)
+
       @working_directory_maintainer.with_package_version(
         base_package.name, base_package.version
       ) do
@@ -315,6 +317,15 @@ module Fig
       end
 
       return destination_path
+    end
+
+    def check_source_existence(variable_name, variable_value, base_package)
+      return if File.exists?(variable_value)
+
+      Logging.fatal(
+        %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>
+      )
+      raise RepositoryError.new
     end
 
     def expand_at_signs_in_path(path, base_package)

@@ -29,6 +29,9 @@ v0.1.??
 
   - Now warns about ineffectual "retrieve" statements.
 
+  - A lot of existence checks have been added, resulting in nicer error
+    messages and fewer stack traces.
+
   Bug fixes:
 
   - Now checks that archive base names are unique before allowing publishing.
