@@ -349,8 +349,19 @@ module Fig
     # 'tmp/foo/*.jar']
     def expand_globs_from(resources)
       expanded_files = []
-      resources.each {|f| expanded_files.concat(Dir.glob(f))}
-      expanded_files
+
+      resources.each do
+        |path|
+
+        globbed_files = Dir.glob(path)
+        if globbed_files.empty?
+          expanded_files << path
+        else
+          expanded_files.concat(globbed_files)
+        end
+      end
+
+      return expanded_files
     end
 
     def read_package_from_directory(dir, descriptor)
@@ -425,7 +436,9 @@ module Fig
     def publish_package_content_and_derive_dot_fig_contents(
       package_statements, descriptor, local_dir, local_only
     )
-      header_strings = derive_package_metadata_comments(descriptor)
+      header_strings = derive_package_metadata_comments(
+        package_statements, descriptor
+      )
       deparsed_statement_strings = publish_package_content(
         package_statements, descriptor, local_dir, local_only
       )
@@ -433,17 +446,26 @@ module Fig
       return [header_strings, deparsed_statement_strings].flatten()
     end
 
-    def derive_package_metadata_comments(descriptor)
+    def derive_package_metadata_comments(package_statements, descriptor)
       now = Time.now()
+
+      asset_statements =
+        package_statements.select { |statement| statement.is_asset? }
+      asset_strings =
+        asset_statements.collect { |statement| statement.unparse('#    ') }
 
       return [
         %Q<# Publishing information for #{descriptor.to_string()}:>,
         %q<#>,
-        %Q<#    Time: #{now} (epoch: #{now.to_i()})>,
-        %Q<#    User: #{Sys::Admin.get_login()}>,
-        %Q<#    Host: #{Socket.gethostname()}>,
-        %Q<#    Args: "#{ARGV.join %q[", "]}">,
-        %q<#>
+        %Q<#     Time: #{now} (epoch: #{now.to_i()})>,
+        %Q<#     User: #{Sys::Admin.get_login()}>,
+        %Q<#     Host: #{Socket.gethostname()}>,
+        %Q<#     Args: "#{ARGV.join %q[", "]}">,
+        %q<#>,
+        %q<# Original asset statements: >,
+        %q<#>,
+        asset_strings.join("\n"),
+        %Q<\n>,
       ]
     end
 
@@ -466,9 +488,16 @@ module Fig
 
           if Repository.is_url?(statement.url)
             asset_local = File.join(temp_dir(), asset_name)
-            @operating_system.download(statement.url, asset_local)
+
+            begin
+              @operating_system.download(statement.url, asset_local)
+            rescue NotFoundError
+              Logging.fatal "Could not download #{statement.url}."
+              raise RepositoryError.new
+            end
           else
             asset_local = statement.url
+            check_asset_path(asset_local)
           end
 
           if not local_only
@@ -494,28 +523,55 @@ module Fig
     # Archive statement.  Thus the caller should substitute its set of
     # statements with the return value.
     def create_resource_archive(package_statements)
-      resource_paths = []
+      asset_paths = []
       new_package_statements = package_statements.reject do |statement|
         if (
           statement.is_a?(Statement::Resource) &&
           ! Repository.is_url?(statement.url)
         )
-          resource_paths << statement.url
+          asset_paths << statement.url
           true
         else
           false
         end
       end
 
-      if resource_paths.size > 0
-        resource_paths = expand_globs_from(resource_paths)
+      if asset_paths.size > 0
+        asset_paths = expand_globs_from(asset_paths)
+        check_asset_paths(asset_paths)
+
         file = 'resources.tar.gz'
-        @operating_system.create_archive(file, resource_paths)
+        @operating_system.create_archive(file, asset_paths)
         new_package_statements.unshift(Statement::Archive.new(nil, file))
         at_exit { File.delete(file) }
       end
 
       return new_package_statements
+    end
+
+    def check_asset_path(asset_path)
+      if not File.exist?(asset_path)
+        Logging.fatal "Could not find file #{asset_path}."
+        raise RepositoryError.new
+      end
+
+      return
+    end
+
+    def check_asset_paths(asset_paths)
+      non_existing_paths = asset_paths.select {|path| ! File.exist?(path) }
+
+      if not non_existing_paths.empty?
+        if non_existing_paths.size > 1
+          Logging.fatal "Could not find files: #{ non_existing_paths.join(', ') }"
+        else
+          Logging.fatal "Could not find file #{non_existing_paths[0]}."
+        end
+
+        raise RepositoryError.new
+      end
+
+      return
     end
   end
 end

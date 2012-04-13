@@ -12,7 +12,7 @@ def create_local_repository()
   application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_URL)
   repository = Fig::Repository.new(
     Fig::OperatingSystem.new(nil),
-    FIG_SPEC_BASE_DIRECTORY,
+    FIG_HOME,
     application_config,
     nil,   # remote user
     false, # unconditional update
@@ -23,28 +23,27 @@ def create_local_repository()
 end
 
 def generate_package_statements
-    resource_statement      = Fig::Statement::Resource.new(nil, 'fullpath')
-    path_statement          = Fig::Statement::Path.new(nil, 'FOO', 'bar')
-    configuration_statement =
-      Fig::Statement::Configuration.new(
-        nil, Fig::Package::DEFAULT_CONFIG, [path_statement]
-      )
-    publish_statement       = Fig::Statement::Publish.new()
+  resource_statement      = Fig::Statement::Resource.new(nil, FIG_FILE_GUARANTEED_TO_EXIST)
+  path_statement          = Fig::Statement::Path.new(nil, 'FOO', 'bar')
+  configuration_statement =
+    Fig::Statement::Configuration.new(
+      nil, Fig::Package::DEFAULT_CONFIG, [path_statement]
+    )
+  publish_statement       = Fig::Statement::Publish.new()
 
-    package_statements = [resource_statement] + [configuration_statement]
-    package_statements << publish_statement
+  package_statements = [resource_statement] + [configuration_statement]
+  package_statements << publish_statement
 
-    return package_statements
+  return package_statements
 end
 
 describe 'Repository' do
   before(:each) do
+    cleanup_test_environment
     setup_test_environment
   end
 
   it 'cleans a package from the repository' do
-    cleanup_test_environment
-
     repository = create_local_repository
 
     repository.list_packages.include?('foo/1.0.0').should be_false

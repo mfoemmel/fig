@@ -104,12 +104,16 @@ end
 Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
 FIG_SPEC_BASE_DIRECTORY =
-    File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
+  File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
 FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
 FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
 FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
 FIG_BIN        = File.expand_path(File.dirname(__FILE__) + '/../bin')
 FIG_EXE        = %Q<#{FIG_BIN}/fig>
+
+# Needed for testing of resources.
+FIG_FILE_GUARANTEED_TO_EXIST =
+  File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/file-guaranteed-to-exist')
 
 # If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
 RUBY_EXE =
@@ -129,6 +133,8 @@ def setup_test_environment()
   FileUtils.mkdir_p(FIG_HOME)
 
   FileUtils.mkdir_p(FIG_REMOTE_DIR)
+
+  FileUtils.touch(FIG_FILE_GUARANTEED_TO_EXIST)
 
   metadata_directory =
     File.join(FIG_REMOTE_DIR, Fig::Repository::METADATA_SUBDIRECTORY)

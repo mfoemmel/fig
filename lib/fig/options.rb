@@ -178,8 +178,8 @@ Environment variables:
     return @options[:no_figrc]
   end
 
-  def non_command_package_statements()
-    return @options[:non_command_package_statements]
+  def environment_variable_statements()
+    return @options[:environment_variable_statements]
   end
 
   def package_config_file()
@@ -383,14 +383,14 @@ Environment variables:
   end
 
   def set_up_package_statements(parser)
-    @options[:non_command_package_statements] = []
+    @options[:environment_variable_statements] = []
     parser.on(
       '-p',
       '--append VARIABLE=VALUE',
       'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |var_val|
       var, val = var_val.split('=')
-      @options[:non_command_package_statements] <<
+      @options[:environment_variable_statements] <<
         Fig::Statement::Path.new(nil, var, val)
     end
 
@@ -404,14 +404,14 @@ Environment variables:
           nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
         )
       statement.complain_if_version_missing()
-      @options[:non_command_package_statements] << statement
+      @options[:environment_variable_statements] << statement
     end
 
     parser.on(
       '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
     ) do |var_val|
       var, val = var_val.split('=')
-      @options[:non_command_package_statements] <<
+      @options[:environment_variable_statements] <<
         Fig::Statement::Set.new(nil, var, val)
     end
 
