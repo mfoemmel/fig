@@ -5,6 +5,7 @@ require 'fig/environmentvariables/casesensitive'
 require 'fig/package'
 require 'fig/packagedescriptor'
 require 'fig/statement/configuration'
+require 'fig/statement/retrieve'
 require 'fig/statement/set'
 
 DEPENDED_UPON_PACKAGE_NAME = 'depended-upon'
@@ -46,7 +47,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
 
   if retrieve_vars
     retrieve_vars.each do |name, path|
-      environment.add_retrieve( name, path )
+      environment.add_retrieve( Fig::Statement::Retrieve.new(nil, name, path) )
     end
   end
 

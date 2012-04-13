@@ -39,13 +39,15 @@ module Fig
 
     # Indicates that the values from a particular environment variable path
     # should be copied to a local directory.
-    def add_retrieve(name, path)
+    def add_retrieve(retrieve_statement)
+      name = retrieve_statement.var
       if @retrieves.has_key?(name)
         Logging.warn \
-          %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name]}" with "#{path}".>
+          %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name].path}" with "#{retrieve_statement.path}".>
       end
 
-      @retrieves[name] = path
+      @retrieves[name] = retrieve_statement
+      retrieve_statement.added_to_environment(true)
 
       return
     end
@@ -190,6 +192,18 @@ module Fig
       )
 
       return
+    end
+
+    def check_unused_retrieves()
+      @retrieves.keys().sort().each do
+        |name|
+
+        statement = @retrieves[name]
+        if statement.loaded_but_not_referenced?
+          Logging.warn \
+            %Q<#{name} was never referenced, so "#{statement.unparse('')}"#{statement.position_string} was ignored.>
+        end
+      end
     end
 
     private
@@ -373,7 +387,10 @@ module Fig
     end
 
     def get_retrieve_path_with_substitution(name, base_package)
-      return @retrieves[name].gsub(/ \[package\] /x, base_package.name)
+      retrieve_statement = @retrieves[name]
+      retrieve_statement.referenced(true)
+
+      return retrieve_statement.path.gsub(/ \[package\] /x, base_package.name)
     end
   end
 end

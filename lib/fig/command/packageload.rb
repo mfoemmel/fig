@@ -54,8 +54,8 @@ module Fig::Command::PackageLoad
 
   def register_package_with_environment()
     if @options.updating?
-      @package.retrieves.each do |var, path|
-        @environment.add_retrieve(var, path)
+      @package.retrieves.each do |statement|
+        @environment.add_retrieve(statement)
       end
     end
 

@@ -170,5 +170,19 @@ describe 'Fig' do
       fig('--update-if-missing', input)
       File.read("#{FIG_SPEC_BASE_DIRECTORY}/lib2/foo/foo.jar").should == 'some library'
     end
+
+    it 'warns on unused retrieval' do
+      setup_test_environment()
+
+      input = <<-END
+        retrieve UNREFERENCED_VARIABLE->somewhere
+        config default
+          set WHATEVER=SOMETHING
+        end
+      END
+      out, err, exit_code = fig('--update-if-missing', input)
+
+      err.should =~ /UNREFERENCED_VARIABLE was never referenced, so.*retrieve UNREFERENCED_VARIABLE->somewhere.*was ignored/
+    end
   end
 end

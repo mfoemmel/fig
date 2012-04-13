@@ -58,15 +58,7 @@ class Fig::Package
   end
 
   def retrieves
-    retrieves = {}
-
-    statements.each do
-      |statement|
-
-      retrieves[statement.var] = statement.path if statement.is_a?(Fig::Statement::Retrieve)
-    end
-
-    return retrieves
+    return @statements.select { |statement| statement.is_a?(Fig::Statement::Retrieve) }
   end
 
   def archive_urls
