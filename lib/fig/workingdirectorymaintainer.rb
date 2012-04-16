@@ -103,11 +103,11 @@ class Fig::WorkingDirectoryMaintainer
     target = File.join(@base_dir, relpath)
     if File.directory?(source)
       FileUtils.mkdir_p(target)
+      Fig::Logging.debug "Copying directory #{source} to #{target}."
       Dir.foreach(source) do |child|
         if child != '.' and child != '..'
           source_file = File.join(source, child)
           target_file = File.join(relpath, child)
-          Fig::Logging.debug "Copying #{source_file} to #{target_file}."
           copy(source_file, target_file)
         end
       end
@@ -115,7 +115,7 @@ class Fig::WorkingDirectoryMaintainer
       if ! File.exist?(target) || File.mtime(source) > File.mtime(target)
         if Fig::Logging.debug?
           Fig::Logging.debug \
-            "Copying package [#{formatted_meta()}] from #{source} to #{target}."
+            "Copying file from #{source} to #{target}."
         else
           Fig::Logging.info(
             Fig::Logging::Colorizable.new(
