@@ -144,7 +144,8 @@ of statements is not significant.  A "config" block can contain "set", path,
 "include" and "command" statements; order of statements within "config" blocks
 is significant.  "config" blocks are not nestable.
 
-A simple example "package.fig" file that contains one of each kind of statement:
+A simple (nonsensical) example "package.fig" file that contains one of each
+kind of statement:
 
     archive path/somefile.tar.gz
     resource foo/*.jar
@@ -424,15 +425,26 @@ sections may be helpful in organizing these concerns.
 
 ## `add`
 
-Specifies a value to be appended to a `PATH`-like environment variable, e.g.
+Specifies a value to be prepended to a `PATH`-like environment variable, e.g.
 `CLASSPATH` for Java.  Does not include the delimiter within the variable, just
 the component value.
 
-At sign ("@") and retrieve variable substitution is done on the value.
+### Syntax
+
+    config something
+        add VARIABLE=value
+    end
+
+No whitespace is allowed around the equals sign.  The value cannot be empty.
+No whitespace, semicolons, colons, double quotes, less-than signs, greater-than
+signs, or pipe symbols are allowed in the value.  At sign ("@") and retrieve
+variable substitution is done on the value.
 
 ## `append`
 
-Synonym for `add`.
+Synonym for `add`.  Note that, despite the name, the value will be prepended,
+not appended.  (At the present time, there is no way to actually append a value
+to a path variable.)
 
 ## `archive`
 
@@ -441,13 +453,18 @@ incorporated into the package.  This is different from a `resource` in that the
 contents will be extracted as part of installation.  Also unlike a `resource`,
 if the value is a local path, no file globbing will be performed.
 
+### Syntax
+
+    archive URL
+    archive local/path
+
 ## `command`
 
 Specifies a default command to be run for a given `config` when no command is
 given on the command-line.
 
     config default
-      command echo Hello there.
+      command "echo Hello there."
     end
 
 Cannot be specified outside of a `config` statement.  There may not be multiple
@@ -458,11 +475,43 @@ For example, given the above package declaration, if you were to run `fig
 --command-extra-args It is a nice day.`, you would get "Hello there. It is a
 nice day." as output.
 
+### Syntax
+
+    config something
+      command "command-line"
+    end
+
+The command-line must be specified in double quotes and cannot contain double
+quotes.
+
+Package names preceded by at signs ("@") will be expanded to the base
+directory of that package.  For example, given
+
+    config something
+      command "echo blah@foo/whatever"
+    end
+
+the "@foo" will be replaced with the directory where Fig has the foo package
+stored.
+
+Due to Fig internals, the command-line will be split on whitespace and
+reassembled with single spaces, so you can't get a whitespace character into
+your program.
+
 ## `config`
 
 A grouping of statements that specifies what is to be done.  There must either
 be a configuration named "default" or you will always have to specify a
 configuration on the command-line.
+
+### Syntax
+
+    config something
+      set ...
+      add ...
+      include ...
+      command ...
+    end
 
 May not be nested.  If you wish to incorporate the effects of one configuration
 into another, use an `include` statement.
@@ -533,6 +582,12 @@ Or specify the same version to both:
 
 Multiple `override` clauses can be specified in a single `include` statement.
 
+### Syntax
+
+    config something
+      include package-descriptor [override package/version [...]]
+    end
+
 ## `path`
 
 Synonym for `add`.
@@ -545,6 +600,11 @@ from an `archive` in that the contents will not be extracted as part of
 installation.  If the value is a local path, then file globbing will be
 performed on it, allowing you to do things like include all jar files below a
 directory, e.g. "`resource jars/**/*.jar`".
+
+### Syntax
+
+    resource URL
+    resource local/path
 
 ## `retrieve`
 
@@ -637,9 +697,17 @@ Substitution of the string "[package]" is done.
 ## `set`
 
 Specifies the value of an environment variable.  Unlike `add`/`append`/`path`,
-this is the complete, final value.
+this is the complete value.
 
-At sign ("@") and retrieve variable substitution is done on the value.
+### Syntax
+
+    config something
+      set VARIABLE=value
+    end
+
+No whitespace is allowed around the equals sign.  The value can be empty.  No
+whitespace is allowed in the value.  At sign ("@") and retrieve variable
+substitution is done on the value.
 
 Querying Fig Net Effects
 ========================
