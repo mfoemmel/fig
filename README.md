@@ -266,8 +266,8 @@ called "package.fig" in the current directory and automatically processes it.
 This "package.fig" file implements the previous example:
 
     config default
-      set GREETING=Hello
-      append PATH=@/bin
+        set GREETING=Hello
+        append PATH=@/bin
     end
 
 Then we can just run:
@@ -285,13 +285,13 @@ current directory).
 A single Fig file may have multiple configurations:
 
     config default
-      set GREETING=Hello
-      append PATH=@/bin
+        set GREETING=Hello
+        append PATH=@/bin
     end
 
     config french
-      set GREETING=Bonjour
-      append PATH=@/bin
+        set GREETING=Bonjour
+        append PATH=@/bin
     end
 
 ## Config Sections
@@ -305,20 +305,20 @@ The statements from one config section can be incorporated into another config
 section via an `include` statement:
 
     config default
-      include :spanish
+        include :spanish
     end
 
     config spanish
-      set GREETING="Buenas Dias"
-      append PATH=@/bin
+        set GREETING="Buenas Dias"
+        append PATH=@/bin
     end
 
 Note that config statements cannot be nested within a Fig file.  I.e. the
 following is _invalid_:
 
     config foo
-      config bar
-      end
+        config bar
+        end
     end
 
 ## Packages
@@ -379,7 +379,7 @@ For example, let's create a package that contains a library for the "foo"
 programming language. Define a "package.fig" file:
 
     config default
-      append FOOPATH=@/lib/hello.foo
+        append FOOPATH=@/lib/hello.foo
     end
 
 Then:
@@ -393,7 +393,7 @@ deleting the "package.fig" we just used for publishing):
 
     retrieve FOOPATH->lib/[package]
     config default
-      include hello-lib/3.2.1
+        include hello-lib/3.2.1
     end
 
 Upon a `fig --update`, each resource in FOOPATH will be copied into
@@ -464,7 +464,7 @@ Specifies a default command to be run for a given `config` when no command is
 given on the command-line.
 
     config default
-      command "echo Hello there."
+        command "echo Hello there."
     end
 
 Cannot be specified outside of a `config` statement.  There may not be multiple
@@ -478,7 +478,7 @@ nice day." as output.
 ### Syntax
 
     config something
-      command "command-line"
+        command "command-line"
     end
 
 The command-line must be specified in double quotes and cannot contain double
@@ -488,7 +488,7 @@ Package names preceded by at signs ("@") will be expanded to the base
 directory of that package.  For example, given
 
     config something
-      command "echo blah@foo/whatever"
+        command "echo blah@foo/whatever"
     end
 
 the "@foo" will be replaced with the directory where Fig has the foo package
@@ -507,10 +507,10 @@ configuration on the command-line.
 ### Syntax
 
     config something
-      set ...
-      add ...
-      include ...
-      command ...
+        set ...
+        add ...
+        include ...
+        command ...
     end
 
 May not be nested.  If you wish to incorporate the effects of one configuration
@@ -527,11 +527,11 @@ You can get the effects of one configuration in another by using the name of
 the other configuration preceded by a colon:
 
     config a
-      include :b
+        include :b
     end
 
     config b
-      ...
+        ...
     end
 
 ### Declare a package dependency
@@ -540,7 +540,7 @@ States that one package should be installed prior to the current one; can
 specify a configuration in the other package.
 
     config default
-      include somepackage/1.2.3:some_non_default_configuration
+        include somepackage/1.2.3:some_non_default_configuration
     end
 
 Dependency version conflicts can be resolved by using `override` clauses.
@@ -549,35 +549,35 @@ Say you've got a "base-dependency" package.  Then, in the `package.fig` for
 "middle-dependency-a" you have
 
     config default
-      include base-dependency/1.2.3
+        include base-dependency/1.2.3
     end
 
 And in the `package.fig` for "middle-dependency-b" you have
 
     config default
-      include base-dependency/3.2.1
+        include base-dependency/3.2.1
     end
 
 Finally, in the `package.fig` for the package you're working on you've got
 
     config default
-      include middle-dependency-a
-      include middle-dependency-b
+        include middle-dependency-a
+        include middle-dependency-b
     end
 
 This will produce a conflicting requirement on "base-dependency".  Resolve this
 by either matching the version of one dependency to another:
 
     config default
-      include middle-dependency-a override base-dependency/3.2.1
-      include middle-dependency-b
+        include middle-dependency-a override base-dependency/3.2.1
+        include middle-dependency-b
     end
 
 Or specify the same version to both:
 
     config default
-      include middle-dependency-a override base-dependency/2.2.2
-      include middle-dependency-b override base-dependency/2.2.2
+        include middle-dependency-a override base-dependency/2.2.2
+        include middle-dependency-b override base-dependency/2.2.2
     end
 
 Multiple `override` clauses can be specified in a single `include` statement.
@@ -585,7 +585,7 @@ Multiple `override` clauses can be specified in a single `include` statement.
 ### Syntax
 
     config something
-      include package-descriptor [override package/version [...]]
+        include package-descriptor [override package/version [...]]
     end
 
 ## `path`
@@ -640,8 +640,8 @@ statement will have no effect.  So, given a package.fig like
 
     retrieve CLASSPATH->some/path/to/copy/jar/files/to
     config default
-      set FOO=BAR
-      add WHATEVER=some/path
+        set FOO=BAR
+        add WHATEVER=some/path
     end
 
 no copying will happen because no manipulation of the CLASSPATH environment
@@ -654,7 +654,7 @@ package with no prerequisites, e.g.
     # Not going to do any copying here, either.
     retrieve CLASSPATH->some/path/to/copy/jar/files/to
     config default
-      set CLASSPATH=whatever
+        set CLASSPATH=whatever
     end
 
 The simplest form of a retrieve that will actually execute something looks like
@@ -662,14 +662,14 @@ the following.  You need to have a prerequisite package that manipulates the
 variable in a way that requires expansion:
 
     config default
-      add CLASSPATH=@/some.jar
+        add CLASSPATH=@/some.jar
     end
 
 And then you need to depend upon that:
 
     retrieve CLASSPATH->from-dependent
     config default
-      include prerequisite/1
+        include prerequisite/1
     end
 
 Also, only retrieve statements in the base package (whether the package.fig in
@@ -679,13 +679,13 @@ following
 
     retrieve CLASSPATH->from-prerequisite
     config default
-      set CLASSPATH=@/whatever
+        set CLASSPATH=@/whatever
     end
 
 and a package.fig in the current directory like
 
     config default
-      include prerequisite/1
+        include prerequisite/1
     end
 
 then no copying will take place despite the CLASSPATH variable being set.
@@ -702,7 +702,7 @@ this is the complete value.
 ### Syntax
 
     config something
-      set VARIABLE=value
+        set VARIABLE=value
     end
 
 No whitespace is allowed around the equals sign.  The value can be empty.  No
