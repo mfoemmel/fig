@@ -367,9 +367,12 @@ module Fig
         >x
       ) do |match|
         backslashes = $1 || ''
-        package = get_package($2)
+        package_name = $2
+        package = get_package(package_name)
         if package.nil?
-          raise RepositoryError.new("Package not found: #{$1}")
+          raise RepositoryError.new(
+            %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package.>
+          )
         end
         backslashes + package.directory
       end
