@@ -94,28 +94,6 @@ module Fig
       return
     end
 
-    def execute_command(command, args, package)
-      @variables.with_environment do
-        argument =
-          expand_command_line_argument(
-            "#{command.command} #{args.join(' ')}"
-          )
-
-        yield expand_at_signs_in_path(argument, package).split(' ')
-      end
-
-      return
-    end
-
-    def find_config_name_in_package(name)
-      package = get_package(name)
-      if not package
-        return Package::DEFAULT_CONFIG
-      end
-
-      return package.primary_config_name || Package::DEFAULT_CONFIG
-    end
-
     def execute_config(base_package, descriptor, args, &block)
       config_name =
         descriptor.config || find_config_name_in_package(descriptor.name)
@@ -130,9 +108,9 @@ module Fig
         )
       )
 
-      command = package[config_name].command
-      if command
-        execute_command(command, args, package, &block)
+      command_statement = package[config_name].command_statement
+      if command_statement
+        execute_command(command_statement, args, package, &block)
       else
         raise UserInputError.new(%Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>)
       end
@@ -269,6 +247,28 @@ module Fig
       end
 
       return package
+    end
+
+    def find_config_name_in_package(name)
+      package = get_package(name)
+      if not package
+        return Package::DEFAULT_CONFIG
+      end
+
+      return package.primary_config_name || Package::DEFAULT_CONFIG
+    end
+
+    def execute_command(command_statement, args, package)
+      @variables.with_environment do
+        argument =
+          expand_command_line_argument(
+            "#{command_statement.command} #{args.join(' ')}"
+          )
+
+        yield expand_at_signs_in_path(argument, package).split(' ')
+      end
+
+      return
     end
 
     # Consider the variable to be a file/directory path; if there's a package,

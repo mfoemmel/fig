@@ -18,7 +18,7 @@ class Fig::Statement::Configuration < Fig::Statement
     Configuration.new(name, statements)
   end
 
-  def command
+  def command_statement
     return statements.find do
       |statement| statement.is_a?(Fig::Statement::Command)
     end
