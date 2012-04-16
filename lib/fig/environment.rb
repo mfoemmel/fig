@@ -129,9 +129,9 @@ module Fig
           base_package, statement.descriptor, statement.overrides, backtrace
         )
       when Statement::Command
-        # ignore
+        # Skip - has no effect on environment.
       else
-        fail "Unexpected statement: #{statement}"
+        raise "Unexpected statement in a config block: #{statement.unparse('')}"
       end
 
       return
