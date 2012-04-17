@@ -179,6 +179,11 @@ class Fig::Command
     return
   end
 
+  def config_was_specified_by_user()
+    return ! @options.config().nil?                   ||
+           @descriptor && ! @descriptor.config().nil?
+  end
+
   def base_config()
     return @options.config()                 ||
            @descriptor && @descriptor.config ||

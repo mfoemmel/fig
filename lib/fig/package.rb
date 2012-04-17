@@ -37,7 +37,14 @@ class Fig::Package
     end
 
     descriptor = Fig::PackageDescriptor.new(@name, @version, config_name)
-    message = 'Configuration not found: ' + descriptor.to_string()
+    config_description = nil
+    if @name.nil? and @version.nil?
+      config_description = config_name
+    else
+      config_description = descriptor.to_string(:use_default_config)
+    end
+
+    message = %Q<There is no "#{config_description}" config.>
 
     raise Fig::NoSuchPackageConfigError.new(message, descriptor)
   end

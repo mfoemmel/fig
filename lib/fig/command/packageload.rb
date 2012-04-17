@@ -61,40 +61,10 @@ module Fig::Command::PackageLoad
 
     @environment.register_package(@package)
 
-    config = base_config()
     begin
-      @environment.apply_config(@package, config, nil)
+      @environment.apply_config(@package, base_config(), nil)
     rescue Fig::NoSuchPackageConfigError => exception
-      raise exception if not @descriptor
-
-      descriptor = exception.descriptor
-
-      raise exception if
-        descriptor.name    && descriptor.name    != @descriptor.name
-      raise exception if
-        descriptor.version && descriptor.version != @descriptor.version
-      raise exception if      descriptor.config  != config
-
-      source = nil
-      if @package_loaded_from_path
-        source = @package_loaded_from_path
-      else
-        source =
-          Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
-      end
-      source_component = source ? %Q< in #{source}> : ''
-
-      message = %Q<There's no "#{config}" configuration#{source_component}.>
-      message += %q< Specify one that does like this: ">
-      message +=
-        Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
-      message += %q<".>
-
-      if @options.publishing?
-        message += ' (Yes, this does work with --publish.)'
-      end
-
-      raise Fig::UserInputError.new(message)
+      make_no_such_package_exception_descriptive(exception)
     end
 
     return
@@ -133,5 +103,58 @@ module Fig::Command::PackageLoad
     end
 
     return
+  end
+
+  def make_no_such_package_exception_descriptive(exception)
+    if not @descriptor
+      raise exception if config_was_specified_by_user()
+
+      source = derive_exception_source()
+      message =
+        %Q<No config was specified and there's no "#{Fig::Package::DEFAULT_CONFIG}" config#{source}.>
+      message +=
+        %Q< The valid configs are "#{@package.config_names().join('", "')}".>
+
+      raise Fig::UserInputError.new(message)
+    end
+
+    check_no_such_package_exception_is_for_command_line_package(exception)
+    source = derive_exception_source()
+
+    message = %Q<There's no "#{base_config()}" config#{source}.>
+    message += %q< Specify one that does like this: ">
+    message +=
+      Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
+    message += %q<".>
+
+    if @options.publishing?
+      message += ' (Yes, this does work with --publish.)'
+    end
+
+    raise Fig::UserInputError.new(message)
+  end
+
+  def check_no_such_package_exception_is_for_command_line_package(exception)
+    descriptor = exception.descriptor
+
+    raise exception if
+      descriptor.name    && descriptor.name    != @descriptor.name
+    raise exception if
+      descriptor.version && descriptor.version != @descriptor.version
+    raise exception if      descriptor.config  != base_config()
+
+    return
+  end
+
+  def derive_exception_source()
+    source = nil
+    if @package_loaded_from_path
+      source = @package_loaded_from_path
+    elsif @descriptor
+      source =
+        Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
+    end
+
+    return source ? %Q< in #{source}> : ''
   end
 end
