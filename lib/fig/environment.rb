@@ -39,13 +39,15 @@ module Fig
 
     # Indicates that the values from a particular environment variable path
     # should be copied to a local directory.
-    def add_retrieve(name, path)
+    def add_retrieve(retrieve_statement)
+      name = retrieve_statement.var
       if @retrieves.has_key?(name)
         Logging.warn \
-          %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name]}" with "#{path}".>
+          %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name].path}" with "#{retrieve_statement.path}".>
       end
 
-      @retrieves[name] = path
+      @retrieves[name] = retrieve_statement
+      retrieve_statement.added_to_environment(true)
 
       return
     end
@@ -92,28 +94,6 @@ module Fig
       return
     end
 
-    def execute_command(command, args, package)
-      @variables.with_environment do
-        argument =
-          expand_command_line_argument(
-            "#{command.command} #{args.join(' ')}"
-          )
-
-        yield expand_at_signs_in_path(argument, package).split(' ')
-      end
-
-      return
-    end
-
-    def find_config_name_in_package(name)
-      package = get_package(name)
-      if not package
-        return Package::DEFAULT_CONFIG
-      end
-
-      return package.primary_config_name || Package::DEFAULT_CONFIG
-    end
-
     def execute_config(base_package, descriptor, args, &block)
       config_name =
         descriptor.config || find_config_name_in_package(descriptor.name)
@@ -128,9 +108,9 @@ module Fig
         )
       )
 
-      command = package[config_name].command
-      if command
-        execute_command(command, args, package, &block)
+      command_statement = package[config_name].command_statement
+      if command_statement
+        execute_command(command_statement, args, package, &block)
       else
         raise UserInputError.new(%Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>)
       end
@@ -149,9 +129,9 @@ module Fig
           base_package, statement.descriptor, statement.overrides, backtrace
         )
       when Statement::Command
-        # ignore
+        # Skip - has no effect on environment.
       else
-        fail "Unexpected statement: #{statement}"
+        raise "Unexpected statement in a config block: #{statement.unparse('')}"
       end
 
       return
@@ -190,6 +170,18 @@ module Fig
       )
 
       return
+    end
+
+    def check_unused_retrieves()
+      @retrieves.keys().sort().each do
+        |name|
+
+        statement = @retrieves[name]
+        if statement.loaded_but_not_referenced?
+          Logging.warn \
+            %Q<The #{name} variable was never referenced or didn't need expansion, so "#{statement.unparse('')}"#{statement.position_string} was ignored.>
+        end
+      end
     end
 
     private
@@ -257,6 +249,28 @@ module Fig
       return package
     end
 
+    def find_config_name_in_package(name)
+      package = get_package(name)
+      if not package
+        return Package::DEFAULT_CONFIG
+      end
+
+      return package.primary_config_name || Package::DEFAULT_CONFIG
+    end
+
+    def execute_command(command_statement, args, package)
+      @variables.with_environment do
+        argument =
+          expand_command_line_argument(
+            "#{command_statement.command} #{args.join(' ')}"
+          )
+
+        yield expand_at_signs_in_path(argument, package).split(' ')
+      end
+
+      return
+    end
+
     # Consider the variable to be a file/directory path; if there's a package,
     # replace @ symbols with the package's directory, "[package]" with the
     # package name and copy any files indicated by a retrieve with the same
@@ -285,14 +299,15 @@ module Fig
           preserved_path
         )
       else
-        destination_path = File.join(
+        destination_path =
           get_retrieve_path_with_substitution(variable_name, base_package)
-        )
         if not File.directory?(variable_value)
           destination_path =
             File.join(destination_path, File.basename(variable_value))
         end
       end
+
+      check_source_existence(variable_name, variable_value, base_package)
 
       @working_directory_maintainer.with_package_version(
         base_package.name, base_package.version
@@ -301,6 +316,15 @@ module Fig
       end
 
       return destination_path
+    end
+
+    def check_source_existence(variable_name, variable_value, base_package)
+      return if File.exists?(variable_value)
+
+      Logging.fatal(
+        %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>
+      )
+      raise RepositoryError.new
     end
 
     def expand_at_signs_in_path(path, base_package)
@@ -342,9 +366,12 @@ module Fig
         >x
       ) do |match|
         backslashes = $1 || ''
-        package = get_package($2)
+        package_name = $2
+        package = get_package(package_name)
         if package.nil?
-          raise RepositoryError.new("Package not found: #{$1}")
+          raise RepositoryError.new(
+            %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package.>
+          )
         end
         backslashes + package.directory
       end
@@ -373,7 +400,10 @@ module Fig
     end
 
     def get_retrieve_path_with_substitution(name, base_package)
-      return @retrieves[name].gsub(/ \[package\] /x, base_package.name)
+      retrieve_statement = @retrieves[name]
+      retrieve_statement.referenced(true)
+
+      return retrieve_statement.path.gsub(/ \[package\] /x, base_package.name)
     end
   end
 end

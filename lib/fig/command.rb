@@ -157,7 +157,7 @@ class Fig::Command
 
     at_exit { @working_directory_maintainer.save_metadata() }
 
-    @environment = prepare_environment
+    prepare_environment()
 
     @options.environment_variable_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
@@ -170,9 +170,18 @@ class Fig::Command
       environment_variables = Fig::OperatingSystem.get_environment_variables({})
     end
 
-    return Fig::Environment.new(
+    @environment = Fig::Environment.new(
       @repository, environment_variables, @working_directory_maintainer
     )
+
+    at_exit { @environment.check_unused_retrieves() }
+
+    return
+  end
+
+  def config_was_specified_by_user()
+    return ! @options.config().nil?                   ||
+           @descriptor && ! @descriptor.config().nil?
   end
 
   def base_config()

@@ -27,6 +27,14 @@ v0.1.??
     does change, then current code could possibly corrupt the future
     repository.
 
+  - Now warns about ineffectual "retrieve" statements.
+
+  - A lot of existence checks have been added, resulting in nicer error
+    messages and fewer stack traces.
+
+  - README.md has had most of its content ripped out.  Documentation has been
+    greatly expanded and is available at https://github.com/mfoemmel/fig/wiki.
+
   Bug fixes:
 
   - Now checks that archive base names are unique before allowing publishing.
