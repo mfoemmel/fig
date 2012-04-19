@@ -299,9 +299,8 @@ module Fig
           preserved_path
         )
       else
-        destination_path = File.join(
+        destination_path =
           get_retrieve_path_with_substitution(variable_name, base_package)
-        )
         if not File.directory?(variable_value)
           destination_path =
             File.join(destination_path, File.basename(variable_value))
