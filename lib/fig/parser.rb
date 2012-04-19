@@ -1,7 +1,6 @@
-require 'polyglot'
 require 'treetop'
 
-require 'fig/grammar'
+require 'fig/grammar' # this is grammar.treetop, not grammar.rb.
 require 'fig/logging'
 require 'fig/packageparseerror'
 require 'fig/repository'
@@ -24,7 +23,8 @@ class Fig::Parser
   end
 
   def initialize(application_config, check_include_versions)
-    @parser                 = Fig::FigParser.new
+    # Fig::FigParser class is synthesized by Treetop.
+    @treetop_parser         = Fig::FigParser.new
     @application_config     = application_config
     @check_include_versions = check_include_versions
   end
@@ -35,11 +35,11 @@ class Fig::Parser
 
     # Extra space at the end because most of the rules in the grammar require
     # trailing whitespace.
-    result = @parser.parse(input + ' ')
+    result = @treetop_parser.parse(input + ' ')
 
     if result.nil?
-      Fig::Logging.fatal "#{directory}: #{@parser.failure_reason}"
-      raise Fig::PackageParseError.new("#{directory}: #{@parser.failure_reason}")
+      Fig::Logging.fatal "#{directory}: #{@treetop_parser.failure_reason}"
+      raise Fig::PackageParseError.new("#{directory}: #{@treetop_parser.failure_reason}")
     end
 
     package = result.to_package(descriptor, directory)
