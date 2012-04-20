@@ -29,6 +29,10 @@ v0.1.??
 
   - Now warns about ineffectual "retrieve" statements.
 
+  - Now fails if you specify both a descriptor and the --file option and you
+    aren't publishing.  Previously it would silently ignore the --file option,
+    which could be a bit more than a little surprising.
+
   - A lot of existence checks have been added, resulting in nicer error
     messages and fewer stack traces.
 

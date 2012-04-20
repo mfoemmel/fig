@@ -63,6 +63,7 @@ class Fig::Command
       return publish()
     end
 
+    ensure_descriptor_and_file_were_not_both_specified()
     load_package_object()
 
     if @options.listing()
@@ -222,6 +223,24 @@ class Fig::Command
     return @options.config()                 ||
            @descriptor && @descriptor.config ||
            Fig::Package::DEFAULT_CONFIG
+  end
+
+  # The one exception to this rule is when we are publishing, which should
+  # already have been invoked by the time this is called.
+  def ensure_descriptor_and_file_were_not_both_specified()
+    file = @options.package_config_file()
+
+    # If the user specified --no-file, even though it's kind of superfluous,
+    # we'll let it slide.
+    file_specified = ! file.nil? && file != :none
+
+    if @descriptor and file_specified
+      raise Fig::UserInputError.new(
+        %Q<Cannot specify both a package descriptor (#{@descriptor.original_string}) and the --file option (#{file}).>
+      )
+    end
+
+    return
   end
 
   def check_required_package_descriptor(operation_description)

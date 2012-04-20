@@ -96,7 +96,6 @@ module Fig::Command::PackageLoad
     if @descriptor.nil?
       load_package_file()
     else
-      # TODO: complain if config file was specified on the command-line.
       @package = @repository.get_package(@descriptor)
 
       register_package_with_environment_if_not_listing_or_publishing()
