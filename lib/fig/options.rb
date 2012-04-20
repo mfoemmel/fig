@@ -277,11 +277,11 @@ Environment variables:
   def set_up_queries(parser)
     parser.banner = USAGE
     parser.on_tail('-?', '-h','--help','display this help text') do
-      @options[:help]
+      @options[:help] = true
     end
 
     parser.on_tail('-v', '--version', 'print Fig version') do
-      @options[:help]
+      @options[:version] = true
     end
 
     parser.on(
@@ -524,8 +524,6 @@ Environment variables:
 
     END_MESSAGE
 
-    @exit_code = 0
-
-    return
+    return 0
   end
 end

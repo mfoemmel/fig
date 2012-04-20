@@ -40,11 +40,11 @@ class Fig::Command
     @descriptor = @options.descriptor
 
     if @options.help?
-      @options.help
+      return @options.help
     end
 
     if @options.version?
-      version
+      return version
     end
 
     configure()
@@ -123,21 +123,18 @@ class Fig::Command
     rescue
       $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
 
-      @exit_code = 1
-      return
+      return 1
     end
 
     if line !~ /\d+\.\d+\.\d+/
       $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
 
-      @exit_code = 1
-      return
+      return 1
     end
 
     puts File.basename($0) + ' v' + line
 
-    @exit_code = 0
-    return
+    return 0
   end
 
   private
