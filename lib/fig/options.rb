@@ -77,6 +77,7 @@ Environment variables:
     @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
 
     parser = new_parser()
+    @help = parser.help
 
     begin
       parser.parse!(argv)
@@ -144,6 +145,10 @@ Environment variables:
 
   def get()
     return @options[:get]
+  end
+
+  def help?()
+    return @options[:help]
   end
 
   def home()
@@ -218,6 +223,10 @@ Environment variables:
     return update? || update_if_missing?
   end
 
+  def version?()
+    return @options[:version]
+  end
+
   # Answers whether we should reset the environment to nothing, sort of like
   # the standardized environment that cron(1) creates.  At present, we're only
   # setting this when we're listing variables.  One could imagine allowing this
@@ -228,8 +237,7 @@ Environment variables:
     return listing() == :variables
   end
 
-  private
-
+  # This needs to be public for efficient use of custom command.rb wrappers.
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|
       terminating_option = nil
@@ -252,6 +260,9 @@ Environment variables:
     return
   end
 
+
+  private
+
   def new_parser
     return OptionParser.new do |parser|
       set_up_queries(parser)
@@ -266,11 +277,11 @@ Environment variables:
   def set_up_queries(parser)
     parser.banner = USAGE
     parser.on_tail('-?', '-h','--help','display this help text') do
-      help(parser)
+      @options[:help]
     end
 
     parser.on_tail('-v', '--version', 'print Fig version') do
-      version()
+      @options[:help]
     end
 
     parser.on(
@@ -505,7 +516,7 @@ Environment variables:
   end
 
   def help(parser)
-    puts parser.help
+    puts @help
     puts <<-'END_MESSAGE'
         --                           end of Fig options; anything after this is used as a command to run
         --command-extra-args         end of Fig options; anything after this is appended to the end of a
@@ -515,35 +526,6 @@ Environment variables:
 
     @exit_code = 0
 
-    return
-  end
-
-  def version()
-    line = nil
-
-    begin
-      File.open(
-        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
-      ) do |file|
-        line = file.gets
-      end
-    rescue
-      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
-
-      @exit_code = 1
-      return
-    end
-
-    if line !~ /\d+\.\d+\.\d+/
-      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
-
-      @exit_code = 1
-      return
-    end
-
-    puts File.basename($0) + ' v' + line
-
-    @exit_code = 0
     return
   end
 end

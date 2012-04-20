@@ -39,6 +39,14 @@ class Fig::Command
     end
     @descriptor = @options.descriptor
 
+    if @options.help?
+      @options.help
+    end
+
+    if @options.version?
+      version
+    end
+
     configure()
 
     if @options.clean?
@@ -101,6 +109,35 @@ class Fig::Command
       log_error_message(error)
       return 1
     end
+  end
+
+  def version()
+    line = nil
+
+    begin
+      File.open(
+        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
+      ) do |file|
+        line = file.gets
+      end
+    rescue
+      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
+
+      @exit_code = 1
+      return
+    end
+
+    if line !~ /\d+\.\d+\.\d+/
+      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
+
+      @exit_code = 1
+      return
+    end
+
+    puts File.basename($0) + ' v' + line
+
+    @exit_code = 0
+    return
   end
 
   private
