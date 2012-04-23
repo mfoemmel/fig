@@ -271,10 +271,6 @@ module Fig
       return
     end
 
-    # Consider the variable to be a file/directory path; if there's a package,
-    # replace @ symbols with the package's directory, "[package]" with the
-    # package name and copy any files indicated by a retrieve with the same
-    # name.
     def expand_variable_as_path_and_process_retrieves(
       variable_name, variable_value, base_package
     )
