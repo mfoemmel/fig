@@ -51,6 +51,7 @@ class Fig::Command
 
     if @options.clean?
       check_required_package_descriptor('to clean')
+      ensure_descriptor_and_file_were_not_both_specified()
       @repository.clean(@descriptor)
       return 0
     end
@@ -225,13 +226,18 @@ class Fig::Command
            Fig::Package::DEFAULT_CONFIG
   end
 
+  # If the user has specified a descriptor, than any package.fig or --file
+  # option is ignored.  Thus, in order to avoid confusing the user, we make
+  # specifying both an error.
+  #
   # The one exception to this rule is when we are publishing, which should
   # already have been invoked by the time this is called.
   def ensure_descriptor_and_file_were_not_both_specified()
     file = @options.package_config_file()
 
     # If the user specified --no-file, even though it's kind of superfluous,
-    # we'll let it slide.
+    # we'll let it slide because the user doesn't think that any file will be
+    # processed.
     file_specified = ! file.nil? && file != :none
 
     if @descriptor and file_specified
