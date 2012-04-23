@@ -284,6 +284,8 @@ module Fig
     end
 
     def retrieve_files(variable_name, variable_value, base_package)
+      check_source_existence(variable_name, variable_value, base_package)
+
       destination_path = nil
 
       # A '//' in the variable value tells us to preserve path
@@ -302,8 +304,6 @@ module Fig
             File.join(destination_path, File.basename(variable_value))
         end
       end
-
-      check_source_existence(variable_name, variable_value, base_package)
 
       @working_directory_maintainer.with_package_version(
         base_package.name, base_package.version
