@@ -364,22 +364,14 @@ module Fig
       return expanded_files
     end
 
-    def read_package_from_directory(dir, descriptor)
-      file = nil
-      dot_fig_file = File.join(dir, '.fig')
-      if File.exist?(dot_fig_file)
-        file = dot_fig_file
-      else
-        package_dot_fig_file = File.join(dir, 'package.fig')
-        if not File.exist?(package_dot_fig_file)
-          Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}". Looked for "#{dot_fig_file}" and "#{package_dot_fig_file}" and found neither.>
-          raise RepositoryError.new
-        end
-
-        file = package_dot_fig_file
+    def read_package_from_directory(directory, descriptor)
+      dot_fig_file = File.join(directory, '.fig')
+      if not File.exist?(dot_fig_file)
+        Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}". There is nothing in "#{dot_fig_file}".>
+        raise RepositoryError.new
       end
 
-      return read_package_from_file(file, descriptor)
+      return read_package_from_file(dot_fig_file, descriptor)
     end
 
     def read_package_from_file(file_name, descriptor)
