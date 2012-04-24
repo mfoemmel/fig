@@ -47,7 +47,7 @@ module Fig
     end
 
     def reset_cached_data()
-      @packages = PackageCache.new()
+      @package_cache = PackageCache.new()
     end
 
     def list_packages
@@ -82,7 +82,7 @@ module Fig
 
       if not descriptor.version
         if allow_any_version
-          package = @packages.get_any_version_of_package(descriptor.name)
+          package = @package_cache.get_any_version_of_package(descriptor.name)
           if package
             Logging.warn(
               "Picked version #{package.version} of #{package.name} at random."
@@ -96,7 +96,7 @@ module Fig
         )
       end
 
-      package = @packages.get_package(descriptor.name, descriptor.version)
+      package = @package_cache.get_package(descriptor.name, descriptor.version)
       return package if package
 
       Logging.debug \
@@ -114,7 +114,7 @@ module Fig
     def clean(descriptor)
       check_local_repository_format()
 
-      @packages.remove_package(descriptor.name, descriptor.version)
+      @package_cache.remove_package(descriptor.name, descriptor.version)
 
       FileUtils.rm_rf(local_dir_for_package(descriptor))
 
@@ -393,7 +393,7 @@ module Fig
         descriptor, File.dirname(file_name), content
       )
 
-      @packages.add_package(package)
+      @package_cache.add_package(package)
 
       return package
     end
