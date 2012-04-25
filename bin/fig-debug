@@ -8,4 +8,4 @@ require 'fig/command'
 
 # Identical to regular fig, but doesn't use exception handling so you can see
 # stack traces.
-exit Fig::Command.new.run_fig(ARGV)
+exit Fig::Command.new.run_fig ARGV

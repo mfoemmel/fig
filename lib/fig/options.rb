@@ -77,7 +77,7 @@ Environment variables:
     @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
 
     parser = new_parser()
-    @help = parser.help
+    @help_message = parser.help
 
     begin
       parser.parse!(argv)
@@ -260,6 +260,18 @@ Environment variables:
     return
   end
 
+  # This needs to be public for efficient use of custom command.rb wrappers.
+  def help()
+    puts @help_message
+    puts <<-'END_MESSAGE'
+        --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
+
+    END_MESSAGE
+
+    return 0
+  end
 
   private
 
@@ -513,17 +525,5 @@ Environment variables:
     end
 
     return
-  end
-
-  def help(parser)
-    puts @help
-    puts <<-'END_MESSAGE'
-        --                           end of Fig options; anything after this is used as a command to run
-        --command-extra-args         end of Fig options; anything after this is appended to the end of a
-                                     "command" statement in a "config" block.
-
-    END_MESSAGE
-
-    return 0
   end
 end
