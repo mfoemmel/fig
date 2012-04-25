@@ -10,9 +10,10 @@ require 'fig/statement/set'
 require 'fig/userinputerror'
 
 module Fig; end
+class Fig::Command; end
 
 # Command-line processing.
-class Fig::Options
+class Fig::Command::Options
   USAGE = <<-EOF
 
 Usage:

@@ -16,6 +16,10 @@ v0.1.??
     would ignore the --resource option, look for a package.fig file and publish
     based upon that.
 
+  - Now fails if you specify both a descriptor and the --file option and you
+    aren't publishing.  Previously it would silently ignore the --file option,
+    which could be a bit more than a little surprising.
+
   New features:
 
   - Now checks repository format version and fails if it's different from what

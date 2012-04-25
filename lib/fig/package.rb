@@ -181,10 +181,3 @@ class Fig::Package
     return mine <=> others
   end
 end
-
-# TODO: get this out of the global namespace
-def unparse_statements(indent, prefix, statements, suffix)
-  body = @statements.map { |statement| statement.unparse(indent+'  ') }.join("\n")
-
-  return ["\n#{indent}#{prefix}", body, "#{indent}#{suffix}"].join("\n")
-end

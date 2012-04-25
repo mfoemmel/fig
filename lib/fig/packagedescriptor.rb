@@ -4,7 +4,7 @@ module Fig; end
 class Fig::PackageDescriptor
   include Comparable
 
-  attr_reader :name, :version, :config
+  attr_reader :name, :version, :config, :original_string
 
   def self.format(name, version, config, use_default_config = false)
     string = name || ''
@@ -32,18 +32,20 @@ class Fig::PackageDescriptor
     self.new(
       raw_string =~ %r< \A         ( [^:/]+ )    >x ? $1 : nil,
       raw_string =~ %r< \A [^/]* / ( [^:]+  )    >x ? $1 : nil,
-      raw_string =~ %r< \A [^:]* : ( .+     ) \z >x ? $1 : nil
+      raw_string =~ %r< \A [^:]* : ( .+     ) \z >x ? $1 : nil,
+      raw_string
     )
   end
 
-  def initialize(name, version, config)
+  def initialize(name, version, config, original_string = nil)
     validate_component name, 'name'
     validate_component version, 'version'
     validate_component config, 'config'
 
-    @name     = name
-    @version  = version
-    @config   = config
+    @name            = name
+    @version         = version
+    @config          = config
+    @original_string = original_string
   end
 
   def validate_component(value, name)

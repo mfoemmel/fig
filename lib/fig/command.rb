@@ -2,11 +2,12 @@ require 'rubygems'
 require 'net/ftp'
 require 'set'
 
+require 'fig/atexit'
+require 'fig/command/options'
 require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/operatingsystem'
-require 'fig/options'
 require 'fig/package'
 require 'fig/parser'
 require 'fig/repository'
@@ -33,7 +34,7 @@ class Fig::Command
   include Fig::Command::PackageLoad
 
   def run_fig(argv)
-    @options = Fig::Options.new(argv)
+    @options = Fig::Command::Options.new(argv)
     if not @options.exit_code.nil?
       return @options.exit_code
     end
@@ -51,6 +52,7 @@ class Fig::Command
 
     if @options.clean?
       check_required_package_descriptor('to clean')
+      ensure_descriptor_and_file_were_not_both_specified()
       @repository.clean(@descriptor)
       return 0
     end
@@ -63,6 +65,7 @@ class Fig::Command
       return publish()
     end
 
+    ensure_descriptor_and_file_were_not_both_specified()
     load_package_object()
 
     if @options.listing()
@@ -82,7 +85,7 @@ class Fig::Command
       ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?
       $stderr.puts "Nothing to do.\n"
-      $stderr.puts Fig::Options::USAGE
+      $stderr.puts Fig::Command::Options::USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
       return 1
     end
@@ -103,7 +106,7 @@ class Fig::Command
       return 1
     rescue OptionParser::InvalidOption => error
       $stderr.puts error.to_s
-      $stderr.puts Fig::Options::USAGE
+      $stderr.puts Fig::Command::Options::USAGE
       return 1
     rescue Fig::RepositoryError => error
       log_error_message(error)
@@ -189,7 +192,7 @@ class Fig::Command
 
     @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
-    at_exit { @working_directory_maintainer.save_metadata() }
+    Fig::AtExit.add { @working_directory_maintainer.save_metadata() }
 
     prepare_environment()
 
@@ -208,7 +211,7 @@ class Fig::Command
       @repository, environment_variables, @working_directory_maintainer
     )
 
-    at_exit { @environment.check_unused_retrieves() }
+    Fig::AtExit.add { @environment.check_unused_retrieves() }
 
     return
   end
@@ -222,6 +225,29 @@ class Fig::Command
     return @options.config()                 ||
            @descriptor && @descriptor.config ||
            Fig::Package::DEFAULT_CONFIG
+  end
+
+  # If the user has specified a descriptor, than any package.fig or --file
+  # option is ignored.  Thus, in order to avoid confusing the user, we make
+  # specifying both an error.
+  #
+  # The one exception to this rule is when we are publishing, which should
+  # already have been invoked by the time this is called.
+  def ensure_descriptor_and_file_were_not_both_specified()
+    file = @options.package_config_file()
+
+    # If the user specified --no-file, even though it's kind of superfluous,
+    # we'll let it slide because the user doesn't think that any file will be
+    # processed.
+    file_specified = ! file.nil? && file != :none
+
+    if @descriptor and file_specified
+      raise Fig::UserInputError.new(
+        %Q<Cannot specify both a package descriptor (#{@descriptor.original_string}) and the --file option (#{file}).>
+      )
+    end
+
+    return
   end
 
   def check_required_package_descriptor(operation_description)

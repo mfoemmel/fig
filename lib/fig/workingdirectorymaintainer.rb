@@ -47,6 +47,7 @@ class Fig::WorkingDirectoryMaintainer
     else
       @package_meta = nil
     end
+
     yield
   end
 
@@ -69,11 +70,12 @@ class Fig::WorkingDirectoryMaintainer
 
   def load_metadata(file)
     File.open(file).each_line do |line|
-      line = line.strip()
+      line.strip!()
       if line =~ /^(.+)=(.+)\/(.+)$/
-        target = $1
-        package_name = $2
+        target          = $1
+        package_name    = $2
         package_version = $3
+
         package_meta = @package_metadata_by_name[package_name]
         if package_meta
           if package_meta.version != package_version
