@@ -19,6 +19,7 @@ module Fig; end
 # defers remote operations to others.
 class Fig::Repository
   METADATA_SUBDIRECTORY = '_meta'
+  RESOURCES_FILE        = 'resources.tar.gz'
   VERSION_FILE_NAME     = 'repository-format-version'
   VERSION_SUPPORTED     = 1
 
@@ -129,7 +130,7 @@ class Fig::Repository
       check_remote_repository_format()
     end
 
-    check_for_unique_asset_names(package_statements)
+    validate_asset_names(package_statements)
 
     temp_dir = temp_dir()
     @operating_system.delete_and_recreate_directory(temp_dir)
@@ -255,7 +256,7 @@ class Fig::Repository
     return version_string.to_i()
   end
 
-  def check_for_unique_asset_names(package_statements)
+  def validate_asset_names(package_statements)
     asset_statements = package_statements.select { |s| s.is_asset? }
 
     asset_names = Set.new()
@@ -264,9 +265,14 @@ class Fig::Repository
 
       asset_name = statement.asset_name()
       if not asset_name.nil?
+        if asset_name == RESOURCES_FILE
+          Fig::Logging.fatal \
+            %Q<You cannot have an asset with the name "#{RESOURCES_FILE}"#{statement.position_string()} due to Fig implementation details.>
+        end
+
         if asset_names.include?(asset_name)
           Fig::Logging.fatal \
-            %Q<Found multiple archives with the name "#{asset_name}". If these were allowed, archives would overwrite each other.>
+            %Q<Found multiple archives with the name "#{asset_name}"#{statement.position_string()}. If these were allowed, archives would overwrite each other.>
           raise Fig::RepositoryError.new
         else
           asset_names.add(asset_name)
@@ -534,7 +540,7 @@ class Fig::Repository
       asset_paths = expand_globs_from(asset_paths)
       check_asset_paths(asset_paths)
 
-      file = 'resources.tar.gz'
+      file = RESOURCES_FILE
       @operating_system.create_archive(file, asset_paths)
       new_package_statements.unshift(Fig::Statement::Archive.new(nil, file))
       Fig::AtExit.add { File.delete(file) }

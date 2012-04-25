@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/operatingsystem'
+require 'fig/repository'
 
 ECHO_COMMAND = Fig::OperatingSystem.windows? ? '@echo' : 'echo'
 
@@ -13,7 +14,7 @@ describe 'Fig' do
         cleanup_home_and_remote
       end
 
-      it 'complains when multiple archives have the same base name' do
+      it 'complains when multiple assets have the same base name' do
         input = <<-END
           archive http://some-host/duplicate-archive.tar.gz
           archive http://some-other-host/duplicate-archive.tar.gz
@@ -25,6 +26,23 @@ describe 'Fig' do
         err.should =~ /multiple archives/
         err.should =~ /duplicate-archive\.tar\.gz/
         exit_code.should_not == 0
+      end
+
+      it 'complains when archives are named the same as the resources tarball' do
+        %w< archive resource >.each do
+          |statement_type|
+
+          input = <<-END
+            #{statement_type} http://some-host/#{Fig::Repository::RESOURCES_FILE}
+          END
+
+          out, err, exit_code =
+              fig('--publish foo/1.2.3', input, :no_raise_on_error)
+
+          err.should =~
+            /cannot have an asset with the name "#{Regexp.escape(Fig::Repository::RESOURCES_FILE)}"/
+          exit_code.should_not == 0
+        end
       end
 
       it 'publishes to remote repository' do
