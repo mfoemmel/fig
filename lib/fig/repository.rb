@@ -390,7 +390,7 @@ class Fig::Repository
     content = File.read(file_name)
 
     package = @parser.parse_package(
-      descriptor, File.dirname(file_name), content
+      descriptor, File.dirname(file_name), descriptor.to_string(), content
     )
 
     @package_cache.add_package(package)
@@ -510,7 +510,7 @@ class Fig::Repository
         if statement.is_a?(Fig::Statement::Archive)
           @operating_system.unpack_archive(local_dir, asset_name)
         end
-        statement.class.new(nil, asset_name).unparse('')
+        statement.class.new(nil, nil, asset_name).unparse('')
       else
         statement.unparse('')
       end
@@ -542,7 +542,9 @@ class Fig::Repository
 
       file = RESOURCES_FILE
       @operating_system.create_archive(file, asset_paths)
-      new_package_statements.unshift(Fig::Statement::Archive.new(nil, file))
+      new_package_statements.unshift(
+        Fig::Statement::Archive.new(nil, nil, file)
+      )
       Fig::AtExit.add { File.delete(file) }
     end
 

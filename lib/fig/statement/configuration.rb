@@ -7,8 +7,8 @@ module Fig; end
 class Fig::Statement::Configuration < Fig::Statement
   attr_reader :name, :statements
 
-  def initialize(line_column, name, statements)
-    super(line_column)
+  def initialize(line_column, source_description, name, statements)
+    super(line_column, source_description)
 
     @name = name
     @statements = statements

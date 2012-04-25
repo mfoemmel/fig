@@ -403,7 +403,7 @@ Environment variables:
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:environment_variable_statements] <<
-        Fig::Statement::Path.new(nil, var, val)
+        Fig::Statement::Path.new(nil, nil, var, val)
     end
 
     parser.on(
@@ -413,7 +413,7 @@ Environment variables:
     ) do |descriptor_string|
       statement =
         Fig::Statement::Include.new(
-          nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
+          nil, nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
         )
       statement.complain_if_version_missing()
       @options[:environment_variable_statements] << statement
@@ -424,7 +424,7 @@ Environment variables:
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:environment_variable_statements] <<
-        Fig::Statement::Set.new(nil, var, val)
+        Fig::Statement::Set.new(nil, nil, var, val)
     end
 
     @options[:archives] = []
@@ -432,7 +432,7 @@ Environment variables:
       '--archive PATH',
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] << Fig::Statement::Archive.new(nil, path)
+      @options[:archives] << Fig::Statement::Archive.new(nil, nil, path)
     end
 
     @options[:resources] =[]
@@ -440,7 +440,7 @@ Environment variables:
       '--resource PATH',
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] << Fig::Statement::Resource.new(nil, path)
+      @options[:resources] << Fig::Statement::Resource.new(nil, nil, path)
     end
 
     return

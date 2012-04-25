@@ -51,6 +51,9 @@ v0.1.??
     the remote repository was corrupt.  Given the current repository layout,
     this is not fixable, so we now disallow publishing packages like this.
 
+    Similarly, we now complain about archives named "resources.tar.gz" because
+    Fig creates an archive by that name to hold resources.
+
 v0.1.62
 
   Bug fixes:

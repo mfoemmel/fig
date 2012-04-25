@@ -18,14 +18,14 @@ module Fig
   grammar Fig
     rule package
       optional_ws statements:(package_statement*) optional_ws {
-        def to_package(descriptor, directory)
+        def to_package(descriptor, directory, source_description)
           Package.new(
             descriptor.name,
             descriptor.version,
             directory,
             statements.elements.map do
               |statement|
-              statement.to_package_statement(descriptor)
+              statement.to_package_statement(descriptor, source_description)
             end
           )
         end
@@ -38,9 +38,11 @@ module Fig
 
     rule archive
       statement_start:"archive" ws resource_url {
-        def to_package_statement(descriptor)
+        def to_package_statement(descriptor, source_description)
           Statement::Archive.new(
-            Parser.node_location(statement_start), resource_url.value.text_value
+            Parser.node_location(statement_start),
+            source_description,
+            resource_url.value.text_value
           )
         end
       }
@@ -48,9 +50,11 @@ module Fig
 
     rule resource
       statement_start:"resource" ws resource_url {
-        def to_package_statement(descriptor)
+        def to_package_statement(descriptor, source_description)
           Statement::Resource.new(
-            Parser.node_location(statement_start), resource_url.value.text_value
+            Parser.node_location(statement_start),
+            source_description,
+            resource_url.value.text_value
           )
         end
       }
@@ -58,9 +62,10 @@ module Fig
 
     rule retrieve
       statement_start:"retrieve" ws var:retrieve_variable_name "->" path:retrieve_path ws {
-        def to_package_statement(descriptor)
+        def to_package_statement(descriptor, source_description)
           Statement::Retrieve.new(
             Parser.node_location(statement_start),
+            source_description,
             var.text_value,
             path.text_value
           )
@@ -78,13 +83,14 @@ module Fig
 
     rule config
       statement_start:"config" ws config_name ws statements:config_statement* "end" ws {
-        def to_package_statement(descriptor)
+        def to_package_statement(descriptor, source_description)
           Statement::Configuration.new(
             Parser.node_location(statement_start),
+            source_description,
             config_name.text_value,
             statements.elements.map do
               |statement|
-              statement.to_config_statement(descriptor)
+              statement.to_config_statement(descriptor, source_description)
             end
           )
         end
@@ -97,11 +103,14 @@ module Fig
 
     rule include
       statement_start:"include" ws descriptor overrides:(override*) {
-        def to_config_statement(containing_package_descriptor)
+        def to_config_statement(
+          containing_package_descriptor, source_description
+        )
           Statement::Include.new(
             Parser.node_location(statement_start),
+            source_description,
             PackageDescriptor.parse(descriptor.text_value.strip),
-            overrides.elements.map{ |e| e.to_override },
+            overrides.elements.map{ |e| e.to_override(source_description) },
             containing_package_descriptor
           )
         end
@@ -110,9 +119,10 @@ module Fig
 
     rule override
       statement_start:"override" ws package_name "/" version_name ws {
-        def to_override
+        def to_override(source_description)
           return Statement::Override.new(
             Parser.node_location(statement_start),
+            source_description,
             package_name.text_value,
             version_name.text_value
           )
@@ -122,9 +132,10 @@ module Fig
 
     rule path
       statement_start:("append" / "path" / "add") ws name:environment_variable_name "=" value:path_value ws {
-        def to_config_statement(descriptor)
+        def to_config_statement(descriptor, source_description)
           Statement::Path.new(
             Parser.node_location(statement_start),
+            source_description,
             name.text_value,
             value.text_value
           )
@@ -146,9 +157,10 @@ module Fig
 
     rule set
       statement_start:"set" ws name:environment_variable_name "=" value:set_value ws {
-        def to_config_statement(descriptor)
+        def to_config_statement(descriptor, source_description)
           Statement::Set.new(
             Parser.node_location(statement_start),
+            source_description,
             name.text_value,
             value.text_value
           )
@@ -162,9 +174,11 @@ module Fig
 
     rule command
       statement_start:"command" ws string {
-        def to_config_statement(descriptor)
+        def to_config_statement(descriptor, source_description)
           Statement::Command.new(
-            Parser.node_location(statement_start), string.value.text_value
+            Parser.node_location(statement_start),
+            source_description,
+            string.value.text_value
           )
         end
       }

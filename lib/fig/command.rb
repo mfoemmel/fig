@@ -289,6 +289,7 @@ class Fig::Command
         [
           Fig::Statement::Configuration.new(
             nil,
+            nil,
             Fig::Package::DEFAULT_CONFIG,
             @options.environment_variable_statements()
           )
