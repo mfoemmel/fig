@@ -2,11 +2,11 @@ require 'rubygems'
 require 'net/ftp'
 require 'set'
 
+require 'fig/command/options'
 require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/operatingsystem'
-require 'fig/options'
 require 'fig/package'
 require 'fig/parser'
 require 'fig/repository'
@@ -33,7 +33,7 @@ class Fig::Command
   include Fig::Command::PackageLoad
 
   def run_fig(argv)
-    @options = Fig::Options.new(argv)
+    @options = Fig::Command::Options.new(argv)
     if not @options.exit_code.nil?
       return @options.exit_code
     end
@@ -84,7 +84,7 @@ class Fig::Command
       ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?
       $stderr.puts "Nothing to do.\n"
-      $stderr.puts Fig::Options::USAGE
+      $stderr.puts Fig::Command::Options::USAGE
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
       return 1
     end
@@ -105,7 +105,7 @@ class Fig::Command
       return 1
     rescue OptionParser::InvalidOption => error
       $stderr.puts error.to_s
-      $stderr.puts Fig::Options::USAGE
+      $stderr.puts Fig::Command::Options::USAGE
       return 1
     rescue Fig::RepositoryError => error
       log_error_message(error)
