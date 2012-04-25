@@ -54,6 +54,9 @@ v0.1.??
     Similarly, we now complain about archives named "resources.tar.gz" because
     Fig creates an archive by that name to hold resources.
 
+  - Now saves retrieve metadata prior to an exec(2).  Previously, if you ran a
+    command, Fig would lose track of what you had in your current directory.
+
 v0.1.62
 
   Bug fixes:
