@@ -13,6 +13,7 @@ require 'uri'
 
 require 'highline/import'
 
+require 'fig/atexit'
 require 'fig/environmentvariables/caseinsensitive'
 require 'fig/environmentvariables/casesensitive'
 require 'fig/logging'
@@ -366,6 +367,9 @@ class Fig::OperatingSystem
   end
 
   def shell_exec(cmd)
+    # Kernel#exec won't run Kernel#at_exit handlers.
+    Fig::AtExit.execute()
+
     if Fig::OperatingSystem.windows?
       Kernel.exec(ENV['ComSpec'], '/c', cmd.join(' '))
     else

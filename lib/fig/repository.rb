@@ -2,6 +2,7 @@ require 'set'
 require 'socket'
 require 'sys/admin'
 
+require 'fig/atexit'
 require 'fig/logging'
 require 'fig/notfounderror'
 require 'fig/packagecache'
@@ -536,7 +537,7 @@ class Fig::Repository
       file = 'resources.tar.gz'
       @operating_system.create_archive(file, asset_paths)
       new_package_statements.unshift(Fig::Statement::Archive.new(nil, file))
-      at_exit { File.delete(file) }
+      Fig::AtExit.add { File.delete(file) }
     end
 
     return new_package_statements

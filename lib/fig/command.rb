@@ -2,6 +2,7 @@ require 'rubygems'
 require 'net/ftp'
 require 'set'
 
+require 'fig/atexit'
 require 'fig/command/options'
 require 'fig/environment'
 require 'fig/figrc'
@@ -191,7 +192,7 @@ class Fig::Command
 
     @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
-    at_exit { @working_directory_maintainer.save_metadata() }
+    Fig::AtExit.add { @working_directory_maintainer.save_metadata() }
 
     prepare_environment()
 
@@ -210,7 +211,7 @@ class Fig::Command
       @repository, environment_variables, @working_directory_maintainer
     )
 
-    at_exit { @environment.check_unused_retrieves() }
+    Fig::AtExit.add { @environment.check_unused_retrieves() }
 
     return
   end
