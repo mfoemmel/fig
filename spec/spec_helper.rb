@@ -71,14 +71,6 @@ def fig(args, input = nil, no_raise_on_error = false, figrc = nil)
 
       err = stderr.read.strip
       out = stdout.read.strip
-      # TODO: remove the following lines as it exists only to eat a warning specific to the grid build machines
-      err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+: warning: Insecure world writable dir (?:\/[a-zA-Z0-9. -:]+)+in PATH, mode 041777/, '')
-      err = err.gsub(/(?:\/[a-zA-Z0-9. -:]+)+[a-zA-Z0-9 `'<>():]+\nIt seems your ruby installation is missing psych \(for YAML output\)\.\nTo eliminate this warning, please install libyaml and reinstall your ruby\.\n?/, '')
-
-      # TODO: remove the following lines as it exists only to eat a warning specific to windows machines
-      ruby_1_9_2_warning_regex = %r/(?:[a-zA-Z]:)?(?:\/[a-zA-Z0-9 -]+)+\.rb:\d+: warning: failed to set environment variable\. Ruby 1\.9\.3 will raise SystemCallError in this case\.?\n?/
-      err = err.gsub(ruby_1_9_2_warning_regex, '').strip
-      out = out.gsub(ruby_1_9_2_warning_regex, '').strip
     end
 
 
@@ -109,7 +101,7 @@ FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
 FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
 FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
 FIG_BIN        = File.expand_path(File.dirname(__FILE__) + '/../bin')
-FIG_EXE        = %Q<#{FIG_BIN}/fig>
+FIG_EXE        = %Q<#{FIG_BIN}/drw-fig>
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
