@@ -170,6 +170,45 @@ describe 'Fig' do
       File.read("#{retrieve_directory}/prerequisite/foo.jar").should == 'some library'
     end
 
+    it 'cleans up no-longer necessary dependencies' do
+      pending 'need to correct this'
+
+      FileUtils.rm_rf(publish_from_directory)
+      FileUtils.mkdir_p(publish_from_directory)
+
+      IO.write("#{publish_from_directory}/from-alpha.txt", 'alpha')
+      input = <<-END
+        resource from-alpha.txt
+        config default
+          set TEST_FILE=from-alpha.txt
+        end
+      END
+      fig('--publish alpha/1.2.3', input, false, false, publish_from_directory)
+
+      FileUtils.rm_rf(publish_from_directory)
+      FileUtils.mkdir_p(publish_from_directory)
+
+      IO.write("#{publish_from_directory}/from-beta.txt", 'beta')
+      input = <<-END
+        resource from-beta.txt
+        config default
+          set TEST_FILE=from-beta.txt
+        end
+      END
+      fig('--publish beta/1.2.3', input, false, false, publish_from_directory)
+
+      File.exist?('from-alpha.txt').should == false
+      File.exist?('from-beta.txt').should  == false
+
+      fig('--update-if-missing --retrieve alpha/1.2.3 -- echo')
+      File.exist?('from-alpha.txt').should == true
+      File.exist?('from-beta.txt').should  == false
+
+      fig('--update-if-missing beta/1.2.3 -- echo')
+      File.exist?('from-alpha.txt').should == false
+      File.exist?('from-beta.txt').should  == true
+    end
+
     it 'warns on unused retrieval' do
       setup_test_environment()
 
