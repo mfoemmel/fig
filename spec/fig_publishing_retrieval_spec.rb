@@ -12,7 +12,7 @@ describe 'Fig' do
     end
 
     it 'retrieves resource' do
-      IO.write("#{lib_directory}/a-library", 'some library')
+      write_file("#{lib_directory}/a-library", 'some library')
       input = <<-END
         resource lib/a-library
         config default
@@ -31,7 +31,7 @@ describe 'Fig' do
     end
 
     it 'retrieves resource and ignores the append statement in the updating config' do
-      IO.write("#{lib_directory}/a-library", 'some library')
+      write_file("#{lib_directory}/a-library", 'some library')
       input = <<-END
         resource lib/a-library
         config default
@@ -51,7 +51,7 @@ describe 'Fig' do
     end
 
     it 'retrieves resource that is a directory' do
-      IO.write("#{lib_directory}/a-library", 'some library')
+      write_file("#{lib_directory}/a-library", 'some library')
       # To copy the contents of a directory, instead of the directory itself,
       # use '/.' as a suffix to the directory name in 'append'.
       input = <<-END
@@ -74,8 +74,8 @@ describe 'Fig' do
     it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
       include_directory = "#{publish_from_directory}/include"
       FileUtils.mkdir_p(include_directory)
-      IO.write("#{include_directory}/hello.h", 'a header file')
-      IO.write("#{include_directory}/hello2.h", 'another header file')
+      write_file("#{include_directory}/hello.h", 'a header file')
+      write_file("#{include_directory}/hello2.h", 'another header file')
       input = <<-END
         resource include/hello.h
         resource include/hello2.h
@@ -101,8 +101,8 @@ describe 'Fig' do
     it 'updates without there being a copy of the package in the FIG_HOME left there from publishing' do
       include_directory = "#{publish_from_directory}/include"
       FileUtils.mkdir_p(include_directory)
-      IO.write("#{include_directory}/hello.h", 'a header file')
-      IO.write("#{include_directory}/hello2.h", 'another header file')
+      write_file("#{include_directory}/hello.h", 'a header file')
+      write_file("#{include_directory}/hello2.h", 'another header file')
       input = <<-END
         resource include/hello.h
         resource include/hello2.h
@@ -128,8 +128,8 @@ describe 'Fig' do
     end
 
     it 'packages multiple resources' do
-      IO.write("#{lib_directory}/a-library", 'some library')
-      IO.write("#{lib_directory}/a-library2", 'some other library')
+      write_file("#{lib_directory}/a-library", 'some library')
+      write_file("#{lib_directory}/a-library2", 'some other library')
       input = <<-END
         resource lib/a-library
         resource lib/a-library2
@@ -151,8 +151,8 @@ describe 'Fig' do
     end
 
     it 'packages multiple resources with wildcards' do
-      IO.write("#{lib_directory}/foo.jar", 'some library')
-      IO.write("#{lib_directory}/bar.jar", 'some other library')
+      write_file("#{lib_directory}/foo.jar", 'some library')
+      write_file("#{lib_directory}/bar.jar", 'some other library')
       input = <<-END
         resource **/*.jar
         config default
@@ -176,7 +176,7 @@ describe 'Fig' do
       FileUtils.rm_rf(publish_from_directory)
       FileUtils.mkdir_p(publish_from_directory)
 
-      IO.write("#{publish_from_directory}/from-alpha.txt", 'alpha')
+      write_file("#{publish_from_directory}/from-alpha.txt", 'alpha')
       input = <<-END
         resource from-alpha.txt
         config default
@@ -188,7 +188,7 @@ describe 'Fig' do
       FileUtils.rm_rf(publish_from_directory)
       FileUtils.mkdir_p(publish_from_directory)
 
-      IO.write("#{publish_from_directory}/from-beta.txt", 'beta')
+      write_file("#{publish_from_directory}/from-beta.txt", 'beta')
       input = <<-END
         resource from-beta.txt
         config default

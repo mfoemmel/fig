@@ -180,3 +180,8 @@ def set_remote_repository_format_to_future_version()
 
   return
 end
+
+# IO.write() only exists in ruby v1.9.3+. *sigh*
+def write_file(path, content)
+  File.open(path, 'w') { |handle| handle << content }
+end
