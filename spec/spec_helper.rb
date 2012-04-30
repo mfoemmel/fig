@@ -47,8 +47,14 @@ class Popen
   end
 end
 
-def fig(args, input = nil, no_raise_on_error = false, figrc = nil)
-  Dir.chdir FIG_SPEC_BASE_DIRECTORY do
+def fig(
+  args,
+  input = nil,
+  no_raise_on_error = false,
+  figrc = nil,
+  current_directory = FIG_SPEC_BASE_DIRECTORY
+)
+  Dir.chdir current_directory do
     args = "--log-level warn #{args}"
     args = "--file - #{args}" if input
 

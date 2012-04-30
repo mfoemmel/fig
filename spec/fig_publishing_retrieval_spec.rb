@@ -1,11 +1,10 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/operatingsystem'
-
 describe 'Fig' do
   describe 'publishing/retrieval' do
-    let(:lib_directory)      { "#{FIG_SPEC_BASE_DIRECTORY}/lib" }
-    let(:retrieve_directory) { "#{FIG_SPEC_BASE_DIRECTORY}/retrieve" }
+    let(:publish_from_directory)  { "#{FIG_SPEC_BASE_DIRECTORY}/publish-home" }
+    let(:lib_directory)           { "#{publish_from_directory}/lib" }
+    let(:retrieve_directory)      { "#{FIG_SPEC_BASE_DIRECTORY}/retrieve" }
 
     before(:each) do
       cleanup_test_environment
@@ -20,7 +19,7 @@ describe 'Fig' do
           append FOOPATH=@/lib/a-library
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -39,7 +38,7 @@ describe 'Fig' do
           append FOOPATH=@/lib/a-library
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -61,7 +60,7 @@ describe 'Fig' do
           append FOOPATH=@/lib/.
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -73,9 +72,10 @@ describe 'Fig' do
     end
 
     it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
-      FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/include")
-      File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello.h", 'w') { |f| f << 'a header file' }
-      File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello2.h", 'w') { |f| f << 'another header file' }
+      include_directory = "#{publish_from_directory}/include"
+      FileUtils.mkdir_p(include_directory)
+      File.open("#{include_directory}/hello.h", 'w') { |f| f << 'a header file' }
+      File.open("#{include_directory}/hello2.h", 'w') { |f| f << 'another header file' }
       input = <<-END
         resource include/hello.h
         resource include/hello2.h
@@ -84,7 +84,7 @@ describe 'Fig' do
           append INCLUDE=@//include/hello2.h
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
 
       input = <<-END
         retrieve INCLUDE->include2/[package]
@@ -99,9 +99,10 @@ describe 'Fig' do
     end
 
     it 'updates without there being a copy of the package in the FIG_HOME left there from publishing' do
-      FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/include")
-      File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello.h", 'w') { |f| f << 'a header file' }
-      File.open("#{FIG_SPEC_BASE_DIRECTORY}/include/hello2.h", 'w') { |f| f << 'another header file' }
+      include_directory = "#{publish_from_directory}/include"
+      FileUtils.mkdir_p(include_directory)
+      File.open("#{include_directory}/hello.h", 'w') { |f| f << 'a header file' }
+      File.open("#{include_directory}/hello2.h", 'w') { |f| f << 'another header file' }
       input = <<-END
         resource include/hello.h
         resource include/hello2.h
@@ -110,7 +111,7 @@ describe 'Fig' do
           append INCLUDE=@/include/hello2.h
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
 
       FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY + '/fighome')
 
@@ -137,7 +138,7 @@ describe 'Fig' do
           append FOOPATH=@/lib/a-library2
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -158,7 +159,7 @@ describe 'Fig' do
           append FOOPATH=@/lib/foo.jar
         end
       END
-      fig('--publish prerequisite/1.2.3', input)
+      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
