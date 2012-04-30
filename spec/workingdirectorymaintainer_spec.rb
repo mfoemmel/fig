@@ -20,28 +20,35 @@ describe 'WorkingDirectoryMaintainer' do
     end
   end
 
-  it 'retrieves single file' do
+  it 'maintains files for a single package' do
     # Set up some test files
-    File.open("#{source_directory}/foo.txt", 'w') {|f| f << 'FOO'}
-    File.open("#{source_directory}/bar.txt", 'w') {|f| f << 'BAR'}
-    File.open("#{source_directory}/baz.txt", 'w') {|f| f << 'BAZ'}
+    source_foo = "#{source_directory}/foo.txt"
+    source_bar = "#{source_directory}/bar.txt"
+    source_baz = "#{source_directory}/baz.txt"
+    File.open(source_foo, 'w') {|f| f << 'FOO'}
+    File.open(source_bar, 'w') {|f| f << 'BAR'}
+    File.open(source_baz, 'w') {|f| f << 'BAZ'}
+
+    working_foo = File.join(working_directory, 'foo.txt')
+    working_bar = File.join(working_directory, 'bar.txt')
+    working_baz = File.join(working_directory, 'baz.txt')
 
     # Retrieve files A and B
     r = Fig::WorkingDirectoryMaintainer.new(working_directory)
     r.with_package_version('foo', '1.2.3') do
-      r.retrieve("#{source_directory}/foo.txt", 'foo.txt')
-      r.retrieve("#{source_directory}/bar.txt", 'bar.txt')
-      File.read(File.join(working_directory, 'foo.txt')).should == 'FOO'
-      File.read(File.join(working_directory, 'bar.txt')).should == 'BAR'
+      r.retrieve(source_foo, 'foo.txt')
+      r.retrieve(source_bar, 'bar.txt')
+      File.read(working_foo).should == 'FOO'
+      File.read(working_bar).should == 'BAR'
     end
 
     # Retrieve files B and C for a different version
     r.with_package_version('foo', '4.5.6') do
-      r.retrieve("#{source_directory}/bar.txt", 'bar.txt')
-      r.retrieve("#{source_directory}/baz.txt", 'baz.txt')
-      File.read(File.join(working_directory, 'bar.txt')).should == 'BAR'
-      File.read(File.join(working_directory, 'baz.txt')).should == 'BAZ'
-      File.exist?(File.join(working_directory, 'foo.txt')).should == false
+      r.retrieve(source_bar, 'bar.txt')
+      r.retrieve(source_baz, 'baz.txt')
+      File.read(working_bar).should == 'BAR'
+      File.read(working_baz).should == 'BAZ'
+      File.exist?(working_foo).should == false
     end
 
     # Save and reload
@@ -50,12 +57,12 @@ describe 'WorkingDirectoryMaintainer' do
 
     # Switch back to original version
     r.with_package_version('foo', '1.2.3') do
-      r.retrieve("#{source_directory}/foo.txt", 'foo.txt')
-      r.retrieve("#{source_directory}/bar.txt", 'bar.txt')
+      r.retrieve(source_foo, 'foo.txt')
+      r.retrieve(source_bar, 'bar.txt')
 
-      File.read(File.join(working_directory, 'foo.txt')).should == 'FOO'
-      File.read(File.join(working_directory, 'bar.txt')).should == 'BAR'
-      File.exist?(File.join(working_directory, 'baz.txt')).should == false
+      File.read(working_foo).should == 'FOO'
+      File.read(working_bar).should == 'BAR'
+      File.exist?(working_baz).should == false
     end
   end
 
