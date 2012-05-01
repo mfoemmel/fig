@@ -171,42 +171,43 @@ describe 'Fig' do
     end
 
     it 'cleans up no-longer necessary dependencies' do
-      pending 'need to correct this'
+      pending 'still need to figure out when clean up should and should not happen'
+      FileUtils.rm_rf(publish_from_directory)
+      FileUtils.mkdir_p(publish_from_directory)
+
+      dependency_basename = 'from-dependency.txt'
+      FileUtils.touch "#{publish_from_directory}/#{dependency_basename}"
+      input = <<-END
+        resource #{dependency_basename}
+        config default
+          set TEST_FILE=@/#{dependency_basename}
+        end
+      END
+      fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
 
       FileUtils.rm_rf(publish_from_directory)
       FileUtils.mkdir_p(publish_from_directory)
 
-      write_file("#{publish_from_directory}/from-alpha.txt", 'alpha')
       input = <<-END
-        resource from-alpha.txt
+        retrieve TEST_FILE->.
         config default
-          set TEST_FILE=from-alpha.txt
+          include dependency/1.2.3
         end
       END
       fig('--publish alpha/1.2.3', input, false, false, publish_from_directory)
+      fig('--publish beta/1.2.3 --no-file --set set_something=so-we-have-some-content')
 
-      FileUtils.rm_rf(publish_from_directory)
-      FileUtils.mkdir_p(publish_from_directory)
+      dependency_file = "#{FIG_SPEC_BASE_DIRECTORY}/#{dependency_basename}"
+      File.exist?(dependency_file) and
+        fail 'File should not exist prior to using alpha.'
 
-      write_file("#{publish_from_directory}/from-beta.txt", 'beta')
-      input = <<-END
-        resource from-beta.txt
-        config default
-          set TEST_FILE=from-beta.txt
-        end
-      END
-      fig('--publish beta/1.2.3', input, false, false, publish_from_directory)
-
-      File.exist?('from-alpha.txt').should == false
-      File.exist?('from-beta.txt').should  == false
-
-      fig('--update-if-missing --retrieve alpha/1.2.3 -- echo')
-      File.exist?('from-alpha.txt').should == true
-      File.exist?('from-beta.txt').should  == false
+      fig('--update-if-missing alpha/1.2.3 -- echo')
+      File.exist?(dependency_file) or
+        fail 'File should exist after using alpha.'
 
       fig('--update-if-missing beta/1.2.3 -- echo')
-      File.exist?('from-alpha.txt').should == false
-      File.exist?('from-beta.txt').should  == true
+      File.exist?(dependency_file) and
+        fail 'File should not exist after switching to beta.'
     end
 
     it 'warns on unused retrieval' do
