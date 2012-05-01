@@ -4,7 +4,7 @@ source 'http://gems-mirror'
 # All environments
 gem 'colorize',          '>= 0.5.8'
 gem 'highline',          '>= 1.6.2'
-gem 'json',              '>= 1.6.5'
+gem 'json',              '= 1.6.5' # Pinned due to TeamCity issues.
 gem 'libarchive-static', '>= 1.0.0'
 gem 'log4r',             '>= 1.1.5'
 gem 'net-netrc',         '>= 0.2.2'
