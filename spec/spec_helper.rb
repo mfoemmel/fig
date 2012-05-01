@@ -7,6 +7,9 @@ require 'rspec'
 
 if ENV['COVERAGE']
   require 'simplecov'
+
+  SimpleCov.merge_timeout 2 * 60 * 60 # 2 hours
+
   SimpleCov.start
 end
 
@@ -47,6 +50,8 @@ class Popen
   end
 end
 
+$fig_run_count = 0 # Nasty, nasty global.
+
 def fig(
   args,
   input = nil,
@@ -54,6 +59,9 @@ def fig(
   figrc = nil,
   current_directory = FIG_SPEC_BASE_DIRECTORY
 )
+  $fig_run_count += 1
+  ENV['FIG_COVERAGE_RUN_COUNT'] = $fig_run_count.to_s
+
   Dir.chdir current_directory do
     args = "--log-level warn #{args}"
     args = "--file - #{args}" if input
@@ -124,6 +132,8 @@ RUBY_EXE =
 
 ENV['FIG_HOME'] = FIG_HOME
 ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
+  File.expand_path(File.dirname(__FILE__) + '/..')
 
 def setup_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
