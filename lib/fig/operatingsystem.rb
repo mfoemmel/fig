@@ -369,6 +369,9 @@ class Fig::OperatingSystem
   def shell_exec(cmd)
     # Kernel#exec won't run Kernel#at_exit handlers.
     Fig::AtExit.execute()
+    if ENV['COVERAGE']
+      SimpleCov.at_exit.call
+    end
 
     if Fig::OperatingSystem.windows?
       Kernel.exec(ENV['ComSpec'], '/c', cmd.join(' '))
