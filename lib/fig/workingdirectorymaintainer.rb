@@ -1,9 +1,9 @@
-require 'ostruct'
 require 'set'
 
 require 'fig/logging'
 require 'fig/logging/colorizable'
 require 'fig/packagedescriptor'
+require 'fig/workingdirectorymetadata'
 
 module Fig; end
 
@@ -17,36 +17,23 @@ class Fig::WorkingDirectoryMaintainer
     @base_dir = base_dir
     @package_metadata_by_name = {}
     @local_fig_data_directory = File.join(@base_dir, '.fig')
+    @metadata_file = File.join(@local_fig_data_directory, 'retrieve')
 
-    file = File.join(@local_fig_data_directory, 'retrieve')
-    if File.exist?(file)
-      load_metadata(file)
+    if File.exist?(@metadata_file)
+      load_metadata()
     end
   end
 
   def with_package_version(name, version)
-    if name and version
-      @package_meta = @package_metadata_by_name[name]
-      if @package_meta && @package_meta.version != version
-        @package_meta.files.each do |relpath|
-          Fig::Logging.info(
-            Fig::Logging::Colorizable.new(
-              "- [#{formatted_meta()}] #{relpath}",
-              :magenta,
-              nil
-            )
-          )
-          FileUtils.rm_f(File.join(@base_dir, relpath))
-        end
-        @package_meta = nil
-      end
-      if not @package_meta
-        @package_meta = new_package_metadata(name, version)
-        @package_metadata_by_name[name] = @package_meta
-      end
-    else
+    @package_meta = @package_metadata_by_name[name]
+    if @package_meta && @package_meta.current_version != version
+      clean_up_package_files()
       @package_meta = nil
     end
+    if not @package_meta
+      @package_meta = reset_package_metadata_with_version(name, version)
+    end
+
     yield
   end
 
@@ -56,10 +43,10 @@ class Fig::WorkingDirectoryMaintainer
 
   def save_metadata
     FileUtils.mkdir_p(@local_fig_data_directory)
-    File.open(File.join(@local_fig_data_directory, 'retrieve'), 'w') do |f|
+    File.open(@metadata_file, 'w') do |file|
       @package_metadata_by_name.each do |name, package_meta|
-        package_meta.files.each do |target|
-          f << target << '=' << formatted_meta(package_meta) << "\n"
+        package_meta.each_file do |target|
+          file << target << '=' << formatted_meta(package_meta) << "\n"
         end
       end
     end
@@ -67,36 +54,40 @@ class Fig::WorkingDirectoryMaintainer
 
   private
 
-  def load_metadata(file)
-    File.open(file).each_line do |line|
-      line = line.strip()
+  def load_metadata()
+    File.open(@metadata_file).each_line do |line|
+      line.strip!()
       if line =~ /^(.+)=(.+)\/(.+)$/
-        target = $1
-        package_name = $2
+        target          = $1
+        package_name    = $2
         package_version = $3
+
         package_meta = @package_metadata_by_name[package_name]
         if package_meta
-          if package_meta.version != package_version
-            raise 'version mismatch in .fig/retrieve'
+          if package_meta.current_version != package_version
+            raise "Version mismatch for #{package_meta.package_name} in #{@metadata_file}."
           end
         else
-          package_meta = new_package_metadata(package_name, package_version)
-          @package_metadata_by_name[package_name] = package_meta
+          package_meta =
+            reset_package_metadata_with_version(package_name, package_version)
         end
-        package_meta.files << target
+        package_meta.add_file(target)
       else
         raise "parse error in #{file}: #{line}"
       end
     end
   end
 
-  def new_package_metadata(name, version)
-    package_meta = OpenStruct.new
-    package_meta.name = name
-    package_meta.version = version
-    package_meta.files = Set.new()
+  def reset_package_metadata_with_version(name, version)
+    metadata = @package_metadata_by_name[name]
+    if not metadata
+      metadata = Fig::WorkingDirectoryMetadata.new(name, version)
+      @package_metadata_by_name[name] = metadata
+    else
+      metadata.reset_with_version(version)
+    end
 
-    return package_meta
+    return metadata
   end
 
   def copy(source, relpath)
@@ -129,13 +120,31 @@ class Fig::WorkingDirectoryMaintainer
 
         FileUtils.cp(source, target, :preserve => true)
       end
-      @package_meta.files << relpath if @package_meta
+      if @package_meta
+        @package_meta.add_file(relpath)
+        @package_meta.mark_as_retrieved()
+      end
     end
+  end
+
+  def clean_up_package_files(package_meta = @package_meta)
+    package_meta.each_file do |relpath|
+      Fig::Logging.info(
+        Fig::Logging::Colorizable.new(
+          "- [#{formatted_meta(package_meta)}] #{relpath}",
+          :magenta,
+          nil
+        )
+      )
+      FileUtils.rm_f(File.join(@base_dir, relpath))
+    end
+
+    return
   end
 
   def formatted_meta(package_meta = @package_meta)
     return Fig::PackageDescriptor.format(
-      package_meta.name, package_meta.version, nil
+      package_meta.package_name, package_meta.current_version, nil
     )
   end
 end

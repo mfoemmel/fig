@@ -12,8 +12,8 @@ class Fig::Statement::Resource < Fig::Statement
 
   attr_reader :url
 
-  def initialize(line_column, url)
-    super(line_column)
+  def initialize(line_column, source_description, url)
+    super(line_column, source_description)
 
     @url = url
   end

@@ -29,7 +29,7 @@ def set_up_local_and_remote_repository
   END_INPUT
 
   fig('--publish remote-only/1.2.3', input)
-  fig('--clean remote-only/1.2.3', input)
+  fig('--clean remote-only/1.2.3', nil)
   fig('--publish both/1.2.3', input)
   fig('--publish-local local-only/1.2.3', input)
 

@@ -7,8 +7,8 @@ module Fig; end
 class Fig::Statement::Configuration < Fig::Statement
   attr_reader :name, :statements
 
-  def initialize(line_column, name, statements)
-    super(line_column)
+  def initialize(line_column, source_description, name, statements)
+    super(line_column, source_description)
 
     @name = name
     @statements = statements
@@ -46,5 +46,14 @@ class Fig::Statement::Configuration < Fig::Statement
 
   def unparse(indent)
     unparse_statements(indent, "config #{@name}", @statements, 'end')
+  end
+
+  private
+
+  def unparse_statements(indent, prefix, statements, suffix)
+    body =
+      @statements.map {|statement| statement.unparse(indent + '  ') }.join("\n")
+
+    return ["\n#{indent}#{prefix}", body, "#{indent}#{suffix}"].join("\n")
   end
 end

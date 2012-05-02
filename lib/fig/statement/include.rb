@@ -8,8 +8,8 @@ module Fig; end
 class Fig::Statement::Include < Fig::Statement
   attr_reader :descriptor, :overrides, :containing_package_descriptor
 
-  def initialize(line_column, descriptor, overrides, containing_package_descriptor)
-    super(line_column)
+  def initialize(line_column, source_description, descriptor, overrides, containing_package_descriptor)
+    super(line_column, source_description)
 
     @descriptor                    = descriptor
     @overrides                     = overrides

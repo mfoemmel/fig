@@ -23,11 +23,11 @@ def create_local_repository()
 end
 
 def generate_package_statements
-  resource_statement      = Fig::Statement::Resource.new(nil, FIG_FILE_GUARANTEED_TO_EXIST)
-  path_statement          = Fig::Statement::Path.new(nil, 'FOO', 'bar')
+  resource_statement      = Fig::Statement::Resource.new(nil, nil, FIG_FILE_GUARANTEED_TO_EXIST)
+  path_statement          = Fig::Statement::Path.new(nil, nil, 'FOO', 'bar')
   configuration_statement =
     Fig::Statement::Configuration.new(
-      nil, Fig::Package::DEFAULT_CONFIG, [path_statement]
+      nil, nil, Fig::Package::DEFAULT_CONFIG, [path_statement]
     )
   publish_statement       = Fig::Statement::Publish.new()
 

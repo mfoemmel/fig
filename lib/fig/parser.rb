@@ -29,7 +29,7 @@ class Fig::Parser
     @check_include_versions = check_include_versions
   end
 
-  def parse_package(descriptor, directory, input)
+  def parse_package(descriptor, directory, source_description, input)
     # Bye bye comments.
     input = input.gsub(/#.*$/, '')
 
@@ -38,11 +38,10 @@ class Fig::Parser
     result = @treetop_parser.parse(input + ' ')
 
     if result.nil?
-      Fig::Logging.fatal "#{directory}: #{@treetop_parser.failure_reason}"
-      raise Fig::PackageParseError.new("#{directory}: #{@treetop_parser.failure_reason}")
+      raise_parse_error(directory, source_description)
     end
 
-    package = result.to_package(descriptor, directory)
+    package = result.to_package(descriptor, directory, source_description)
 
     check_for_bad_urls(package, descriptor)
     check_for_multiple_command_statements(package)
@@ -52,6 +51,21 @@ class Fig::Parser
   end
 
   private
+
+  def raise_parse_error(directory, source_description)
+    message = ''
+    if source_description
+      message = source_description
+      if directory != '.'
+        message << " (#{directory})"
+      end
+    else
+      message = directory
+    end
+    message << ": #{@treetop_parser.failure_reason}"
+
+    raise Fig::PackageParseError.new(message)
+  end
 
   def check_for_bad_urls(package, descriptor)
     bad_urls = []

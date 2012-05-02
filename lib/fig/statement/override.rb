@@ -13,8 +13,8 @@ module Fig; end
 class Fig::Statement::Override < Fig::Statement
   attr_reader :package_name, :version
 
-  def initialize(line_column, package_name, version)
-    super(line_column)
+  def initialize(line_column, source_description, package_name, version)
+    super(line_column, source_description)
 
     @package_name = package_name
     @version = version

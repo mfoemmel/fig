@@ -7,8 +7,8 @@ module Fig; end
 class Fig::Statement::Command < Fig::Statement
   attr_reader :command
 
-  def initialize(line_column, command)
-    super(line_column)
+  def initialize(line_column, source_description, command)
+    super(line_column, source_description)
 
     @command = command
   end

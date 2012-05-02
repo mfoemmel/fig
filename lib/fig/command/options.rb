@@ -10,9 +10,10 @@ require 'fig/statement/set'
 require 'fig/userinputerror'
 
 module Fig; end
+class Fig::Command; end
 
 # Command-line processing.
-class Fig::Options
+class Fig::Command::Options
   USAGE = <<-EOF
 
 Usage:
@@ -77,6 +78,7 @@ Environment variables:
     @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
 
     parser = new_parser()
+    @help_message = parser.help
 
     begin
       parser.parse!(argv)
@@ -144,6 +146,10 @@ Environment variables:
 
   def get()
     return @options[:get]
+  end
+
+  def help?()
+    return @options[:help]
   end
 
   def home()
@@ -218,6 +224,10 @@ Environment variables:
     return update? || update_if_missing?
   end
 
+  def version?()
+    return @options[:version]
+  end
+
   # Answers whether we should reset the environment to nothing, sort of like
   # the standardized environment that cron(1) creates.  At present, we're only
   # setting this when we're listing variables.  One could imagine allowing this
@@ -228,8 +238,7 @@ Environment variables:
     return listing() == :variables
   end
 
-  private
-
+  # This needs to be public for efficient use of custom command.rb wrappers.
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|
       terminating_option = nil
@@ -252,6 +261,21 @@ Environment variables:
     return
   end
 
+  # This needs to be public for efficient use of custom command.rb wrappers.
+  def help()
+    puts @help_message
+    puts <<-'END_MESSAGE'
+        --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
+
+    END_MESSAGE
+
+    return 0
+  end
+
+  private
+
   def new_parser
     return OptionParser.new do |parser|
       set_up_queries(parser)
@@ -266,11 +290,11 @@ Environment variables:
   def set_up_queries(parser)
     parser.banner = USAGE
     parser.on_tail('-?', '-h','--help','display this help text') do
-      help(parser)
+      @options[:help] = true
     end
 
     parser.on_tail('-v', '--version', 'print Fig version') do
-      version()
+      @options[:version] = true
     end
 
     parser.on(
@@ -391,7 +415,7 @@ Environment variables:
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:environment_variable_statements] <<
-        Fig::Statement::Path.new(nil, var, val)
+        Fig::Statement::Path.new(nil, nil, var, val)
     end
 
     parser.on(
@@ -401,7 +425,7 @@ Environment variables:
     ) do |descriptor_string|
       statement =
         Fig::Statement::Include.new(
-          nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
+          nil, nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
         )
       statement.complain_if_version_missing()
       @options[:environment_variable_statements] << statement
@@ -412,7 +436,7 @@ Environment variables:
     ) do |var_val|
       var, val = var_val.split('=')
       @options[:environment_variable_statements] <<
-        Fig::Statement::Set.new(nil, var, val)
+        Fig::Statement::Set.new(nil, nil, var, val)
     end
 
     @options[:archives] = []
@@ -420,7 +444,7 @@ Environment variables:
       '--archive PATH',
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] << Fig::Statement::Archive.new(nil, path)
+      @options[:archives] << Fig::Statement::Archive.new(nil, nil, path)
     end
 
     @options[:resources] =[]
@@ -428,7 +452,7 @@ Environment variables:
       '--resource PATH',
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] << Fig::Statement::Resource.new(nil, path)
+      @options[:resources] << Fig::Statement::Resource.new(nil, nil, path)
     end
 
     return
@@ -501,49 +525,6 @@ Environment variables:
       @options[:suppress_warning_include_statement_missing_version] = true
     end
 
-    return
-  end
-
-  def help(parser)
-    puts parser.help
-    puts <<-'END_MESSAGE'
-        --                           end of Fig options; anything after this is used as a command to run
-        --command-extra-args         end of Fig options; anything after this is appended to the end of a
-                                     "command" statement in a "config" block.
-
-    END_MESSAGE
-
-    @exit_code = 0
-
-    return
-  end
-
-  def version()
-    line = nil
-
-    begin
-      File.open(
-        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
-      ) do |file|
-        line = file.gets
-      end
-    rescue
-      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
-
-      @exit_code = 1
-      return
-    end
-
-    if line !~ /\d+\.\d+\.\d+/
-      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
-
-      @exit_code = 1
-      return
-    end
-
-    puts File.basename($0) + ' v' + line
-
-    @exit_code = 0
     return
   end
 end

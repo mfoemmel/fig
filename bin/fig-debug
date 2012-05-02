@@ -1,5 +1,13 @@
 #!/usr/bin/env ruby
 
+if ENV['FIG_COVERAGE']
+  require File.expand_path(
+    File.join(
+      File.dirname(__FILE__), %w< .. lib fig command coveragesupport.rb >
+    )
+  )
+end
+
 $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
 
 require 'rubygems'
@@ -8,5 +16,4 @@ require 'fig/command'
 
 # Identical to regular fig, but doesn't use exception handling so you can see
 # stack traces.
-return_code = Fig::Command.new.run_fig(ARGV)
-exit return_code
+exit Fig::Command.new.run_fig ARGV

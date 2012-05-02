@@ -12,6 +12,7 @@ describe 'Parser' do
     Fig::Parser.new(application_configuration, false).parse_package(
       Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
       'foo_directory',
+      'source description',
       fig_input
     )
     # Got no exception.
@@ -27,6 +28,7 @@ describe 'Parser' do
       Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
         'foo_directory',
+        'source description',
         fig_input
       )
     }.to raise_error(
@@ -48,6 +50,7 @@ describe 'Parser' do
         Fig::Parser.new(application_configuration, false).parse_package(
           Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
           'foo_directory',
+          'source description',
           fig_package
         )
       }.to raise_error(
@@ -79,6 +82,7 @@ describe 'Parser' do
       package = Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', 'version', nil),
         'foo_directory',
+        'source description',
         fig_package
       )
 
@@ -119,6 +123,7 @@ describe 'Parser' do
       package = Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', 'version', nil),
         'foo_directory',
+        'source description',
         fig_package
       )
       package.should_not == nil
@@ -138,6 +143,7 @@ describe 'Parser' do
         package = Fig::Parser.new(application_configuration, false).parse_package(
           Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
           'foo_directory',
+          'source description',
           fig_package
         )
       rescue Fig::URLAccessError => exception

@@ -78,7 +78,10 @@ module Fig::Command::PackageLoad
 
     @package =
       Fig::Parser.new(@configuration, :check_include_versions).parse_package(
-        Fig::PackageDescriptor.new(nil, nil, nil), '.', config_raw_text
+        Fig::PackageDescriptor.new(nil, nil, nil),
+        '.',
+        derive_package_source_description(),
+        config_raw_text
       )
 
     register_package_with_environment_if_not_listing_or_publishing()
@@ -96,7 +99,6 @@ module Fig::Command::PackageLoad
     if @descriptor.nil?
       load_package_file()
     else
-      # TODO: complain if config file was specified on the command-line.
       @package = @repository.get_package(@descriptor)
 
       register_package_with_environment_if_not_listing_or_publishing()
@@ -107,15 +109,7 @@ module Fig::Command::PackageLoad
 
   def make_no_such_package_exception_descriptive(exception)
     if not @descriptor
-      raise exception if config_was_specified_by_user()
-
-      source = derive_exception_source()
-      message =
-        %Q<No config was specified and there's no "#{Fig::Package::DEFAULT_CONFIG}" config#{source}.>
-      message +=
-        %Q< The valid configs are "#{@package.config_names().join('", "')}".>
-
-      raise Fig::UserInputError.new(message)
+      make_no_such_package_exception_descriptive_without_descriptor(exception)
     end
 
     check_no_such_package_exception_is_for_command_line_package(exception)
@@ -134,6 +128,25 @@ module Fig::Command::PackageLoad
     raise Fig::UserInputError.new(message)
   end
 
+  def make_no_such_package_exception_descriptive_without_descriptor(exception)
+    raise exception if config_was_specified_by_user()
+
+    source = derive_exception_source()
+    message =
+      %Q<No config was specified and there's no "#{Fig::Package::DEFAULT_CONFIG}" config#{source}.>
+    config_names = @package.config_names()
+    if config_names.size > 1
+      message +=
+        %Q< The valid configs are "#{config_names.join('", "')}".>
+    elsif config_names.size == 1
+      message += %Q< The only config is "#{config_names[0]}".>
+    else
+      message += ' Actually, there are no configs.'
+    end
+
+    raise Fig::UserInputError.new(message)
+  end
+
   def check_no_such_package_exception_is_for_command_line_package(exception)
     descriptor = exception.descriptor
 
@@ -147,14 +160,19 @@ module Fig::Command::PackageLoad
   end
 
   def derive_exception_source()
-    source = nil
+    source = derive_package_source_description()
+
+    return source ? %Q< in #{source}> : ''
+  end
+
+  def derive_package_source_description()
     if @package_loaded_from_path
-      source = @package_loaded_from_path
+      return @package_loaded_from_path
     elsif @descriptor
-      source =
+      return
         Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
     end
 
-    return source ? %Q< in #{source}> : ''
+    return nil
   end
 end

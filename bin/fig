@@ -1,10 +1,17 @@
 #!/usr/bin/env ruby
 
+if ENV['FIG_COVERAGE']
+  require File.expand_path(
+    File.join(
+      File.dirname(__FILE__), %w< .. lib fig command coveragesupport.rb >
+    )
+  )
+end
+
 $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
 
 require 'rubygems'
 
 require 'fig/command'
 
-return_code = Fig::Command.new.run_with_exception_handling(ARGV)
-exit return_code
+exit Fig::Command.new.run_with_exception_handling ARGV
