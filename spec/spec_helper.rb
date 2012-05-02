@@ -1,7 +1,7 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-if ENV['COVERAGE']
+if ENV['FIG_COVERAGE']
   require 'simplecov' # note that .simplecov will be loaded here.
 
   SimpleCov.start

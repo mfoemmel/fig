@@ -153,6 +153,7 @@ end
 
 desc 'Run RSpec tests.'
 RSpec::Core::RakeTask.new(:spec) do |spec|
+  # Order is randomized so that we find inter-test dependencies.
   spec.rspec_opts = []
   spec.rspec_opts << '--order rand'
 end
@@ -189,9 +190,11 @@ task :publish do
   end
 end
 
-task :simplecov do
-  ENV['COVERAGE'] = 'true'
-  Rake::Task[:spec].invoke
+desc 'Run RSpec tests with SimpleCov.'
+RSpec::Core::RakeTask.new(:simplecov) do
+  ENV['FIG_COVERAGE'] = 'true'
+  # Don't use '--order rand' like the standard "spec" task so that generated
+  # SimpleCov command-names are consistent between runs.
 end
 
 task :spec do

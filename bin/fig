@@ -1,6 +1,6 @@
 #!/usr/bin/env ruby
 
-if ENV['COVERAGE']
+if ENV['FIG_COVERAGE']
   require File.expand_path(
     File.join(
       File.dirname(__FILE__), %w< .. lib fig command coveragesupport.rb >

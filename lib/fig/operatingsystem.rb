@@ -369,7 +369,7 @@ class Fig::OperatingSystem
   def shell_exec(cmd)
     # Kernel#exec won't run Kernel#at_exit handlers.
     Fig::AtExit.execute()
-    if ENV['COVERAGE']
+    if ENV['FIG_COVERAGE']
       SimpleCov.at_exit.call
     end
 
