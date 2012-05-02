@@ -1,15 +1,15 @@
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))
 
-require 'rubygems'
-require 'rbconfig'
-require 'rspec'
-
 if ENV['COVERAGE']
   require 'simplecov' # note that .simplecov will be loaded here.
 
   SimpleCov.start
 end
+
+require 'rubygems'
+require 'rbconfig'
+require 'rspec'
 
 require 'fileutils'
 
@@ -17,6 +17,36 @@ require 'fig/command'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/repository'
+
+FIG_SPEC_BASE_DIRECTORY =
+  File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
+FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
+FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
+FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
+FIG_BIN        = File.expand_path(File.dirname(__FILE__) + '/../bin')
+FIG_EXE        = %Q<#{FIG_BIN}/fig>
+
+# Needed for testing of resources.
+FIG_FILE_GUARANTEED_TO_EXIST =
+  File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/file-guaranteed-to-exist')
+
+# If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
+RUBY_EXE =
+  [
+    RbConfig::CONFIG['bindir'],
+    '/',
+    RbConfig::CONFIG['RUBY_INSTALL_NAME'],
+    RbConfig::CONFIG['EXEEXT']
+  ].join
+
+ENV['FIG_HOME'] = FIG_HOME
+ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
+  File.expand_path(File.dirname(__FILE__) + '/..')
+
+
+
+Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
 class Popen
   def self.setup_open3
@@ -104,34 +134,6 @@ def fig(
     raise fig_failure
   end
 end
-
-Fig::Logging.initialize_post_configuration(nil, 'off', true)
-
-FIG_SPEC_BASE_DIRECTORY =
-  File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
-FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
-FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
-FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
-FIG_BIN        = File.expand_path(File.dirname(__FILE__) + '/../bin')
-FIG_EXE        = %Q<#{FIG_BIN}/fig>
-
-# Needed for testing of resources.
-FIG_FILE_GUARANTEED_TO_EXIST =
-  File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/file-guaranteed-to-exist')
-
-# If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
-RUBY_EXE =
-  [
-    RbConfig::CONFIG['bindir'],
-    '/',
-    RbConfig::CONFIG['RUBY_INSTALL_NAME'],
-    RbConfig::CONFIG['EXEEXT']
-  ].join
-
-ENV['FIG_HOME'] = FIG_HOME
-ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
-ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
-  File.expand_path(File.dirname(__FILE__) + '/..')
 
 def setup_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
