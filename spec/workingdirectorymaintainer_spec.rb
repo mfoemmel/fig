@@ -52,7 +52,7 @@ describe 'WorkingDirectoryMaintainer' do
     end
 
     # Save and reload
-    r.save_metadata()
+    r.prepare_for_shutdown(:purged_unused_packages)
     r = Fig::WorkingDirectoryMaintainer.new(working_directory)
 
     # Switch back to original version

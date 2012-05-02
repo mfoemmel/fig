@@ -192,7 +192,9 @@ class Fig::Command
 
     @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
-    Fig::AtExit.add { @working_directory_maintainer.save_metadata() }
+    Fig::AtExit.add do
+      @working_directory_maintainer.prepare_for_shutdown(@options.updating?)
+    end
 
     prepare_environment()
 

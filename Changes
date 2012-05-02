@@ -57,6 +57,9 @@ v0.1.??
   - Now saves retrieve metadata prior to an exec(2).  Previously, if you ran a
     command, Fig would lose track of what you had in your current directory.
 
+  - Cleanup of retrieves for no-longer-referenced packages now happens, i.e.,
+    if a dependency removes a dependency, files are correctly removed.
+
 v0.1.62
 
   Bug fixes:

@@ -4,7 +4,7 @@ module Fig; end
 
 # Data about a package within the current working directory.
 class Fig::WorkingDirectoryMetadata
-  attr_reader   :package_name, :current_version, :retrieved
+  attr_reader   :package_name, :current_version
 
   def initialize(package_name, current_version = nil)
     @package_name    = package_name
@@ -30,6 +30,10 @@ class Fig::WorkingDirectoryMetadata
     @retrieved = true
 
     return
+  end
+
+  def retrieved?()
+    return @retrieved
   end
 
   # So we don't have to expose the files collection.

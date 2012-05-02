@@ -170,44 +170,56 @@ describe 'Fig' do
       File.read("#{retrieve_directory}/prerequisite/foo.jar").should == 'some library'
     end
 
-    it 'cleans up no-longer necessary dependencies' do
-      pending 'still need to figure out when clean up should and should not happen'
-      FileUtils.rm_rf(publish_from_directory)
-      FileUtils.mkdir_p(publish_from_directory)
+    describe 'cleanup' do
+      let(:cleanup_dependency_basename) { 'from-dependency.txt' }
+      let(:cleanup_dependency_file)     {
+        "#{FIG_SPEC_BASE_DIRECTORY}/#{cleanup_dependency_basename}"
+      }
 
-      dependency_basename = 'from-dependency.txt'
-      FileUtils.touch "#{publish_from_directory}/#{dependency_basename}"
-      input = <<-END
-        resource #{dependency_basename}
-        config default
-          set TEST_FILE=@/#{dependency_basename}
-        end
-      END
-      fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
+      before(:each) do
+        FileUtils.rm_rf(publish_from_directory)
+        FileUtils.mkdir_p(publish_from_directory)
 
-      FileUtils.rm_rf(publish_from_directory)
-      FileUtils.mkdir_p(publish_from_directory)
+        FileUtils.touch "#{publish_from_directory}/#{cleanup_dependency_basename}"
+        input = <<-END
+          resource #{cleanup_dependency_basename}
+          config default
+            set TEST_FILE=@/#{cleanup_dependency_basename}
+          end
+        END
+        fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
 
-      input = <<-END
-        retrieve TEST_FILE->.
-        config default
-          include dependency/1.2.3
-        end
-      END
-      fig('--publish alpha/1.2.3', input, false, false, publish_from_directory)
-      fig('--publish beta/1.2.3 --no-file --set set_something=so-we-have-some-content')
+        FileUtils.rm_rf(publish_from_directory)
+        FileUtils.mkdir_p(publish_from_directory)
 
-      dependency_file = "#{FIG_SPEC_BASE_DIRECTORY}/#{dependency_basename}"
-      File.exist?(dependency_file) and
-        fail 'File should not exist prior to using alpha.'
+        input = <<-END
+          retrieve TEST_FILE->.
+          config default
+            include dependency/1.2.3
+          end
+        END
+        fig('--publish alpha/1.2.3', input, false, false, publish_from_directory)
+        fig('--publish beta/1.2.3 --no-file --set set_something=so-we-have-some-content')
 
-      fig('--update-if-missing alpha/1.2.3 -- echo')
-      File.exist?(dependency_file) or
-        fail 'File should exist after using alpha.'
+        File.exist?(cleanup_dependency_file) and
+          fail 'File should not exist prior to using alpha.'
 
-      fig('--update-if-missing beta/1.2.3 -- echo')
-      File.exist?(dependency_file) and
-        fail 'File should not exist after switching to beta.'
+        fig('--update alpha/1.2.3 -- echo')
+        File.exist?(cleanup_dependency_file) or
+          fail 'File should exist after using alpha.'
+      end
+
+      it 'happens with --update' do
+        fig('--update beta/1.2.3 -- echo')
+        File.exist?(cleanup_dependency_file) and
+          fail 'File should not exist after using beta.'
+      end
+
+      it 'does not happen without --update' do
+        fig('beta/1.2.3 -- echo')
+        File.exist?(cleanup_dependency_file) or
+          fail 'File should exist after using beta.'
+      end
     end
 
     it 'warns on unused retrieval' do

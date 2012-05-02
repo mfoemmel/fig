@@ -35,21 +35,24 @@ class Fig::WorkingDirectoryMaintainer
     end
 
     yield
+
+    return
   end
 
   def retrieve(source, relpath)
     copy(source, relpath)
+
+    return
   end
 
-  def save_metadata
-    FileUtils.mkdir_p(@local_fig_data_directory)
-    File.open(@metadata_file, 'w') do |file|
-      @package_metadata_by_name.each do |name, package_meta|
-        package_meta.each_file do |target|
-          file << target << '=' << formatted_meta(package_meta) << "\n"
-        end
-      end
+  def prepare_for_shutdown(purged_unused_packages)
+    if purged_unused_packages
+      clean_up_unused_packages()
     end
+
+    save_metadata()
+
+    return
   end
 
   private
@@ -76,6 +79,8 @@ class Fig::WorkingDirectoryMaintainer
         raise "parse error in #{file}: #{line}"
       end
     end
+
+    return
   end
 
   def reset_package_metadata_with_version(name, version)
@@ -125,6 +130,8 @@ class Fig::WorkingDirectoryMaintainer
         @package_meta.mark_as_retrieved()
       end
     end
+
+    return
   end
 
   def clean_up_package_files(package_meta = @package_meta)
@@ -137,6 +144,32 @@ class Fig::WorkingDirectoryMaintainer
         )
       )
       FileUtils.rm_f(File.join(@base_dir, relpath))
+    end
+
+    return
+  end
+
+  def clean_up_unused_packages()
+    @package_metadata_by_name.each_value do
+      |metadata|
+
+      if not metadata.retrieved?
+        clean_up_package_files(metadata)
+        metadata.reset_with_version(nil)
+      end
+    end
+
+    return
+  end
+
+  def save_metadata()
+    FileUtils.mkdir_p(@local_fig_data_directory)
+    File.open(@metadata_file, 'w') do |file|
+      @package_metadata_by_name.each do |name, package_meta|
+        package_meta.each_file do |target|
+          file << target << '=' << formatted_meta(package_meta) << "\n"
+        end
+      end
     end
 
     return
