@@ -6,9 +6,7 @@ require 'rbconfig'
 require 'rspec'
 
 if ENV['COVERAGE']
-  require 'simplecov'
-
-  SimpleCov.merge_timeout 2 * 60 * 60 # 2 hours
+  require 'simplecov' # note that .simplecov will be loaded here.
 
   SimpleCov.start
 end

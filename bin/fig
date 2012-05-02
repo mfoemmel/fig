@@ -1,36 +1,11 @@
 #!/usr/bin/env ruby
 
-# Depends upon setup done by spec/spec_helper.rb.
 if ENV['COVERAGE']
-  if ! ENV['FIG_COVERAGE_RUN_COUNT'] || ! ENV['FIG_COVERAGE_ROOT_DIRECTORY']
-    $stderr.puts \
-      'FIG_COVERAGE_RUN_COUNT or FIG_COVERAGE_ROOT_DIRECTORY not set. Cannot do coverage correctly.'
-    exit 1
-  end
-
-  require 'simplecov'
-
-  # We may run the same fig command multiple times, so we need to give
-  # additional value to make run unique.
-  SimpleCov.command_name(
-    "fig #{ARGV.join(' ')} run #{ENV['FIG_COVERAGE_RUN_COUNT']}"
+  require File.expand_path(
+    File.join(
+      File.dirname(__FILE__), %w< .. lib fig command coveragesupport.rb >
+    )
   )
-  SimpleCov.root ENV['FIG_COVERAGE_ROOT_DIRECTORY']
-  SimpleCov.merge_timeout 2 * 60 * 60 # 2 hours
-
-  SimpleCov.at_exit do
-    # Have to invoke result() in order to get coverage data saved.
-    #
-    # Default at_exit() further invokes format():
-    #
-    #    1) We save time by not doing it on each fig run and let the rspec run
-    #       handle that.
-    #    2) The formatter emits a message to stdout, which screws up tests of
-    #       the fig output.
-    SimpleCov.result
-  end
-
-  SimpleCov.start
 end
 
 $LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
