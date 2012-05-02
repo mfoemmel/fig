@@ -10,6 +10,6 @@ class Fig::Statement::Publish < Fig::Statement
   end
 
   def unparse(indent)
-    "#{indent}publish"
+    raise %q<Publish statements are synthetic and thus should never appear in unparsed form.>
   end
 end
