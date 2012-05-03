@@ -1,4 +1,4 @@
-v0.1.??
+v0.1.63.beta.1
 
   Backwards incompatibilities:
 
@@ -54,11 +54,25 @@ v0.1.??
     Similarly, we now complain about archives named "resources.tar.gz" because
     Fig creates an archive by that name to hold resources.
 
-  - Now saves retrieve metadata prior to an exec(2).  Previously, if you ran a
-    command, Fig would lose track of what you had in your current directory.
+  - Retrieves:
 
-  - Cleanup of retrieves for no-longer-referenced packages now happens, i.e.,
-    if a dependency removes a dependency, files are correctly removed.
+    * Now saves retrieve metadata prior to an exec(2).  Previously, if you ran
+      a command, Fig would lose track of what you had in your current
+      directory.
+
+    * Cleanup of retrieves for no-longer-referenced packages now happens, i.e.,
+      if a dependency removes a dependency, files are correctly removed.
+
+      Note that, depending upon the packages involved, switching between two
+      base packages can be slower than it was before.  In other words, if
+      packages "foo" and "bar" have a lot of retrieves of dependences NOT in
+      common, running
+
+          fig --update-if-missing foo/v1.2.3
+          fig --update-if-missing bar/v6.5.4
+
+      will be slower.  On the other hand, you won't have a lot of stuff from
+      "foo" hanging around that shouldn't be there.
 
 v0.1.62
 
