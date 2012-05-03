@@ -1,3 +1,12 @@
+v0.1.xxx
+
+  Backwards incompatibilities:
+
+  - Retrieve variable names can no longer contain "@", "/", or ".".  Since
+    environment variable statements only allow alphanumerics and underscore in
+    the variable names, any retrieve variable with those characters in its name
+    would never have any effect.
+
 v0.1.63.beta.1
 
   Backwards incompatibilities:

@@ -61,7 +61,7 @@ module Fig
     end
 
     rule retrieve
-      statement_start:"retrieve" ws var:retrieve_variable_name "->" path:retrieve_path ws {
+      statement_start:"retrieve" ws var:environment_variable_name "->" path:retrieve_path ws {
         def to_package_statement(descriptor, source_description)
           Statement::Retrieve.new(
             Parser.node_location(statement_start),
@@ -71,10 +71,6 @@ module Fig
           )
         end
       }
-    end
-
-    rule retrieve_variable_name
-      [@a-zA-Z0-9/._]+
     end
 
     rule retrieve_path
