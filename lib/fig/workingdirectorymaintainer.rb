@@ -108,7 +108,7 @@ class Fig::WorkingDirectoryMaintainer
         end
       end
     else
-      if ! File.exist?(target) || File.mtime(source) > File.mtime(target)
+      if should_copy_file?(source, target)
         if Fig::Logging.debug?
           Fig::Logging.debug \
             "Copying file from #{source} to #{target}."
@@ -123,7 +123,13 @@ class Fig::WorkingDirectoryMaintainer
         end
         FileUtils.mkdir_p(File.dirname(target))
 
-        FileUtils.cp(source, target, :preserve => true)
+        # If the source is a dangling symlink, then there's no time, etc. to
+        # preserve.
+        preserve = File.exist?(source)
+
+        FileUtils.copy_entry(
+          source, target, preserve, false, :remove_destination
+        )
       end
       if @package_meta
         @package_meta.add_file(relpath)
@@ -132,6 +138,16 @@ class Fig::WorkingDirectoryMaintainer
     end
 
     return
+  end
+
+  def should_copy_file?(source, target)
+    if File.symlink?(target)
+      FileUtils.rm(target)
+      return true
+    end
+
+    return true if ! File.exist?(target)
+    return File.mtime(source) > File.mtime(target)
   end
 
   def clean_up_package_files(package_meta = @package_meta)

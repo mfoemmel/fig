@@ -318,7 +318,7 @@ class Fig::Environment
   end
 
   def check_source_existence(variable_name, variable_value, base_package)
-    return if File.exists?(variable_value)
+    return if File.exists?(variable_value) || File.symlink?(variable_value)
 
     Fig::Logging.fatal(
       %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>

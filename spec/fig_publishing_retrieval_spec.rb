@@ -171,7 +171,6 @@ describe 'Fig' do
     end
 
     it 'can publish and retrieve dangling symlinks' do
-      pending 'Cannot handle this properly yet due to FileUtils.mv() bug which does a stat(2) on files instead of an lstat(2).'
       FileUtils.rm_rf(publish_from_directory)
       FileUtils.mkdir_p(publish_from_directory)
 
@@ -199,11 +198,11 @@ describe 'Fig' do
 
       FileUtils.rm_rf(FIG_HOME)
 
-      File.exist?('dangling-symlink') and
+      File.exist?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") and
         fail 'Symlink should not exist prior to using package.'
 
-      fig('--update dependent/1.2.3 --log-level debug -- echo')
-      File.symlink?('dangling-symlink') or
+      fig('--update dependent/1.2.3 -- echo')
+      File.symlink?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") or
         fail 'Symlink should exist after using package.'
     end
 
