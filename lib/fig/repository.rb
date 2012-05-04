@@ -349,13 +349,9 @@ class Fig::Repository
     end
 
     local_dir = local_dir_for_package(descriptor)
-    @operating_system.delete_and_recreate_directory(local_dir)
-    # some packages contain no files, only a fig file.
-    if not (package.archive_urls.empty? && package.resource_urls.empty?)
-      FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
-    end
-
-    write_local_fig_file_for_package(descriptor, package)
+    FileUtils.rm_rf(local_dir)
+    FileUtils.mkdir_p( File.dirname(local_dir) )
+    FileUtils.mv(temp_dir, local_dir)
 
     return
   end
@@ -407,11 +403,6 @@ class Fig::Repository
 
   def delete_local_package(descriptor)
     FileUtils.rm_rf(local_dir_for_package(descriptor))
-  end
-
-  def write_local_fig_file_for_package(descriptor, package)
-    file = local_fig_file_for_package(descriptor)
-    @operating_system.write(file, package.unparse)
   end
 
   def remote_fig_file_for_package(descriptor)
