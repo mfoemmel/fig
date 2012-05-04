@@ -1,5 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
+require 'fig/operatingsystem'
+
 describe 'Fig' do
   describe 'publishing/retrieval' do
     let(:publish_from_directory)  { "#{FIG_SPEC_BASE_DIRECTORY}/publish-home" }
@@ -170,40 +172,42 @@ describe 'Fig' do
       File.read("#{retrieve_directory}/prerequisite/foo.jar").should == 'some library'
     end
 
-    it 'can publish and retrieve dangling symlinks' do
-      FileUtils.rm_rf(publish_from_directory)
-      FileUtils.mkdir_p(publish_from_directory)
+    if Fig::OperatingSystem.unix?
+      it 'can publish and retrieve dangling symlinks' do
+        FileUtils.rm_rf(publish_from_directory)
+        FileUtils.mkdir_p(publish_from_directory)
 
-      File.symlink(
-        'does-not-exist', "#{publish_from_directory}/dangling-symlink"
-      )
-      input = <<-END
-        resource dangling-symlink
-        config default
-          set TEST_FILE=@/dangling-symlink
-        end
-      END
-      fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
+        File.symlink(
+          'does-not-exist', "#{publish_from_directory}/dangling-symlink"
+        )
+        input = <<-END
+          resource dangling-symlink
+          config default
+            set TEST_FILE=@/dangling-symlink
+          end
+        END
+        fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
 
-      FileUtils.rm_rf(publish_from_directory)
-      FileUtils.mkdir_p(publish_from_directory)
+        FileUtils.rm_rf(publish_from_directory)
+        FileUtils.mkdir_p(publish_from_directory)
 
-      input = <<-END
-        retrieve TEST_FILE->.
-        config default
-          include dependency/1.2.3
-        end
-      END
-      fig('--publish dependent/1.2.3', input, false, false, publish_from_directory)
+        input = <<-END
+          retrieve TEST_FILE->.
+          config default
+            include dependency/1.2.3
+          end
+        END
+        fig('--publish dependent/1.2.3', input, false, false, publish_from_directory)
 
-      FileUtils.rm_rf(FIG_HOME)
+        FileUtils.rm_rf(FIG_HOME)
 
-      File.exist?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") and
-        fail 'Symlink should not exist prior to using package.'
+        File.exist?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") and
+          fail 'Symlink should not exist prior to using package.'
 
-      fig('--update dependent/1.2.3 -- echo')
-      File.symlink?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") or
-        fail 'Symlink should exist after using package.'
+        fig('--update dependent/1.2.3 -- echo')
+        File.symlink?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") or
+          fail 'Symlink should exist after using package.'
+      end
     end
 
     describe 'cleanup' do
