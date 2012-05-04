@@ -7,6 +7,12 @@ v0.1.xxx
     the variable names, any retrieve variable with those characters in its name
     would never have any effect.
 
+  Bug fixes:
+
+  - Updates should be more robust in the face of simultaneous runs of fig.
+
+  - Handling of symlinks should be better.
+
 v0.1.63.beta.1
 
   Backwards incompatibilities:
