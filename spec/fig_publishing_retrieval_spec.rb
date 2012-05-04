@@ -113,7 +113,7 @@ describe 'Fig' do
       END
       fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
 
-      FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY + '/fighome')
+      FileUtils.rm_rf(FIG_HOME)
 
       input = <<-END
         retrieve INCLUDE->include2/[package]
@@ -168,6 +168,43 @@ describe 'Fig' do
       END
       fig('--update-if-missing', input)
       File.read("#{retrieve_directory}/prerequisite/foo.jar").should == 'some library'
+    end
+
+    it 'can publish and retrieve dangling symlinks' do
+      pending 'Cannot handle this properly yet due to FileUtils.mv() bug which does a stat(2) on files instead of an lstat(2).'
+      FileUtils.rm_rf(publish_from_directory)
+      FileUtils.mkdir_p(publish_from_directory)
+
+      File.symlink(
+        'does-not-exist', "#{publish_from_directory}/dangling-symlink"
+      )
+      input = <<-END
+        resource dangling-symlink
+        config default
+          set TEST_FILE=@/dangling-symlink
+        end
+      END
+      fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
+
+      FileUtils.rm_rf(publish_from_directory)
+      FileUtils.mkdir_p(publish_from_directory)
+
+      input = <<-END
+        retrieve TEST_FILE->.
+        config default
+          include dependency/1.2.3
+        end
+      END
+      fig('--publish dependent/1.2.3', input, false, false, publish_from_directory)
+
+      FileUtils.rm_rf(FIG_HOME)
+
+      File.exist?('dangling-symlink') and
+        fail 'Symlink should not exist prior to using package.'
+
+      fig('--update dependent/1.2.3 --log-level debug -- echo')
+      File.symlink?('dangling-symlink') or
+        fail 'Symlink should exist after using package.'
     end
 
     describe 'cleanup' do

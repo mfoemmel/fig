@@ -561,7 +561,8 @@ class Fig::Repository
   end
 
   def check_asset_paths(asset_paths)
-    non_existing_paths = asset_paths.select {|path| ! File.exist?(path) }
+    non_existing_paths =
+      asset_paths.select {|path| ! File.exist?(path) && ! File.symlink?(path) }
 
     if not non_existing_paths.empty?
       if non_existing_paths.size > 1
