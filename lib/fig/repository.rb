@@ -132,11 +132,11 @@ class Fig::Repository
 
     validate_asset_names(package_statements)
 
-    temp_dir = temp_dir()
+    temp_dir = publish_temp_dir()
     @operating_system.delete_and_recreate_directory(temp_dir)
     local_dir = local_dir_for_package(descriptor)
     @operating_system.delete_and_recreate_directory(local_dir)
-    fig_file = File.join(temp_dir, '.fig')
+    fig_file = File.join(temp_dir, PACKAGE_FILE_IN_REPO)
     content = publish_package_content_and_derive_dot_fig_contents(
       package_statements, descriptor, local_dir, local_only
     )
@@ -163,6 +163,8 @@ class Fig::Repository
   end
 
   private
+
+  PACKAGE_FILE_IN_REPO = '.fig'
 
   def initialize_local_repository()
     if not File.exist?(@local_repository_directory)
@@ -220,7 +222,7 @@ class Fig::Repository
 
   def remote_repository_version()
     if @remote_repository_version.nil?
-      temp_dir = temp_dir()
+      temp_dir = base_temp_dir()
       @operating_system.delete_and_recreate_directory(temp_dir)
       remote_version_file = "#{remote_repository_url()}/#{VERSION_FILE_NAME}"
       local_version_file = File.join(temp_dir, "remote-#{VERSION_FILE_NAME}")
@@ -296,61 +298,66 @@ class Fig::Repository
     return read_package_from_directory(directory, descriptor)
   end
 
-  def install_package(descriptor)
-    temp_dir = nil
-
-    begin
-      package = read_local_package(descriptor)
-      temp_dir = temp_dir()
-      @operating_system.delete_and_recreate_directory(temp_dir)
-
-      package.archive_urls.each do |archive_url|
-        if not Fig::Repository.is_url?(archive_url)
-          archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
-        end
-        @operating_system.download_and_unpack_archive(archive_url, temp_dir)
-      end
-      package.resource_urls.each do |resource_url|
-        if not Fig::Repository.is_url?(resource_url)
-          resource_url =
-            remote_dir_for_package(descriptor) + '/' + resource_url
-        end
-        @operating_system.download_resource(resource_url, temp_dir)
-      end
-
-      local_dir = local_dir_for_package(descriptor)
-      @operating_system.delete_and_recreate_directory(local_dir)
-      # some packages contain no files, only a fig file.
-      if not (package.archive_urls.empty? && package.resource_urls.empty?)
-        FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
-      end
-
-      write_local_fig_file_for_package(descriptor, package)
-    rescue StandardError => exception
-      Fig::Logging.debug exception
-      Fig::Logging.fatal 'Install failed, cleaning up.'
-      delete_local_package(descriptor)
-      raise Fig::RepositoryError.new
-    ensure
-      if temp_dir
-        FileUtils.rm_rf(temp_dir)
-      end
-    end
-  end
-
   def update_package(descriptor)
-    remote_fig_file = remote_fig_file_for_package(descriptor)
-    local_fig_file = local_fig_file_for_package(descriptor)
+    temp_dir = package_download_temp_dir(descriptor)
     begin
-      if @operating_system.download(remote_fig_file, local_fig_file)
-        install_package(descriptor)
-      end
+      install_package(descriptor)
     rescue Fig::NotFoundError
       Fig::Logging.fatal \
         "Package not found in remote repository: #{descriptor.to_string()}"
+
       delete_local_package(descriptor)
+
       raise Fig::RepositoryError.new
+    rescue StandardError => exception
+      Fig::Logging.debug exception
+      Fig::Logging.fatal 'Install failed, cleaning up.'
+
+      delete_local_package(descriptor)
+
+      raise Fig::RepositoryError.new
+    ensure
+      FileUtils.rm_rf(temp_dir)
     end
+
+    return
+  end
+
+  def install_package(descriptor)
+    temp_dir = package_download_temp_dir(descriptor)
+    @operating_system.delete_and_recreate_directory(temp_dir)
+
+    remote_fig_file = remote_fig_file_for_package(descriptor)
+    local_fig_file = download_fig_file_for_package(descriptor)
+
+    return if not @operating_system.download(remote_fig_file, local_fig_file)
+
+    package = read_package_from_directory(temp_dir, descriptor)
+
+    package.archive_urls.each do |archive_url|
+      if not Fig::Repository.is_url?(archive_url)
+        archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
+      end
+      @operating_system.download_and_unpack_archive(archive_url, temp_dir)
+    end
+    package.resource_urls.each do |resource_url|
+      if not Fig::Repository.is_url?(resource_url)
+        resource_url =
+          remote_dir_for_package(descriptor) + '/' + resource_url
+      end
+      @operating_system.download_resource(resource_url, temp_dir)
+    end
+
+    local_dir = local_dir_for_package(descriptor)
+    @operating_system.delete_and_recreate_directory(local_dir)
+    # some packages contain no files, only a fig file.
+    if not (package.archive_urls.empty? && package.resource_urls.empty?)
+      FileUtils.mv(Dir.glob(File.join(temp_dir, '*')), local_dir)
+    end
+
+    write_local_fig_file_for_package(descriptor, package)
+
+    return
   end
 
   # 'resources' is an Array of fileglob patterns: ['tmp/foo/file1',
@@ -373,7 +380,7 @@ class Fig::Repository
   end
 
   def read_package_from_directory(directory, descriptor)
-    dot_fig_file = File.join(directory, '.fig')
+    dot_fig_file = File.join(directory, PACKAGE_FILE_IN_REPO)
     if not File.exist?(dot_fig_file)
       Fig::Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}". There is nothing in "#{dot_fig_file}".>
       raise Fig::RepositoryError.new
@@ -408,11 +415,15 @@ class Fig::Repository
   end
 
   def remote_fig_file_for_package(descriptor)
-    "#{remote_dir_for_package(descriptor)}/.fig"
+    "#{remote_dir_for_package(descriptor)}/#{PACKAGE_FILE_IN_REPO}"
   end
 
   def local_fig_file_for_package(descriptor)
-    File.join(local_dir_for_package(descriptor), '.fig')
+    File.join(local_dir_for_package(descriptor), PACKAGE_FILE_IN_REPO)
+  end
+
+  def download_fig_file_for_package(descriptor)
+    File.join(package_download_temp_dir(descriptor), PACKAGE_FILE_IN_REPO)
   end
 
   def remote_dir_for_package(descriptor)
@@ -425,8 +436,20 @@ class Fig::Repository
     )
   end
 
-  def temp_dir()
+  def base_temp_dir()
     File.join(@local_repository_directory, 'tmp')
+  end
+
+  def publish_temp_dir()
+    File.join(base_temp_dir(), 'publish')
+  end
+
+  def package_download_temp_dir(descriptor)
+    File.join(
+      base_temp_dir(),
+      'package-download',
+      "#{descriptor.name}.version.#{descriptor.version}"
+    )
   end
 
   def package_missing?(descriptor)
@@ -487,7 +510,7 @@ class Fig::Repository
         asset_remote = "#{remote_dir_for_package(descriptor)}/#{asset_name}"
 
         if Fig::Repository.is_url?(statement.url)
-          asset_local = File.join(temp_dir(), asset_name)
+          asset_local = File.join(publish_temp_dir(), asset_name)
 
           begin
             @operating_system.download(statement.url, asset_local)
