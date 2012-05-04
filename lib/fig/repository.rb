@@ -1,6 +1,7 @@
 require 'set'
 require 'socket'
 require 'sys/admin'
+require 'tmpdir'
 
 require 'fig/atexit'
 require 'fig/logging'
@@ -301,7 +302,7 @@ class Fig::Repository
   def update_package(descriptor)
     temp_dir = package_download_temp_dir(descriptor)
     begin
-      install_package(descriptor)
+      install_package(descriptor, temp_dir)
     rescue Fig::NotFoundError
       Fig::Logging.fatal \
         "Package not found in remote repository: #{descriptor.to_string()}"
@@ -323,12 +324,11 @@ class Fig::Repository
     return
   end
 
-  def install_package(descriptor)
-    temp_dir = package_download_temp_dir(descriptor)
+  def install_package(descriptor, temp_dir)
     @operating_system.delete_and_recreate_directory(temp_dir)
 
     remote_fig_file = remote_fig_file_for_package(descriptor)
-    local_fig_file = download_fig_file_for_package(descriptor)
+    local_fig_file = fig_file_for_package_download(temp_dir)
 
     return if not @operating_system.download(remote_fig_file, local_fig_file)
 
@@ -413,8 +413,8 @@ class Fig::Repository
     File.join(local_dir_for_package(descriptor), PACKAGE_FILE_IN_REPO)
   end
 
-  def download_fig_file_for_package(descriptor)
-    File.join(package_download_temp_dir(descriptor), PACKAGE_FILE_IN_REPO)
+  def fig_file_for_package_download(package_download_dir)
+    File.join(package_download_dir, PACKAGE_FILE_IN_REPO)
   end
 
   def remote_dir_for_package(descriptor)
@@ -436,10 +436,11 @@ class Fig::Repository
   end
 
   def package_download_temp_dir(descriptor)
-    File.join(
-      base_temp_dir(),
-      'package-download',
-      "#{descriptor.name}.version.#{descriptor.version}"
+    base_directory = File.join(base_temp_dir(), 'package-download')
+    FileUtils.mkdir_p(base_directory)
+
+    return Dir.mktmpdir(
+      "#{descriptor.name}.version.#{descriptor.version}+", base_directory
     )
   end
 
