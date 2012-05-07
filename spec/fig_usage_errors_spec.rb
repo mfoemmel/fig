@@ -20,7 +20,7 @@ describe 'Fig' do
     it %q<prints usage message when there's nothing to do and there's no package.fig file> do
       (out, err, exitstatus) = fig('', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ / usage /xi
+      err.should =~ /nothing to do/i
       out.should == ''
     end
 
@@ -35,7 +35,7 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig('', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ / usage /xi
+      err.should =~ /nothing to do/i
       out.should == ''
     end
 
