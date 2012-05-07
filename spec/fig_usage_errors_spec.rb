@@ -154,5 +154,14 @@ describe 'Fig' do
       err.should =~ %r< cannot .* _meta >x
       out.should == ''
     end
+
+    it %q<complains about command-line substitution of unreferenced packages> do
+      fig('--publish a-package/a-version --set FOO=BAR')
+      (out, err, exitstatus) =
+        fig('-- echo @a-package', nil, :no_raise_on_error)
+      exitstatus.should_not == 0
+      err.should =~ %r<\ba-package\b.*has not been referenced>
+      out.should == ''
+    end
   end
 end

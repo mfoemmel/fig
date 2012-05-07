@@ -70,10 +70,6 @@ class Fig::Environment
     return @packages[name]
   end
 
-  def packages
-    return @packages.values
-  end
-
   def apply_config(package, config_name, backtrace)
     if package.applied_config_names.member?(config_name)
       return
@@ -376,7 +372,7 @@ class Fig::Environment
       package = get_package(package_name)
       if package.nil?
         raise Fig::RepositoryError.new(
-          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package.>
+          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>
         )
       end
       backslashes + package.directory
