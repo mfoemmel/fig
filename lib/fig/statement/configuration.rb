@@ -21,10 +21,6 @@ class Fig::Statement::Configuration < Fig::Statement
     @statements = [overrides, others].flatten
   end
 
-  def with_name(name)
-    Configuration.new(name, statements)
-  end
-
   def command_statement
     return statements.find do
       |statement| statement.is_a?(Fig::Statement::Command)
