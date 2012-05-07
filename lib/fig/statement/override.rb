@@ -3,10 +3,11 @@ require 'fig/statement'
 
 module Fig; end
 
-# Overrides one package version dependency with another in an include
-# statement.
+# Overrides one package version dependency with another.
 #
-#    include blah/1.2.3 override somedependency/3.2.6
+#   config whatever
+#     override somedependency/3.2.6
+#   end
 #
 # indicates that, regardless of which version of somedependency the blah
 # package says it needs, the blah package will actually use v3.2.6.
@@ -20,7 +21,8 @@ class Fig::Statement::Override < Fig::Statement
     @version = version
   end
 
-  def unparse()
-    return ' override ' + Fig::PackageDescriptor.format(@package_name, @version, nil)
+  def unparse(indent)
+    return "#{indent}override " +
+      Fig::PackageDescriptor.format(@package_name, @version, nil)
   end
 end

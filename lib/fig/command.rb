@@ -77,7 +77,7 @@ class Fig::Command
         |command| @operating_system.shell_exec command
       end
     elsif @descriptor
-      @environment.include_config(@package, @descriptor, {}, nil)
+      @environment.include_config(@package, @descriptor, nil)
       @environment.execute_config(
         @package,
         @descriptor,

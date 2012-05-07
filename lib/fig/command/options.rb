@@ -425,7 +425,7 @@ Environment variables:
     ) do |descriptor_string|
       statement =
         Fig::Statement::Include.new(
-          nil, nil, Fig::PackageDescriptor.parse(descriptor_string), {}, nil
+          nil, nil, Fig::PackageDescriptor.parse(descriptor_string), nil
         )
       statement.complain_if_version_missing()
       @options[:environment_variable_statements] << statement

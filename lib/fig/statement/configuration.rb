@@ -4,6 +4,8 @@ require 'fig/statement/command'
 module Fig; end
 
 # A grouping of statements within a configuration.  May not be nested.
+#
+# Any processing of statements is guaranteed to hit any Overrides first.
 class Fig::Statement::Configuration < Fig::Statement
   attr_reader :name, :statements
 
@@ -11,7 +13,12 @@ class Fig::Statement::Configuration < Fig::Statement
     super(line_column, source_description)
 
     @name = name
-    @statements = statements
+
+    overrides, others = statements.partition do
+      |statement| statement.is_a?(Fig::Statement::Override)
+    end
+
+    @statements = [overrides, others].flatten
   end
 
   def with_name(name)

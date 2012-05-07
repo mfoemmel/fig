@@ -94,11 +94,11 @@ module Fig
     end
 
     rule config_statement
-      include / command / path / set
+      override / include / command / path / set
     end
 
     rule include
-      statement_start:"include" ws descriptor overrides:(override*) {
+      statement_start:"include" ws descriptor {
         def to_config_statement(
           containing_package_descriptor, source_description
         )
@@ -106,7 +106,6 @@ module Fig
             Parser.node_location(statement_start),
             source_description,
             PackageDescriptor.parse(descriptor.text_value.strip),
-            overrides.elements.map{ |e| e.to_override(source_description) },
             containing_package_descriptor
           )
         end
@@ -115,7 +114,9 @@ module Fig
 
     rule override
       statement_start:"override" ws package_name "/" version_name ws {
-        def to_override(source_description)
+        def to_config_statement(
+          containing_package_descriptor, source_description
+        )
           return Statement::Override.new(
             Parser.node_location(statement_start),
             source_description,

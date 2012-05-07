@@ -4,15 +4,15 @@ require 'fig/statement'
 module Fig; end
 
 # Dual role: "include :configname" incorporates one configuration into another;
-# "include package[/version]" declares a dependency upon another package.
+# "include package[/version]" declares a dependency upon another package
+# (incorporating the "default" configuration from that package as well).
 class Fig::Statement::Include < Fig::Statement
-  attr_reader :descriptor, :overrides, :containing_package_descriptor
+  attr_reader :descriptor, :containing_package_descriptor
 
-  def initialize(line_column, source_description, descriptor, overrides, containing_package_descriptor)
+  def initialize(line_column, source_description, descriptor, containing_package_descriptor)
     super(line_column, source_description)
 
     @descriptor                    = descriptor
-    @overrides                     = overrides
     @containing_package_descriptor = containing_package_descriptor
   end
 
@@ -81,9 +81,7 @@ class Fig::Statement::Include < Fig::Statement
     text += package_name() if package_name()
     text += "/#{version()}" if version()
     text += ":#{config_name()}" if config_name()
-    @overrides.each do |override|
-      text += override.unparse
-    end
+
     return "#{indent}include #{text}"
   end
 
@@ -94,11 +92,6 @@ class Fig::Statement::Include < Fig::Statement
   end
 
   def referenced_version(containing_package, backtrace)
-    overrides().each do
-      |override|
-      backtrace.add_override(override.package_name(), override.version())
-    end
-
     package_name = nil
     original_version = nil
     if package_name()
