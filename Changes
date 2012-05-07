@@ -7,6 +7,27 @@ v0.1.xxx
     the variable names, any retrieve variable with those characters in its name
     would never have any effect.
 
+  New features:
+
+  - Overrides are now independent statements, no longer attached to includes.
+    E.g. this
+
+      config default
+        include A/1 override C/3
+        include B/1 override C/3
+      end
+
+    is now equivalent to this
+
+      config default
+        override C/3
+        include A/1
+        include B/1
+      end
+
+    No changes to existing (functioning) package.fig files will be necessary.
+    In fact, this will fix some that didn't work due to versionless includes.
+
   Bug fixes:
 
   - Updates should be more robust in the face of simultaneous runs of fig.
