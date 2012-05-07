@@ -4,13 +4,9 @@ require 'English'
 
 describe 'Fig' do
   describe 'usage errors' do
-    before(:all) do
+    before(:each) do
       cleanup_test_environment
       setup_test_environment
-    end
-
-    before(:each) do
-      FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
     end
 
     it %q<prints usage message when passed an unknown option> do
@@ -102,6 +98,52 @@ describe 'Fig' do
       >.each do
         |option|
         err.should =~ / #{option} /x
+      end
+    end
+
+    describe %q<prints error when unknown package is referenced> do
+      it %q<without --update> do
+        (out, err, exitstatus) =
+          fig('no-such-package/version --get PATH', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ / no-such-package /x
+        out.should == ''
+      end
+
+      it %q<with --update> do
+        (out, err, exitstatus) =
+          fig('no-such-package/version --update --get PATH', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ / no-such-package /x
+        out.should == ''
+      end
+
+      it %q<with --update-if-missing> do
+        (out, err, exitstatus) =
+          fig('no-such-package/version --update-if-missing --get PATH', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ / no-such-package /x
+        out.should == ''
+      end
+    end
+
+    describe %q<prints error when referring to non-existent configuration> do
+      it %q<from the command-line as the base package> do
+        fig('--publish foo/1.2.3 --set FOO=BAR')
+        (out, err, exitstatus) =
+          fig('foo/1.2.3:non-existent-config --get FOO', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r< non-existent-config >x
+        out.should == ''
+      end
+
+      it %q<from the command-line as an included package> do
+        fig('--publish foo/1.2.3 --set FOO=BAR')
+        (out, err, exitstatus) =
+          fig('--include foo/1.2.3:non-existent-config --get FOO', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r< foo/1\.2\.3:non-existent-config >x
+        out.should == ''
       end
     end
   end
