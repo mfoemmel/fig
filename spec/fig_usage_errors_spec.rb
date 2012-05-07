@@ -147,12 +147,30 @@ describe 'Fig' do
       end
     end
 
-    it %q<refuses to publish a package named "_meta"> do
-      (out, err, exitstatus) =
-        fig('--publish _meta/version --set FOO=BAR', nil, :no_raise_on_error)
-      exitstatus.should_not == 0
-      err.should =~ %r< cannot .* _meta >x
-      out.should == ''
+    describe %q<refuses to publish> do
+      it %q<a package named "_meta"> do
+        (out, err, exitstatus) =
+          fig('--publish _meta/version --set FOO=BAR', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r< cannot .* _meta >x
+        out.should == ''
+      end
+
+      it %q<without a package name> do
+        (out, err, exitstatus) =
+          fig('--publish --set FOO=BAR', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r<specify a package>
+        out.should == ''
+      end
+
+      it %q<without a version> do
+        (out, err, exitstatus) =
+          fig('--publish a-package --set FOO=BAR', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r<no version specified>i
+        out.should == ''
+      end
     end
 
     it %q<complains about command-line substitution of unreferenced packages> do
