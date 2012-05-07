@@ -146,5 +146,13 @@ describe 'Fig' do
         out.should == ''
       end
     end
+
+    it %q<refuses to publish a package named "_meta"> do
+      (out, err, exitstatus) =
+        fig('--publish _meta/version --set FOO=BAR', nil, :no_raise_on_error)
+      exitstatus.should_not == 0
+      err.should =~ %r< cannot .* _meta >x
+      out.should == ''
+    end
   end
 end

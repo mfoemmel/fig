@@ -290,7 +290,14 @@ class Fig::Command
     check_required_package_descriptor('to publish')
 
     if @descriptor.name.nil? || @descriptor.version.nil?
-      raise Fig::UserInputError.new('Please specify a package name and a version name.')
+      raise Fig::UserInputError.new(
+        'Please specify a package name and a version name.'
+      )
+    end
+    if @descriptor.name == '_meta'
+      raise Fig::UserInputError.new(
+        %q<Due to implementation issues, cannot create a package named "_meta".>
+      )
     end
 
     publish_statements = nil
