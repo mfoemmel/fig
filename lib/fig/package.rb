@@ -115,18 +115,6 @@ class Fig::Package
     return
   end
 
-  # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(repository, &block)
-    @statements.each do |statement|
-      yield self, statement
-      statement.walk_statements_following_package_dependencies(
-        repository, self, nil, &block
-      )
-    end
-
-    return
-  end
-
   def unparse
     return @statements.map { |statement| statement.unparse('') }.join("\n")
   end

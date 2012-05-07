@@ -55,27 +55,6 @@ class Fig::Statement::Include < Fig::Statement
     )
   end
 
-  # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(
-    repository, package, configuration, &block
-  )
-    referenced_package = nil
-    if package_name()
-      referenced_package = repository.get_package(descriptor())
-    else
-      referenced_package = package
-    end
-
-    configuration = referenced_package[referenced_config_name()]
-
-    yield referenced_package, configuration
-    configuration.walk_statements_following_package_dependencies(
-      repository, referenced_package, nil, &block
-    )
-
-    return
-  end
-
   def unparse(indent)
     text = ''
     text += package_name() if package_name()

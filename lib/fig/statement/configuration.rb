@@ -35,18 +35,6 @@ class Fig::Statement::Configuration < Fig::Statement
     end
   end
 
-  # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(repository, package, configuration, &block)
-    @statements.each do |statement|
-      yield package, self, statement
-      statement.walk_statements_following_package_dependencies(
-        repository, package, self, &block
-      )
-    end
-
-    return
-  end
-
   def unparse(indent)
     unparse_statements(indent, "config #{@name}", @statements, 'end')
   end
