@@ -4,6 +4,7 @@ require 'sys/admin'
 require 'tmpdir'
 
 require 'fig/atexit'
+require 'fig/command'
 require 'fig/logging'
 require 'fig/notfounderror'
 require 'fig/packagecache'
@@ -476,12 +477,13 @@ class Fig::Repository
       %Q<#     User: #{Sys::Admin.get_login()}>,
       %Q<#     Host: #{Socket.gethostname()}>,
       %Q<#     Args: "#{ARGV.join %q[", "]}">,
+      %Q<#     Fig:  v#{Fig::Command.get_version()}>,
       %q<#>,
       %q<# Original asset statements: >,
       %q<#>,
-      asset_strings.join("\n"),
+      asset_strings,
       %Q<\n>,
-    ]
+    ].flatten()
   end
 
   # Deals with Archive and Resource statements.  It downloads any remote

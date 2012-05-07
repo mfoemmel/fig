@@ -33,6 +33,33 @@ class Fig::Command
   include Fig::Command::Listing
   include Fig::Command::PackageLoad
 
+  def self.get_version()
+    line = nil
+
+    begin
+      File.open(
+        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
+      ) do |file|
+        line = file.gets
+      end
+    rescue
+      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
+
+      return nil
+    end
+
+    # Note that we accept anything that contains three decimal numbers
+    # seperated by periods.  This allows for versions like
+    # "4.3.2-super-special-version-in-3D".
+    if line !~ %r< \b \d+ [.] \d+ [.] \d+ \b >x
+      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
+
+      return nil
+    end
+
+    return line
+  end
+
   def run_fig(argv)
     @options = Fig::Command::Options.new(argv)
     if not @options.exit_code.nil?
@@ -45,7 +72,7 @@ class Fig::Command
     end
 
     if @options.version?
-      return version
+      return emit_version()
     end
 
     configure()
@@ -114,28 +141,11 @@ class Fig::Command
     end
   end
 
-  def version()
-    line = nil
+  def emit_version()
+    version = Fig::Command.get_version()
+    return 1 if version.nil?
 
-    begin
-      File.open(
-        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
-      ) do |file|
-        line = file.gets
-      end
-    rescue
-      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
-
-      return 1
-    end
-
-    if line !~ /\d+\.\d+\.\d+/
-      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
-
-      return 1
-    end
-
-    puts File.basename($0) + ' v' + line
+    puts File.basename($0) + ' v' + version
 
     return 0
   end
