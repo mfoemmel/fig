@@ -115,10 +115,6 @@ class Fig::Package
     return
   end
 
-  def unparse
-    return @statements.map { |statement| statement.unparse('') }.join("\n")
-  end
-
   def ==(other)
     return false if other.nil?
 
