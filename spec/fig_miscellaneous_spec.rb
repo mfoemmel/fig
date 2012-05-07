@@ -27,4 +27,18 @@ describe 'Fig' do
       out.should =~ / \d+ \. \d+ \. \d+ /x
     end
   end
+
+  it 'emits help' do
+    %w/-? -h --help/.each do |option|
+      (out, err, exitstatus) = fig(option)
+      exitstatus.should == 0
+      err.should == ''
+      out.should =~ / Usage: /x
+      out.should =~ / \b fig \b /x
+      out.should =~ / --help \b /x
+      out.should =~ / --force \b /x
+      out.should =~ / --update \b /x
+      out.should =~ / --set \b /x
+    end
+  end
 end
