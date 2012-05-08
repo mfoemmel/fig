@@ -34,7 +34,7 @@ v0.1.xxx
 
   - Updates should be more robust in the face of simultaneous runs of fig.
 
-  - Handling of symlinks should be better.
+  - Handling of symlinks is be better.
 
 v0.1.63.beta.1
 
