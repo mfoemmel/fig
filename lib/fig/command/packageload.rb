@@ -76,11 +76,14 @@ module Fig::Command::PackageLoad
       return
     end
 
+    source_description = derive_package_source_description()
     @package =
       Fig::Parser.new(@configuration, :check_include_versions).parse_package(
-        Fig::PackageDescriptor.new(nil, nil, nil),
+        Fig::PackageDescriptor.new(
+          nil, nil, nil, :source_description => source_description
+        ),
         '.',
-        derive_package_source_description(),
+        source_description,
         config_raw_text
       )
 

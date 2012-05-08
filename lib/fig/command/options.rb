@@ -1,7 +1,6 @@
 require 'optparse'
 
 require 'fig/package'
-require 'fig/packagedescriptor'
 require 'fig/statement/archive'
 require 'fig/statement/include'
 require 'fig/statement/path'
@@ -66,7 +65,7 @@ Environment variables:
 
   attr_reader :shell_command
   attr_reader :command_extra_argv
-  attr_reader :descriptor
+  attr_reader :descriptor_string
   attr_reader :exit_code
 
   def initialize(argv)
@@ -98,28 +97,7 @@ Environment variables:
       return
     end
 
-    package_text = argv.first
-    if package_text
-      @descriptor = Fig::PackageDescriptor.parse(package_text)
-      if not @descriptor.name
-        $stderr.puts %Q<No package name specified in descriptor "#{package_text}".>
-        @exit_code = 1
-        return
-      end
-
-      if not @descriptor.version
-        $stderr.puts %Q<No version specified in descriptor "#{package_text}".>
-        @exit_code = 1
-        return
-      end
-
-      if @descriptor.config && config()
-        $stderr.puts \
-          %Q<Cannot specify both --config and a config in the descriptor "#{package_text}".>
-        @exit_code = 1
-        return
-      end
-    end
+    @descriptor_string = argv.first
 
     return
   end
@@ -422,10 +400,10 @@ Environment variables:
       '-i',
       '--include DESCRIPTOR',
       'include package/version:config specified in DESCRIPTOR in environment'
-    ) do |descriptor_string|
+    ) do |include_descriptor_string|
       statement =
         Fig::Statement::Include.new(
-          nil, nil, Fig::PackageDescriptor.parse(descriptor_string), nil
+          nil, nil, Fig::PackageDescriptor.parse(include_descriptor_string), nil
         )
       statement.complain_if_version_missing()
       @options[:environment_variable_statements] << statement

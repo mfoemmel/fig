@@ -9,6 +9,7 @@ require 'fig/figrc'
 require 'fig/logging'
 require 'fig/operatingsystem'
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/repositoryerror'
@@ -65,7 +66,6 @@ class Fig::Command
     if not @options.exit_code.nil?
       return @options.exit_code
     end
-    @descriptor = @options.descriptor
 
     if @options.help?
       return @options.help
@@ -73,6 +73,12 @@ class Fig::Command
 
     if @options.version?
       return emit_version()
+    end
+
+    Fig::Logging.initialize_pre_configuration(@options.log_level())
+
+    if not derive_descriptor()
+      return 1
     end
 
     configure()
@@ -171,10 +177,26 @@ class Fig::Command
     return ! suppressed_warnings.include?('include statement missing version')
   end
 
+  def derive_descriptor()
+    if @options.descriptor_string()
+      @descriptor = Fig::PackageDescriptor.parse(
+        @options.descriptor_string(),
+        :name    => :required,
+        :version => :required,
+        :validation_context => ' specified on command line'
+      )
+
+      if @descriptor.config && @options.config()
+        $stderr.puts \
+          %Q<Cannot specify both --config and a config in the descriptor "#{@descriptor.original_string()}".>
+        return false
+      end
+    end
+
+    return true
+  end
+
   def configure()
-    Fig::Logging.initialize_pre_configuration(@options.log_level())
-
-
     @configuration = Fig::FigRC.find(
       @options.figrc(),
       derive_remote_url(),
@@ -355,7 +377,7 @@ class Fig::Command
   def log_error_message(error)
     # If there's no message, we assume that the cause has already been logged.
     if error_has_message?(error)
-      Fig::Logging.fatal error.to_s
+       Fig::Logging.fatal error.to_s
     end
   end
 

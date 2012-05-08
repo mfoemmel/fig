@@ -50,21 +50,21 @@ describe 'Fig' do
     it %q<prints error when a package descriptor consists solely of a version> do
       (out, err, exitstatus) = fig('/version', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ /No package name specified in descriptor/
+      err.should =~ /package name required/i
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a config> do
       (out, err, exitstatus) = fig(':config', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ /No package name specified in descriptor/
+      err.should =~ /package name required/i
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a package> do
       (out, err, exitstatus) = fig('package', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ /No version specified in descriptor/
+      err.should =~ /version required/i
       out.should == ''
     end
 
@@ -168,7 +168,7 @@ describe 'Fig' do
         (out, err, exitstatus) =
           fig('--publish a-package --set FOO=BAR', nil, :no_raise_on_error)
         exitstatus.should_not == 0
-        err.should =~ %r<no version specified>i
+        err.should =~ %r<version required>i
         out.should == ''
       end
     end
