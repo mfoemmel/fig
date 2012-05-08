@@ -1,6 +1,7 @@
 require 'optparse'
 
 require 'fig/package'
+require 'fig/packagedescriptor'
 require 'fig/statement/archive'
 require 'fig/statement/include'
 require 'fig/statement/path'
@@ -65,41 +66,16 @@ Environment variables:
 
   attr_reader :shell_command
   attr_reader :command_extra_argv
-  attr_reader :descriptor_string
+  attr_reader :descriptor
   attr_reader :exit_code
 
   def initialize(argv)
-    argv = argv.clone
-    strip_shell_command(argv)
-
-    @options = {}
-
-    @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
-
-    parser = new_parser()
-    @help_message = parser.help
-
     begin
-      parser.parse!(argv)
-    rescue OptionParser::MissingArgument => error
-      $stderr.puts "Please provide the #{error}."
+      process_command_line(argv)
+    rescue Fig::UserInputError => error
+      $stderr.puts error.to_s
       @exit_code = 1
-      return
     end
-
-    if not exit_code.nil?
-      return
-    end
-
-    if argv.size > 1
-      $stderr.puts %q<Extra arguments. Should only have a package/version after all other options. Had "> + argv.join(%q<", ">) + %q<" left over.>
-      @exit_code = 1
-      return
-    end
-
-    @descriptor_string = argv.first
-
-    return
   end
 
   def archives()
@@ -254,6 +230,40 @@ Environment variables:
 
   private
 
+  def process_command_line(argv)
+    argv = argv.clone
+    strip_shell_command(argv)
+
+    @options = {}
+
+    @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
+
+    parser = new_parser()
+    @help_message = parser.help
+
+    begin
+      parser.parse!(argv)
+    rescue OptionParser::MissingArgument => error
+      $stderr.puts "Please provide the #{error}."
+      @exit_code = 1
+      return
+    end
+
+    if not exit_code.nil?
+      return
+    end
+
+    if argv.size > 1
+      $stderr.puts %q<Extra arguments. Should only have a package/version after all other options. Had "> + argv.join(%q<", ">) + %q<" left over.>
+      @exit_code = 1
+      return
+    end
+
+    derive_descriptor(argv.first)
+
+    return
+  end
+
   def new_parser
     return OptionParser.new do |parser|
       set_up_queries(parser)
@@ -400,10 +410,10 @@ Environment variables:
       '-i',
       '--include DESCRIPTOR',
       'include package/version:config specified in DESCRIPTOR in environment'
-    ) do |include_descriptor_string|
+    ) do |descriptor_string|
       statement =
         Fig::Statement::Include.new(
-          nil, nil, Fig::PackageDescriptor.parse(include_descriptor_string), nil
+          nil, nil, Fig::PackageDescriptor.parse(descriptor_string), nil
         )
       statement.complain_if_version_missing()
       @options[:environment_variable_statements] << statement
@@ -501,6 +511,25 @@ Environment variables:
       %q<don't complain about "include package" without a version>
     ) do
       @options[:suppress_warning_include_statement_missing_version] = true
+    end
+
+    return
+  end
+
+  def derive_descriptor(raw_string)
+    return if raw_string.nil?
+
+    @descriptor = Fig::PackageDescriptor.parse(
+      raw_string,
+      :name    => :required,
+      :version => :required,
+      :validation_context => ' specified on command line'
+    )
+
+    if @descriptor.config && config()
+      $stderr.puts \
+        %Q<Cannot specify both --config and a config in the descriptor "#{raw_string}".>
+      @exit_code = 1
     end
 
     return
