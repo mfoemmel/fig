@@ -377,7 +377,7 @@ class Fig::Command
   def log_error_message(error)
     # If there's no message, we assume that the cause has already been logged.
     if error_has_message?(error)
-       Fig::Logging.fatal error.to_s
+      Fig::Logging.fatal error.to_s
     end
   end
 

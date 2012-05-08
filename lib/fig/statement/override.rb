@@ -14,6 +14,18 @@ module Fig; end
 class Fig::Statement::Override < Fig::Statement
   attr_reader :package_name, :version
 
+  # Centralized definition of requirements for descriptors for override
+  # statements.
+  def self.parse_descriptor(raw_string, options = {})
+    filled_in_options = {}
+    filled_in_options.merge!(options)
+    filled_in_options[:name]    = :required
+    filled_in_options[:version] = :required
+    filled_in_options[:config]  = :forbidden
+
+    return Fig::PackageDescriptor.parse(raw_string, filled_in_options)
+  end
+
   def initialize(line_column, source_description, package_name, version)
     super(line_column, source_description)
 

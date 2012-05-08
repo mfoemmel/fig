@@ -9,6 +9,12 @@ module Fig; end
 class Fig::Statement::Include < Fig::Statement
   attr_reader :descriptor, :containing_package_descriptor
 
+  # Centralized definition of requirements for descriptors for include
+  # statements.
+  def self.parse_descriptor(raw_string, options = {})
+    return Fig::PackageDescriptor.parse(raw_string, options)
+  end
+
   def initialize(line_column, source_description, descriptor, containing_package_descriptor)
     super(line_column, source_description)
 

@@ -109,7 +109,7 @@ module Fig
           Statement::Include.new(
             Parser.node_location(statement_start),
             source_description,
-            PackageDescriptor.parse(
+            Statement::Include.parse_descriptor(
               descriptor_string.text_value.strip,
               :source_description => Statement.position_description(
                 *(Parser.node_location(descriptor_string)), source_description
@@ -128,14 +128,11 @@ module Fig
           containing_package_descriptor, source_description
         )
           descriptor =
-            PackageDescriptor.parse(
+            Statement::Override.parse_descriptor(
               descriptor_string.text_value.strip,
               :source_description => Statement.position_description(
                 *(Parser.node_location(descriptor_string)), source_description
               ),
-              :name    => :required,
-              :version => :required,
-              :config  => :forbidden,
               :validation_context => ' for an override statement'
             )
           return Statement::Override.new(
