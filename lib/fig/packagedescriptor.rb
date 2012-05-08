@@ -27,18 +27,18 @@ class Fig::PackageDescriptor
   end
 
   def self.parse(raw_string, options = {})
+    filled_in_options = {}
+    filled_in_options.merge!(options)
+    filled_in_options[:original_string] = raw_string
+
     # Additional checks in validate_component() will take care of the looseness
     # of the regexes.  These just need to ensure that the entire string gets
     # assigned to one component or another.
-
-    options = Hash.new options
-    options[:original_string] = raw_string
-
     self.new(
       raw_string =~ %r< \A         ( [^:/]+ )    >x ? $1 : nil,
       raw_string =~ %r< \A [^/]* / ( [^:]+  )    >x ? $1 : nil,
       raw_string =~ %r< \A [^:]* : ( .+     ) \z >x ? $1 : nil,
-      options
+      filled_in_options
     )
   end
 
