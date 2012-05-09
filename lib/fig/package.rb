@@ -97,6 +97,8 @@ class Fig::Package
 
       if statement.is_a?(Fig::Statement::Include)
         descriptors << statement.resolved_dependency_descriptor(self, backtrace)
+      elsif statement.is_a?(Fig::Statement::Override)
+        backtrace.add_override(statement.package_name(), statement.version())
       end
     end
 
@@ -111,22 +113,6 @@ class Fig::Package
     end
 
     return
-  end
-
-  # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(repository, &block)
-    @statements.each do |statement|
-      yield self, statement
-      statement.walk_statements_following_package_dependencies(
-        repository, self, nil, &block
-      )
-    end
-
-    return
-  end
-
-  def unparse
-    return @statements.map { |statement| statement.unparse('') }.join("\n")
   end
 
   def ==(other)

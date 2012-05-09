@@ -9,7 +9,6 @@ require 'fig/statement/configuration'
 require 'fig/statement/include'
 require 'fig/statement/override'
 require 'fig/statement/path'
-require 'fig/statement/publish'
 require 'fig/statement/resource'
 require 'fig/statement/retrieve'
 require 'fig/statement/set'
@@ -61,7 +60,7 @@ module Fig
     end
 
     rule retrieve
-      statement_start:"retrieve" ws var:retrieve_variable_name "->" path:retrieve_path ws {
+      statement_start:"retrieve" ws var:environment_variable_name "->" path:retrieve_path ws {
         def to_package_statement(descriptor, source_description)
           Statement::Retrieve.new(
             Parser.node_location(statement_start),
@@ -71,10 +70,6 @@ module Fig
           )
         end
       }
-    end
-
-    rule retrieve_variable_name
-      [@a-zA-Z0-9/._]+
     end
 
     rule retrieve_path
@@ -97,20 +92,29 @@ module Fig
       }
     end
 
+    rule config_name
+      [a-zA-Z0-9_.-]+
+    end
+
     rule config_statement
-      include / command / path / set
+      override / include / command / path / set
     end
 
     rule include
-      statement_start:"include" ws descriptor overrides:(override*) {
+      statement_start:"include" ws descriptor_string ws {
         def to_config_statement(
           containing_package_descriptor, source_description
         )
           Statement::Include.new(
             Parser.node_location(statement_start),
             source_description,
-            PackageDescriptor.parse(descriptor.text_value.strip),
-            overrides.elements.map{ |e| e.to_override(source_description) },
+            Statement::Include.parse_descriptor(
+              descriptor_string.text_value.strip,
+              :source_description => Parser.node_location_description(
+                descriptor_string, source_description
+              ),
+              :validation_context => ' for an include statement'
+            ),
             containing_package_descriptor
           )
         end
@@ -118,13 +122,21 @@ module Fig
     end
 
     rule override
-      statement_start:"override" ws package_name "/" version_name ws {
-        def to_override(source_description)
+      statement_start:"override" ws descriptor_string ws {
+        def to_config_statement(
+          containing_package_descriptor, source_description
+        )
+          descriptor =
+            Statement::Override.parse_descriptor(
+              descriptor_string.text_value.strip,
+              :source_description => Parser.node_location_description(
+                descriptor_string, source_description
+              ),
+              :validation_context => ' for an override statement'
+            )
           return Statement::Override.new(
             Parser.node_location(statement_start),
-            source_description,
-            package_name.text_value,
-            version_name.text_value
+            source_description, descriptor.name, descriptor.version
           )
         end
       }
@@ -188,27 +200,8 @@ module Fig
       '"' value:(!'"' . )* '"' ws
     end
 
-    rule descriptor
-      ((package:package_name ("/" version:version_name)? (":" config:config_name)? ws) /
-      (":" config:config_name ws)) {
-        def get_version
-          elements.each do |element|
-            if element.respond_to?(:version)
-              return element.version.text_value
-            end
-          end
-          nil
-        end
-        def get_config
-          return self.config.text_value if self.respond_to?(:config)
-          elements.each do |element|
-            if element.respond_to?(:config)
-              return element.config.text_value
-            end
-          end
-          nil
-        end
-      }
+    rule descriptor_string
+      [\S]+
     end
 
     rule package_name
@@ -216,10 +209,6 @@ module Fig
     end
 
     rule version_name
-      [a-zA-Z0-9_.-]+
-    end
-
-    rule config_name
       [a-zA-Z0-9_.-]+
     end
 

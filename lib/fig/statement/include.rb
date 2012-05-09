@@ -4,15 +4,21 @@ require 'fig/statement'
 module Fig; end
 
 # Dual role: "include :configname" incorporates one configuration into another;
-# "include package[/version]" declares a dependency upon another package.
+# "include package[/version]" declares a dependency upon another package
+# (incorporating the "default" configuration from that package as well).
 class Fig::Statement::Include < Fig::Statement
-  attr_reader :descriptor, :overrides, :containing_package_descriptor
+  attr_reader :descriptor, :containing_package_descriptor
 
-  def initialize(line_column, source_description, descriptor, overrides, containing_package_descriptor)
+  # Centralized definition of requirements for descriptors for include
+  # statements.
+  def self.parse_descriptor(raw_string, options = {})
+    return Fig::PackageDescriptor.parse(raw_string, options)
+  end
+
+  def initialize(line_column, source_description, descriptor, containing_package_descriptor)
     super(line_column, source_description)
 
     @descriptor                    = descriptor
-    @overrides                     = overrides
     @containing_package_descriptor = containing_package_descriptor
   end
 
@@ -55,35 +61,12 @@ class Fig::Statement::Include < Fig::Statement
     )
   end
 
-  # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(
-    repository, package, configuration, &block
-  )
-    referenced_package = nil
-    if package_name()
-      referenced_package = repository.get_package(descriptor())
-    else
-      referenced_package = package
-    end
-
-    configuration = referenced_package[referenced_config_name()]
-
-    yield referenced_package, configuration
-    configuration.walk_statements_following_package_dependencies(
-      repository, referenced_package, nil, &block
-    )
-
-    return
-  end
-
   def unparse(indent)
     text = ''
     text += package_name() if package_name()
     text += "/#{version()}" if version()
     text += ":#{config_name()}" if config_name()
-    @overrides.each do |override|
-      text += override.unparse
-    end
+
     return "#{indent}include #{text}"
   end
 
@@ -94,11 +77,6 @@ class Fig::Statement::Include < Fig::Statement
   end
 
   def referenced_version(containing_package, backtrace)
-    overrides().each do
-      |override|
-      backtrace.add_override(override.package_name(), override.version())
-    end
-
     package_name = nil
     original_version = nil
     if package_name()

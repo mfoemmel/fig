@@ -35,21 +35,24 @@ class Fig::WorkingDirectoryMaintainer
     end
 
     yield
+
+    return
   end
 
   def retrieve(source, relpath)
     copy(source, relpath)
+
+    return
   end
 
-  def save_metadata
-    FileUtils.mkdir_p(@local_fig_data_directory)
-    File.open(@metadata_file, 'w') do |file|
-      @package_metadata_by_name.each do |name, package_meta|
-        package_meta.each_file do |target|
-          file << target << '=' << formatted_meta(package_meta) << "\n"
-        end
-      end
+  def prepare_for_shutdown(purged_unused_packages)
+    if purged_unused_packages
+      clean_up_unused_packages()
     end
+
+    save_metadata()
+
+    return
   end
 
   private
@@ -76,6 +79,8 @@ class Fig::WorkingDirectoryMaintainer
         raise "parse error in #{file}: #{line}"
       end
     end
+
+    return
   end
 
   def reset_package_metadata_with_version(name, version)
@@ -103,7 +108,7 @@ class Fig::WorkingDirectoryMaintainer
         end
       end
     else
-      if ! File.exist?(target) || File.mtime(source) > File.mtime(target)
+      if should_copy_file?(source, target)
         if Fig::Logging.debug?
           Fig::Logging.debug \
             "Copying file from #{source} to #{target}."
@@ -118,13 +123,31 @@ class Fig::WorkingDirectoryMaintainer
         end
         FileUtils.mkdir_p(File.dirname(target))
 
-        FileUtils.cp(source, target, :preserve => true)
+        # If the source is a dangling symlink, then there's no time, etc. to
+        # preserve.
+        preserve = File.exist?(source)
+
+        FileUtils.copy_entry(
+          source, target, preserve, false, :remove_destination
+        )
       end
       if @package_meta
         @package_meta.add_file(relpath)
         @package_meta.mark_as_retrieved()
       end
     end
+
+    return
+  end
+
+  def should_copy_file?(source, target)
+    if File.symlink?(target)
+      FileUtils.rm(target)
+      return true
+    end
+
+    return true if ! File.exist?(target)
+    return File.mtime(source) > File.mtime(target)
   end
 
   def clean_up_package_files(package_meta = @package_meta)
@@ -137,6 +160,32 @@ class Fig::WorkingDirectoryMaintainer
         )
       )
       FileUtils.rm_f(File.join(@base_dir, relpath))
+    end
+
+    return
+  end
+
+  def clean_up_unused_packages()
+    @package_metadata_by_name.each_value do
+      |metadata|
+
+      if not metadata.retrieved?
+        clean_up_package_files(metadata)
+        metadata.reset_with_version(nil)
+      end
+    end
+
+    return
+  end
+
+  def save_metadata()
+    FileUtils.mkdir_p(@local_fig_data_directory)
+    File.open(@metadata_file, 'w') do |file|
+      @package_metadata_by_name.each do |name, package_meta|
+        package_meta.each_file do |target|
+          file << target << '=' << formatted_meta(package_meta) << "\n"
+        end
+      end
     end
 
     return

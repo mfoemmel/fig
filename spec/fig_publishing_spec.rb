@@ -172,7 +172,7 @@ describe 'Fig' do
 
       it 'should complain if you publish without a package version' do
         out, err, exit_code = fig('--publish foo', nil, :no_raise_on_error)
-        err.should =~ /No version specified/
+        err.should =~ /version required/i
         exit_code.should_not == 0
       end
 

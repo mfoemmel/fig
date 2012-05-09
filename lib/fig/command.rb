@@ -13,7 +13,6 @@ require 'fig/parser'
 require 'fig/repository'
 require 'fig/repositoryerror'
 require 'fig/statement/configuration'
-require 'fig/statement/publish'
 require 'fig/userinputerror'
 require 'fig/workingdirectorymaintainer'
 
@@ -33,6 +32,33 @@ class Fig::Command
   include Fig::Command::Listing
   include Fig::Command::PackageLoad
 
+  def self.get_version()
+    line = nil
+
+    begin
+      File.open(
+        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
+      ) do |file|
+        line = file.gets
+      end
+    rescue
+      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
+
+      return nil
+    end
+
+    # Note that we accept anything that contains three decimal numbers
+    # seperated by periods.  This allows for versions like
+    # "4.3.2-super-special-version-in-3D".
+    if line !~ %r< \b \d+ [.] \d+ [.] \d+ \b >x
+      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
+
+      return nil
+    end
+
+    return line
+  end
+
   def run_fig(argv)
     @options = Fig::Command::Options.new(argv)
     if not @options.exit_code.nil?
@@ -45,7 +71,7 @@ class Fig::Command
     end
 
     if @options.version?
-      return version
+      return emit_version()
     end
 
     configure()
@@ -77,15 +103,14 @@ class Fig::Command
         |command| @operating_system.shell_exec command
       end
     elsif @descriptor
-      @environment.include_config(@package, @descriptor, {}, nil)
+      @environment.include_config(@package, @descriptor, nil)
       @environment.execute_config(
         @package,
         @descriptor,
         @options.command_extra_argv || []
       ) { |cmd| @operating_system.shell_exec cmd }
     elsif not @repository.updating?
-      $stderr.puts "Nothing to do.\n"
-      $stderr.puts Fig::Command::Options::USAGE
+      $stderr.puts "Nothing to do.\n\n"
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
       return 1
     end
@@ -114,28 +139,11 @@ class Fig::Command
     end
   end
 
-  def version()
-    line = nil
+  def emit_version()
+    version = Fig::Command.get_version()
+    return 1 if version.nil?
 
-    begin
-      File.open(
-        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
-      ) do |file|
-        line = file.gets
-      end
-    rescue
-      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
-
-      return 1
-    end
-
-    if line !~ /\d+\.\d+\.\d+/
-      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
-
-      return 1
-    end
-
-    puts File.basename($0) + ' v' + line
+    puts File.basename($0) + ' v' + version
 
     return 0
   end
@@ -192,7 +200,9 @@ class Fig::Command
 
     @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
-    Fig::AtExit.add { @working_directory_maintainer.save_metadata() }
+    Fig::AtExit.add do
+      @working_directory_maintainer.prepare_for_shutdown(@options.updating?)
+    end
 
     prepare_environment()
 
@@ -278,7 +288,14 @@ class Fig::Command
     check_required_package_descriptor('to publish')
 
     if @descriptor.name.nil? || @descriptor.version.nil?
-      raise Fig::UserInputError.new('Please specify a package name and a version name.')
+      raise Fig::UserInputError.new(
+        'Please specify a package name and a version name.'
+      )
+    end
+    if @descriptor.name == '_meta'
+      raise Fig::UserInputError.new(
+        %q<Due to implementation issues, cannot create a package named "_meta".>
+      )
     end
 
     publish_statements = nil
@@ -294,7 +311,6 @@ class Fig::Command
             @options.environment_variable_statements()
           )
         ]
-      publish_statements << Fig::Statement::Publish.new()
     elsif not @options.resources().empty? or not @options.archives().empty?
       raise Fig::UserInputError.new(
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'

@@ -118,6 +118,10 @@ def write_version_file()
   end
 end
 
+def clean_up_after_testing()
+  rm_rf './.fig'
+end
+
 fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.name = 'fig'
   gemspec.summary = 'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
@@ -157,6 +161,20 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   spec.rspec_opts = []
   spec.rspec_opts << '--order rand'
 end
+task :spec do
+  clean_up_after_testing()
+end
+
+desc 'Run RSpec tests with SimpleCov.'
+task :simplecov do
+  ENV['FIG_COVERAGE'] = 'true'
+  # Don't use '--order rand' like the standard "spec" task so that generated
+  # SimpleCov command-names are consistent between runs.
+end
+RSpec::Core::RakeTask.new(:simplecov)
+task :simplecov do
+  clean_up_after_testing()
+end
 
 desc 'Increments the major version number by one.'
 task :increment_major_version do
@@ -188,17 +206,6 @@ task :publish do
       tag_and_push_to_git(version.chomp)
     end
   end
-end
-
-desc 'Run RSpec tests with SimpleCov.'
-RSpec::Core::RakeTask.new(:simplecov) do
-  ENV['FIG_COVERAGE'] = 'true'
-  # Don't use '--order rand' like the standard "spec" task so that generated
-  # SimpleCov command-names are consistent between runs.
-end
-
-task :spec do
-  rm_rf './.fig'
 end
 
 task :default => :spec

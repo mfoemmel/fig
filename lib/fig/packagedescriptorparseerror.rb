@@ -2,14 +2,13 @@ require 'fig/userinputerror'
 
 module Fig
   # Could not determine some kind of information from a configuration file,
-  # whether .figrc, log4r, package.fig, etc.
-  class ConfigFileError < UserInputError
-    attr_accessor :file
+  class PackageDescriptorParseError < UserInputError
+    attr_accessor :original_string
 
-    def initialize(message, file)
+    def initialize(message, original_string)
       super(message)
 
-      @file = file
+      @file = original_string
 
       return
     end

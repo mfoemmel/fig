@@ -4,6 +4,8 @@ require 'fig/statement/command'
 module Fig; end
 
 # A grouping of statements within a configuration.  May not be nested.
+#
+# Any processing of statements is guaranteed to hit any Overrides first.
 class Fig::Statement::Configuration < Fig::Statement
   attr_reader :name, :statements
 
@@ -11,11 +13,12 @@ class Fig::Statement::Configuration < Fig::Statement
     super(line_column, source_description)
 
     @name = name
-    @statements = statements
-  end
 
-  def with_name(name)
-    Configuration.new(name, statements)
+    overrides, others = statements.partition do
+      |statement| statement.is_a?(Fig::Statement::Override)
+    end
+
+    @statements = [overrides, others].flatten
   end
 
   def command_statement
@@ -30,18 +33,6 @@ class Fig::Statement::Configuration < Fig::Statement
       yield statement
       statement.walk_statements &block
     end
-  end
-
-  # Block will receive a Package and a Statement.
-  def walk_statements_following_package_dependencies(repository, package, configuration, &block)
-    @statements.each do |statement|
-      yield package, self, statement
-      statement.walk_statements_following_package_dependencies(
-        repository, package, self, &block
-      )
-    end
-
-    return
   end
 
   def unparse(indent)

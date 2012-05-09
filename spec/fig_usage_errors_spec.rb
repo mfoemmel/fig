@@ -4,13 +4,9 @@ require 'English'
 
 describe 'Fig' do
   describe 'usage errors' do
-    before(:all) do
+    before(:each) do
       cleanup_test_environment
       setup_test_environment
-    end
-
-    before(:each) do
-      FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
     end
 
     it %q<prints usage message when passed an unknown option> do
@@ -24,7 +20,7 @@ describe 'Fig' do
     it %q<prints usage message when there's nothing to do and there's no package.fig file> do
       (out, err, exitstatus) = fig('', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ / usage /xi
+      err.should =~ /nothing to do/i
       out.should == ''
     end
 
@@ -39,7 +35,7 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig('', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ / usage /xi
+      err.should =~ /nothing to do/i
       out.should == ''
     end
 
@@ -54,21 +50,21 @@ describe 'Fig' do
     it %q<prints error when a package descriptor consists solely of a version> do
       (out, err, exitstatus) = fig('/version', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ /No package name specified in descriptor/
+      err.should =~ /package name required/i
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a config> do
       (out, err, exitstatus) = fig(':config', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ /No package name specified in descriptor/
+      err.should =~ /package name required/i
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a package> do
       (out, err, exitstatus) = fig('package', nil, :no_raise_on_error)
       exitstatus.should == 1
-      err.should =~ /No version specified in descriptor/
+      err.should =~ /version required/i
       out.should == ''
     end
 
@@ -103,6 +99,87 @@ describe 'Fig' do
         |option|
         err.should =~ / #{option} /x
       end
+    end
+
+    describe %q<prints error when unknown package is referenced> do
+      it %q<without --update> do
+        (out, err, exitstatus) =
+          fig('no-such-package/version --get PATH', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ / no-such-package /x
+        out.should == ''
+      end
+
+      it %q<with --update> do
+        (out, err, exitstatus) =
+          fig('no-such-package/version --update --get PATH', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ / no-such-package /x
+        out.should == ''
+      end
+
+      it %q<with --update-if-missing> do
+        (out, err, exitstatus) =
+          fig('no-such-package/version --update-if-missing --get PATH', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ / no-such-package /x
+        out.should == ''
+      end
+    end
+
+    describe %q<prints error when referring to non-existent configuration> do
+      it %q<from the command-line as the base package> do
+        fig('--publish foo/1.2.3 --set FOO=BAR')
+        (out, err, exitstatus) =
+          fig('foo/1.2.3:non-existent-config --get FOO', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r< non-existent-config >x
+        out.should == ''
+      end
+
+      it %q<from the command-line as an included package> do
+        fig('--publish foo/1.2.3 --set FOO=BAR')
+        (out, err, exitstatus) =
+          fig('--include foo/1.2.3:non-existent-config --get FOO', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r< foo/1\.2\.3:non-existent-config >x
+        out.should == ''
+      end
+    end
+
+    describe %q<refuses to publish> do
+      it %q<a package named "_meta"> do
+        (out, err, exitstatus) =
+          fig('--publish _meta/version --set FOO=BAR', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r< cannot .* _meta >x
+        out.should == ''
+      end
+
+      it %q<without a package name> do
+        (out, err, exitstatus) =
+          fig('--publish --set FOO=BAR', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r<specify a package>
+        out.should == ''
+      end
+
+      it %q<without a version> do
+        (out, err, exitstatus) =
+          fig('--publish a-package --set FOO=BAR', nil, :no_raise_on_error)
+        exitstatus.should_not == 0
+        err.should =~ %r<version required>i
+        out.should == ''
+      end
+    end
+
+    it %q<complains about command-line substitution of unreferenced packages> do
+      fig('--publish a-package/a-version --set FOO=BAR')
+      (out, err, exitstatus) =
+        fig('-- echo @a-package', nil, :no_raise_on_error)
+      exitstatus.should_not == 0
+      err.should =~ %r<\ba-package\b.*has not been referenced>
+      out.should == ''
     end
   end
 end

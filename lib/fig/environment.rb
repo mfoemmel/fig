@@ -70,18 +70,21 @@ class Fig::Environment
     return @packages[name]
   end
 
-  def packages
-    return @packages.values
-  end
-
   def apply_config(package, config_name, backtrace)
     if package.applied_config_names.member?(config_name)
       return
     end
-    new_backtrace = backtrace
+    new_backtrace = backtrace ||
+      Fig::Backtrace.new(
+        nil,
+        Fig::PackageDescriptor.new(package.name, package.version, config_name)
+      )
 
     config = package[config_name]
-    config.statements.each { |stmt| apply_config_statement(package, stmt, new_backtrace) }
+    config.statements.each do
+      |statement|
+      apply_config_statement(package, statement, new_backtrace)
+    end
     package.add_applied_config_name(config_name)
 
     return
@@ -121,6 +124,9 @@ class Fig::Environment
     return
   end
 
+  # In order for this to work correctly, any Overrides need to be processed
+  # before any other kind of Statement.  The Configuration class guarantees
+  # that those come first in its set of Statements.
   def apply_config_statement(base_package, statement, backtrace)
     case statement
     when Fig::Statement::Path
@@ -128,9 +134,9 @@ class Fig::Environment
     when Fig::Statement::Set
       set_variable(base_package, statement.name, statement.value)
     when Fig::Statement::Include
-      include_config(
-        base_package, statement.descriptor, statement.overrides, backtrace
-      )
+      include_config(base_package, statement.descriptor, backtrace)
+    when Fig::Statement::Override
+      backtrace.add_override(statement.package_name(), statement.version())
     when Fig::Statement::Command
       # Skip - has no effect on environment.
     else
@@ -140,7 +146,7 @@ class Fig::Environment
     return
   end
 
-  def include_config(base_package, descriptor, overrides, backtrace)
+  def include_config(base_package, descriptor, backtrace)
     resolved_descriptor = nil
 
     # Check to see if this include has been overridden.
@@ -158,9 +164,6 @@ class Fig::Environment
     resolved_descriptor ||= descriptor
 
     new_backtrace = Fig::Backtrace.new(backtrace, resolved_descriptor)
-    overrides.each do |override|
-      new_backtrace.add_override(override.package_name, override.version)
-    end
     package = lookup_package(
       resolved_descriptor.name || base_package.name,
       resolved_descriptor.version,
@@ -318,7 +321,7 @@ class Fig::Environment
   end
 
   def check_source_existence(variable_name, variable_value, base_package)
-    return if File.exists?(variable_value)
+    return if File.exists?(variable_value) || File.symlink?(variable_value)
 
     Fig::Logging.fatal(
       %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>
@@ -369,7 +372,7 @@ class Fig::Environment
       package = get_package(package_name)
       if package.nil?
         raise Fig::RepositoryError.new(
-          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package.>
+          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>
         )
       end
       backslashes + package.directory

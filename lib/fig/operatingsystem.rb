@@ -320,14 +320,21 @@ class Fig::OperatingSystem
       `tar czvf #{archive_name} #{files_to_archive.join(' ')}`
     else
       # TODO: Need to verify files_to_archive exists.
-      ::Archive.write_open_filename(archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR) do |ar|
-        files_to_archive.each do |fn|
-          ar.new_entry do |entry|
-            entry.copy_stat(fn)
-            entry.pathname = fn
-            ar.write_header(entry)
-            if !entry.directory?
-              ar.write_data(open(fn) {|f| f.binmode; f.read })
+      ::Archive.write_open_filename(
+        archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR
+      ) do |writer|
+        files_to_archive.each do |file_name|
+          writer.new_entry do |entry|
+            entry.copy_lstat(file_name)
+            entry.pathname = file_name
+            if entry.symbolic_link?
+              linked = File.readlink(file_name)
+              entry.symlink = linked
+            end
+            writer.write_header(entry)
+
+            if entry.regular?
+              writer.write_data(open(file_name) {|f| f.binmode; f.read })
             end
           end
         end
@@ -345,9 +352,9 @@ class Fig::OperatingSystem
       if Fig::OperatingSystem.java?
         `tar xzvf #{file}`
       else
-        ::Archive.read_open_filename(file) do |ar|
-          while entry = ar.next_header
-            ar.extract(entry)
+        ::Archive.read_open_filename(file) do |reader|
+          while entry = reader.next_header
+            reader.extract(entry)
           end
         end
       end

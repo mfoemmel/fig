@@ -4,6 +4,7 @@ require 'fig/grammar' # this is grammar.treetop, not grammar.rb.
 require 'fig/logging'
 require 'fig/packageparseerror'
 require 'fig/repository'
+require 'fig/statement'
 require 'fig/urlaccesserror'
 require 'fig/userinputerror'
 
@@ -20,6 +21,17 @@ class Fig::Parser
       input.line_of(offset_from_start_of_file),
       input.column_of(offset_from_start_of_file)
     ]
+  end
+
+  # This method is necessary due to ruby v1.8 not allowing array splat
+  # notation, i.e. Fig::Statement.position_description(*node_location(node),
+  # source_description)
+  def self.node_location_description(node, source_description)
+    location = node_location(node)
+
+    return Fig::Statement.position_description(
+      location[0], location[1], source_description
+    )
   end
 
   def initialize(application_config, check_include_versions)
