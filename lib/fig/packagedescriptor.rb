@@ -43,7 +43,18 @@ class Fig::PackageDescriptor
     )
   end
 
-  # "options
+  # Options are:
+  #
+  #   :name                           => { :required | :forbidden }
+  #   :version                        => { :required | :forbidden }
+  #   :config                         => { :required | :forbidden }
+  #   :original_string                => the unparsed form
+  #   :require_at_least_one_component => should we have at least one of
+  #                                      name, version, and config
+  #   :validation_context             => what the descriptor is for
+  #   :source_description             => where the descriptor came from,
+  #                                      most likely the result of invoking
+  #                                      Fig::Statement.position_description().
   def initialize(name, version, config, options = {})
     @name            = name
     @version         = version
