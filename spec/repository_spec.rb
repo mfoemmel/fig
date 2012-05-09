@@ -5,7 +5,6 @@ require 'fig/packagedescriptor'
 require 'fig/repository'
 require 'fig/statement/configuration'
 require 'fig/statement/path'
-require 'fig/statement/publish'
 require 'fig/statement/resource'
 
 def create_local_repository()
@@ -29,10 +28,8 @@ def generate_package_statements
     Fig::Statement::Configuration.new(
       nil, nil, Fig::Package::DEFAULT_CONFIG, [path_statement]
     )
-  publish_statement       = Fig::Statement::Publish.new()
 
   package_statements = [resource_statement] + [configuration_statement]
-  package_statements << publish_statement
 
   return package_statements
 end

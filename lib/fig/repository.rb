@@ -497,9 +497,7 @@ class Fig::Repository
     package_statements, descriptor, local_dir, local_only
   )
     return create_resource_archive(package_statements).map do |statement|
-      if statement.is_a?(Fig::Statement::Publish)
-        nil
-      elsif statement.is_asset?
+      if statement.is_asset?
         asset_name = statement.asset_name()
         asset_remote = "#{remote_dir_for_package(descriptor)}/#{asset_name}"
 
@@ -527,11 +525,12 @@ class Fig::Repository
         if statement.is_a?(Fig::Statement::Archive)
           @operating_system.unpack_archive(local_dir, asset_name)
         end
+
         statement.class.new(nil, nil, asset_name).unparse('')
       else
         statement.unparse('')
       end
-    end.select { |s| not s.nil? }
+    end
   end
 
   # Grabs all of the Resource statements that don't reference URLs, creates a

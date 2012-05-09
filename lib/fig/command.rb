@@ -13,7 +13,6 @@ require 'fig/parser'
 require 'fig/repository'
 require 'fig/repositoryerror'
 require 'fig/statement/configuration'
-require 'fig/statement/publish'
 require 'fig/userinputerror'
 require 'fig/workingdirectorymaintainer'
 
@@ -312,7 +311,6 @@ class Fig::Command
             @options.environment_variable_statements()
           )
         ]
-      publish_statements << Fig::Statement::Publish.new()
     elsif not @options.resources().empty? or not @options.archives().empty?
       raise Fig::UserInputError.new(
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
