@@ -111,8 +111,8 @@ module Fig
             source_description,
             Statement::Include.parse_descriptor(
               descriptor_string.text_value.strip,
-              :source_description => Statement.position_description(
-                *(Parser.node_location(descriptor_string)), source_description
+              :source_description => Parser.node_location_description(
+                descriptor_string, source_description
               ),
               :validation_context => ' for an include statement'
             ),
@@ -130,8 +130,8 @@ module Fig
           descriptor =
             Statement::Override.parse_descriptor(
               descriptor_string.text_value.strip,
-              :source_description => Statement.position_description(
-                *(Parser.node_location(descriptor_string)), source_description
+              :source_description => Parser.node_location_description(
+                descriptor_string, source_description
               ),
               :validation_context => ' for an override statement'
             )
