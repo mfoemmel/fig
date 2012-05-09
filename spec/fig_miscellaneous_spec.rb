@@ -8,15 +8,22 @@ describe 'Fig' do
 
   it 'ignores comments' do
     input = <<-END
-      #/usr/bin/env fig
-
       # Some comment
       config default
         set FOO=BAR # Another comment
       end
     END
-    FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
     fig('--get FOO', input)[0].should == 'BAR'
+  end
+
+  it 'reads from the value of --file' do
+    dot_fig_file = "#{FIG_SPEC_BASE_DIRECTORY}/file-option-test.fig"
+    write_file(dot_fig_file, <<-END)
+      config default
+        set FOO=BAR
+      end
+    END
+    fig("--file #{dot_fig_file} --get FOO")[0].should == 'BAR'
   end
 
   it 'prints the version number' do
