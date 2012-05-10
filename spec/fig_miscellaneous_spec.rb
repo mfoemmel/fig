@@ -16,14 +16,35 @@ describe 'Fig' do
     fig('--get FOO', input)[0].should == 'BAR'
   end
 
-  it 'reads from the value of --file' do
-    dot_fig_file = "#{FIG_SPEC_BASE_DIRECTORY}/file-option-test.fig"
+  describe '--file' do
+    it 'reads from the value' do
+      dot_fig_file = "#{FIG_SPEC_BASE_DIRECTORY}/file-option-test.fig"
+      write_file(dot_fig_file, <<-END)
+        config default
+          set FOO=BAR
+        end
+      END
+      fig("--file #{dot_fig_file} --get FOO")[0].should == 'BAR'
+    end
+
+    it 'complains about the value not existing' do
+      out, err, exit_code =
+        fig("--file does-not-exist --get FOO", nil, :no_raise_on_error)
+      out.should == ''
+      err.should =~ /does-not-exist/
+      exit_code.should_not == 0
+    end
+  end
+
+  it 'ignores package.fig with the --no-file option' do
+    dot_fig_file =
+      "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}"
     write_file(dot_fig_file, <<-END)
       config default
         set FOO=BAR
       end
     END
-    fig("--file #{dot_fig_file} --get FOO")[0].should == 'BAR'
+    fig("--no-file --get FOO")[0].should == ''
   end
 
   it 'prints the version number' do

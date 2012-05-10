@@ -18,7 +18,7 @@ module Fig::Command::PackageLoad
 
       return File.read(config_file)
     else
-      raise Fig::UserInputError.new(%Q<File not found: "#{config_file}".>)
+      raise Fig::UserInputError.new(%Q<File "#{config_file}" does not exist.>)
     end
   end
 
