@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe 'Fig' do
   describe 'environment variables' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
 
       # These shouldn't matter because the commands shouldn't look at the repositories.
       set_local_repository_format_to_future_version()

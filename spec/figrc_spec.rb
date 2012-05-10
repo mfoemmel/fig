@@ -35,11 +35,11 @@ end
 
 describe 'FigRC' do
   before(:all) do
-    setup_test_environment
+    set_up_test_environment
   end
 
   after(:each) do
-    cleanup_test_environment
+    clean_up_test_environment
   end
 
   it 'handles override path with a remote repository' do

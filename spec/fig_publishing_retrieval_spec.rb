@@ -9,7 +9,7 @@ describe 'Fig' do
     let(:retrieve_directory)      { "#{FIG_SPEC_BASE_DIRECTORY}/retrieve" }
 
     before(:each) do
-      cleanup_test_environment
+      clean_up_test_environment
       FileUtils.mkdir_p(lib_directory)
     end
 
@@ -263,7 +263,7 @@ describe 'Fig' do
     end
 
     it 'warns on unused retrieval' do
-      setup_test_environment()
+      set_up_test_environment()
 
       input = <<-END
         retrieve UNREFERENCED_VARIABLE->somewhere

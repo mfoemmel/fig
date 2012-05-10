@@ -132,7 +132,7 @@ end
 
 describe 'Environment' do
   before(:all) do
-    setup_test_environment()
+    set_up_test_environment()
   end
 
   it 'can hand back a variable' do

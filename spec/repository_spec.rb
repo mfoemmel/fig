@@ -36,8 +36,8 @@ end
 
 describe 'Repository' do
   before(:each) do
-    cleanup_test_environment
-    setup_test_environment
+    clean_up_test_environment
+    set_up_test_environment
   end
 
   it 'cleans a package from the repository' do
@@ -56,6 +56,6 @@ describe 'Repository' do
 
     repository.list_packages.include?('foo/1.0.0').should be_false
 
-    cleanup_test_environment
+    clean_up_test_environment
   end
 end

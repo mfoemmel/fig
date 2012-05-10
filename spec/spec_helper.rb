@@ -135,7 +135,7 @@ def fig(
   end
 end
 
-def setup_test_environment()
+def set_up_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
 
   FileUtils.mkdir_p(FIG_HOME)
@@ -158,7 +158,7 @@ def setup_test_environment()
   return
 end
 
-def cleanup_test_environment()
+def clean_up_test_environment()
   FileUtils.rm_rf(FIG_SPEC_BASE_DIRECTORY)
 
   return

@@ -9,8 +9,8 @@ describe 'Fig' do
   describe 'publishing (without retrieval)' do
     context 'starting with a clean home and remote repository' do
       before(:each) do
-        cleanup_test_environment
-        setup_test_environment
+        clean_up_test_environment
+        set_up_test_environment
         cleanup_home_and_remote
       end
 
@@ -206,7 +206,7 @@ describe 'Fig' do
 
     context 'starting with a clean test environment' do
       before(:each) do
-        cleanup_test_environment
+        clean_up_test_environment
       end
 
       it 'publishes resource to remote repository' do
@@ -254,7 +254,7 @@ describe 'Fig' do
       end
 
       it 'publishes a file containing an include statement without a version' do
-        setup_test_environment()
+        set_up_test_environment()
 
         input = <<-END_INPUT
           config default

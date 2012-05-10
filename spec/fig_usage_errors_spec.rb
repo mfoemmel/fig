@@ -5,8 +5,8 @@ require 'English'
 describe 'Fig' do
   describe 'usage errors' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
     end
 
     it %q<prints usage message when passed an unknown option> do

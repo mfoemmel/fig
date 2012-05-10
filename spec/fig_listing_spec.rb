@@ -434,8 +434,8 @@ end
 describe 'Fig' do
   describe '--list-local' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
     end
 
     it %q<prints nothing with an empty repository> do
@@ -473,8 +473,8 @@ describe 'Fig' do
 
   describe '--list-remote' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
     end
 
     it %q<prints nothing with an empty repository> do
@@ -511,8 +511,8 @@ describe 'Fig' do
 
   describe '--list-configs' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
     end
 
     it %q<prints all the configurations for local-only> do
@@ -535,8 +535,8 @@ describe 'Fig' do
 
   describe '--list-dependencies' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
       cleanup_home_and_remote
     end
 
@@ -984,8 +984,8 @@ describe 'Fig' do
     describe 'no --list-tree' do
       describe 'no --list-all-configs' do
         before(:each) do
-          cleanup_test_environment
-          setup_test_environment
+          clean_up_test_environment
+          set_up_test_environment
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
@@ -1081,8 +1081,8 @@ describe 'Fig' do
 
       describe 'with --list-all-configs' do
         before(:each) do
-          cleanup_test_environment
-          setup_test_environment
+          clean_up_test_environment
+          set_up_test_environment
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
@@ -1180,8 +1180,8 @@ describe 'Fig' do
     describe 'with --list-tree' do
       describe 'no --list-all-configs' do
         before(:each) do
-          cleanup_test_environment
-          setup_test_environment
+          clean_up_test_environment
+          set_up_test_environment
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
@@ -1356,8 +1356,8 @@ describe 'Fig' do
 
       describe 'with --list-all-configs' do
         before(:each) do
-          cleanup_test_environment
-          setup_test_environment
+          clean_up_test_environment
+          set_up_test_environment
         end
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
@@ -1538,8 +1538,8 @@ describe 'Fig' do
 
     describe %q<handles "include ... override ...> do
       before(:each) do
-        cleanup_test_environment
-        setup_test_environment
+        clean_up_test_environment
+        set_up_test_environment
         set_up_packages_with_overrides
         remove_any_package_dot_fig
       end
@@ -1573,8 +1573,8 @@ describe 'Fig' do
     end
 
     it %q<should complain if local repository isn't in the expected format version> do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
       set_up_packages_with_overrides
       remove_any_package_dot_fig
       set_local_repository_format_to_future_version

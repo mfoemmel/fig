@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe 'Fig' do
   describe 'running commands in a package config section' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
     end
 
     it %q<runs a command> do
