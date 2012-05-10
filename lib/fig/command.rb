@@ -92,6 +92,7 @@ class Fig::Command
     end
 
     ensure_descriptor_and_file_were_not_both_specified()
+
     load_package_object()
 
     if @options.listing()
@@ -208,10 +209,6 @@ class Fig::Command
     end
 
     prepare_environment()
-
-    @options.environment_statements().each do |statement|
-      @environment.apply_config_statement(nil, statement, nil)
-    end
   end
 
   def prepare_environment()

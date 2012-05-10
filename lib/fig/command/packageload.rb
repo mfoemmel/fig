@@ -61,6 +61,10 @@ module Fig::Command::PackageLoad
 
     @environment.register_package(@package)
 
+    @options.environment_statements().each do |statement|
+      @environment.apply_config_statement(nil, statement, nil)
+    end
+
     begin
       @environment.apply_config(@package, base_config(), nil)
     rescue Fig::NoSuchPackageConfigError => exception
@@ -72,7 +76,12 @@ module Fig::Command::PackageLoad
 
   def parse_package_config_file(config_raw_text)
     if config_raw_text.nil?
-      @package = Fig::Package.new(nil, nil, '.', [])
+      @package = Fig::Package.new(
+        nil,
+        nil,
+        '.',
+        [ Fig::Statement::Configuration.new(nil, nil, base_config(), []) ]
+      )
       return
     end
 
@@ -86,8 +95,6 @@ module Fig::Command::PackageLoad
         source_description,
         config_raw_text
       )
-
-    register_package_with_environment_if_not_listing_or_publishing()
 
     return
   end
@@ -103,9 +110,9 @@ module Fig::Command::PackageLoad
       load_package_file()
     else
       @package = @repository.get_package(@descriptor)
-
-      register_package_with_environment_if_not_listing_or_publishing()
     end
+
+    register_package_with_environment_if_not_listing_or_publishing()
 
     return
   end

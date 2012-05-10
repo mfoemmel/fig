@@ -57,7 +57,11 @@ class Fig::Environment
     name = package.name
 
     if get_package(name)
-      Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
+      if (name)
+        Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
+      else
+        Fig::Logging.fatal %q<There is already an unnamed package.>
+      end
       raise Fig::RepositoryError.new
     end
 
