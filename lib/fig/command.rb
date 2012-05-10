@@ -206,7 +206,7 @@ class Fig::Command
 
     prepare_environment()
 
-    @options.environment_variable_statements().each do |statement|
+    @options.environment_statements().each do |statement|
       @environment.apply_config_statement(nil, statement, nil)
     end
   end
@@ -299,7 +299,7 @@ class Fig::Command
     end
 
     publish_statements = nil
-    if not @options.environment_variable_statements().empty?
+    if not @options.environment_statements().empty?
       publish_statements =
         @options.resources() +
         @options.archives() +
@@ -308,7 +308,7 @@ class Fig::Command
             nil,
             nil,
             Fig::Package::DEFAULT_CONFIG,
-            @options.environment_variable_statements()
+            @options.environment_statements()
           )
         ]
     elsif not @options.resources().empty? or not @options.archives().empty?
