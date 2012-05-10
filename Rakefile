@@ -160,7 +160,6 @@ RSpec::Core::RakeTask.new(:spec) do |spec|
   # Order is randomized so that we find inter-test dependencies.
   spec.rspec_opts = []
   spec.rspec_opts << '--order rand'
-  spec.pattern = './spec/fig_miscellaneous_spec.rb:47'
 end
 task :spec do
   clean_up_after_testing()

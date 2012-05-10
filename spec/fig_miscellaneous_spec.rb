@@ -44,8 +44,6 @@ describe 'Fig' do
         set FOO=BAR
       end
     END
-require 'pp'
-pp fig("--no-file --get FOO")
     fig("--no-file --get FOO")[0].should == ''
   end
 
