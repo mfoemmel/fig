@@ -32,7 +32,7 @@ describe 'Fig' do
     end
 
     it 'should complain if you clean without a package descriptor' do
-      out, err, exit_code = fig('--clean', nil, :no_raise_on_error)
+      out, err, exit_code = fig('--clean', :no_raise_on_error => true)
       err.should =~ /Need to specify a package to clean/
       exit_code.should_not == 0
     end
@@ -47,7 +47,8 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)[2].should == 0
 
       set_local_repository_format_to_future_version()
-      out, err, exit_code = fig('--clean foo/1.2.3', nil, :no_raise_on_error)
+      out, err, exit_code =
+        fig('--clean foo/1.2.3', :no_raise_on_error => true)
       err.should =~
         /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
       exit_code.should_not == 0

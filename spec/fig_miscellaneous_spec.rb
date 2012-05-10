@@ -29,7 +29,7 @@ describe 'Fig' do
 
     it 'complains about the value not existing' do
       out, err, exit_code =
-        fig("--file does-not-exist --get FOO", nil, :no_raise_on_error)
+        fig("--file does-not-exist --get FOO", :no_raise_on_error => true)
       out.should == ''
       err.should =~ /does-not-exist/
       exit_code.should_not == 0

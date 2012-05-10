@@ -80,20 +80,18 @@ end
 
 $fig_run_count = 0 # Nasty, nasty global.
 
-def fig(
-  args,
-  input = nil,
-  no_raise_on_error = false,
-  figrc = nil,
-  current_directory = FIG_SPEC_BASE_DIRECTORY
-)
+def fig(args, first_extra = nil, rest_extra = nil)
+  input, options = _fig_input_options(first_extra, rest_extra)
+
   $fig_run_count += 1
   ENV['FIG_COVERAGE_RUN_COUNT'] = $fig_run_count.to_s
 
+  current_directory = options[:current_directory] || FIG_SPEC_BASE_DIRECTORY
   Dir.chdir current_directory do
     args = "--log-level warn #{args}"
     args = "--file - #{args}" if input
 
+    figrc = options[:figrc]
     if figrc
       args = "--figrc #{figrc} #{args}"
     else
@@ -115,8 +113,7 @@ def fig(
       out = stdout.read.strip
     end
 
-
-    if not result or result.success? or no_raise_on_error
+    if not result or result.success? or options[:no_raise_on_error]
       return out, err, result.nil? ? 0 : result.exitstatus
     end
 
@@ -133,6 +130,23 @@ def fig(
 
     raise fig_failure
   end
+end
+
+# A bit of ruby magic to make invoking fig() nicer; this takes advantage of the
+# hash assignment syntax so you can call it like any of
+#
+#     fig('arguments')
+#     fig('arguments', input)
+#     fig('arguments', input, :no_raise_on_error => true)
+#     fig('arguments', :no_raise_on_error => true)
+def _fig_input_options(first_extra, rest_extra)
+  return nil, rest_extra || {} if first_extra.nil?
+
+  if first_extra.is_a? Hash
+    return nil, first_extra
+  end
+
+  return first_extra, rest_extra || {}
 end
 
 def set_up_test_environment()

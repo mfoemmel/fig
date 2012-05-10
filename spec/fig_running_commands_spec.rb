@@ -15,7 +15,7 @@ describe 'Fig' do
       END
       fig('--publish foo/1.2.3', input)
 
-      (out, err, exitstatus) = fig('foo/1.2.3', nil)
+      (out, err, exitstatus) = fig('foo/1.2.3')
       exitstatus.should == 0
       out.should == 'foo'
       err.should == ''
@@ -30,7 +30,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
 
       (out, err, exitstatus) =
-        fig('foo/1.2.3 --command-extra-args there', nil)
+        fig('foo/1.2.3 --command-extra-args there')
       exitstatus.should == 0
       out.should == 'Hi there'
       err.should == ''
@@ -44,7 +44,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
 
       (out, err, exitstatus) =
-        fig('foo/1.2.3 --command-extra-args yadda', nil, :no_raise_on_error)
+        fig('foo/1.2.3 --command-extra-args yadda', :no_raise_on_error => true)
       exitstatus.should_not == 0
       out.should == ''
       err.should =~ /does not contain a command/
@@ -58,7 +58,7 @@ describe 'Fig' do
         end
       END
       out, err, exit_code =
-        fig('--publish foo/1.2.3.4', input, :no_raise_on_error)
+        fig('--publish foo/1.2.3.4', input, :no_raise_on_error => true)
       err.should =~
         %r<Found a second "command" statement within a "config" block \(line>
     end

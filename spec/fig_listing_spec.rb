@@ -29,7 +29,7 @@ def set_up_local_and_remote_repository
   END_INPUT
 
   fig('--publish remote-only/1.2.3', input)
-  fig('--clean remote-only/1.2.3', nil)
+  fig('--clean remote-only/1.2.3')
   fig('--publish both/1.2.3', input)
   fig('--publish-local local-only/1.2.3', input)
 
@@ -455,7 +455,7 @@ describe 'Fig' do
     end
 
     it 'should complain if with a package descriptor' do
-      out, err, exit_code = fig('--list-local foo', nil, :no_raise_on_error)
+      out, err, exit_code = fig('--list-local foo', :no_raise_on_error => true)
       out.should     be_empty
       err.should_not be_empty
       exit_code.should_not == 0
@@ -464,7 +464,7 @@ describe 'Fig' do
     it %q<should complain if local repository isn't in the expected format version> do
       set_local_repository_format_to_future_version()
 
-      out, err, exit_code = fig('--list-local', nil, :no_raise_on_error)
+      out, err, exit_code = fig('--list-local', :no_raise_on_error => true)
       err.should =~
         /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
       exit_code.should_not == 0
@@ -494,7 +494,7 @@ describe 'Fig' do
     end
 
     it 'should complain if with a package descriptor' do
-      out, err, exit_code = fig('--list-remote foo', nil, :no_raise_on_error)
+      out, err, exit_code = fig('--list-remote foo', :no_raise_on_error => true)
       err.should_not be_empty
       exit_code.should_not == 0
     end
@@ -502,7 +502,7 @@ describe 'Fig' do
     it %q<should complain if remote repository isn't in the expected format version> do
       set_remote_repository_format_to_future_version()
 
-      out, err, exit_code = fig('--list-remote', nil, :no_raise_on_error)
+      out, err, exit_code = fig('--list-remote', :no_raise_on_error => true)
       err.should =~
         /Remote repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
       exit_code.should_not == 0
@@ -527,7 +527,7 @@ describe 'Fig' do
       set_up_local_and_remote_repository
 
       (out, err, exitstatus) =
-        fig("--list-configs remote-only/1.2.3", nil, :no_raise_on_error)
+        fig("--list-configs remote-only/1.2.3", :no_raise_on_error => true)
       exitstatus.should_not == 0
       err.should =~ /Fig file not found for package/
     end
@@ -784,7 +784,8 @@ describe 'Fig' do
                 no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig('--list-dependencies --list-tree --list-all-configs')
+          (out, err, exitstatus) =
+            fig('--list-dependencies --list-tree --list-all-configs')
           exitstatus.should == 0
           out.should == expected
           err.should == ''
@@ -908,8 +909,7 @@ describe 'Fig' do
 
           (out, err, exitstatus) = fig(
             '--list-dependencies --list-tree --list-all-configs downstream/whatever',
-            nil,
-            :no_raise_on_error
+            :no_raise_on_error => true
           )
           out.should == expected
           err.should =~ /Cannot retrieve "upstream" without a version/
@@ -973,7 +973,7 @@ describe 'Fig' do
       set_local_repository_format_to_future_version
 
       (out, err, exitstatus) =
-        fig('--list-dependencies A/1.2.3', nil, :no_raise_on_error)
+        fig('--list-dependencies A/1.2.3', :no_raise_on_error => true)
       exitstatus.should_not == 0
       err.should =~
         /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
@@ -1580,7 +1580,7 @@ describe 'Fig' do
       set_local_repository_format_to_future_version
 
       (out, err, exitstatus) =
-        fig('--list-variables A/1.2.3', nil, :no_raise_on_error)
+        fig('--list-variables A/1.2.3', :no_raise_on_error => true)
       exitstatus.should_not == 0
       err.should =~
         /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./

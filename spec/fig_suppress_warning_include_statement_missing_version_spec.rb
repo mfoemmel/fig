@@ -118,7 +118,8 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-dependencies', input, false, figrc)
+        (out, err, exit_code) =
+          fig('--list-dependencies', input, :figrc => figrc)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
         exit_code.should == 0

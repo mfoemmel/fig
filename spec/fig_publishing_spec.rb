@@ -21,7 +21,7 @@ describe 'Fig' do
         END
 
         out, err, exit_code =
-            fig('--publish foo/1.2.3', input, :no_raise_on_error)
+            fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
 
         err.should =~ /multiple archives/
         err.should =~ /duplicate-archive\.tar\.gz/
@@ -37,7 +37,7 @@ describe 'Fig' do
           END
 
           out, err, exit_code =
-              fig('--publish foo/1.2.3', input, :no_raise_on_error)
+              fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
 
           err.should =~
             /cannot have an asset with the name "#{Regexp.escape(Fig::Repository::RESOURCES_FILE)}"/
@@ -64,7 +64,7 @@ describe 'Fig' do
 
         set_local_repository_format_to_future_version()
         out, err, exit_code =
-            fig('--publish foo/1.2.3', input, :no_raise_on_error)
+            fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
         err.should =~
           /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
         exit_code.should_not == 0
@@ -79,7 +79,7 @@ describe 'Fig' do
 
         set_local_repository_format_to_future_version()
         out, err, exit_code =
-            fig('--publish-local foo/1.2.3', input, :no_raise_on_error)
+            fig('--publish-local foo/1.2.3', input, :no_raise_on_error => true)
         err.should =~
           /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
         exit_code.should_not == 0
@@ -94,7 +94,7 @@ describe 'Fig' do
 
         set_remote_repository_format_to_future_version()
         out, err, exit_code =
-            fig('--publish foo/1.2.3', input, :no_raise_on_error)
+            fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
         err.should =~
           /Remote repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
         exit_code.should_not == 0
@@ -165,13 +165,13 @@ describe 'Fig' do
       end
 
       it 'should complain if you publish without a package descriptor' do
-        out, err, exit_code = fig('--publish', nil, :no_raise_on_error)
+        out, err, exit_code = fig('--publish', :no_raise_on_error => true)
         err.should =~ /Need to specify a package to publish/
         exit_code.should_not == 0
       end
 
       it 'should complain if you publish without a package version' do
-        out, err, exit_code = fig('--publish foo', nil, :no_raise_on_error)
+        out, err, exit_code = fig('--publish foo', :no_raise_on_error => true)
         err.should =~ /version required/i
         exit_code.should_not == 0
       end
@@ -193,7 +193,7 @@ describe 'Fig' do
           end
         END
         (out, err, exitstatus) = fig(
-          '--publish foo/1.2.3', input, :no_raise_on_error
+          '--publish foo/1.2.3', input, :no_raise_on_error => true
         )
         exitstatus.should == 1
         fig('--update --include foo/1.2.3 --get FOO')[0].should == 'SHEEP'
@@ -262,7 +262,8 @@ describe 'Fig' do
           end
         END_INPUT
 
-        out, err, exit_code = fig('--publish foo/1.2.3', input, :no_raise_on_error)
+        out, err, exit_code =
+          fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
 
         out.should == ''
         err.should =~
