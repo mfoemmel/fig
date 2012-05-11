@@ -18,7 +18,7 @@ module Fig::Command::PackageLoad
 
       return File.read(config_file)
     else
-      raise Fig::UserInputError.new(%Q<File not found: "#{config_file}".>)
+      raise Fig::UserInputError.new(%Q<File "#{config_file}" does not exist.>)
     end
   end
 
@@ -62,7 +62,11 @@ module Fig::Command::PackageLoad
     @environment.register_package(@package)
 
     begin
-      @environment.apply_config(@package, base_config(), nil)
+      @environment.apply_config(
+        synthesize_package_for_command_line_options(),
+        Fig::Package::DEFAULT_CONFIG,
+        nil
+      )
     rescue Fig::NoSuchPackageConfigError => exception
       make_no_such_package_exception_descriptive(exception)
     end
@@ -72,7 +76,14 @@ module Fig::Command::PackageLoad
 
   def parse_package_config_file(config_raw_text)
     if config_raw_text.nil?
-      @package = Fig::Package.new(nil, nil, '.', [])
+      # This package gets a free ride in terms of requiring a base config; we
+      # synthesize it.
+      @package = Fig::Package.new(
+        nil,
+        nil,
+        '.',
+        [ Fig::Statement::Configuration.new(nil, nil, base_config(), []) ]
+      )
       return
     end
 
@@ -86,8 +97,6 @@ module Fig::Command::PackageLoad
         source_description,
         config_raw_text
       )
-
-    register_package_with_environment_if_not_listing_or_publishing()
 
     return
   end
@@ -103,11 +112,31 @@ module Fig::Command::PackageLoad
       load_package_file()
     else
       @package = @repository.get_package(@descriptor)
-
-      register_package_with_environment_if_not_listing_or_publishing()
     end
 
+    register_package_with_environment_if_not_listing_or_publishing()
+
     return
+  end
+
+  def synthesize_package_for_command_line_options()
+    include_statement = Fig::Statement::Include.new(
+      nil,
+      %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+      Fig::PackageDescriptor.new(
+        @package.name(), @package.version(), base_config()
+      ),
+      nil
+    )
+    configuration_statement =
+      Fig::Statement::Configuration.new(
+        nil,
+        nil,
+        Fig::Package::DEFAULT_CONFIG,
+        [@options.environment_statements(), include_statement].flatten()
+      )
+
+    return Fig::Package.new(nil, nil, '.', [configuration_statement])
   end
 
   def make_no_such_package_exception_descriptive(exception)
@@ -133,6 +162,7 @@ module Fig::Command::PackageLoad
 
   def make_no_such_package_exception_descriptive_without_descriptor(exception)
     raise exception if config_was_specified_by_user()
+    raise exception if not exception.descriptor.nil?
 
     source = derive_exception_source()
     message =

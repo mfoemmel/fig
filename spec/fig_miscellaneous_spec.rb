@@ -2,21 +2,49 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe 'Fig' do
   before(:each) do
-    cleanup_test_environment
-    setup_test_environment
+    clean_up_test_environment
+    set_up_test_environment
   end
 
   it 'ignores comments' do
     input = <<-END
-      #/usr/bin/env fig
-
       # Some comment
       config default
         set FOO=BAR # Another comment
       end
     END
-    FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
     fig('--get FOO', input)[0].should == 'BAR'
+  end
+
+  describe '--file' do
+    it 'reads from the value' do
+      dot_fig_file = "#{FIG_SPEC_BASE_DIRECTORY}/file-option-test.fig"
+      write_file(dot_fig_file, <<-END)
+        config default
+          set FOO=BAR
+        end
+      END
+      fig("--file #{dot_fig_file} --get FOO")[0].should == 'BAR'
+    end
+
+    it 'complains about the value not existing' do
+      out, err, exit_code =
+        fig("--file does-not-exist --get FOO", :no_raise_on_error => true)
+      out.should == ''
+      err.should =~ /does-not-exist/
+      exit_code.should_not == 0
+    end
+  end
+
+  it 'ignores package.fig with the --no-file option' do
+    dot_fig_file =
+      "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}"
+    write_file(dot_fig_file, <<-END)
+      config default
+        set FOO=BAR
+      end
+    END
+    fig("--no-file --get FOO")[0].should == ''
   end
 
   it 'prints the version number' do

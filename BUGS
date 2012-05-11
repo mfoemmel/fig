@@ -1,3 +1,6 @@
 Known bugs:
 
   - --resource and --archive statement parameters aren't validated.
+  - "--set VARIABLE=" and "--append VARIABLE" result in stack traces.
+  - --set and --append without arguments don't do anything.
+    "fig --set --list-variables" => "Nothing to do."

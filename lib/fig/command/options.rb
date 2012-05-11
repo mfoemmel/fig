@@ -138,8 +138,8 @@ Environment variables:
     return @options[:no_figrc]
   end
 
-  def environment_variable_statements()
-    return @options[:environment_variable_statements]
+  def environment_statements()
+    return @options[:environment_statements]
   end
 
   def package_config_file()
@@ -269,7 +269,8 @@ Environment variables:
       set_up_queries(parser)
       set_up_commands(parser)
       set_up_package_configuration_source(parser)
-      set_up_package_statements(parser)
+      set_up_environment_statements(parser)
+      set_up_package_contents_statements(parser)
       set_up_remote_repository_access(parser)
       set_up_program_configuration(parser)
     end
@@ -394,16 +395,16 @@ Environment variables:
     return
   end
 
-  def set_up_package_statements(parser)
-    @options[:environment_variable_statements] = []
+  def set_up_environment_statements(parser)
+    @options[:environment_statements] = []
     parser.on(
       '-p',
       '--append VARIABLE=VALUE',
       'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |var_val|
-      var, val = var_val.split('=')
-      @options[:environment_variable_statements] <<
-        Fig::Statement::Path.new(nil, nil, var, val)
+      variable, value = var_val.split('=')
+      @options[:environment_statements] <<
+        Fig::Statement::Path.new(nil, nil, variable, value.nil? ? '' : value)
     end
 
     parser.on(
@@ -422,17 +423,21 @@ Environment variables:
           nil
         )
       statement.complain_if_version_missing()
-      @options[:environment_variable_statements] << statement
+      @options[:environment_statements] << statement
     end
 
     parser.on(
       '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
     ) do |var_val|
-      var, val = var_val.split('=')
-      @options[:environment_variable_statements] <<
-        Fig::Statement::Set.new(nil, nil, var, val)
+      variable, value = var_val.split('=')
+      @options[:environment_statements] <<
+        Fig::Statement::Set.new(nil, nil, variable, value.nil? ? '' : value)
     end
 
+    return
+  end
+
+  def set_up_package_contents_statements(parser)
     @options[:archives] = []
     parser.on(
       '--archive PATH',

@@ -9,7 +9,7 @@ describe 'Fig' do
     let(:retrieve_directory)      { "#{FIG_SPEC_BASE_DIRECTORY}/retrieve" }
 
     before(:each) do
-      cleanup_test_environment
+      clean_up_test_environment
       FileUtils.mkdir_p(lib_directory)
     end
 
@@ -21,7 +21,11 @@ describe 'Fig' do
           append FOOPATH=@/lib/a-library
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -40,7 +44,11 @@ describe 'Fig' do
           append FOOPATH=@/lib/a-library
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -62,7 +70,11 @@ describe 'Fig' do
           append FOOPATH=@/lib/.
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -86,7 +98,11 @@ describe 'Fig' do
           append INCLUDE=@//include/hello2.h
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
 
       input = <<-END
         retrieve INCLUDE->include2/[package]
@@ -113,7 +129,11 @@ describe 'Fig' do
           append INCLUDE=@/include/hello2.h
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
 
       FileUtils.rm_rf(FIG_HOME)
 
@@ -140,7 +160,11 @@ describe 'Fig' do
           append FOOPATH=@/lib/a-library2
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -161,7 +185,11 @@ describe 'Fig' do
           append FOOPATH=@/lib/foo.jar
         end
       END
-      fig('--publish prerequisite/1.2.3', input, false, false, publish_from_directory)
+      fig(
+        '--publish prerequisite/1.2.3',
+        input,
+        :current_directory => publish_from_directory
+      )
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
         config default
@@ -186,7 +214,11 @@ describe 'Fig' do
             set TEST_FILE=@/dangling-symlink
           end
         END
-        fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
+        fig(
+          '--publish dependency/1.2.3',
+          input,
+          :current_directory => publish_from_directory
+        )
 
         FileUtils.rm_rf(publish_from_directory)
         FileUtils.mkdir_p(publish_from_directory)
@@ -197,7 +229,11 @@ describe 'Fig' do
             include dependency/1.2.3
           end
         END
-        fig('--publish dependent/1.2.3', input, false, false, publish_from_directory)
+        fig(
+          '--publish dependent/1.2.3',
+          input,
+          :current_directory => publish_from_directory
+        )
 
         FileUtils.rm_rf(FIG_HOME)
 
@@ -227,7 +263,11 @@ describe 'Fig' do
             set TEST_FILE=@/#{cleanup_dependency_basename}
           end
         END
-        fig('--publish dependency/1.2.3', input, false, false, publish_from_directory)
+        fig(
+          '--publish dependency/1.2.3',
+          input,
+          :current_directory => publish_from_directory
+        )
 
         FileUtils.rm_rf(publish_from_directory)
         FileUtils.mkdir_p(publish_from_directory)
@@ -238,7 +278,11 @@ describe 'Fig' do
             include dependency/1.2.3
           end
         END
-        fig('--publish alpha/1.2.3', input, false, false, publish_from_directory)
+        fig(
+          '--publish alpha/1.2.3',
+          input,
+          :current_directory => publish_from_directory
+        )
         fig('--publish beta/1.2.3 --no-file --set set_something=so-we-have-some-content')
 
         File.exist?(cleanup_dependency_file) and
@@ -263,7 +307,7 @@ describe 'Fig' do
     end
 
     it 'warns on unused retrieval' do
-      setup_test_environment()
+      set_up_test_environment()
 
       input = <<-END
         retrieve UNREFERENCED_VARIABLE->somewhere

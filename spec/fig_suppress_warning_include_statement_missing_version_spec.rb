@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe 'Fig' do
   describe 'suppress unversioned include statement warnings' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
       cleanup_home_and_remote
 
       input = <<-END
@@ -118,7 +118,8 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-dependencies', input, false, figrc)
+        (out, err, exit_code) =
+          fig('--list-dependencies', input, :figrc => figrc)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
         exit_code.should == 0

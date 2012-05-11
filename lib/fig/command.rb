@@ -92,12 +92,16 @@ class Fig::Command
     end
 
     ensure_descriptor_and_file_were_not_both_specified()
+
     load_package_object()
 
     if @options.listing()
       handle_post_parse_list_options()
     elsif @options.get()
-      puts @environment[@options.get()]
+      # Ruby v1.8 emits "nil" for nil, whereas ruby v1.9 emits the empty
+      # string, so, for consistency, we need to ensure that we always emit the
+      # empty string.
+      puts @environment[@options.get()] || ''
     elsif @options.shell_command
       @environment.execute_shell(@options.shell_command) do
         |command| @operating_system.shell_exec command
@@ -205,10 +209,6 @@ class Fig::Command
     end
 
     prepare_environment()
-
-    @options.environment_variable_statements().each do |statement|
-      @environment.apply_config_statement(nil, statement, nil)
-    end
   end
 
   def prepare_environment()
@@ -299,7 +299,7 @@ class Fig::Command
     end
 
     publish_statements = nil
-    if not @options.environment_variable_statements().empty?
+    if not @options.environment_statements().empty?
       publish_statements =
         @options.resources() +
         @options.archives() +
@@ -308,7 +308,7 @@ class Fig::Command
             nil,
             nil,
             Fig::Package::DEFAULT_CONFIG,
-            @options.environment_variable_statements()
+            @options.environment_statements()
           )
         ]
     elsif not @options.resources().empty? or not @options.archives().empty?

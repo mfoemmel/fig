@@ -3,8 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 describe 'Fig' do
   describe 'environment variables' do
     before(:each) do
-      cleanup_test_environment
-      setup_test_environment
+      clean_up_test_environment
+      set_up_test_environment
 
       # These shouldn't matter because the commands shouldn't look at the repositories.
       set_local_repository_format_to_future_version()
@@ -13,7 +13,11 @@ describe 'Fig' do
 
     it 'sets variable from command line' do
       fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
-      fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
+
+      fig('--set NO_VALUE_WITH_EQUALS= --list-variables')[0].should ==
+        'NO_VALUE_WITH_EQUALS='
+      fig('--set NO_VALUE_WITHOUT_EQUALS --list-variables')[0].should ==
+        'NO_VALUE_WITHOUT_EQUALS='
     end
 
     it 'sets variable from fig file' do
@@ -27,6 +31,11 @@ describe 'Fig' do
 
     it 'appends variable from command line' do
       fig('--append PATH=foo --get PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
+
+      fig('--append NO_VALUE_WITH_EQUALS= --list-variables')[0].should ==
+        'NO_VALUE_WITH_EQUALS='
+      fig('--append NO_VALUE_WITHOUT_EQUALS --list-variables')[0].should ==
+        'NO_VALUE_WITHOUT_EQUALS='
     end
 
     it 'appends variable from fig file' do

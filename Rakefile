@@ -168,10 +168,11 @@ end
 desc 'Run RSpec tests with SimpleCov.'
 task :simplecov do
   ENV['FIG_COVERAGE'] = 'true'
+end
+RSpec::Core::RakeTask.new(:simplecov) do |spec|
   # Don't use '--order rand' like the standard "spec" task so that generated
   # SimpleCov command-names are consistent between runs.
 end
-RSpec::Core::RakeTask.new(:simplecov)
 task :simplecov do
   clean_up_after_testing()
 end
