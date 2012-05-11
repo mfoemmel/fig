@@ -402,9 +402,9 @@ Environment variables:
       '--append VARIABLE=VALUE',
       'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |var_val|
-      var, val = var_val.split('=')
+      variable, value = var_val.split('=')
       @options[:environment_statements] <<
-        Fig::Statement::Path.new(nil, nil, var, val)
+        Fig::Statement::Path.new(nil, nil, variable, value.nil? ? '' : value)
     end
 
     parser.on(
@@ -429,9 +429,9 @@ Environment variables:
     parser.on(
       '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
     ) do |var_val|
-      var, val = var_val.split('=')
+      variable, value = var_val.split('=')
       @options[:environment_statements] <<
-        Fig::Statement::Set.new(nil, nil, var, val)
+        Fig::Statement::Set.new(nil, nil, variable, value.nil? ? '' : value)
     end
 
     return
