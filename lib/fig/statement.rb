@@ -1,6 +1,6 @@
 module Fig; end
 
-# A statement within a package configuration file (package.fig).
+# A statement within a package definition file (package.fig).
 class Fig::Statement
   attr_reader :line, :column, :source_description
 

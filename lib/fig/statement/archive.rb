@@ -3,7 +3,7 @@ require 'fig/statement/asset'
 
 module Fig; end
 
-# Specifies an archive file (possibly via a URL) that is part of the current package.
+# Specifies an archive file (possibly via a URL) that is part of a package.
 #
 # Differs from a Resource in that the contents will be extracted.
 class Fig::Statement::Archive < Fig::Statement

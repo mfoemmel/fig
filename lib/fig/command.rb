@@ -16,13 +16,14 @@ require 'fig/statement/configuration'
 require 'fig/userinputerror'
 require 'fig/workingdirectorymaintainer'
 
-# These are a breakout of parts of this class simply to keep the file size down.
+# The following are a break out of parts of this class simply to keep the file
+# size down.
 
 # You will need to look in this file for any stuff related to --list-* options.
 require 'fig/command/listing'
 
 # You will need to look in this file for any stuff related to loading the
-# primary Package object.
+# base Package object.
 require 'fig/command/packageload'
 
 module Fig; end
@@ -244,7 +245,7 @@ class Fig::Command
   # The one exception to this rule is when we are publishing, which should
   # already have been invoked by the time this is called.
   def ensure_descriptor_and_file_were_not_both_specified()
-    file = @options.package_config_file()
+    file = @options.package_definition_file()
 
     # If the user specified --no-file, even though it's kind of superfluous,
     # we'll let it slide because the user doesn't think that any file will be

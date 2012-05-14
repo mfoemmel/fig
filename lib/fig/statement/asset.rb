@@ -1,7 +1,7 @@
 module Fig; end
 class Fig::Statement; end
 
-# Something to be included in a package.
+# Some sort of file to be included in a package.
 module Fig::Statement::Asset
   def urls()
     return [ url() ]

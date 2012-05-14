@@ -1,7 +1,7 @@
 require 'fig/userinputerror'
 
 module Fig
-  # Could not determine some kind of information from a configuration file,
+  # Could not turn a string into a PackageDescriptor.
   class PackageDescriptorParseError < UserInputError
     attr_accessor :original_string
 

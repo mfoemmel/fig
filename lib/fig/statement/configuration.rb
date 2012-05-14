@@ -3,7 +3,7 @@ require 'fig/statement/command'
 
 module Fig; end
 
-# A grouping of statements within a configuration.  May not be nested.
+# A grouping of statements within a package.  May not be nested.
 #
 # Any processing of statements is guaranteed to hit any Overrides first.
 class Fig::Statement::Configuration < Fig::Statement

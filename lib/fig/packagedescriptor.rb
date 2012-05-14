@@ -2,7 +2,7 @@ require 'fig/packagedescriptorparseerror'
 
 module Fig; end
 
-# Parsed representation of a package (name/version:config).
+# Parsed representation of a package specification, i.e. "name/version:config".
 class Fig::PackageDescriptor
   include Comparable
 

@@ -142,8 +142,8 @@ Environment variables:
     return @options[:environment_statements]
   end
 
-  def package_config_file()
-    return @options[:package_config_file]
+  def package_definition_file()
+    return @options[:package_definition_file]
   end
 
   def publish?()
@@ -378,18 +378,18 @@ Environment variables:
       @options[:config] = config
     end
 
-    @options[:package_config_file] = nil
+    @options[:package_definition_file] = nil
     parser.on(
       '--file FILE',
       %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
-      @options[:package_config_file] = path
+      @options[:package_definition_file] = path
     end
 
     parser.on(
       '--no-file', 'ignore package.fig file in current directory'
     ) do |path|
-      @options[:package_config_file] = :none
+      @options[:package_definition_file] = :none
     end
 
     return
@@ -404,7 +404,19 @@ Environment variables:
     ) do |var_val|
       variable, value = var_val.split('=')
       @options[:environment_statements] <<
-        Fig::Statement::Path.new(nil, nil, variable, value.nil? ? '' : value)
+        Fig::Statement::Path.new(
+          nil, '--append option', variable, value.nil? ? '' : value
+        )
+    end
+
+    parser.on(
+      '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
+    ) do |var_val|
+      variable, value = var_val.split('=')
+      @options[:environment_statements] <<
+        Fig::Statement::Set.new(
+          nil, '--set option', variable, value.nil? ? '' : value
+        )
     end
 
     parser.on(
@@ -415,23 +427,35 @@ Environment variables:
       statement =
         Fig::Statement::Include.new(
           nil,
-          nil,
+          '--include option',
           Fig::Statement::Include.parse_descriptor(
             descriptor_string,
             :validation_context => ' given in a --include option'
           ),
           nil
         )
+
+      # We've never allowed versionless includes from the command-line. Hooray!
       statement.complain_if_version_missing()
+
       @options[:environment_statements] << statement
     end
 
     parser.on(
-      '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
-    ) do |var_val|
-      variable, value = var_val.split('=')
-      @options[:environment_statements] <<
-        Fig::Statement::Set.new(nil, nil, variable, value.nil? ? '' : value)
+      '--override DESCRIPTOR',
+      'dictate version of package as specified in DESCRIPTOR'
+    ) do |descriptor_string|
+      descriptor =
+        Fig::Statement::Override.parse_descriptor(
+          descriptor_string,
+          :validation_context => ' given in a --override option'
+        )
+      statement =
+        Fig::Statement::Override.new(
+          nil, '--override option', descriptor.name, descriptor.version
+        )
+
+      @options[:environment_statements] << statement
     end
 
     return
@@ -443,7 +467,8 @@ Environment variables:
       '--archive PATH',
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] << Fig::Statement::Archive.new(nil, nil, path)
+      @options[:archives] <<
+        Fig::Statement::Archive.new(nil, '--archive option', path)
     end
 
     @options[:resources] =[]
@@ -451,7 +476,8 @@ Environment variables:
       '--resource PATH',
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] << Fig::Statement::Resource.new(nil, nil, path)
+      @options[:resources] <<
+        Fig::Statement::Resource.new(nil, '--resource option', path)
     end
 
     return
