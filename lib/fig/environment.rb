@@ -315,11 +315,11 @@ class Fig::Environment
       end
     end
 
-    @working_directory_maintainer.with_package_version(
+    @working_directory_maintainer.switch_to_package_version(
       base_package.name, base_package.version
-    ) do
-      @working_directory_maintainer.retrieve(variable_value, destination_path)
-    end
+    )
+
+    @working_directory_maintainer.retrieve(variable_value, destination_path)
 
     return destination_path
   end

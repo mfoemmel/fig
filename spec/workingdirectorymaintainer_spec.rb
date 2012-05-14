@@ -35,35 +35,32 @@ describe 'WorkingDirectoryMaintainer' do
 
     # Retrieve files A and B
     r = Fig::WorkingDirectoryMaintainer.new(working_directory)
-    r.with_package_version('foo', '1.2.3') do
-      r.retrieve(source_foo, 'foo.txt')
-      r.retrieve(source_bar, 'bar.txt')
-      File.read(working_foo).should == 'FOO'
-      File.read(working_bar).should == 'BAR'
-    end
+    r.switch_to_package_version('foo', '1.2.3')
+    r.retrieve(source_foo, 'foo.txt')
+    r.retrieve(source_bar, 'bar.txt')
+    File.read(working_foo).should == 'FOO'
+    File.read(working_bar).should == 'BAR'
 
     # Retrieve files B and C for a different version
-    r.with_package_version('foo', '4.5.6') do
-      r.retrieve(source_bar, 'bar.txt')
-      r.retrieve(source_baz, 'baz.txt')
-      File.read(working_bar).should == 'BAR'
-      File.read(working_baz).should == 'BAZ'
-      File.exist?(working_foo).should == false
-    end
+    r.switch_to_package_version('foo', '4.5.6')
+    r.retrieve(source_bar, 'bar.txt')
+    r.retrieve(source_baz, 'baz.txt')
+    File.read(working_bar).should == 'BAR'
+    File.read(working_baz).should == 'BAZ'
+    File.exist?(working_foo).should == false
 
     # Save and reload
     r.prepare_for_shutdown(:purged_unused_packages)
     r = Fig::WorkingDirectoryMaintainer.new(working_directory)
 
     # Switch back to original version
-    r.with_package_version('foo', '1.2.3') do
-      r.retrieve(source_foo, 'foo.txt')
-      r.retrieve(source_bar, 'bar.txt')
+    r.switch_to_package_version('foo', '1.2.3')
+    r.retrieve(source_foo, 'foo.txt')
+    r.retrieve(source_bar, 'bar.txt')
 
-      File.read(working_foo).should == 'FOO'
-      File.read(working_bar).should == 'BAR'
-      File.exist?(working_baz).should == false
-    end
+    File.read(working_foo).should == 'FOO'
+    File.read(working_bar).should == 'BAR'
+    File.exist?(working_baz).should == false
   end
 
   it 'preserves executable bit' do
@@ -72,12 +69,11 @@ describe 'WorkingDirectoryMaintainer' do
     FileUtils.chmod(0755, "#{source_directory}/executable")
 
     r = Fig::WorkingDirectoryMaintainer.new(working_directory)
-    r.with_package_version('foo', '1.2.3') do
-      r.retrieve("#{source_directory}/plain", 'plain')
-      r.retrieve("#{source_directory}/executable", 'executable.exe')
+    r.switch_to_package_version('foo', '1.2.3')
+    r.retrieve("#{source_directory}/plain", 'plain')
+    r.retrieve("#{source_directory}/executable", 'executable.exe')
 
-      File.stat(File.join(working_directory, 'plain')).executable?.should == false
-      File.stat(File.join(working_directory, 'executable.exe')).executable?.should == true
-    end
+    File.stat(File.join(working_directory, 'plain')).executable?.should == false
+    File.stat(File.join(working_directory, 'executable.exe')).executable?.should == true
   end
 end

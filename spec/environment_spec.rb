@@ -39,7 +39,8 @@ end
 
 def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   maintainer_double = double('working directory maintainer')
-  maintainer_double.stub(:with_package_version)
+  maintainer_double.stub(:switch_to_package_version)
+  maintainer_double.stub(:retrieve)
   environment =
     Fig::Environment.new(
       nil,

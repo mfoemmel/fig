@@ -24,7 +24,7 @@ class Fig::WorkingDirectoryMaintainer
     end
   end
 
-  def with_package_version(name, version)
+  def switch_to_package_version(name, version)
     @package_meta = @package_metadata_by_name[name]
     if @package_meta && @package_meta.current_version != version
       clean_up_package_files()
@@ -33,8 +33,6 @@ class Fig::WorkingDirectoryMaintainer
     if not @package_meta
       @package_meta = reset_package_metadata_with_version(name, version)
     end
-
-    yield
 
     return
   end
