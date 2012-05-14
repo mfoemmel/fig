@@ -1,7 +1,6 @@
 module Fig; end
 
-# Contains traces of file inclusions so that the user can track down which file
-# an error occurred in.
+# Keeps track of overrides and can produce package definition stack traces.
 class Fig::Backtrace
   attr_reader :overrides
 

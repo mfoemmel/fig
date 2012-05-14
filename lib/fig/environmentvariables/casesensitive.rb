@@ -4,7 +4,7 @@ module Fig; end;
 module EnvironmentVariables; end
 
 # Manager of a set of environment variables where the variable names are
-# case-insensitive, e.g. on *nix.
+# case-sensitive, e.g. on *nix.
 class Fig::EnvironmentVariables::CaseSensitive
   include Fig::EnvironmentVariables
 

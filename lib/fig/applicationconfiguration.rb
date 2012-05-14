@@ -1,7 +1,6 @@
 module Fig; end
 
-# Configuration for the Fig program, as opposed to the configuration in a
-# package.
+# Configuration for the Fig program, as opposed to a config in a package.
 class Fig::ApplicationConfiguration
   attr_reader :remote_repository_url
 

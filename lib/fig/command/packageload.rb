@@ -5,7 +5,7 @@ require 'fig/parser'
 module Fig; end
 class Fig::Command; end
 
-# Parts of the Command class related to loading of the primary Package object,
+# Parts of the Command class related to loading of the base Package object,
 # simply to keep the size of command.rb down.
 module Fig::Command::PackageLoad
   DEFAULT_FIG_FILE = 'package.fig'

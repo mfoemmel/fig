@@ -18,7 +18,7 @@ module Fig; end
 class Fig::Environment
   # Note: when reading this code, understand that the word "retrieve" is a
   # noun and not a verb, e.g. "retrieve path" means the value of a retrieve
-  # and not the action of retrieving a path.
+  # statement and not the action of retrieving a path.
 
   def initialize(repository, variables_override, working_directory_maintainer)
     @repository = repository

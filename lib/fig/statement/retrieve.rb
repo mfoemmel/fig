@@ -2,7 +2,8 @@ require 'fig/statement'
 
 module Fig; end
 
-# Specifies the destination to put a dependency into.
+# Specifies that files from a package should be copied into the current
+# directory when an environment variable has its value changed.
 class Fig::Statement::Retrieve < Fig::Statement
   attr_reader   :var, :path
 

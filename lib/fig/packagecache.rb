@@ -1,6 +1,6 @@
 module Fig; end
 
-# Simple double-level cache of Packages.
+# Simple double-level (name, version) cache of Packages.
 class Fig::PackageCache
   def initialize()
     @packages = {}

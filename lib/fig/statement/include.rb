@@ -4,8 +4,9 @@ require 'fig/statement'
 module Fig; end
 
 # Dual role: "include :configname" incorporates one configuration into another;
-# "include package[/version]" declares a dependency upon another package
-# (incorporating the "default" configuration from that package as well).
+# "include package[/version]" declares a dependency upon another package (with
+# incorporation of the "default" configuration from that other package if no
+# ":configname" is specified.
 class Fig::Statement::Include < Fig::Statement
   attr_reader :descriptor, :containing_package_descriptor
 

@@ -16,13 +16,14 @@ require 'fig/statement/configuration'
 require 'fig/userinputerror'
 require 'fig/workingdirectorymaintainer'
 
-# These are a breakout of parts of this class simply to keep the file size down.
+# The following are a break out of parts of this class simply to keep the file
+# size down.
 
 # You will need to look in this file for any stuff related to --list-* options.
 require 'fig/command/listing'
 
 # You will need to look in this file for any stuff related to loading the
-# primary Package object.
+# base Package object.
 require 'fig/command/packageload'
 
 module Fig; end
