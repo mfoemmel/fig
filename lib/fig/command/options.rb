@@ -410,6 +410,16 @@ Environment variables:
     end
 
     parser.on(
+      '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
+    ) do |var_val|
+      variable, value = var_val.split('=')
+      @options[:environment_statements] <<
+        Fig::Statement::Set.new(
+          nil, '--set option', variable, value.nil? ? '' : value
+        )
+    end
+
+    parser.on(
       '-i',
       '--include DESCRIPTOR',
       'include package/version:config specified in DESCRIPTOR in environment'
@@ -424,18 +434,28 @@ Environment variables:
           ),
           nil
         )
+
+      # We've never allowed versionless includes from the command-line. Hooray!
       statement.complain_if_version_missing()
+
       @options[:environment_statements] << statement
     end
 
     parser.on(
-      '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
-    ) do |var_val|
-      variable, value = var_val.split('=')
-      @options[:environment_statements] <<
-        Fig::Statement::Set.new(
-          nil, '--set option', variable, value.nil? ? '' : value
+      '--override DESCRIPTOR',
+      'dictate version of package as specified in DESCRIPTOR'
+    ) do |descriptor_string|
+      descriptor =
+        Fig::Statement::Override.parse_descriptor(
+          descriptor_string,
+          :validation_context => ' given in a --override option'
         )
+      statement =
+        Fig::Statement::Override.new(
+          nil, '--override option', descriptor.name, descriptor.version
+        )
+
+      @options[:environment_statements] << statement
     end
 
     return

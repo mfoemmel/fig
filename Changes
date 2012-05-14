@@ -28,6 +28,8 @@ v0.1.xxx
     No changes to existing (functioning) package.fig files will be necessary.
     In fact, this will fix some that didn't work due to versionless includes.
 
+  - You can now specify overrides on the command-line using "--override".
+
   - Includes the Fig version in the comments in published .fig files.
 
   Bug fixes:

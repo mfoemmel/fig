@@ -100,68 +100,87 @@ describe 'Fig' do
         exit_code.should_not == 0
       end
 
-      it 'allows single and multiple override' do
-        [3,4,5].each do |point_ver|   # Publish some versions of foo
+      describe 'overrides' do
+        before(:each) do
+          [3, 4, 5, 'command-line'].each do |point_ver|
+            input = <<-END
+              config default
+                set FOO=foo-v1.2.#{point_ver}
+              end
+            END
+            fig("--publish foo/1.2.#{point_ver}", input)
+          end
+
+          [0,1].each do |point_ver|
+            input = <<-END
+              config default
+                set BLAH=bla20#{point_ver}
+              end
+            END
+            fig("--publish blah/2.0.#{point_ver}", input)
+          end
+
           input = <<-END
             config default
-              set FOO=foo12#{point_ver}
+              include :nondefault
+            end
+            config nondefault
+              include foo/1.2.3
+              include blah/2.0.0
             end
           END
-          fig("--publish foo/1.2.#{point_ver}", input)
-        end
+          fig('--publish bar/4.5.6', input)
 
-        [0,1].each do |point_ver|    # Publish some versions of blah
+          input = <<-END
+            # Multiple overrides will work for 'default', even if
+            # indirectly specified.
+            config default
+              include :nondefault
+            end
+            config nondefault
+              include foo/1.2.4
+              include blah/2.0.1
+            end
+          END
+          fig('--publish baz/7.8.9', input)
+
           input = <<-END
             config default
-              set BLAH=bla20#{point_ver}
+              include foo/1.2.5
             end
           END
-          fig("--publish blah/2.0.#{point_ver}", input)
+          fig('--publish cat/10.11.12', input)
+
+          input = <<-END
+            config default
+              include bar/4.5.6
+
+              # Description of "multiple overrides" below out of date, however
+              # we need to ensure we don't break old package.fig files. Thus,
+              # we leave override statements on the same line as the include
+              # statements because overrides used to be part of include
+              # statements instead of being independent.
+
+              # Demonstrates the syntax for how a package overrides multiple
+              # dependencies (assuming the dependencies are resolved in a
+              # 'default' config section).
+              include baz/7.8.9:default override foo/1.2.3 override blah/2.0.0
+              include cat/10.11.12 override foo/1.2.3
+            end
+          END
+          fig('--publish top/1', input)
         end
 
-        input = <<-END
-          config default
-            include :nondefault
-          end
-          config nondefault
-            include foo/1.2.3
-            include blah/2.0.0
-          end
-        END
-        fig('--publish bar/4.5.6', input)
+        it 'work from a .fig file' do
+          fig('--update --include top/1 --get FOO')[0].should == 'foo-v1.2.3'
+        end
 
-        input = <<-END
-          # Multiple overrides will work for 'default', even if
-          # indirectly specified.
-          config default
-            include :nondefault
-          end
-          config nondefault
-            include foo/1.2.4
-            include blah/2.0.1
-          end
-        END
-        fig('--publish baz/7.8.9', input)
-
-        input = <<-END
-          config default
-            include foo/1.2.5
-          end
-        END
-        fig('--publish cat/10.11.12', input)
-
-        input = <<-END
-          config default
-            include bar/4.5.6
-            # Demonstrates the syntax for how a package overrides multiple dependencies
-            # (assuming the dependencies are resolved in a 'default' config section)
-            include baz/7.8.9:default override foo/1.2.3 override blah/2.0.0
-            include cat/10.11.12 override foo/1.2.3
-          end
-        END
-        fig('--publish top/1', input)
-
-        fig('--update --include top/1 --get FOO')[0].should == 'foo123'
+        it 'work from the command-line' do
+          fig(
+            '--update --include top/1 --override foo/1.2.command-line --get FOO'
+          )[0].should ==
+            'foo-v1.2.command-line'
+        end
       end
 
       it 'should complain if you publish without a package descriptor' do

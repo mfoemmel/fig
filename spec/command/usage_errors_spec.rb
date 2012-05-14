@@ -161,6 +161,39 @@ describe 'Fig' do
       end
     end
 
+    it %q<prints error when --include is specified without a package version> do
+      (out, err, exitstatus) = fig(
+          '--include package-without-version',
+          :no_raise_on_error => true
+        )
+      exitstatus.should_not == 0
+      err.should =~ %r< package-without-version >x
+      err.should =~ %r<no version specified>i
+      out.should == ''
+    end
+
+    it %q<prints error when --override is specified without a package version> do
+      (out, err, exitstatus) = fig(
+          '--override package-without-version',
+          :no_raise_on_error => true
+        )
+      exitstatus.should_not == 0
+      err.should =~ %r< package-without-version >x
+      err.should =~ %r<version required>i
+      out.should == ''
+    end
+
+    it %q<prints error when --override is specified with a package config> do
+      (out, err, exitstatus) = fig(
+          '--override package/version:config-should-not-be-here',
+          :no_raise_on_error => true
+        )
+      exitstatus.should_not == 0
+      err.should =~ %r< package/version:config-should-not-be-here >x
+      err.should =~ %r<config forbidden>i
+      out.should == ''
+    end
+
     describe %q<refuses to publish> do
       it %q<a package named "_meta"> do
         (out, err, exitstatus) =
