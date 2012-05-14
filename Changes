@@ -2,6 +2,35 @@ v0.1.xxx
 
   Backwards incompatibilities:
 
+  - --set and --append command-line options now take priority over package.fig
+    files and --include options are now processed after any "include"
+    statements.
+
+    Previously, "fig foo/1.2.3 --set SET=command-line --append
+    APPEND=command-line --include command-line/1.2.3" was equivalent to
+
+      config default
+        set SET=command-line
+        add APPEND=command-line
+        include command-line/1.2.3
+
+        include foo/1.2.3
+      end
+
+    Now it is equivalent to
+
+      config default
+        include foo/1.2.3
+
+        set SET=command-line
+        add APPEND=command-line
+        include command-line/1.2.3
+      end
+
+    (It really is like that: a package is synthesized with statements
+    equivalent to the command-line options and that package is run through the
+    whole process.)
+
   - Retrieve variable names can no longer contain "@", "/", or ".".  Since
     environment variable statements only allow alphanumerics and underscore in
     the variable names, any retrieve variable with those characters in its name
