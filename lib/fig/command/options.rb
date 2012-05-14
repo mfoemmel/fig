@@ -142,8 +142,8 @@ Environment variables:
     return @options[:environment_statements]
   end
 
-  def package_config_file()
-    return @options[:package_config_file]
+  def package_definition_file()
+    return @options[:package_definition_file]
   end
 
   def publish?()
@@ -378,18 +378,18 @@ Environment variables:
       @options[:config] = config
     end
 
-    @options[:package_config_file] = nil
+    @options[:package_definition_file] = nil
     parser.on(
       '--file FILE',
       %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
-      @options[:package_config_file] = path
+      @options[:package_definition_file] = path
     end
 
     parser.on(
       '--no-file', 'ignore package.fig file in current directory'
     ) do |path|
-      @options[:package_config_file] = :none
+      @options[:package_definition_file] = :none
     end
 
     return

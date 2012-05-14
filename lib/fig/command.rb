@@ -244,7 +244,7 @@ class Fig::Command
   # The one exception to this rule is when we are publishing, which should
   # already have been invoked by the time this is called.
   def ensure_descriptor_and_file_were_not_both_specified()
-    file = @options.package_config_file()
+    file = @options.package_definition_file()
 
     # If the user specified --no-file, even though it's kind of superfluous,
     # we'll let it slide because the user doesn't think that any file will be

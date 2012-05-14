@@ -12,7 +12,7 @@ module Fig::Command::PackageLoad
 
   private
 
-  def read_in_package_config_file(config_file)
+  def read_in_package_definition_file(config_file)
     if File.exist?(config_file)
       @package_loaded_from_path = config_file
 
@@ -22,23 +22,23 @@ module Fig::Command::PackageLoad
     end
   end
 
-  def load_package_config_file_contents()
-    package_config_file = @options.package_config_file()
+  def load_package_definition_file_contents()
+    package_definition_file = @options.package_definition_file()
 
-    if package_config_file == :none
+    if package_definition_file == :none
       return nil
-    elsif package_config_file == '-'
+    elsif package_definition_file == '-'
       @package_loaded_from_path = '<standard input>'
 
       return $stdin.read
-    elsif package_config_file.nil?
+    elsif package_definition_file.nil?
       if File.exist?(DEFAULT_FIG_FILE)
         @package_loaded_from_path = DEFAULT_FIG_FILE
 
         return File.read(DEFAULT_FIG_FILE)
       end
     else
-      return read_in_package_config_file(package_config_file)
+      return read_in_package_definition_file(package_definition_file)
     end
 
     return
@@ -74,7 +74,7 @@ module Fig::Command::PackageLoad
     return
   end
 
-  def parse_package_config_file(config_raw_text)
+  def parse_package_definition_file(config_raw_text)
     if config_raw_text.nil?
       # This package gets a free ride in terms of requiring a base config; we
       # synthesize it.
@@ -102,9 +102,9 @@ module Fig::Command::PackageLoad
   end
 
   def load_package_file()
-    config_raw_text = load_package_config_file_contents()
+    config_raw_text = load_package_definition_file_contents()
 
-    parse_package_config_file(config_raw_text)
+    parse_package_definition_file(config_raw_text)
   end
 
   def load_package_object()
