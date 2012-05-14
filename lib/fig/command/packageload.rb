@@ -82,7 +82,14 @@ module Fig::Command::PackageLoad
         nil,
         nil,
         '.',
-        [ Fig::Statement::Configuration.new(nil, nil, base_config(), []) ]
+        [
+          Fig::Statement::Configuration.new(
+            nil,
+            %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+            base_config(),
+            []
+          )
+        ]
       )
       return
     end
@@ -131,7 +138,7 @@ module Fig::Command::PackageLoad
     configuration_statement =
       Fig::Statement::Configuration.new(
         nil,
-        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         Fig::Package::DEFAULT_CONFIG,
         [@options.environment_statements(), include_statement].flatten()
       )

@@ -404,7 +404,9 @@ Environment variables:
     ) do |var_val|
       variable, value = var_val.split('=')
       @options[:environment_statements] <<
-        Fig::Statement::Path.new(nil, nil, variable, value.nil? ? '' : value)
+        Fig::Statement::Path.new(
+          nil, '--append option', variable, value.nil? ? '' : value
+        )
     end
 
     parser.on(
@@ -415,7 +417,7 @@ Environment variables:
       statement =
         Fig::Statement::Include.new(
           nil,
-          nil,
+          '--include option',
           Fig::Statement::Include.parse_descriptor(
             descriptor_string,
             :validation_context => ' given in a --include option'
@@ -431,7 +433,9 @@ Environment variables:
     ) do |var_val|
       variable, value = var_val.split('=')
       @options[:environment_statements] <<
-        Fig::Statement::Set.new(nil, nil, variable, value.nil? ? '' : value)
+        Fig::Statement::Set.new(
+          nil, '--set option', variable, value.nil? ? '' : value
+        )
     end
 
     return
@@ -443,7 +447,8 @@ Environment variables:
       '--archive PATH',
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] << Fig::Statement::Archive.new(nil, nil, path)
+      @options[:archives] <<
+        Fig::Statement::Archive.new(nil, '--archive option', path)
     end
 
     @options[:resources] =[]
@@ -451,7 +456,8 @@ Environment variables:
       '--resource PATH',
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] << Fig::Statement::Resource.new(nil, nil, path)
+      @options[:resources] <<
+        Fig::Statement::Resource.new(nil, '--resource option', path)
     end
 
     return
