@@ -1,5 +1,6 @@
 require 'optparse'
 
+require 'fig/command/optionerror'
 require 'fig/package'
 require 'fig/packagedescriptor'
 require 'fig/statement/archive'
@@ -7,7 +8,6 @@ require 'fig/statement/include'
 require 'fig/statement/path'
 require 'fig/statement/resource'
 require 'fig/statement/set'
-require 'fig/userinputerror'
 
 module Fig; end
 class Fig::Command; end
@@ -243,10 +243,14 @@ Environment variables:
 
     begin
       parser.parse!(argv)
+    rescue OptionParser::InvalidArgument => error
+      raise Fig::Command::OptionError.new(
+        %Q<Invalid value for #{error.args[0]}: "#{error.args[1]}".>
+      )
     rescue OptionParser::MissingArgument => error
-      $stderr.puts "Please provide the #{error}."
-      @exit_code = 1
-      return
+      raise Fig::Command::OptionError.new(
+        "Please provide a value for #{error.args[0]}."
+      )
     end
 
     if not exit_code.nil?

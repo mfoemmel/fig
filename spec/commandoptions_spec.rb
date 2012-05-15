@@ -1,0 +1,61 @@
+require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+
+require 'fig/command/optionerror'
+require 'fig/command/options'
+
+describe 'Command::Options' do
+  describe %q<complains if a value isn't given to> do
+    [
+      %w< get >,                          # Queries
+      %w< set append include override >,  # Environment
+      %w< archive resource >,             # Package contents
+      %w< file config log-level figrc >   # Configuration
+    ].flatten.each do
+      |option_name|
+
+      describe "--#{option_name}" do
+        it 'when it is the last option on the command-line' do
+          expect {
+            Fig::Command::Options.new(["--#{option_name}"])
+          }.to raise_error(
+            Fig::Command::OptionError,
+            "Please provide a value for --#{option_name}."
+          )
+        end
+
+        describe 'when it is followed by' do
+          # One long option example and one short option example.
+          %w< --version -c >.each do
+            |following_option|
+
+            it following_option do
+              expect {
+                Fig::Command::Options.new(["--#{option_name}", following_option])
+              }.to raise_error(
+                Fig::Command::OptionError,
+                %Q<Invalid value for --#{option_name}: "#{following_option}".>
+              )
+            end
+          end
+        end
+      end
+    end
+  end
+
+  describe '--file' do
+    {
+      'a'   => 'a single character',
+      'x-'  => 'a name without a hyphen at the front',
+      '-'   => 'the stdin indicator'
+    }.each do
+      |option_value, description|
+
+      it %Q<allows #{description} ("#{option_value}") as a value> do
+        options =
+          Fig::Command::Options.new(['--file', option_value])
+        options.package_definition_file.should == option_value
+      end
+    end
+  end
+
+end
