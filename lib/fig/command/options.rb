@@ -70,12 +70,7 @@ Environment variables:
   attr_reader :exit_code
 
   def initialize(argv)
-    begin
-      process_command_line(argv)
-    rescue Fig::UserInputError => error
-      $stderr.puts error.to_s
-      @exit_code = 1
-    end
+    process_command_line(argv)
   end
 
   def archives()
@@ -230,6 +225,11 @@ Environment variables:
 
   private
 
+  # Note that OptionParser insist that the regex match the entire value, not
+  # just matches the regex in general.  In effect, OptionParser is wrapping the
+  # regex with "\A" and "\z".
+  STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >x
+
   def process_command_line(argv)
     argv = argv.clone
     strip_shell_command(argv)
@@ -289,6 +289,7 @@ Environment variables:
     parser.on(
       '-g',
       '--get VARIABLE',
+      STARTS_WITH_NON_HYPHEN,
       'print value of environment variable VARIABLE'
     ) do |get|
       @options[:get] = get
@@ -369,10 +370,21 @@ Environment variables:
     return
   end
 
+  FILE_OPTION_VALUE_PATTERN =
+    %r<
+      \A
+      (?:
+          -         # Solely a hyphen, to allow for stdin
+        | [^-] .*   # or anything not starting with a hyphen.
+      )
+      \z
+    >x
+
   def set_up_package_configuration_source(parser)
     parser.on(
       '-c',
       '--config CONFIG',
+      STARTS_WITH_NON_HYPHEN,
       %q<apply configuration CONFIG, default is "default">
     ) do |config|
       @options[:config] = config
@@ -381,6 +393,7 @@ Environment variables:
     @options[:package_definition_file] = nil
     parser.on(
       '--file FILE',
+      FILE_OPTION_VALUE_PATTERN,
       %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
       @options[:package_definition_file] = path
@@ -400,6 +413,7 @@ Environment variables:
     parser.on(
       '-p',
       '--append VARIABLE=VALUE',
+      STARTS_WITH_NON_HYPHEN,
       'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |var_val|
       variable, value = var_val.split('=')
@@ -410,7 +424,10 @@ Environment variables:
     end
 
     parser.on(
-      '-s', '--set VARIABLE=VALUE', 'set environment variable VARIABLE to VALUE'
+      '-s',
+      '--set VARIABLE=VALUE',
+      STARTS_WITH_NON_HYPHEN,
+      'set environment variable VARIABLE to VALUE'
     ) do |var_val|
       variable, value = var_val.split('=')
       @options[:environment_statements] <<
@@ -422,6 +439,7 @@ Environment variables:
     parser.on(
       '-i',
       '--include DESCRIPTOR',
+      STARTS_WITH_NON_HYPHEN,
       'include package/version:config specified in DESCRIPTOR in environment'
     ) do |descriptor_string|
       statement =
@@ -443,6 +461,7 @@ Environment variables:
 
     parser.on(
       '--override DESCRIPTOR',
+      STARTS_WITH_NON_HYPHEN,
       'dictate version of package as specified in DESCRIPTOR'
     ) do |descriptor_string|
       descriptor =
@@ -465,6 +484,7 @@ Environment variables:
     @options[:archives] = []
     parser.on(
       '--archive PATH',
+      STARTS_WITH_NON_HYPHEN,
       'include PATH archive in package (when using --publish)'
     ) do |path|
       @options[:archives] <<
@@ -474,6 +494,7 @@ Environment variables:
     @options[:resources] =[]
     parser.on(
       '--resource PATH',
+      STARTS_WITH_NON_HYPHEN,
       'include PATH resource in package (when using --publish)'
     ) do |path|
       @options[:resources] <<
@@ -519,7 +540,9 @@ Environment variables:
 
   def set_up_program_configuration(parser)
     parser.on(
-      '--figrc PATH', 'add PATH to configuration used for Fig'
+      '--figrc PATH',
+      STARTS_WITH_NON_HYPHEN,
+      'add PATH to configuration used for Fig'
     ) do |path|
       @options[:figrc] = path
     end
@@ -527,7 +550,9 @@ Environment variables:
     parser.on('--no-figrc', 'ignore ~/.figrc') { @options[:no_figrc] = true }
 
     parser.on(
-      '--log-config PATH', 'use PATH file as configuration for Log4r'
+      '--log-config PATH',
+      STARTS_WITH_NON_HYPHEN,
+      'use PATH file as configuration for Log4r'
     ) do |path|
       @options[:log_config] = path
     end

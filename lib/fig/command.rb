@@ -61,7 +61,13 @@ class Fig::Command
   end
 
   def run_fig(argv)
-    @options = Fig::Command::Options.new(argv)
+    begin
+      @options = Fig::Command::Options.new(argv)
+    rescue Fig::UserInputError => error
+      $stderr.puts error.to_s # Logging isn't set up yet.
+      return 1
+    end
+
     if not @options.exit_code.nil?
       return @options.exit_code
     end
