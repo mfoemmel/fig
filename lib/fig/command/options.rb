@@ -25,6 +25,7 @@ Usage:
       [--resource PATH]
       [--archive  PATH]
       [--include  DESCRIPTOR]
+      [--override DESCRIPTOR]
       [--force]
       [...]
 
