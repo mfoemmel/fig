@@ -598,12 +598,12 @@ Environment variables:
   def new_variable_statement(option, name_value, statement_class)
     variable, value = name_value.split("=")
 
-    if variable !~ statement_class.const_get(:NAME_REGEX, false)
+    if variable !~ statement_class.const_get(:NAME_REGEX)
       raise_invalid_argument(option, name_value)
     end
 
     value = '' if value.nil?
-    if value !~ statement_class.const_get(:VALUE_REGEX, false)
+    if value !~ statement_class.const_get(:VALUE_REGEX)
       raise_invalid_argument(option, name_value)
     end
 
