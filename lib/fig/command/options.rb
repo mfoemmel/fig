@@ -596,7 +596,7 @@ Environment variables:
   end
 
   def new_variable_statement(option, name_value, statement_class)
-    variable, value = name_value.split(?=)
+    variable, value = name_value.split("=")
 
     if variable !~ statement_class.const_get(:NAME_REGEX, false)
       raise_invalid_argument(option, name_value)
