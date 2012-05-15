@@ -103,21 +103,11 @@ describe 'Fig' do
       describe 'overrides' do
         before(:each) do
           [3, 4, 5, 'command-line'].each do |point_ver|
-            input = <<-END
-              config default
-                set FOO=foo-v1.2.#{point_ver}
-              end
-            END
-            fig("--publish foo/1.2.#{point_ver}", input)
+            fig("--publish foo/1.2.#{point_ver} --set FOO=foo-v1.2.#{point_ver}")
           end
 
           [0,1].each do |point_ver|
-            input = <<-END
-              config default
-                set BLAH=bla20#{point_ver}
-              end
-            END
-            fig("--publish blah/2.0.#{point_ver}", input)
+            fig("--publish blah/2.0.#{point_ver} --set BLAH=bla20#{point_ver}")
           end
 
           input = <<-END
