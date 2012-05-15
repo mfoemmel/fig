@@ -8,8 +8,6 @@ class Fig::Statement::Set < Fig::Statement
 
   NAME_REGEX         = %r< \b \w+ \b >x
   VALUE_REGEX        = %r< \S* >x
-  COMMAND_LINE_REGEX =
-    %r< \A (?<name> #{NAME_REGEX} ) = (?<value> #{VALUE_REGEX} ) \z >x
 
   def initialize(line_column, source_description, name, value)
     super(line_column, source_description)
