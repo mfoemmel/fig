@@ -142,7 +142,7 @@ class Fig::Repository
     content = publish_package_content_and_derive_dot_fig_contents(
       package_statements, descriptor, local_dir, local_only
     )
-    @operating_system.write(fig_file, content.join("\n").strip)
+    @operating_system.write(fig_file, content)
 
     if not local_only
       @operating_system.upload(
@@ -459,7 +459,8 @@ class Fig::Repository
       package_statements, descriptor, local_dir, local_only
     )
 
-    return [header_strings, deparsed_statement_strings].flatten()
+    statement_strings = [header_strings, deparsed_statement_strings].flatten()
+    return statement_strings.join("\n").gsub(/\n{3,}/, "\n\n").strip() + "\n"
   end
 
   def derive_package_metadata_comments(package_statements, descriptor)
@@ -469,6 +470,21 @@ class Fig::Repository
       package_statements.select { |statement| statement.is_asset? }
     asset_strings =
       asset_statements.collect { |statement| statement.unparse('#    ') }
+    asset_summary = nil
+
+    if asset_strings.empty?
+      asset_summary = [
+        %q<#>,
+        %q<# There were no asset statements in the unpublished package definition.>
+      ]
+    else
+      asset_summary = [
+        %q<#>,
+        %q<# Original asset statements: >,
+        %q<#>,
+        asset_strings
+      ]
+    end
 
     return [
       %Q<# Publishing information for #{descriptor.to_string()}:>,
@@ -478,10 +494,7 @@ class Fig::Repository
       %Q<#     Host: #{Socket.gethostname()}>,
       %Q<#     Args: "#{ARGV.join %q[", "]}">,
       %Q<#     Fig:  v#{Fig::Command.get_version()}>,
-      %q<#>,
-      %q<# Original asset statements: >,
-      %q<#>,
-      asset_strings,
+      asset_summary,
       %Q<\n>,
     ].flatten()
   end
