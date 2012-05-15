@@ -7,7 +7,7 @@ require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
 
-describe 'Fig::Statement::Configuration' do
+describe 'Statement::Configuration' do
   it 'moves override statements to the front of the set of statements' do
     override_c = Fig::Statement::Override.new(nil, nil, 'C', 'version')
     override_b = Fig::Statement::Override.new(nil, nil, 'B', 'version')
