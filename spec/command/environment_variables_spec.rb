@@ -31,11 +31,6 @@ describe 'Fig' do
 
     it 'appends variable from command line' do
       fig('--append PATH=foo --get PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
-
-      fig('--append NO_VALUE_WITH_EQUALS= --list-variables')[0].should ==
-        'NO_VALUE_WITH_EQUALS='
-      fig('--append NO_VALUE_WITHOUT_EQUALS --list-variables')[0].should ==
-        'NO_VALUE_WITHOUT_EQUALS='
     end
 
     it 'appends variable from fig file' do

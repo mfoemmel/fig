@@ -3,7 +3,27 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fig/command/optionerror'
 require 'fig/command/options'
 
+  def check_environment_variable_option(option_name)
+    it 'complains if there is no variable name' do
+      expect_invalid_value_error(option_name, '=whatever')
+    end
+
+    it 'accepts a simple variable value' do
+      Fig::Command::Options.new(["--#{option_name}", 'variable=value'])
+      # no exception
+    end
+  end
+
 describe 'Command::Options' do
+  def expect_invalid_value_error(option_name, value)
+    expect {
+      Fig::Command::Options.new(["--#{option_name}", value])
+    }.to raise_error(
+      Fig::Command::OptionError,
+      %r<\AInvalid value for --#{option_name}: "#{Regexp.quote(value)}"[.]>
+    )
+  end
+
   describe %q<complains if a value isn't given to> do
     [
       %w< get >,                          # Queries
@@ -29,12 +49,7 @@ describe 'Command::Options' do
             |following_option|
 
             it following_option do
-              expect {
-                Fig::Command::Options.new(["--#{option_name}", following_option])
-              }.to raise_error(
-                Fig::Command::OptionError,
-                %Q<Invalid value for --#{option_name}: "#{following_option}".>
-              )
+              expect_invalid_value_error(option_name, following_option)
             end
           end
         end
@@ -58,4 +73,37 @@ describe 'Command::Options' do
     end
   end
 
+  describe '--set' do
+    check_environment_variable_option('set')
+
+    it 'allows the absence of an equals sign' do
+      Fig::Command::Options.new(%w< --set whatever >)
+      # no exception
+    end
+
+    it 'allows an empty value' do
+      Fig::Command::Options.new(%w< --set whatever= >)
+      # no exception
+    end
+  end
+
+  describe '--append' do
+    check_environment_variable_option('append')
+
+    it 'complains if there is no variable value' do
+      expect_invalid_value_error('append', 'whatever=')
+    end
+
+    %w[ ; : " < > | ].each do
+      |character|
+
+      it %Q<complains about a variable value containing "#{character}"> do
+        expect_invalid_value_error('append', "variable=#{character}")
+      end
+    end
+
+    it 'complains about a variable value containing a space character' do
+      expect_invalid_value_error('append', 'variable= stuff')
+    end
+  end
 end

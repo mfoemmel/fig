@@ -7,8 +7,8 @@ module Fig; end
 class Fig::Statement::Path < Fig::Statement
   attr_reader :name, :value
 
-  NAME_REGEX         = %r< \b \w+ \b >x
-  VALUE_REGEX        = %r< [^;:"<>|\s]+ >x
+  NAME_REGEX         = %r< \A \w+ \z >x
+  VALUE_REGEX        = %r< \A [^;:"<>|\s]+ \z >x
 
   def initialize(line_column, source_description, name, value)
     super(line_column, source_description)

@@ -42,7 +42,7 @@ Usage:
 
 A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",
 "foo/1.2.3", and "foo/1.2.3:default". Whether ":<config>" and "/<version>" are
-required or allowed is dependent upon what your are doing
+required or allowed is dependent upon what your are doing.
 
 Standard options (represented as "[...]" above):
 
@@ -231,6 +231,13 @@ Environment variables:
   # regex with "\A" and "\z".
   STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >x
 
+  ARGUMENT_DESCRIPTION = {
+    '--set'    =>
+      %q<The value must look like "NAME=VALUE", though VALUE can be empty.>,
+    '--append' =>
+      %q[The value must look like "NAME=VALUE". VALUE cannot contain any of ";:<>|", double quotes, or whitespace.],
+  }
+
   def process_command_line(argv)
     argv = argv.clone
     strip_shell_command(argv)
@@ -245,9 +252,7 @@ Environment variables:
     begin
       parser.parse!(argv)
     rescue OptionParser::InvalidArgument => error
-      raise Fig::Command::OptionError.new(
-        %Q<Invalid value for #{error.args[0]}: "#{error.args[1]}".>
-      )
+      raise_invalid_argument(error.args[0], error.args[1])
     rescue OptionParser::MissingArgument => error
       raise Fig::Command::OptionError.new(
         "Please provide a value for #{error.args[0]}."
@@ -267,6 +272,19 @@ Environment variables:
     derive_descriptor(argv.first)
 
     return
+  end
+
+  def raise_invalid_argument(option, value)
+    description = ARGUMENT_DESCRIPTION[option]
+    if description.nil?
+      description = ''
+    else
+      description = ' ' + description
+    end
+
+    raise Fig::Command::OptionError.new(
+      %Q<Invalid value for #{option}: "#{value}".#{description}>
+    )
   end
 
   def new_parser
@@ -420,12 +438,9 @@ Environment variables:
       '--append VARIABLE=VALUE',
       STARTS_WITH_NON_HYPHEN,
       'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
-    ) do |var_val|
-      variable, value = var_val.split('=')
+    ) do |name_value|
       @options[:environment_statements] <<
-        Fig::Statement::Path.new(
-          nil, '--append option', variable, value.nil? ? '' : value
-        )
+        new_variable_statement('--append', name_value, Fig::Statement::Path)
     end
 
     parser.on(
@@ -433,12 +448,9 @@ Environment variables:
       '--set VARIABLE=VALUE',
       STARTS_WITH_NON_HYPHEN,
       'set environment variable VARIABLE to VALUE'
-    ) do |var_val|
-      variable, value = var_val.split('=')
+    ) do |name_value|
       @options[:environment_statements] <<
-        Fig::Statement::Set.new(
-          nil, '--set option', variable, value.nil? ? '' : value
-        )
+        new_variable_statement('--set', name_value, Fig::Statement::Set)
     end
 
     parser.on(
@@ -581,6 +593,23 @@ Environment variables:
     end
 
     return
+  end
+
+  def new_variable_statement(option, name_value, statement_class)
+    variable, value = name_value.split(?=)
+
+    if variable !~ statement_class.const_get(:NAME_REGEX, false)
+      raise_invalid_argument(option, name_value)
+    end
+
+    value = '' if value.nil?
+    if value !~ statement_class.const_get(:VALUE_REGEX, false)
+      raise_invalid_argument(option, name_value)
+    end
+
+    return statement_class.new(
+      nil, "#{option} option", variable, value.nil? ? '' : value
+    )
   end
 
   def derive_descriptor(raw_string)
