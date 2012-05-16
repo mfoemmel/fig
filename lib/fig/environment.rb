@@ -57,12 +57,13 @@ class Fig::Environment
     name = package.name
 
     if get_package(name)
-      if (name)
-        Fig::Logging.fatal %Q<There is already a package with the name "#{name}".>
-      else
-        Fig::Logging.fatal %q<There is already an unnamed package.>
-      end
-      raise Fig::RepositoryError.new
+      raise_repository_error(
+        name.nil? \
+          ? %Q<There is already a package with the name "#{name}".> \
+          : %q<There is already an unnamed package.>,
+        nil,
+        package
+      )
     end
 
     @packages[name] = package
@@ -96,7 +97,7 @@ class Fig::Environment
 
   def execute_shell(command)
     @variables.with_environment do
-      yield command.map{|arg| expand_command_line_argument(arg)}
+      yield command.map{|arg| expand_command_line_argument(arg, nil, nil)}
     end
 
     return
@@ -118,7 +119,7 @@ class Fig::Environment
 
     command_statement = package[config_name].command_statement
     if command_statement
-      execute_command(command_statement, args, package, &block)
+      execute_command(command_statement, args, package, nil, &block)
     else
       raise Fig::UserInputError.new(
         %Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>
@@ -134,9 +135,9 @@ class Fig::Environment
   def apply_config_statement(base_package, statement, backtrace)
     case statement
     when Fig::Statement::Path
-      prepend_variable(base_package, statement.name, statement.value)
+      prepend_variable(base_package, statement.name, statement.value, backtrace)
     when Fig::Statement::Set
-      set_variable(base_package, statement.name, statement.value)
+      set_variable(base_package, statement.name, statement.value, backtrace)
     when Fig::Statement::Include
       include_config(base_package, statement.descriptor, backtrace)
     when Fig::Statement::Override
@@ -196,9 +197,11 @@ class Fig::Environment
 
   private
 
-  def set_variable(base_package, name, value)
+  def set_variable(base_package, name, value, backtrace)
     expanded_value =
-      expand_variable_as_path_and_process_retrieves(name, value, base_package)
+      expand_variable_as_path_and_process_retrieves(
+        name, value, base_package, backtrace
+      )
     @variables[name] = expanded_value
 
     if Fig::Logging.debug?
@@ -214,9 +217,11 @@ class Fig::Environment
     return
   end
 
-  def prepend_variable(base_package, name, value)
+  def prepend_variable(base_package, name, value, backtrace)
     expanded_value =
-      expand_variable_as_path_and_process_retrieves(name, value, base_package)
+      expand_variable_as_path_and_process_retrieves(
+        name, value, base_package, backtrace
+      )
     @variables.prepend_variable(name, expanded_value)
 
     if Fig::Logging.debug?
@@ -236,8 +241,9 @@ class Fig::Environment
     package = get_package(name)
     if package.nil?
       if not version
-        Fig::Logging.fatal "No version specified for #{name}."
-        raise Fig::RepositoryError.new
+        raise_repository_error(
+          "No version specified for #{name}.", backtrace, package
+        )
       end
 
       package = @repository.get_package(
@@ -246,14 +252,7 @@ class Fig::Environment
       package.backtrace = backtrace
       @packages[name] = package
     elsif version && version != package.version
-      string_handle = StringIO.new
-      backtrace.dump(string_handle) if backtrace
-      package.backtrace.dump(string_handle) if package.backtrace
-      stacktrace = string_handle.string
-      Fig::Logging.fatal                           \
-          "Version mismatch: #{name}" \
-        + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
-      raise Fig::RepositoryError.new
+      raise_repository_error("Version mismatch: #{name}", backtrace, package)
     end
 
     return package
@@ -268,33 +267,38 @@ class Fig::Environment
     return package.primary_config_name || Fig::Package::DEFAULT_CONFIG
   end
 
-  def execute_command(command_statement, args, package)
+  def execute_command(command_statement, args, package, backtrace)
     @variables.with_environment do
       argument =
         expand_command_line_argument(
-          "#{command_statement.command} #{args.join(' ')}"
+          "#{command_statement.command} #{args.join(' ')}", backtrace, package
         )
 
-      yield expand_at_signs_in_path(argument, package).split(' ')
+      yield expand_at_signs_in_path(argument, package, backtrace).split(' ')
     end
 
     return
   end
 
   def expand_variable_as_path_and_process_retrieves(
-    variable_name, variable_value, base_package
+    variable_name, variable_value, base_package, backtrace
   )
     return variable_value unless base_package && base_package.name
 
-    variable_value = expand_at_signs_in_path(variable_value, base_package)
+    variable_value =
+      expand_at_signs_in_path(variable_value, base_package, backtrace)
 
     return variable_value if not @retrieves.member?(variable_name)
 
-    return retrieve_files(variable_name, variable_value, base_package)
+    return retrieve_files(
+      variable_name, variable_value, base_package, backtrace
+    )
   end
 
-  def retrieve_files(variable_name, variable_value, base_package)
-    check_source_existence(variable_name, variable_value, base_package)
+  def retrieve_files(variable_name, variable_value, base_package, backtrace)
+    check_source_existence(
+      variable_name, variable_value, base_package, backtrace
+    )
 
     destination_path = nil
 
@@ -324,19 +328,22 @@ class Fig::Environment
     return destination_path
   end
 
-  def check_source_existence(variable_name, variable_value, base_package)
+  def check_source_existence(
+    variable_name, variable_value, base_package, backtrace
+  )
     return if File.exists?(variable_value) || File.symlink?(variable_value)
 
-    Fig::Logging.fatal(
-      %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>
+    raise_repository_error(
+      %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>,
+      backtrace,
+      base_package
     )
-    raise Fig::RepositoryError.new
   end
 
-  def expand_at_signs_in_path(path, base_package)
+  def expand_at_signs_in_path(path, base_package, backtrace)
     expanded_path =
       replace_at_signs_with_package_references(path, base_package)
-    check_for_bad_escape(expanded_path, path)
+    check_for_bad_escape(expanded_path, path, base_package, backtrace)
 
     return collapse_backslashes_for_escaped_at_signs(expanded_path)
   end
@@ -354,14 +361,14 @@ class Fig::Environment
     end
   end
 
-  def expand_command_line_argument(arg)
-    package_substituted = expand_named_package_references(arg)
-    check_for_bad_escape(package_substituted, arg)
+  def expand_command_line_argument(arg, backtrace, package)
+    package_substituted = expand_named_package_references(arg, backtrace)
+    check_for_bad_escape(package_substituted, arg, package, backtrace)
 
     return collapse_backslashes_for_escaped_at_signs(package_substituted)
   end
 
-  def expand_named_package_references(arg)
+  def expand_named_package_references(arg, backtrace)
     return arg.gsub(
       # TODO: Refactor package name regex into PackageDescriptor constant.
       %r<
@@ -375,8 +382,10 @@ class Fig::Environment
       package_name = $2
       package = get_package(package_name)
       if package.nil?
-        raise Fig::RepositoryError.new(
-          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>
+        raise_repository_error(
+          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>,
+          backtrace,
+          nil
         )
       end
       backslashes + package.directory
@@ -385,14 +394,14 @@ class Fig::Environment
 
   # The value is expected to have had any @ substitution already done, but
   # collapsing of escapes not done yet.
-  def check_for_bad_escape(substituted, original)
+  def check_for_bad_escape(substituted, original, package, backtrace)
     if substituted =~ %r<
       (?: ^ | [^\\])  # Start of line or non backslash
       (?: \\{2})*     # Even number of backslashes (including zero)
       ( \\ [^\\@] )   # A bad escape
     >x
-      raise Fig::RepositoryError.new(
-        %Q<Unknown escape "#{$1}" in "#{original}">
+      raise_repository_error(
+        %Q<Unknown escape "#{$1}" in "#{original}">, backtrace, package
       )
     end
 
@@ -410,5 +419,16 @@ class Fig::Environment
     retrieve_statement.referenced(true)
 
     return retrieve_statement.path.gsub(/ \[package\] /x, base_package.name)
+  end
+
+  def raise_repository_error(message, backtrace, package)
+    string_handle = StringIO.new
+    backtrace.dump(string_handle) if backtrace
+    package.backtrace.dump(string_handle) if package && package.backtrace
+    stacktrace = string_handle.string
+
+    raise Fig::RepositoryError.new(
+        message + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
+    )
   end
 end
