@@ -3,6 +3,7 @@ require 'treetop'
 require 'fig/grammar' # this is grammar.treetop, not grammar.rb.
 require 'fig/logging'
 require 'fig/packageparseerror'
+require 'fig/parserpackagebuildstate'
 require 'fig/repository'
 require 'fig/statement'
 require 'fig/urlaccesserror'
@@ -13,27 +14,6 @@ module Fig; end
 # Parses .fig files (wrapping the Treetop-generated parser object) and deals
 # with a few restrictions on them.
 class Fig::Parser
-  def self.node_location(node)
-    offset_from_start_of_file = node.interval.first
-    input = node.input
-
-    return [
-      input.line_of(offset_from_start_of_file),
-      input.column_of(offset_from_start_of_file)
-    ]
-  end
-
-  # This method is necessary due to ruby v1.8 not allowing array splat
-  # notation, i.e. Fig::Statement.position_description(*node_location(node),
-  # source_description)
-  def self.node_location_description(node, source_description)
-    location = node_location(node)
-
-    return Fig::Statement.position_description(
-      location[0], location[1], source_description
-    )
-  end
-
   def initialize(application_config, check_include_versions)
     # Fig::FigParser class is synthesized by Treetop.
     @treetop_parser         = Fig::FigParser.new
@@ -53,7 +33,10 @@ class Fig::Parser
       raise_parse_error(directory, source_description)
     end
 
-    package = result.to_package(descriptor, directory, source_description)
+    package = result.to_package(
+      directory,
+      Fig::ParserPackageBuildState.new(descriptor, source_description)
+    )
 
     check_for_bad_urls(package, descriptor)
     check_for_multiple_command_statements(package)
@@ -99,7 +82,7 @@ class Fig::Parser
     package.walk_statements do |statement|
       if statement.is_a?(Fig::Statement::Command)
         if command_processed == true
-          raise Fig::UserInputError.new(
+          raise Fig::PackageParseError.new(
             %Q<Found a second "command" statement within a "config" block#{statement.position_string()}.>
           )
         end
