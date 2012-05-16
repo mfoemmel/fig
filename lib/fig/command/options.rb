@@ -272,7 +272,7 @@ Environment variables:
       return
     end
 
-    derive_descriptor(argv.first)
+    derive_primary_descriptor(argv.first)
 
     return
   end
@@ -625,23 +625,16 @@ Environment variables:
   end
 
   def new_variable_statement(option, name_value, statement_class)
-    variable, value = name_value.split("=")
-
-    if variable !~ statement_class.const_get(:NAME_REGEX)
+    variable, value = statement_class.parse_name_value(name_value) {
       raise_invalid_argument(option, name_value)
-    end
+    }
 
-    value = '' if value.nil?
-    if value !~ statement_class.const_get(:VALUE_REGEX)
-      raise_invalid_argument(option, name_value)
-    end
-
-    return statement_class.new(
-      nil, "#{option} option", variable, value.nil? ? '' : value
-    )
+    return statement_class.new(nil, "#{option} option", variable, value)
   end
 
-  def derive_descriptor(raw_string)
+  # This will be the base package, unless we're publishing (in which case it's
+  # the name to publish to.
+  def derive_primary_descriptor(raw_string)
     return if raw_string.nil?
 
     @descriptor = Fig::PackageDescriptor.parse(

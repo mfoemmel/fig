@@ -2,6 +2,8 @@ module Fig; end
 
 # A statement within a package definition file (package.fig).
 class Fig::Statement
+  ENVIRONMENT_VARIABLE_NAME_REGEX = %r< \A \w+ \z >x
+
   attr_reader :line, :column, :source_description
 
   def self.position_description(line, column, source_description)
