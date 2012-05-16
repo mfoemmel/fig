@@ -17,14 +17,14 @@ describe 'Fig' do
       out.should == ''
     end
 
-    it %q<prints usage message when there's nothing to do and there's no package.fig file> do
+    it %q<prints message when there's nothing to do and there's no package.fig file> do
       (out, err, exitstatus) = fig('', :no_raise_on_error => true)
       exitstatus.should == 1
       err.should =~ /nothing to do/i
       out.should == ''
     end
 
-    it %q<prints usage message when there's nothing to do and there's a package.fig file> do
+    it %q<prints message when there's nothing to do and there's a package.fig file> do
       File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
         |handle|
         handle.print <<-END

@@ -49,7 +49,14 @@ describe 'Command::Options' do
             |following_option|
 
             it following_option do
-              expect_invalid_value_error(option_name, following_option)
+              expect {
+                Fig::Command::Options.new(
+                  ["--#{option_name}", following_option]
+                )
+              }.to raise_error(
+                Fig::Command::OptionError,
+                "Please provide a value for --#{option_name}."
+              )
             end
           end
         end
