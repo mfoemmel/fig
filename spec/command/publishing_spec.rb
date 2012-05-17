@@ -161,8 +161,17 @@ describe 'Fig' do
           fig('--publish top/1', input)
         end
 
-        it 'work from a .fig file' do
+        it 'work from a published .fig file' do
           fig('--update --include top/1 --get FOO')[0].should == 'foo-v1.2.3'
+        end
+
+        it 'work from a package published based upon a command-line' do
+          fig(
+            'command-line/some-version --no-file --publish --include top/1 --override foo/1.2.command-line'
+          )
+          fig(
+            '--no-file --include command-line/some-version --get FOO'
+          )[0].should == 'foo-v1.2.command-line'
         end
 
         it 'work from the command-line' do
