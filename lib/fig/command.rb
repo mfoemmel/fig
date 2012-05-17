@@ -323,7 +323,7 @@ class Fig::Command
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
       )
     else
-      load_package_file()
+      load_package_object_from_file()
       if not @package.statements.empty?
         publish_statements = @package.statements
       else
@@ -331,6 +331,8 @@ class Fig::Command
         return 1
       end
     end
+
+    apply_base_config_to_environment(:ignore_base_package)
 
     if @options.publish?
       Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."

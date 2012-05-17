@@ -14,7 +14,7 @@ module Fig; end
 
 # Manages the program's metadata, including packages and environment
 # variables, and sets things up for running commands (from "command"
-# statements in configuration files).
+# statements in definition files or from the command-line).
 class Fig::Environment
   # Note: when reading this code, understand that the word "retrieve" is a
   # noun and not a verb, e.g. "retrieve path" means the value of a retrieve
@@ -141,7 +141,7 @@ class Fig::Environment
     when Fig::Statement::Include
       include_config(base_package, statement.descriptor, backtrace)
     when Fig::Statement::Override
-      backtrace.add_override(statement.package_name(), statement.version())
+      backtrace.add_override(statement)
     when Fig::Statement::Command
       # Skip - has no effect on environment.
     else

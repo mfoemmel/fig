@@ -98,7 +98,7 @@ class Fig::Package
       if statement.is_a?(Fig::Statement::Include)
         descriptors << statement.resolved_dependency_descriptor(self, backtrace)
       elsif statement.is_a?(Fig::Statement::Override)
-        backtrace.add_override(statement.package_name(), statement.version())
+        backtrace.add_override(statement)
       end
     end
 

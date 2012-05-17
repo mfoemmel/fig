@@ -1,3 +1,5 @@
+require 'fig/repositoryerror'
+
 module Fig; end
 
 # Keeps track of overrides and can produce package definition stack traces.
@@ -10,11 +12,21 @@ class Fig::Backtrace
     @overrides  = {}
   end
 
-  def add_override(package_name, version)
+  def add_override(statement)
+    package_name = statement.package_name
     # Don't replace an existing override on the stack
-    return if get_override(package_name)
+    return if @parent && @parent.get_override(package_name)
 
-    @overrides[package_name] = version
+    new_version = statement.version
+    existing_version = @overrides[package_name]
+    if existing_version && existing_version != new_version
+      stacktrace = dump_to_string()
+      raise Fig::RepositoryError.new(
+        "Override #{package_name} version conflict (#{existing_version} vs #{new_version})#{statement.position_string}." + ( stacktrace.empty? ? '' : "\n#{stacktrace}" )
+      )
+    end
+
+    @overrides[package_name] = new_version
   end
 
   # Returns a version.
@@ -30,7 +42,7 @@ class Fig::Backtrace
   def dump(out)
     stack = []
     collect(stack)
-    i=0
+    i = 0
     for descriptor in stack
       indent=''
       i.times { indent += '  ' }
@@ -40,6 +52,12 @@ class Fig::Backtrace
   end
 
   protected
+
+  def dump_to_string()
+    string_handle = StringIO.new
+    dump(string_handle)
+    return string_handle.string
+  end
 
   def collect(stack)
     if @parent

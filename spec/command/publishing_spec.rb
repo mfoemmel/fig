@@ -18,6 +18,7 @@ describe 'Fig' do
         input = <<-END
           archive http://some-host/duplicate-archive.tar.gz
           archive http://some-other-host/duplicate-archive.tar.gz
+          config default end
         END
 
         out, err, exit_code =
@@ -34,6 +35,7 @@ describe 'Fig' do
 
           input = <<-END
             #{statement_type} http://some-host/#{Fig::Repository::RESOURCES_FILE}
+            config default end
           END
 
           out, err, exit_code =
@@ -85,7 +87,7 @@ describe 'Fig' do
         exit_code.should_not == 0
       end
 
-      it %q<should complain if remote repository isn't in the expected format version> do
+      it %q<complains if remote repository isn't in the expected format version> do
         input = <<-END
           config default
             set FOO=BAR
@@ -180,15 +182,28 @@ describe 'Fig' do
           )[0].should ==
             'foo-v1.2.command-line'
         end
+
+        it 'fail with conflicting versions' do
+          out, err, exit_code =
+            fig(
+              'package/version --no-file --publish --include top/1' +
+              ' --override some-package/1.2.3'                               +
+              ' --override some-package/1.2.4',
+              :no_raise_on_error => true
+            )
+          err.should =~ /version conflict/i
+          err.should =~ /\bsome-package\b/
+          exit_code.should_not == 0
+        end
       end
 
-      it 'should complain if you publish without a package descriptor' do
+      it 'complains if you publish without a package descriptor' do
         out, err, exit_code = fig('--publish', :no_raise_on_error => true)
         err.should =~ /Need to specify a package to publish/
         exit_code.should_not == 0
       end
 
-      it 'should complain if you publish without a package version' do
+      it 'complains if you publish without a package version' do
         out, err, exit_code = fig('--publish foo', :no_raise_on_error => true)
         err.should =~ /version required/i
         exit_code.should_not == 0

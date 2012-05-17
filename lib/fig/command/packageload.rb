@@ -60,37 +60,16 @@ module Fig::Command::PackageLoad
     end
 
     @environment.register_package(@package)
-
-    begin
-      @environment.apply_config(
-        synthesize_package_for_command_line_options(),
-        Fig::Package::DEFAULT_CONFIG,
-        nil
-      )
-    rescue Fig::NoSuchPackageConfigError => exception
-      make_no_such_package_exception_descriptive(exception)
-    end
+    apply_base_config_to_environment()
 
     return
   end
 
-  def parse_package_definition_file(config_raw_text)
-    if config_raw_text.nil?
+  def parse_package_definition_file(definition_text)
+    if definition_text.nil?
       # This package gets a free ride in terms of requiring a base config; we
       # synthesize it.
-      @package = Fig::Package.new(
-        nil,
-        nil,
-        '.',
-        [
-          Fig::Statement::Configuration.new(
-            nil,
-            %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-            base_config(),
-            []
-          )
-        ]
-      )
+      set_base_package_to_empty_synthetic_one()
       return
     end
 
@@ -102,21 +81,21 @@ module Fig::Command::PackageLoad
         ),
         '.',
         source_description,
-        config_raw_text
+        definition_text
       )
 
     return
   end
 
-  def load_package_file()
-    config_raw_text = load_package_definition_file_contents()
+  def load_package_object_from_file()
+    definition_text = load_package_definition_file_contents()
 
-    parse_package_definition_file(config_raw_text)
+    parse_package_definition_file(definition_text)
   end
 
   def load_package_object()
     if @descriptor.nil?
-      load_package_file()
+      load_package_object_from_file()
     else
       @package = @repository.get_package(@descriptor)
     end
@@ -126,21 +105,60 @@ module Fig::Command::PackageLoad
     return
   end
 
-  def synthesize_package_for_command_line_options()
-    include_statement = Fig::Statement::Include.new(
+  def apply_base_config_to_environment(ignore_base_package = false)
+    begin
+      @environment.apply_config(
+        synthesize_package_for_command_line_options(ignore_base_package),
+        Fig::Package::DEFAULT_CONFIG,
+        nil
+      )
+    rescue Fig::NoSuchPackageConfigError => exception
+      make_no_such_package_exception_descriptive(exception)
+    end
+
+    return
+  end
+
+  def set_base_package_to_empty_synthetic_one()
+    @package = Fig::Package.new(
       nil,
-      %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-      Fig::PackageDescriptor.new(
-        @package.name(), @package.version(), base_config()
-      ),
-      nil
+      nil,
+      '.',
+      [
+        Fig::Statement::Configuration.new(
+          nil,
+          %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+          base_config(),
+          []
+        )
+      ]
     )
+
+    return
+  end
+
+  def synthesize_package_for_command_line_options(ignore_base_package)
+    configuration_statements = []
+
+    if not ignore_base_package
+      configuration_statements << Fig::Statement::Include.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        Fig::PackageDescriptor.new(
+          @package.name(), @package.version(), base_config()
+        ),
+        nil
+      )
+    end
+
+    configuration_statements << @options.environment_statements()
+
     configuration_statement =
       Fig::Statement::Configuration.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         Fig::Package::DEFAULT_CONFIG,
-        [include_statement, @options.environment_statements()].flatten()
+        configuration_statements.flatten()
       )
 
     return Fig::Package.new(nil, nil, '.', [configuration_statement])

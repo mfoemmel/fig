@@ -7,8 +7,11 @@ class Fig::Statement
   attr_reader :line, :column, :source_description
 
   def self.position_description(line, column, source_description)
-    return '' if not line
-    return '' if not column
+    if not line or not column
+      return '' if not source_description
+
+      return " (#{source_description})"
+    end
 
     description = " (line #{line}, column #{column}"
     if source_description
