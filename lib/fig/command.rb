@@ -114,9 +114,9 @@ class Fig::Command
         |command| @operating_system.shell_exec command
       end
     elsif @descriptor
-      @environment.include_config(@package, @descriptor, nil)
+      @environment.include_config(@base_package, @descriptor, nil)
       @environment.execute_config(
-        @package,
+        @base_package,
         @descriptor,
         @options.command_extra_argv || []
       ) { |cmd| @operating_system.shell_exec cmd }
@@ -324,8 +324,8 @@ class Fig::Command
       )
     else
       load_package_object_from_file()
-      if not @package.statements.empty?
-        publish_statements = @package.statements
+      if not @base_package.statements.empty?
+        publish_statements = @base_package.statements
       else
         $stderr.puts 'Nothing to publish.'
         return 1

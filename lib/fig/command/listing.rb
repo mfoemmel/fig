@@ -28,7 +28,7 @@ module Fig::Command::Listing
   end
 
   def display_configs_in_local_packages_list()
-    @package.configs.each do |config|
+    @base_package.configs.each do |config|
       puts config.name
     end
 
@@ -71,7 +71,7 @@ module Fig::Command::Listing
   end
 
   def display_dependencies_in_tree()
-    walk_dependency_tree(@package, derive_base_display_config_names(), nil, 0) do
+    walk_dependency_tree(@base_package, derive_base_display_config_names(), nil, 0) do
       |package, config_name, depth|
 
       print ' ' * (depth * 4)
@@ -150,7 +150,7 @@ module Fig::Command::Listing
 
   def derive_base_display_config_names()
     if @options.list_all_configs?
-      return @package.config_names
+      return @base_package.config_names
     end
 
     return [ base_config() ]
@@ -160,11 +160,11 @@ module Fig::Command::Listing
     packages = {}
     starting_config_names = derive_base_display_config_names()
 
-    if ! @package.name.nil?
-      packages[@package] = starting_config_names.to_set
+    if ! @base_package.name.nil?
+      packages[@base_package] = starting_config_names.to_set
     end
 
-    walk_dependency_tree(@package, starting_config_names, nil, 0) do
+    walk_dependency_tree(@base_package, starting_config_names, nil, 0) do
       |package, config_name, depth|
 
       if (
@@ -230,7 +230,7 @@ module Fig::Command::Listing
     prior_node = nil
     current_parent = tree
 
-    walk_dependency_tree(@package, derive_base_display_config_names(), nil, 0) do
+    walk_dependency_tree(@base_package, derive_base_display_config_names(), nil, 0) do
       |package, config_name, depth|
 
       if depth < prior_depth
@@ -327,7 +327,7 @@ module Fig::Command::Listing
   def display_variables_flat_from_repository()
     variable_names = Set.new()
 
-    walk_dependency_tree(@package, derive_base_display_config_names(), nil, 0) do
+    walk_dependency_tree(@base_package, derive_base_display_config_names(), nil, 0) do
       |package, config_name, depth|
 
       package[config_name].walk_statements() do |statement|

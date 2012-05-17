@@ -54,12 +54,12 @@ module Fig::Command::PackageLoad
 
   def register_package_with_environment()
     if @options.updating?
-      @package.retrieves.each do |statement|
+      @base_package.retrieves.each do |statement|
         @environment.add_retrieve(statement)
       end
     end
 
-    @environment.register_package(@package)
+    @environment.register_package(@base_package)
     apply_base_config_to_environment()
 
     return
@@ -74,7 +74,7 @@ module Fig::Command::PackageLoad
     end
 
     source_description = derive_package_source_description()
-    @package =
+    @base_package =
       Fig::Parser.new(@configuration, :check_include_versions).parse_package(
         Fig::PackageDescriptor.new(
           nil, nil, nil, :source_description => source_description
@@ -97,7 +97,7 @@ module Fig::Command::PackageLoad
     if @descriptor.nil?
       load_package_object_from_file()
     else
-      @package = @repository.get_package(@descriptor)
+      @base_package = @repository.get_package(@descriptor)
     end
 
     register_package_with_environment_if_not_listing_or_publishing()
@@ -120,7 +120,7 @@ module Fig::Command::PackageLoad
   end
 
   def set_base_package_to_empty_synthetic_one()
-    @package = Fig::Package.new(
+    @base_package = Fig::Package.new(
       nil,
       nil,
       '.',
@@ -145,7 +145,7 @@ module Fig::Command::PackageLoad
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         Fig::PackageDescriptor.new(
-          @package.name(), @package.version(), base_config()
+          @base_package.name(), @base_package.version(), base_config()
         ),
         nil
       )
@@ -192,7 +192,7 @@ module Fig::Command::PackageLoad
     source = derive_exception_source()
     message =
       %Q<No config was specified and there's no "#{Fig::Package::DEFAULT_CONFIG}" config#{source}.>
-    config_names = @package.config_names()
+    config_names = @base_package.config_names()
     if config_names.size > 1
       message +=
         %Q< The valid configs are "#{config_names.join('", "')}".>
