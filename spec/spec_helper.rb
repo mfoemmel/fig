@@ -24,7 +24,7 @@ FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
 FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
 FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
 FIG_BIN        = File.expand_path(File.dirname(__FILE__) + '/../bin')
-FIG_EXE        = %Q<#{FIG_BIN}/fig>
+FIG_EXE        = %Q<#{FIG_BIN}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
