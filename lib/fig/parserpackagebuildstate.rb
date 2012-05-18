@@ -1,3 +1,4 @@
+require 'fig/packageparseerror'
 require 'fig/statement'
 
 module Fig; end
@@ -29,6 +30,27 @@ class Fig::ParserPackageBuildState
 
     return Fig::Statement.position_description(
       location[0], location[1], source_description
+    )
+  end
+
+  def new_environment_variable_statement(
+    statement_class, keyword_node, value_node
+  )
+    name, value = statement_class.parse_name_value(value_node.text_value) {
+      raise_invalid_value_parse_error(
+        keyword_node,
+        value_node,
+        statement_class.const_get(:ARGUMENT_DESCRIPTION)
+      )
+    }
+    return statement_class.new(
+      node_location(keyword_node), source_description, name, value
+    )
+  end
+
+  def raise_invalid_value_parse_error(keyword_node, value_node, description)
+    raise Fig::PackageParseError.new(
+      %Q<Invalid value for #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
     )
   end
 end

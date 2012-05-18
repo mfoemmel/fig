@@ -29,13 +29,16 @@ class Fig::Parser
     # trailing whitespace.
     result = @treetop_parser.parse(input + ' ')
 
+    extended_description =
+      extend_source_description(directory, source_description)
+
     if result.nil?
-      raise_parse_error(directory, source_description)
+      raise_parse_error(extended_description)
     end
 
     package = result.to_package(
       directory,
-      Fig::ParserPackageBuildState.new(descriptor, source_description)
+      Fig::ParserPackageBuildState.new(descriptor, extended_description)
     )
 
     check_for_bad_urls(package, descriptor)
@@ -47,16 +50,21 @@ class Fig::Parser
 
   private
 
-  def raise_parse_error(directory, source_description)
-    message = ''
-    if source_description
-      message = source_description
+  def extend_source_description(directory, original_description)
+    if original_description
+      extended = original_description
       if directory != '.'
-        message << " (#{directory})"
+        extended << " (#{directory})"
       end
-    else
-      message = directory
+
+      return extended
     end
+
+    return directory
+  end
+
+  def raise_parse_error(extended_description)
+    message = extended_description
     message << ": #{@treetop_parser.failure_reason}"
 
     raise Fig::PackageParseError.new(message)

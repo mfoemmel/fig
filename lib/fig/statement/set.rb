@@ -4,7 +4,9 @@ module Fig; end
 
 # A statement that sets the value of an environment variable.
 class Fig::Statement::Set < Fig::Statement
-  VALUE_REGEX = %r< \A \S* \z >x
+  VALUE_REGEX          = %r< \A \S* \z >x
+  ARGUMENT_DESCRIPTION =
+    %q<The value must look like "NAME=VALUE", though VALUE can be empty.>
 
   # Yields on error.
   def self.parse_name_value(combined)

@@ -230,10 +230,8 @@ Environment variables:
   STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >x
 
   ARGUMENT_DESCRIPTION = {
-    '--set'    =>
-      %q<The value must look like "NAME=VALUE", though VALUE can be empty.>,
-    '--append' =>
-      %q[The value must look like "NAME=VALUE". VALUE cannot contain any of ";:<>|", double quotes, or whitespace.],
+    '--set'    => Fig::Statement::Set::ARGUMENT_DESCRIPTION,
+    '--append' => Fig::Statement::Path::ARGUMENT_DESCRIPTION
   }
 
   def process_command_line(argv)
