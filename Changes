@@ -1,3 +1,16 @@
+v0.1.xxx
+
+  New features:
+
+  - Warns if you attempt to use a "retrieve" statement to write to an absolute
+    path; all retrieve destinations are relative.
+
+  Bug fixes:
+
+  - Better command-line parsing.  There were a number of scenarios where
+    missing or malformed arguments to options would cause incorrect behavior or
+    stack traces.
+
 v0.1.63.beta.2
 
   Backwards incompatibilities:

@@ -27,13 +27,18 @@ describe 'Fig' do
         :current_directory => publish_from_directory
       )
       input = <<-END
-        retrieve FOOPATH->retrieve/[package]
+        # Leading slash on path to test warning.
+        retrieve FOOPATH->/retrieve/[package]
         config default
           include prerequisite/1.2.3
         end
       END
-      fig('--update-if-missing', input)
+      out, err, exit_code = fig('--update-if-missing', input)
       File.read("#{retrieve_directory}/prerequisite/a-library").should == 'some library'
+
+      err.should =~ /absolute/
+      err.should =~ /relative/
+      err.should =~ %r</retrieve/\[package\]>
     end
 
     it 'retrieves resource and ignores the append statement in the updating config' do

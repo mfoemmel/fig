@@ -1,3 +1,4 @@
+require 'fig/logging'
 require 'fig/statement'
 
 module Fig; end
@@ -12,6 +13,14 @@ class Fig::Statement::Retrieve < Fig::Statement
 
     @var = var
     @path = path
+
+    # Yeah, it's not cross-platform, but File doesn't have an #absolute? method
+    # and this is better than nothing.
+    if path =~ %r< ^ / >x
+      Fig::Logging.warn(
+        %Q<The retrieve path "#{path}"#{position_string()} looks like it is intended to be absolute; retrieve paths are always treated as relative.>
+      )
+    end
   end
 
   def loaded_but_not_referenced?()
