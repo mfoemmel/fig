@@ -300,29 +300,12 @@ class Fig::Environment
       variable_name, variable_value, base_package, backtrace
     )
 
-    destination_path = nil
-
-    # A '//' in the variable value tells us to preserve path
-    # information after the '//' when doing a retrieve.
-    if variable_value.split('//').size > 1
-      preserved_path = variable_value.split('//').last
-      destination_path = File.join(
-        get_retrieve_path_with_substitution(variable_name, base_package),
-        preserved_path
-      )
-    else
-      destination_path =
-        get_retrieve_path_with_substitution(variable_name, base_package)
-      if not File.directory?(variable_value)
-        destination_path =
-          File.join(destination_path, File.basename(variable_value))
-      end
-    end
+    destination_path =
+      derive_retrieve_destination(variable_name, variable_value, base_package)
 
     @working_directory_maintainer.switch_to_package_version(
       base_package.name, base_package.version
     )
-
     @working_directory_maintainer.retrieve(variable_value, destination_path)
 
     return destination_path
@@ -338,6 +321,25 @@ class Fig::Environment
       backtrace,
       base_package
     )
+  end
+
+  def derive_retrieve_destination(variable_name, variable_value, base_package)
+    retrieve_path =
+      get_retrieve_path_with_substitution(variable_name, base_package)
+
+    # A '//' in the variable value tells us to preserve path
+    # information after the '//' when doing a retrieve.
+    if variable_value.include? '//'
+      preserved_path = variable_value.split('//').last
+
+      return File.join(retrieve_path, preserved_path)
+    end
+
+    if File.directory?(variable_value)
+      return retrieve_path
+    end
+
+    return File.join(retrieve_path, File.basename(variable_value))
   end
 
   def expand_at_signs_in_path(path, base_package, backtrace)
