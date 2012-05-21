@@ -330,7 +330,7 @@ class Fig::Environment
     # A '//' in the variable value tells us to preserve path
     # information after the '//' when doing a retrieve.
     if variable_value.include? '//'
-      preserved_path = variable_value.split('//').last
+      preserved_path = variable_value.split('//', -1).last
 
       return File.join(retrieve_path, preserved_path)
     end

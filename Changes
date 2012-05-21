@@ -1,3 +1,16 @@
+v0.1.65
+
+  Bug fixes:
+
+  - Treat trailing double-slashes in environment variable statements as if they
+    weren't there, i.e.
+
+        set FOO=blah//
+
+    is the same as
+
+        set FOO=blah
+
 v0.1.64
 
   Backwards incompatibilities:
