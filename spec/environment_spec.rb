@@ -29,6 +29,8 @@ def new_example_package(environment, name, extra_statements, variable_value)
 
   environment.register_package(package)
 
+  # Kind of a cheat: we're creating a "set" statement that isn't in a "config"
+  # block and then shoving it through the Environment directly.
   set_statement = Fig::Statement::Set.new(
     nil, nil, "WHATEVER_#{name.upcase}", variable_value
   )
@@ -228,22 +230,35 @@ describe 'Environment' do
 
     it 'truncates before //' do
       if FIG_FILE_GUARANTEED_TO_EXIST !~
-          %r< \A (.+ [^/]) ( (?: / [^/]+ ){2} ) \z >x
+          %r<
+            \A
+            (.+ [^/]) # Maximally at least two charcters not ending in a slash.
+            (
+              (?: / [^/]+ ){2} # Slash followed by maximally non-slash, twice.
+            )
+            \z
+          >x
         fail "Test assumes that FIG_FILE_GUARANTEED_TO_EXIST (#{FIG_FILE_GUARANTEED_TO_EXIST}) has at least two parent directories."
       end
       base_path = $1
-      to_be_preserved = $2
+      to_be_preserved = $2 # Note that this will have a leading slash...
+
+      # ... which means that this will have two slashes in it.
       mangled_path = "#{base_path}/#{to_be_preserved}"
 
       retrieve_vars = {
         # Just checking that double slashes aren't mangled in the retrieves.
         'WHATEVER_ONE'   => 'foo.[package].//./bar.[package].baz',
-        # No WHATEVER_TWO here means that the value should pass through unmolested.
+        # No WHATEVER_TWO here means that the value should pass through
+        # unmolested.
         'WHATEVER_THREE' => 'phoo.//.bhar'
       }
       output = substitute_variable(mangled_path, retrieve_vars)
 
-      output.should == "foo.one.//./bar.one.baz#{to_be_preserved}\n#{mangled_path}\nphoo.//.bhar#{to_be_preserved}\n"
+      output.should == \
+        "foo.one.//./bar.one.baz#{to_be_preserved}\n" + # WHATEVER_ONE
+        "#{mangled_path}\n"                           + # WHATEVER_TWO
+        "phoo.//.bhar#{to_be_preserved}\n"              # WHATEVER_THREE
     end
   end
 
