@@ -1,17 +1,4 @@
-v0.1.xxx
-
-  New features:
-
-  - Warns if you attempt to use a "retrieve" statement to write to an absolute
-    path; all retrieve destinations are relative.
-
-  Bug fixes:
-
-  - Better command-line parsing.  There were a number of scenarios where
-    missing or malformed arguments to options would cause incorrect behavior or
-    stack traces.
-
-v0.1.63.beta.2
+v0.1.64
 
   Backwards incompatibilities:
 
@@ -49,6 +36,24 @@ v0.1.63.beta.2
     the variable names, any retrieve variable with those characters in its name
     would never have any effect.
 
+  - Running fig --publish or --publish-local with --resource or --archive
+    options without also specifying a --set or --append option is now an error.
+
+    What would previously happen is that the --resource and --archive options
+    were ignored and package.fig locating would happen and the publish would be
+    based only on that.  Probably not what was intended.
+
+    E.g.:
+
+      fig --publish foo/1 --resource=something.txt
+
+    would ignore the --resource option, look for a package.fig file and publish
+    based upon that.
+
+  - Now fails if you specify both a descriptor and the --file option and you
+    aren't publishing.  Previously it would silently ignore the --file option,
+    which could be a bit more than a little surprising.
+
   New features:
 
   - Overrides are now independent statements, no longer attached to includes.
@@ -72,38 +77,6 @@ v0.1.63.beta.2
 
   - You can now specify overrides on the command-line using "--override".
 
-  - Includes the Fig version in the comments in published .fig files.
-
-  Bug fixes:
-
-  - Updates should be more robust in the face of simultaneous runs of fig.
-
-  - Handling of symlinks is be better.
-
-v0.1.63.beta.1
-
-  Backwards incompatibilities:
-
-  - Running fig --publish or --publish-local with --resource or --archive
-    options without also specifying a --set or --append option is now an error.
-
-    What would previously happen is that the --resource and --archive options
-    were ignored and package.fig locating would happen and the publish would be
-    based only on that.  Probably not what was intended.
-
-    E.g.:
-
-      fig --publish foo/1 --resource=something.txt
-
-    would ignore the --resource option, look for a package.fig file and publish
-    based upon that.
-
-  - Now fails if you specify both a descriptor and the --file option and you
-    aren't publishing.  Previously it would silently ignore the --file option,
-    which could be a bit more than a little surprising.
-
-  New features:
-
   - Now checks repository format version and fails if it's different from what
     it knows about.
 
@@ -113,6 +86,9 @@ v0.1.63.beta.1
     does change, then current code could possibly corrupt the future
     repository.
 
+  - Warns if you attempt to use a "retrieve" statement to write to an absolute
+    path; all retrieve destinations are relative.
+
   - Now warns about ineffectual "retrieve" statements.
 
   - A lot of existence checks have been added, resulting in nicer error
@@ -121,7 +97,15 @@ v0.1.63.beta.1
   - README.md has had most of its content ripped out.  Documentation has been
     greatly expanded and is available at https://github.com/mfoemmel/fig/wiki.
 
+  - Includes the Fig version in the comments in published .fig files.
+
   Bug fixes:
+
+  - Better command-line parsing.  There were a number of scenarios where
+    missing or malformed arguments to options would cause incorrect behavior or
+    stack traces.
+
+  - Handling of symlinks is better.
 
   - Now checks that archive base names are unique before allowing publishing.
     Previously, if you had something like
@@ -135,6 +119,8 @@ v0.1.63.beta.1
 
     Similarly, we now complain about archives named "resources.tar.gz" because
     Fig creates an archive by that name to hold resources.
+
+  - Updates should be more robust in the face of simultaneous runs of fig.
 
   - Retrieves:
 
@@ -155,6 +141,11 @@ v0.1.63.beta.1
 
       will be slower.  On the other hand, you won't have a lot of stuff from
       "foo" hanging around that shouldn't be there.
+
+v0.1.63.beta.2
+v0.1.63.beta.1
+
+  - Test releases
 
 v0.1.62
 
