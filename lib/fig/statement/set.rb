@@ -16,8 +16,10 @@ class Fig::Statement::Set < Fig::Statement
       yield
     end
 
-    # Value can be anything, so no need to check.
     value = '' if value.nil?
+    if value !~ VALUE_REGEX
+      yield
+    end
 
     return [variable, value]
   end
