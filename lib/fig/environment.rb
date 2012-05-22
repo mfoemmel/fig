@@ -79,6 +79,7 @@ class Fig::Environment
     if package.applied_config_names.member?(config_name)
       return
     end
+
     new_backtrace = backtrace ||
       Fig::Backtrace.new(
         nil,
@@ -86,6 +87,8 @@ class Fig::Environment
       )
 
     config = package[config_name]
+
+    Fig::Logging.debug("Applying #{package}:#{config_name}.")
     config.statements.each do
       |statement|
       apply_config_statement(package, statement, new_backtrace)

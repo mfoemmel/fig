@@ -124,7 +124,7 @@ class Fig::Package
   end
 
   def to_s
-    name    = @name || '<empty>'
+    name    = @name || UNPUBLISHED
     version = @version || '<empty>'
     return Fig::PackageDescriptor.format(name, version, nil)
   end
