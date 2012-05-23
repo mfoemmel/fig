@@ -1,7 +1,7 @@
 # Treetop (http://treetop.rubyforge.org/) grammar for package definitions.
 
 require 'fig/package'
-require 'fig/packagedescriptor'
+require 'fig/package_descriptor'
 require 'fig/parser'
 require 'fig/statement/archive'
 require 'fig/statement/command'

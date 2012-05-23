@@ -1,4 +1,4 @@
-require 'fig/repositoryerror'
+require 'fig/repository_error'
 
 module Fig; end
 

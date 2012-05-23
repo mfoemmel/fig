@@ -1,8 +1,8 @@
 require 'optparse'
 
-require 'fig/command/optionerror'
+require 'fig/command/option_error'
 require 'fig/package'
-require 'fig/packagedescriptor'
+require 'fig/package_descriptor'
 require 'fig/statement/archive'
 require 'fig/statement/include'
 require 'fig/statement/path'

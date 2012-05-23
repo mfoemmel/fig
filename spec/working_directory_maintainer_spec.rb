@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/workingdirectorymaintainer'
+require 'fig/working_directory_maintainer'
 
 describe 'WorkingDirectoryMaintainer' do
   let(:base_directory)    { "#{FIG_SPEC_BASE_DIRECTORY}/retrieve-test" }

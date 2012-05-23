@@ -2,8 +2,8 @@ require 'set'
 
 require 'fig/logging'
 require 'fig/logging/colorizable'
-require 'fig/packagedescriptor'
-require 'fig/workingdirectorymetadata'
+require 'fig/package_descriptor'
+require 'fig/working_directory_metadata'
 
 module Fig; end
 

@@ -3,7 +3,7 @@
 if ENV['FIG_COVERAGE']
   require File.expand_path(
     File.join(
-      File.dirname(__FILE__), %w< .. lib fig command coveragesupport.rb >
+      File.dirname(__FILE__), %w< .. lib fig command coverage_support.rb >
     )
   )
 end

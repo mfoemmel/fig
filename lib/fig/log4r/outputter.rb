@@ -3,7 +3,7 @@ require 'log4r/logger'
 require 'log4r/outputter/iooutputter'
 
 require 'fig/logging/colorizable'
-require 'fig/operatingsystem'
+require 'fig/operating_system'
 
 module Fig; end
 module Fig::Log4r; end

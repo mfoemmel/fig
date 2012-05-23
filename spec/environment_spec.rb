@@ -1,9 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/environment'
-require 'fig/environmentvariables/casesensitive'
+require 'fig/environment_variables/case_sensitive'
 require 'fig/package'
-require 'fig/packagedescriptor'
+require 'fig/package_descriptor'
 require 'fig/statement/configuration'
 require 'fig/statement/retrieve'
 require 'fig/statement/set'

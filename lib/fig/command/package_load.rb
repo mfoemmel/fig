@@ -1,5 +1,5 @@
 require 'fig/package'
-require 'fig/packagedescriptor'
+require 'fig/package_descriptor'
 require 'fig/parser'
 
 module Fig; end

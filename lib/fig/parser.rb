@@ -2,12 +2,12 @@ require 'treetop'
 
 require 'fig/grammar' # this is grammar.treetop, not grammar.rb.
 require 'fig/logging'
-require 'fig/packageparseerror'
-require 'fig/parserpackagebuildstate'
+require 'fig/package_parse_error'
+require 'fig/parser_package_build_state'
 require 'fig/repository'
 require 'fig/statement'
-require 'fig/urlaccesserror'
-require 'fig/userinputerror'
+require 'fig/url_access_error'
+require 'fig/user_input_error'
 
 module Fig; end
 

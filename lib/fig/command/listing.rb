@@ -2,8 +2,8 @@ require 'set'
 
 require 'fig/backtrace'
 require 'fig/package'
-require 'fig/packagedescriptor'
-require 'fig/userinputerror'
+require 'fig/package_descriptor'
+require 'fig/user_input_error'
 
 module Fig; end
 class Fig::Command; end

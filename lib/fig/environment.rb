@@ -3,12 +3,12 @@ require 'stringio'
 require 'fig/backtrace'
 require 'fig/logging'
 require 'fig/package'
-require 'fig/repositoryerror'
+require 'fig/repository_error'
 require 'fig/statement/command'
 require 'fig/statement/include'
 require 'fig/statement/path'
 require 'fig/statement/set'
-require 'fig/userinputerror'
+require 'fig/user_input_error'
 
 module Fig; end
 

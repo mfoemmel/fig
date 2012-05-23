@@ -1,4 +1,4 @@
-require 'fig/environmentvariables'
+require 'fig/environment_variables'
 
 module Fig; end;
 module EnvironmentVariables; end

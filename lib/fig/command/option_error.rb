@@ -1,4 +1,4 @@
-require 'fig/userinputerror'
+require 'fig/user_input_error'
 
 module Fig; end
 class Fig::Command; end

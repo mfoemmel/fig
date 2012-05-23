@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-require 'fig/operatingsystem'
+require 'fig/operating_system'
 require 'fig/repository'
 
 ECHO_COMMAND = Fig::OperatingSystem.windows? ? '@echo' : 'echo'

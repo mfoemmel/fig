@@ -1,4 +1,4 @@
-require 'fig/userinputerror'
+require 'fig/user_input_error'
 
 module Fig
   # Could not determine some kind of information from a configuration file,

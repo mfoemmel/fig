@@ -1,4 +1,4 @@
-require 'fig/packagedescriptor'
+require 'fig/package_descriptor'
 require 'fig/statement'
 
 module Fig; end

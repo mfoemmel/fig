@@ -3,17 +3,17 @@ require 'socket'
 require 'sys/admin'
 require 'tmpdir'
 
-require 'fig/atexit'
+require 'fig/at_exit'
 require 'fig/command'
 require 'fig/logging'
-require 'fig/notfounderror'
-require 'fig/packagecache'
-require 'fig/packagedescriptor'
+require 'fig/not_found_error'
+require 'fig/package_cache'
+require 'fig/package_descriptor'
 require 'fig/parser'
-require 'fig/repositoryerror'
+require 'fig/repository_error'
 require 'fig/statement/archive'
 require 'fig/statement/resource'
-require 'fig/urlaccesserror'
+require 'fig/url_access_error'
 
 module Fig; end
 

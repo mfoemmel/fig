@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/environmentvariables/caseinsensitive'
-require 'fig/environmentvariables/casesensitive'
+require 'fig/environment_variables/case_insensitive'
+require 'fig/environment_variables/case_sensitive'
 
 def find_diffs(primary_hash, secondary_hash, diff_hash)
   primary_hash.each do |key, value|

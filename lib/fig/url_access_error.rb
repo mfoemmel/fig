@@ -1,4 +1,4 @@
-require 'fig/userinputerror'
+require 'fig/user_input_error'
 
 module Fig
   # Configuration attempted to specify a URL outside of the whitelist.

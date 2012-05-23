@@ -2,8 +2,8 @@ require 'log4r'
 require 'log4r/configurator'
 require 'log4r/yamlconfigurator'
 
-require 'fig/configfileerror'
-require 'fig/log4rconfigerror'
+require 'fig/config_file_error'
+require 'fig/log4r_config_error'
 require 'fig/log4r/outputter'
 
 module Fig; end

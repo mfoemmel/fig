@@ -1,6 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/command/optionerror'
+require 'fig/command/option_error'
 require 'fig/command/options'
 
   def check_environment_variable_option(option_name)

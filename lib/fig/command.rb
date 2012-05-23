@@ -2,19 +2,19 @@ require 'rubygems'
 require 'net/ftp'
 require 'set'
 
-require 'fig/atexit'
+require 'fig/at_exit'
 require 'fig/command/options'
 require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
-require 'fig/operatingsystem'
+require 'fig/operating_system'
 require 'fig/package'
 require 'fig/parser'
 require 'fig/repository'
-require 'fig/repositoryerror'
+require 'fig/repository_error'
 require 'fig/statement/configuration'
-require 'fig/userinputerror'
-require 'fig/workingdirectorymaintainer'
+require 'fig/user_input_error'
+require 'fig/working_directory_maintainer'
 
 # The following are a break out of parts of this class simply to keep the file
 # size down.
@@ -24,7 +24,7 @@ require 'fig/command/listing'
 
 # You will need to look in this file for any stuff related to loading the
 # base Package object.
-require 'fig/command/packageload'
+require 'fig/command/package_load'
 
 module Fig; end
 

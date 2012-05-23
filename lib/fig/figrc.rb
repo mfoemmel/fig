@@ -1,8 +1,8 @@
 require 'json'
 
-require 'fig/applicationconfiguration'
-require 'fig/configfileerror'
-require 'fig/operatingsystem'
+require 'fig/application_configuration'
+require 'fig/config_file_error'
+require 'fig/operating_system'
 require 'fig/repository'
 
 module Fig; end

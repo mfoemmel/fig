@@ -1,4 +1,4 @@
-require 'fig/packageparseerror'
+require 'fig/package_parse_error'
 require 'fig/statement'
 
 module Fig; end

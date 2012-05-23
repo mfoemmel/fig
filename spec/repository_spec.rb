@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/applicationconfiguration'
-require 'fig/packagedescriptor'
+require 'fig/application_configuration'
+require 'fig/package_descriptor'
 require 'fig/repository'
 require 'fig/statement/configuration'
 require 'fig/statement/path'

@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/applicationconfiguration'
-require 'fig/packagedescriptor'
-require 'fig/packageparseerror'
+require 'fig/application_configuration'
+require 'fig/package_descriptor'
+require 'fig/package_parse_error'
 require 'fig/parser'
 
 describe 'Parser' do

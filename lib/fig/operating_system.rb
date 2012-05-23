@@ -13,12 +13,12 @@ require 'uri'
 
 require 'highline/import'
 
-require 'fig/atexit'
-require 'fig/environmentvariables/caseinsensitive'
-require 'fig/environmentvariables/casesensitive'
+require 'fig/at_exit'
+require 'fig/environment_variables/case_insensitive'
+require 'fig/environment_variables/case_sensitive'
 require 'fig/logging'
-require 'fig/networkerror'
-require 'fig/notfounderror'
+require 'fig/network_error'
+require 'fig/not_found_error'
 
 module Fig; end
 

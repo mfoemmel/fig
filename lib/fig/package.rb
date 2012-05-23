@@ -1,6 +1,6 @@
 require 'fig/logging'
-require 'fig/nosuchpackageconfigerror'
-require 'fig/packagedescriptor'
+require 'fig/no_such_package_config_error'
+require 'fig/package_descriptor'
 require 'fig/statement/archive'
 require 'fig/statement/configuration'
 require 'fig/statement/resource'

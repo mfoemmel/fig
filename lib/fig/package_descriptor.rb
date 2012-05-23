@@ -1,4 +1,4 @@
-require 'fig/packagedescriptorparseerror'
+require 'fig/package_descriptor_parse_error'
 
 module Fig; end
 
