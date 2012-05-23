@@ -10,4 +10,24 @@ class Fig::Command::Action::ListConfigs
   def options
     return %w<--list-configs>
   end
+
+  def descriptor_action()
+    return nil
+  end
+
+  def need_base_package?()
+    return true
+  end
+
+  def need_base_config?()
+    return false
+  end
+
+  def register_base_package?()
+    return false
+  end
+
+  def apply_base_config?()
+    return false
+  end
 end

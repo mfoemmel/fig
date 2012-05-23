@@ -10,4 +10,24 @@ class Fig::Command::Action::Version
   def options
     return %w<--version>
   end
+
+  def descriptor_action()
+    return :ignore
+  end
+
+  def need_base_package?()
+    return false
+  end
+
+  def need_base_config?()
+    return false
+  end
+
+  def register_base_package?()
+    return false
+  end
+
+  def apply_base_config?()
+    return false
+  end
 end

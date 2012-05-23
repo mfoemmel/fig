@@ -114,6 +114,8 @@ class Fig::Command
         |command| @operating_system.shell_exec command
       end
     elsif @descriptor
+      # TODO: Elliot's current theory is that this is pointless as long as
+      # we've applied the config.
       @environment.include_config(@base_package, @descriptor, nil)
       @environment.execute_config(
         @base_package,

@@ -10,4 +10,24 @@ class Fig::Command::Action::Publish
   def options
     return %w<--publish>
   end
+
+  def descriptor_action()
+    return :required
+  end
+
+  def need_base_package?()
+    return true
+  end
+
+  def need_base_config?()
+    return false
+  end
+
+  def register_base_package?()
+    return false
+  end
+
+  def apply_base_config?()
+    return true
+  end
 end

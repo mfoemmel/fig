@@ -661,6 +661,14 @@ Environment variables:
 
   def set_base_action(action_class)
     action = action_class.new
+    # Help overrides anything.
+    if action_class == Fig::Command::Action::Help
+      @base_action = action
+      return
+    end
+
+    return if @base_action && @base_action == Fig::Command::Action::Help
+
     if @base_action
       raise Fig::Command::OptionError.new(
         "Cannot specify both #{@base_action.options[0]} and #{action.options[0]}."
@@ -668,6 +676,8 @@ Environment variables:
     end
 
     @base_action = action
+
+    return
   end
 
   def set_update_action(update_action_class)
