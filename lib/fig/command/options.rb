@@ -95,6 +95,19 @@ Environment variables:
     process_command_line(argv)
   end
 
+  def actions()
+    actions = []
+
+    if @update_action
+      actions << @update_action
+    end
+    if @base_action
+      actions << @base_action
+    end
+
+    return actions
+  end
+
   def archives()
     return @options[:archives]
   end

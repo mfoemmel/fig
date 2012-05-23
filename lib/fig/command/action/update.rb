@@ -11,7 +11,7 @@ class Fig::Command::Action::Update
     return %w<--update>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

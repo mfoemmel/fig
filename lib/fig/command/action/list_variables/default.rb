@@ -8,7 +8,7 @@ class Fig::Command::Action::ListVariables::Default
     return %w<--list-variables>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

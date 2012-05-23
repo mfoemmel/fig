@@ -11,7 +11,7 @@ class Fig::Command::Action::Help
     return %w<--help>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return :ignore
   end
 

@@ -11,7 +11,7 @@ class Fig::Command::Action::Get
     return %w<--get>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

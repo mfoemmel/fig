@@ -11,7 +11,7 @@ class Fig::Command::Action::Publish
     return %w<--publish>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return :required
   end
 

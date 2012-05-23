@@ -71,7 +71,11 @@ class Fig::Command
     if not @options.exit_code.nil?
       return @options.exit_code
     end
+
+    Fig::Logging.initialize_pre_configuration(@options.log_level())
+
     @descriptor = @options.descriptor
+    check_descriptor_requirement()
 
     if @options.help?
       return @options.help
@@ -84,7 +88,6 @@ class Fig::Command
     configure()
 
     if @options.clean?
-      check_required_package_descriptor('to clean')
       ensure_descriptor_and_file_were_not_both_specified()
       @repository.clean(@descriptor)
       return 0
@@ -184,9 +187,6 @@ class Fig::Command
   end
 
   def configure()
-    Fig::Logging.initialize_pre_configuration(@options.log_level())
-
-
     @configuration = Fig::FigRC.find(
       @options.figrc(),
       derive_remote_url(),
@@ -269,22 +269,27 @@ class Fig::Command
     return
   end
 
-  def check_required_package_descriptor(operation_description)
-    if not @descriptor
-      raise Fig::UserInputError.new(
-        "Need to specify a package #{operation_description}."
-      )
+  def check_descriptor_requirement()
+    @options.actions.each do
+      |action|
+
+      case action.descriptor_requirement()
+      when :required
+        if not @descriptor
+          raise Fig::UserInputError.new(
+            "Need to specify a descriptor for #{action.options[0]}."
+          )
+        end
+      when :warn
+        if @descriptor
+          Fig::Logging.warn(
+            %Q<Ignored descriptor "#{@descriptor.to_string}".>
+          )
+        end
+      end
     end
 
     return
-  end
-
-  def check_disallowed_package_descriptor(operation_description)
-    if @descriptor
-      raise Fig::UserInputError.new(
-        "Cannot specify a package for #{operation_description}."
-      )
-    end
   end
 
   def remote_operation_necessary?()
@@ -294,8 +299,6 @@ class Fig::Command
   end
 
   def publish()
-    check_required_package_descriptor('to publish')
-
     if @descriptor.name.nil? || @descriptor.version.nil?
       raise Fig::UserInputError.new(
         'Please specify a package name and a version name.'

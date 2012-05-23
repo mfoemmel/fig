@@ -16,9 +16,9 @@ module Fig::Command::Action::Role::HasSubAction
     raise 'Bug in code. Sub-action missing.'
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     check_sub_action_presence()
-    return sub_action.descriptor_action()
+    return sub_action.descriptor_requirement()
   end
 
   def need_base_package?()

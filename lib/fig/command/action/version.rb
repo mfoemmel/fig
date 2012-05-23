@@ -11,7 +11,7 @@ class Fig::Command::Action::Version
     return %w<--version>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return :ignore
   end
 

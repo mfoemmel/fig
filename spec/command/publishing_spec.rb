@@ -199,7 +199,7 @@ describe 'Fig' do
 
       it 'complains if you publish without a package descriptor' do
         out, err, exit_code = fig('--publish', :no_raise_on_error => true)
-        err.should =~ /Need to specify a package to publish/
+        err.should =~ /need to specify a descriptor/i
         exit_code.should_not == 0
       end
 

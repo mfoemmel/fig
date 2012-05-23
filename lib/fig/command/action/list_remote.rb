@@ -11,7 +11,7 @@ class Fig::Command::Action::ListRemote
     return %w<--list-remote>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return :warn
   end
 

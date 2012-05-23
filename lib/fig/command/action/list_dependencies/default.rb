@@ -8,7 +8,7 @@ class Fig::Command::Action::ListDependencies::Default
     return %w<--list-dependencies>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

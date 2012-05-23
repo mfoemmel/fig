@@ -11,7 +11,7 @@ class Fig::Command::Action::UpdateIfMissing
     return %w<--update-if-missing>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

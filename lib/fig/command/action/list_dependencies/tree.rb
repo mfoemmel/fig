@@ -8,7 +8,7 @@ class Fig::Command::Action::ListDependencies::Tree
     return %w<--list-dependencies --list-tree>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

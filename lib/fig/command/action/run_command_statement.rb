@@ -11,7 +11,7 @@ class Fig::Command::Action::RunCommandStatement
     return %w<--command-extra-args>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

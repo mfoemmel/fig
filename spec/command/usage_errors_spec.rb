@@ -200,7 +200,7 @@ describe 'Fig' do
         (out, err, exitstatus) =
           fig('--publish --set FOO=BAR', :no_raise_on_error => true)
         exitstatus.should_not == 0
-        err.should =~ %r<specify a package>
+        err.should =~ %r<specify a descriptor>i
         out.should == ''
       end
 

@@ -11,7 +11,7 @@ class Fig::Command::Action::Clean
     return %w<--clean>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return :required
   end
 

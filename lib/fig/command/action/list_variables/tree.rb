@@ -8,7 +8,7 @@ class Fig::Command::Action::ListVariables::Tree
     return %w<--list-variables --list-tree>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return nil
   end
 

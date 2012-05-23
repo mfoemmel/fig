@@ -11,7 +11,7 @@ class Fig::Command::Action::ListLocal
     return %w<--list-local>
   end
 
-  def descriptor_action()
+  def descriptor_requirement()
     return :warn
   end
 
