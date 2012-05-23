@@ -1,5 +1,28 @@
 require 'optparse'
 
+require 'fig/command/action/clean'
+require 'fig/command/action/get'
+require 'fig/command/action/help'
+require 'fig/command/action/list_configs'
+require 'fig/command/action/list_dependencies'
+require 'fig/command/action/list_dependencies/all_configs'
+require 'fig/command/action/list_dependencies/default'
+require 'fig/command/action/list_dependencies/tree'
+require 'fig/command/action/list_dependencies/tree_all_configs'
+require 'fig/command/action/list_local'
+require 'fig/command/action/list_remote'
+require 'fig/command/action/list_variables'
+require 'fig/command/action/list_variables/all_configs'
+require 'fig/command/action/list_variables/default'
+require 'fig/command/action/list_variables/tree'
+require 'fig/command/action/list_variables/tree_all_configs'
+require 'fig/command/action/publish'
+require 'fig/command/action/publish_local'
+require 'fig/command/action/run_command_line'
+require 'fig/command/action/run_command_statement'
+require 'fig/command/action/update'
+require 'fig/command/action/update_if_missing'
+require 'fig/command/action/version'
 require 'fig/command/option_error'
 require 'fig/package'
 require 'fig/package_descriptor'
@@ -193,14 +216,14 @@ Environment variables:
 
       case arg
         when '--'
-          terminating_option = arg
+          set_base_action(Fig::Command::Action::RunCommandLine)
           @shell_command = argv[(i+1)..-1]
         when '--command-extra-args'
-          terminating_option = arg
+          set_base_action(Fig::Command::Action::RunCommandStatement)
           @command_extra_argv = argv[(i+1)..-1]
       end
 
-      if terminating_option
+      if @base_action
         argv.slice!(i..-1)
         break
       end
@@ -324,10 +347,12 @@ Environment variables:
     @switches << parser.define_tail(
       '-?', '-h','--help','display this help text'
     ) do
+      set_base_action(Fig::Command::Action::Help)
       @options[:help] = true
     end
 
     @switches << parser.define_tail('-v', '--version', 'print Fig version') do
+      set_base_action(Fig::Command::Action::Version)
       @options[:version] = true
     end
 
@@ -337,6 +362,7 @@ Environment variables:
       STARTS_WITH_NON_HYPHEN,
       'print value of environment variable VARIABLE'
     ) do |get|
+      set_base_action(Fig::Command::Action::Get)
       @options[:get] = get
     end
 
@@ -347,40 +373,42 @@ Environment variables:
 
   def set_up_listings(parser)
     option_mapping = {
-      :local_packages =>
-        [ '--list-local', '--list', 'list packages in $FIG_HOME' ],
+      :local_packages => [
+        ['--list-local', '--list', 'list packages in $FIG_HOME'],
+        Fig::Command::Action::ListLocal
+      ],
 
-      :configs =>
+      :configs => [
         ['--list-configs', 'list configurations'],
+        Fig::Command::Action::ListConfigs
+      ],
 
-      :dependencies =>
+      :dependencies => [
         ['--list-dependencies', 'list package dependencies, recursively'],
+        Fig::Command::Action::ListDependencies
+      ],
 
-      :variables =>
+      :variables => [
         [
           '--list-variables',
           'list all variables defined/used by package and its dependencies'
         ],
+        Fig::Command::Action::ListVariables
+      ],
 
-      :remote_packages =>
-        ['--list-remote', 'list packages in remote repo']
+      :remote_packages => [
+        ['--list-remote', 'list packages in remote repo'],
+        Fig::Command::Action::ListRemote
+      ],
     }
 
     option_mapping.each_pair do
-      | type, specification |
+      | type, specification_action_class |
 
+      specification, action_class = *specification_action_class
       @switches << parser.define(*specification) do
-        if @options[:listing]
-          options_string =
-            (
-              option_mapping.values.collect {|specification| specification[0]}
-            ).join(', ')
-
-          $stderr.puts "Can only specify one of #{options_string}."
-          @exit_code = 1
-        else
-          @options[:listing] = type
-        end
+        set_base_action(action_class)
+        @options[:listing] = type
       end
     end
 
@@ -402,18 +430,21 @@ Environment variables:
 
   def set_up_commands(parser)
     @switches << parser.define('--clean', 'remove package from $FIG_HOME') do
+      set_base_action(Fig::Command::Action::Clean)
       @options[:clean] = true
     end
 
     @switches << parser.define(
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
+      set_base_action(Fig::Command::Action::Publish)
       @options[:publish] = true
     end
 
     @switches << parser.define(
       '--publish-local', 'install package only in $FIG_HOME'
     ) do |publish_local|
+      set_base_action(Fig::Command::Action::PublishLocal)
       @options[:publish_local] = true
     end
 
@@ -554,6 +585,7 @@ Environment variables:
       '--update',
       'check remote repo for updates and download to $FIG_HOME as necessary'
     ) do
+      set_update_action(Fig::Command::Action::Update)
       @options[:update] = true
     end
 
@@ -562,6 +594,7 @@ Environment variables:
       '--update-if-missing',
       'check remote repo for updates only if package missing from $FIG_HOME'
     ) do
+      set_update_action(Fig::Command::Action::UpdateIfMissing)
       @options[:update_if_missing] = true
     end
 
@@ -620,6 +653,28 @@ Environment variables:
     end
 
     return
+  end
+
+  def set_base_action(action_class)
+    action = action_class.new
+    if @base_action
+      raise Fig::Command::OptionError.new(
+        "Cannot specify both #{@base_action.options[0]} and #{action.options[0]}."
+      )
+    end
+
+    @base_action = action
+  end
+
+  def set_update_action(update_action_class)
+    update_action = update_action_class.new
+    if @update_action
+      raise Fig::Command::OptionError.new(
+        "Cannot specify both #{@update_action.options[0]} and #{update_action.options[0]}."
+      )
+    end
+
+    @update_action = update_action
   end
 
   def new_variable_statement(option, name_value, statement_class)

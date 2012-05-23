@@ -94,16 +94,7 @@ describe 'Fig' do
       exitstatus.should == 1
       out.should == ''
 
-      %w<
-        --list-configs
-        --list-dependencies
-        --list-local
-        --list-remote
-        --list-variables
-      >.each do
-        |option|
-        err.should =~ / #{option} /x
-      end
+      err.should =~ /cannot specify/i
     end
 
     describe %q<prints error when unknown package is referenced> do
