@@ -1,6 +1,6 @@
 require 'stringio'
 
-require 'fig/backtrace'
+require 'fig/include_backtrace'
 require 'fig/logging'
 require 'fig/package'
 require 'fig/repository_error'
@@ -81,7 +81,7 @@ class Fig::Environment
     end
 
     new_backtrace = backtrace ||
-      Fig::Backtrace.new(
+      Fig::IncludeBacktrace.new(
         nil,
         Fig::PackageDescriptor.new(package.name, package.version, config_name)
       )
@@ -114,7 +114,7 @@ class Fig::Environment
     package = lookup_package(
       name,
       descriptor.version,
-      Fig::Backtrace.new(
+      Fig::IncludeBacktrace.new(
         nil,
         Fig::PackageDescriptor.new(name, descriptor.version, config_name)
       )
@@ -171,7 +171,7 @@ class Fig::Environment
     end
     resolved_descriptor ||= descriptor
 
-    new_backtrace = Fig::Backtrace.new(backtrace, resolved_descriptor)
+    new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
     package = lookup_package(
       resolved_descriptor.name || base_package.name,
       resolved_descriptor.version,

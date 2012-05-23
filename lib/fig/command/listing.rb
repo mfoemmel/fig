@@ -1,6 +1,6 @@
 require 'set'
 
-require 'fig/backtrace'
+require 'fig/include_backtrace'
 require 'fig/package'
 require 'fig/package_descriptor'
 require 'fig/user_input_error'
@@ -91,7 +91,7 @@ module Fig::Command::Listing
 
       yield base_package, config_name, depth
 
-      new_backtrace = Fig::Backtrace.new(
+      new_backtrace = Fig::IncludeBacktrace.new(
         backtrace,
         Fig::PackageDescriptor.new(
           base_package.name(),

@@ -2,8 +2,13 @@ require 'fig/repository_error'
 
 module Fig; end
 
+# Stack of applied "include" statements.
+#
 # Keeps track of overrides and can produce package definition stack traces.
-class Fig::Backtrace
+#
+# Pushing and popping actually happens via instances being held/let go by
+# recursive method calls on Environment.
+class Fig::IncludeBacktrace
   attr_reader :overrides
 
   def initialize(parent, descriptor)
