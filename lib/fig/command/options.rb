@@ -293,6 +293,10 @@ Environment variables:
       return
     end
 
+    if not @base_action
+      set_base_action(Fig::Command::Action::RunCommandStatement)
+    end
+    set_up_sub_actions()
     derive_primary_descriptor(argv.first)
 
     return
@@ -683,6 +687,23 @@ Environment variables:
     }
 
     return statement_class.new(nil, "#{option} option", variable, value)
+  end
+
+  def set_up_sub_actions()
+    if @base_action.sub_action?
+      # This is a cheat because the only things with sub-actions at present are
+      # --list-dependencies and --list-variables.  This will need to be
+      # refactored if we get further sub-action actions.
+      sub_action_name = :Default
+      if list_tree?
+        sub_action_name = list_all_configs? ? :TreeAllConfigs : :Tree
+      elsif list_all_configs?
+        sub_action_name = :AllConfigs
+      end
+
+      @base_action.sub_action =
+        @base_action.class.const_get(sub_action_name).new
+    end
   end
 
   # This will be the base package, unless we're publishing (in which case it's

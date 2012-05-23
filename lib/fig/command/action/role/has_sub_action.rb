@@ -4,9 +4,7 @@ module  Fig::Command::Action; end
 module  Fig::Command::Action::Role; end
 
 module Fig::Command::Action::Role::HasSubAction
-  def sub_action
-    return @sub_action
-  end
+  attr_accessor :sub_action
 
   def sub_action?
     true
