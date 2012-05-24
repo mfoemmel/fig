@@ -2,6 +2,8 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'English'
 
+require 'fig/command/package_loader'
+
 describe 'Fig' do
   describe 'usage errors' do
     before(:each) do
@@ -25,7 +27,7 @@ describe 'Fig' do
     end
 
     it %q<prints message when there's nothing to do and there's a package.fig file> do
-      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::DEFAULT_FIG_FILE}", 'w' do
+      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}", 'w' do
         |handle|
         handle.print <<-END
           config default

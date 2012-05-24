@@ -319,7 +319,7 @@ module Fig::Command::Listing
   end
 
   def display_variables_flat_from_environment()
-    register_package_with_environment()
+    @package_loader.register_package_with_environment()
 
     variables = @environment.variables()
 

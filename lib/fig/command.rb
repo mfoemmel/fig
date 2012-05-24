@@ -4,6 +4,7 @@ require 'set'
 
 require 'fig/at_exit'
 require 'fig/command/options'
+require 'fig/command/package_loader'
 require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
@@ -18,20 +19,15 @@ require 'fig/working_directory_maintainer'
 
 # The following are a break out of parts of this class simply to keep the file
 # size down.
-
+#
 # You will need to look in this file for any stuff related to --list-* options.
 require 'fig/command/listing'
-
-# You will need to look in this file for any stuff related to loading the
-# base Package object.
-require 'fig/command/package_load'
 
 module Fig; end
 
 # Main program
 class Fig::Command
   include Fig::Command::Listing
-  include Fig::Command::PackageLoad
 
   def self.get_version()
     line = nil
@@ -98,7 +94,7 @@ class Fig::Command
       return publish()
     end
 
-    load_package_object()
+    @base_package = @package_loader.load_package_object()
 
     if @options.listing()
       handle_post_parse_list_options()
@@ -204,6 +200,10 @@ class Fig::Command
     end
 
     prepare_environment()
+
+    @package_loader = Fig::Command::PackageLoader.new(
+      @configuration, @environment, @options, @descriptor, @repository, base_config, config_was_specified_by_user
+    )
   end
 
   def prepare_environment()
@@ -311,7 +311,7 @@ class Fig::Command
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
       )
     else
-      load_package_object_from_file()
+      @base_package = @package_loader.load_package_object_from_file()
       if not @base_package.statements.empty?
         publish_statements = @base_package.statements
       else
@@ -320,7 +320,7 @@ class Fig::Command
       end
     end
 
-    apply_base_config_to_environment(:ignore_base_package)
+    @package_loader.apply_base_config_to_environment(:ignore_base_package)
 
     if @options.publish?
       Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."

@@ -7,8 +7,70 @@ class Fig::Command; end
 
 # Parts of the Command class related to loading of the base Package object,
 # simply to keep the size of command.rb down.
-module Fig::Command::PackageLoad
+class Fig::Command::PackageLoader
   DEFAULT_FIG_FILE = 'package.fig'
+
+  attr_reader :package_loaded_from_path
+
+  # TODO: remove all these parmeters..
+  def initialize(
+    application_configuration, environment, options, descriptor, repository, base_config, config_was_specified_by_user
+  )
+    @application_configuration    = application_configuration
+    @environment                  = environment
+    @options                      = options
+    @descriptor                   = descriptor
+    @repository                   = repository
+    @base_config                  = base_config
+    @config_was_specified_by_user = config_was_specified_by_user
+  end
+
+  def load_package_object_from_file()
+    definition_text = load_package_definition_file_contents()
+
+    parse_package_definition_file(definition_text)
+
+    return @base_package
+  end
+
+  def load_package_object()
+    if @descriptor.nil?
+      load_package_object_from_file()
+    else
+      @base_package = @repository.get_package(@descriptor)
+    end
+
+    register_package_with_environment_if_not_listing_or_publishing()
+
+    return @base_package
+  end
+
+  def apply_base_config_to_environment(ignore_base_package = false)
+    begin
+      @environment.apply_config(
+        synthesize_package_for_command_line_options(ignore_base_package),
+        Fig::Package::DEFAULT_CONFIG,
+        nil
+      )
+    rescue Fig::NoSuchPackageConfigError => exception
+      make_no_such_package_exception_descriptive(exception)
+    end
+
+    return
+  end
+
+  def register_package_with_environment()
+    if @options.updating?
+      @base_package.retrieves.each do |statement|
+        @environment.add_retrieve(statement)
+      end
+    end
+
+    @environment.register_package(@base_package)
+    apply_base_config_to_environment()
+
+    return
+  end
 
   private
 
@@ -52,19 +114,6 @@ module Fig::Command::PackageLoad
     return
   end
 
-  def register_package_with_environment()
-    if @options.updating?
-      @base_package.retrieves.each do |statement|
-        @environment.add_retrieve(statement)
-      end
-    end
-
-    @environment.register_package(@base_package)
-    apply_base_config_to_environment()
-
-    return
-  end
-
   def parse_package_definition_file(definition_text)
     if definition_text.nil?
       # This package gets a free ride in terms of requiring a base config; we
@@ -75,7 +124,7 @@ module Fig::Command::PackageLoad
 
     source_description = derive_package_source_description()
     @base_package =
-      Fig::Parser.new(@configuration, :check_include_versions).parse_package(
+      Fig::Parser.new(@application_configuration, :check_include_versions).parse_package(
         Fig::PackageDescriptor.new(
           nil, nil, nil, :source_description => source_description
         ),
@@ -83,38 +132,6 @@ module Fig::Command::PackageLoad
         source_description,
         definition_text
       )
-
-    return
-  end
-
-  def load_package_object_from_file()
-    definition_text = load_package_definition_file_contents()
-
-    parse_package_definition_file(definition_text)
-  end
-
-  def load_package_object()
-    if @descriptor.nil?
-      load_package_object_from_file()
-    else
-      @base_package = @repository.get_package(@descriptor)
-    end
-
-    register_package_with_environment_if_not_listing_or_publishing()
-
-    return
-  end
-
-  def apply_base_config_to_environment(ignore_base_package = false)
-    begin
-      @environment.apply_config(
-        synthesize_package_for_command_line_options(ignore_base_package),
-        Fig::Package::DEFAULT_CONFIG,
-        nil
-      )
-    rescue Fig::NoSuchPackageConfigError => exception
-      make_no_such_package_exception_descriptive(exception)
-    end
 
     return
   end
@@ -128,7 +145,7 @@ module Fig::Command::PackageLoad
         Fig::Statement::Configuration.new(
           nil,
           %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-          base_config(),
+          @base_config,
           []
         )
       ]
@@ -145,7 +162,7 @@ module Fig::Command::PackageLoad
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         Fig::PackageDescriptor.new(
-          @base_package.name(), @base_package.version(), base_config()
+          @base_package.name(), @base_package.version(), @base_config
         ),
         nil
       )
@@ -172,7 +189,7 @@ module Fig::Command::PackageLoad
     check_no_such_package_exception_is_for_command_line_package(exception)
     source = derive_exception_source()
 
-    message = %Q<There's no "#{base_config()}" config#{source}.>
+    message = %Q<There's no "#{@base_config}" config#{source}.>
     message += %q< Specify one that does like this: ">
     message +=
       Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
@@ -186,7 +203,7 @@ module Fig::Command::PackageLoad
   end
 
   def make_no_such_package_exception_descriptive_without_descriptor(exception)
-    raise exception if config_was_specified_by_user()
+    raise exception if @config_was_specified_by_user
     raise exception if not exception.descriptor.nil?
 
     source = derive_exception_source()
@@ -212,7 +229,7 @@ module Fig::Command::PackageLoad
       descriptor.name    && descriptor.name    != @descriptor.name
     raise exception if
       descriptor.version && descriptor.version != @descriptor.version
-    raise exception if      descriptor.config  != base_config()
+    raise exception if      descriptor.config  != @base_config
 
     return
   end
