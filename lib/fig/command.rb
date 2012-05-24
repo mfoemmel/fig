@@ -4,6 +4,7 @@ require 'set'
 
 require 'fig/at_exit'
 require 'fig/command/options'
+require 'fig/command/package_applier'
 require 'fig/command/package_loader'
 require 'fig/environment'
 require 'fig/figrc'
@@ -95,6 +96,7 @@ class Fig::Command
     end
 
     @base_package = @package_loader.load_package_object()
+    new_package_applier().register_package_with_environment_if_not_listing_or_publishing()
 
     if @options.listing()
       handle_post_parse_list_options()
@@ -202,7 +204,11 @@ class Fig::Command
     prepare_environment()
 
     @package_loader = Fig::Command::PackageLoader.new(
-      @configuration, @environment, @options, @descriptor, @repository, base_config, config_was_specified_by_user
+      @configuration,
+      @descriptor,
+      @options.package_definition_file,
+      base_config,
+      @repository
     )
   end
 
@@ -230,6 +236,18 @@ class Fig::Command
     return @options.config()                 ||
            @descriptor && @descriptor.config ||
            Fig::Package::DEFAULT_CONFIG
+  end
+
+  def new_package_applier()
+    return Fig::Command::PackageApplier.new(
+      @base_package,
+      @environment,
+      @options,
+      @descriptor,
+      base_config(),
+      config_was_specified_by_user(),
+      @package_loader.package_source_description()
+    )
   end
 
   # If the user has specified a descriptor, than any package.fig or --file
@@ -320,7 +338,7 @@ class Fig::Command
       end
     end
 
-    @package_loader.apply_base_config_to_environment(:ignore_base_package)
+    new_package_applier().apply_base_config_to_environment(:ignore_base_package)
 
     if @options.publish?
       Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."

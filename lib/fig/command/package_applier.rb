@@ -1,0 +1,142 @@
+require 'fig/package'
+require 'fig/package_descriptor'
+
+module Fig; end
+class Fig::Command; end
+
+class Fig::Command::PackageApplier
+  def initialize(
+    base_package, environment, options, descriptor, base_config, config_was_specified_by_user, package_source_description
+  )
+    @base_package                 = base_package
+    @environment                  = environment
+    @options                      = options
+    @descriptor                   = descriptor
+    @base_config                  = base_config
+    @config_was_specified_by_user = config_was_specified_by_user
+    @package_source_description   = package_source_description
+  end
+
+  def apply_base_config_to_environment(ignore_base_package = false)
+    begin
+      @environment.apply_config(
+        synthesize_package_for_command_line_options(ignore_base_package),
+        Fig::Package::DEFAULT_CONFIG,
+        nil
+      )
+    rescue Fig::NoSuchPackageConfigError => exception
+      make_no_such_package_exception_descriptive(exception)
+    end
+
+    return
+  end
+
+  def register_package_with_environment_if_not_listing_or_publishing()
+    return if @options.listing || @options.publishing?
+
+    register_package_with_environment()
+
+    return
+  end
+
+  def register_package_with_environment()
+    if @options.updating?
+      @base_package.retrieves.each do |statement|
+        @environment.add_retrieve(statement)
+      end
+    end
+
+    @environment.register_package(@base_package)
+    apply_base_config_to_environment()
+
+    return
+  end
+
+  private
+
+  def synthesize_package_for_command_line_options(ignore_base_package)
+    configuration_statements = []
+
+    if not ignore_base_package
+      configuration_statements << Fig::Statement::Include.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        Fig::PackageDescriptor.new(
+          @base_package.name(), @base_package.version(), @base_config
+        ),
+        nil
+      )
+    end
+
+    configuration_statements << @options.environment_statements()
+
+    configuration_statement =
+      Fig::Statement::Configuration.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        Fig::Package::DEFAULT_CONFIG,
+        configuration_statements.flatten()
+      )
+
+    return Fig::Package.new(nil, nil, '.', [configuration_statement])
+  end
+
+  def make_no_such_package_exception_descriptive(exception)
+    if not @descriptor
+      make_no_such_package_exception_descriptive_without_descriptor(exception)
+    end
+
+    check_no_such_package_exception_is_for_command_line_package(exception)
+    source = derive_exception_source()
+
+    message = %Q<There's no "#{@base_config}" config#{source}.>
+    message += %q< Specify one that does like this: ">
+    message +=
+      Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
+    message += %q<".>
+
+    if @options.publishing?
+      message += ' (Yes, this does work with --publish.)'
+    end
+
+    raise Fig::UserInputError.new(message)
+  end
+
+  def make_no_such_package_exception_descriptive_without_descriptor(exception)
+    raise exception if @config_was_specified_by_user
+    raise exception if not exception.descriptor.nil?
+
+    source = derive_exception_source()
+    message =
+      %Q<No config was specified and there's no "#{Fig::Package::DEFAULT_CONFIG}" config#{source}.>
+    config_names = @base_package.config_names()
+    if config_names.size > 1
+      message +=
+        %Q< The valid configs are "#{config_names.join('", "')}".>
+    elsif config_names.size == 1
+      message += %Q< The only config is "#{config_names[0]}".>
+    else
+      message += ' Actually, there are no configs.'
+    end
+
+    raise Fig::UserInputError.new(message)
+  end
+
+  def check_no_such_package_exception_is_for_command_line_package(exception)
+    descriptor = exception.descriptor
+
+    raise exception if
+      descriptor.name    && descriptor.name    != @descriptor.name
+    raise exception if
+      descriptor.version && descriptor.version != @descriptor.version
+    raise exception if      descriptor.config  != @base_config
+
+    return
+  end
+
+  def derive_exception_source()
+    source = @package_source_description
+
+    return source ? %Q< in #{source}> : ''
+  end
+end
