@@ -72,16 +72,20 @@ class Fig::Command
       return @options.exit_code
     end
 
+    @options.actions().each do
+      |action|
+
+      if action.execute_immediately_after_command_line_parse?
+        return action.execute(@repository)
+      end
+    end
+
     Fig::Logging.initialize_pre_configuration(@options.log_level())
 
     @descriptor = @options.descriptor
     check_descriptor_requirement()
     if @options.actions.any? {|action| not action.allow_both_descriptor_and_file? }
       ensure_descriptor_and_file_were_not_both_specified()
-    end
-
-    if @options.help? or @options.version?
-      return @options.base_action().execute(@repository)
     end
 
     configure()

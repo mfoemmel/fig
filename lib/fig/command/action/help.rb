@@ -13,6 +13,10 @@ class Fig::Command::Action::Help
     return %w<--help>
   end
 
+  def execute_immediately_after_command_line_parse?
+    return true
+  end
+
   def descriptor_requirement()
     return :ignore
   end

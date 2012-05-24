@@ -10,6 +10,12 @@ module Fig::Command::Action
     raise NotImplementedError
   end
 
+  # Is this a special Action that should just be run on its own without looking
+  # at other Actions?
+  def execute_immediately_after_command_line_parse?
+    return false
+  end
+
   def descriptor_requirement()
     raise NotImplementedError
   end
