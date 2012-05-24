@@ -21,19 +21,6 @@ module Fig::Command::Listing
     return
   end
 
-  def handle_pre_parse_list_options()
-    case @options.listing()
-    when :local_packages
-      @options.base_action().execute(@repository)
-    when :remote_packages
-      @options.base_action().execute(@repository)
-    else
-      return false
-    end
-
-    return true
-  end
-
   def display_dependencies()
     if @options.list_tree?
       display_dependencies_in_tree()

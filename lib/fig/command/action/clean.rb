@@ -9,6 +9,11 @@ class Fig::Command::Action::Clean
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
+  # TODO: delete this
+  def implemented?
+    return true
+  end
+
   def options()
     return %w<--clean>
   end
@@ -31,5 +36,15 @@ class Fig::Command::Action::Clean
 
   def apply_base_config?()
     return false
+  end
+
+  def configure(options)
+    @descriptor = options.descriptor
+  end
+
+  def execute(repository)
+    repository.clean(@descriptor)
+
+    return 0
   end
 end

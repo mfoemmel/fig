@@ -2,6 +2,13 @@ module Fig; end
 class Fig::Command; end
 
 module Fig::Command::Action
+  # TODO: delete this
+  #
+  # This is a cheat until the full refactoring is done.
+  def implemented?()
+    return false
+  end
+
   def primary_option()
     return options()[0]
   end

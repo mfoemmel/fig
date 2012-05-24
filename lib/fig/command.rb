@@ -90,13 +90,8 @@ class Fig::Command
 
     configure()
 
-    if @options.clean?
-      @repository.clean(@descriptor)
-      return 0
-    end
-
-    if handle_pre_parse_list_options()
-      return 0
+    if @options.base_action().implemented?
+      return @options.base_action().execute(@repository)
     end
 
     if @options.publishing?
