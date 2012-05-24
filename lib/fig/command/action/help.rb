@@ -43,6 +43,10 @@ class Fig::Command::Action::Help
     return false
   end
 
+  def apply_config?()
+    return false
+  end
+
   def apply_base_config?()
     return false
   end

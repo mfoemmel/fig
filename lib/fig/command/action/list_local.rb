@@ -34,6 +34,10 @@ class Fig::Command::Action::ListLocal
     return false
   end
 
+  def apply_config?()
+    return false
+  end
+
   def apply_base_config?()
     return false
   end

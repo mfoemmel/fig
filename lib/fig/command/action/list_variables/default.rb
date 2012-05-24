@@ -24,6 +24,10 @@ class Fig::Command::Action::ListVariables::Default
     return true
   end
 
+  def apply_config?()
+    return true
+  end
+
   def apply_base_config?()
     return true
   end

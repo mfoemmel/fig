@@ -39,6 +39,10 @@ class Fig::Command::Action::Version
     return false
   end
 
+  def apply_config?()
+    return false
+  end
+
   def apply_base_config?()
     return false
   end

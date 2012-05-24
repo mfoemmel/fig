@@ -35,11 +35,19 @@ module Fig::Command::Action
     raise NotImplementedError
   end
 
+  def base_package_can_come_from_descriptor?()
+    return true
+  end
+
   def need_base_config?()
     raise NotImplementedError
   end
 
   def register_base_package?()
+    raise NotImplementedError
+  end
+
+  def apply_config?()
     raise NotImplementedError
   end
 

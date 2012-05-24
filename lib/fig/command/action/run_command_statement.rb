@@ -29,6 +29,10 @@ class Fig::Command::Action::RunCommandStatement
     return true
   end
 
+  def apply_config?()
+    return true
+  end
+
   def apply_base_config?()
     return true
   end

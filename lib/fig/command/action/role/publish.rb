@@ -18,6 +18,10 @@ module Fig::Command::Action::Role::Publish
     return true
   end
 
+  def base_package_can_come_from_descriptor?()
+    return false
+  end
+
   def need_base_config?()
     return false
   end
@@ -26,7 +30,11 @@ module Fig::Command::Action::Role::Publish
     return false
   end
 
-  def apply_base_config?()
+  def apply_config?()
     return true
+  end
+
+  def apply_base_config?()
+    return false
   end
 end

@@ -319,8 +319,6 @@ module Fig::Command::Listing
   end
 
   def display_variables_flat_from_environment()
-    new_package_applier().register_package_with_environment()
-
     variables = @environment.variables()
 
     if variables.empty? and $stdout.tty?

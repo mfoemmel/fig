@@ -87,6 +87,23 @@ class Fig::Command
 
     configure()
 
+    base_action = @options.base_action()
+    if base_action.need_base_package?
+      if base_action.base_package_can_come_from_descriptor?
+        @base_package = @package_loader.load_package_object()
+      else
+        @base_package = @package_loader.load_package_object_from_file()
+      end
+
+      applier = new_package_applier()
+      if base_action.register_base_package?
+        applier.register_package_with_environment()
+      end
+      if base_action.apply_config?
+        applier.apply_config_to_environment(! base_action.apply_base_config?)
+      end
+    end
+
     if @options.base_action().implemented?
       return @options.base_action().execute(@repository)
     end
@@ -94,9 +111,6 @@ class Fig::Command
     if @options.publishing?
       return publish()
     end
-
-    @base_package = @package_loader.load_package_object()
-    new_package_applier().register_package_with_environment_if_not_listing_or_publishing()
 
     if @options.listing()
       handle_post_parse_list_options()
@@ -311,6 +325,8 @@ class Fig::Command
       )
     end
 
+    # TODO: fail on environment statements && --file because the --file will
+    # get ignored as far as statements are concerned.
     publish_statements = nil
     if not @options.environment_statements().empty?
       publish_statements =
@@ -329,7 +345,6 @@ class Fig::Command
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
       )
     else
-      @base_package = @package_loader.load_package_object_from_file()
       if not @base_package.statements.empty?
         publish_statements = @base_package.statements
       else
@@ -337,8 +352,6 @@ class Fig::Command
         return 1
       end
     end
-
-    new_package_applier().apply_base_config_to_environment(:ignore_base_package)
 
     if @options.publish?
       Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."

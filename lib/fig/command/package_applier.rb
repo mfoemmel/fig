@@ -17,10 +17,22 @@ class Fig::Command::PackageApplier
     @package_source_description   = package_source_description
   end
 
-  def apply_base_config_to_environment(ignore_base_package = false)
+  def register_package_with_environment()
+    if @options.updating?
+      @base_package.retrieves.each do |statement|
+        @environment.add_retrieve(statement)
+      end
+    end
+
+    @environment.register_package(@base_package)
+
+    return
+  end
+
+  def apply_config_to_environment(ignore_base_config)
     begin
       @environment.apply_config(
-        synthesize_package_for_command_line_options(ignore_base_package),
+        synthesize_package_for_command_line_options(ignore_base_config),
         Fig::Package::DEFAULT_CONFIG,
         nil
       )
@@ -31,33 +43,12 @@ class Fig::Command::PackageApplier
     return
   end
 
-  def register_package_with_environment_if_not_listing_or_publishing()
-    return if @options.listing || @options.publishing?
-
-    register_package_with_environment()
-
-    return
-  end
-
-  def register_package_with_environment()
-    if @options.updating?
-      @base_package.retrieves.each do |statement|
-        @environment.add_retrieve(statement)
-      end
-    end
-
-    @environment.register_package(@base_package)
-    apply_base_config_to_environment()
-
-    return
-  end
-
   private
 
-  def synthesize_package_for_command_line_options(ignore_base_package)
+  def synthesize_package_for_command_line_options(ignore_base_config)
     configuration_statements = []
 
-    if not ignore_base_package
+    if not ignore_base_config
       configuration_statements << Fig::Statement::Include.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,

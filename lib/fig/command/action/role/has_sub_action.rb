@@ -33,11 +33,16 @@ module Fig::Command::Action::Role::HasSubAction
 
   def register_base_package?()
     check_sub_action_presence()
-    return sub_action.apply_base_package?
+    return sub_action.register_base_package?
+  end
+
+  def apply_config?()
+    check_sub_action_presence()
+    return sub_action.apply_config?
   end
 
   def apply_base_config?()
     check_sub_action_presence()
-    return sub_action.apply_base_package?
+    return sub_action.apply_base_config?
   end
 end
