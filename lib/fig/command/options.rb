@@ -250,17 +250,13 @@ Environment variables:
     return
   end
 
-  # This needs to be public for efficient use of custom command.rb wrappers.
-  def help()
-    puts @help_message
-    puts <<-'END_MESSAGE'
+  def help_message()
+    return @help_message + <<-'END_MESSAGE'
         --                           end of Fig options; anything after this is used as a command to run
         --command-extra-args         end of Fig options; anything after this is appended to the end of a
                                      "command" statement in a "config" block.
 
     END_MESSAGE
-
-    return 0
   end
 
   private
@@ -316,6 +312,8 @@ Environment variables:
     end
     set_up_sub_actions()
     derive_primary_descriptor(argv.first)
+
+    actions().each {|action| action.configure(self)}
 
     return
   end

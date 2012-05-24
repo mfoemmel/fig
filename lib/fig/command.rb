@@ -77,11 +77,7 @@ class Fig::Command
     @descriptor = @options.descriptor
     check_descriptor_requirement()
 
-    if @options.help?
-      return @options.help
-    end
-
-    if @options.version?
+    if @options.help? or @options.version?
       return @options.base_action().execute()
     end
 
