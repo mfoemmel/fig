@@ -108,6 +108,11 @@ Environment variables:
     return actions
   end
 
+  # TODO: delete this once everything has been moved over to Actions.
+  def base_action()
+    return @base_action
+  end
+
   def archives()
     return @options[:archives]
   end

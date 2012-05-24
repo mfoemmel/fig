@@ -1,3 +1,4 @@
+require 'fig/command'
 require 'fig/command/action/role/has_no_sub_action'
 
 module  Fig; end
@@ -29,5 +30,14 @@ class Fig::Command::Action::Version
 
   def apply_base_config?()
     return false
+  end
+
+  def execute()
+    version = Fig::Command.get_version()
+    return 1 if version.nil?
+
+    puts File.basename($0) + ' v' + version
+
+    return 0
   end
 end

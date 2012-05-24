@@ -82,7 +82,7 @@ class Fig::Command
     end
 
     if @options.version?
-      return emit_version()
+      return @options.base_action().execute()
     end
 
     configure()
@@ -153,15 +153,6 @@ class Fig::Command
       log_error_message(error)
       return 1
     end
-  end
-
-  def emit_version()
-    version = Fig::Command.get_version()
-    return 1 if version.nil?
-
-    puts File.basename($0) + ' v' + version
-
-    return 0
   end
 
   private
