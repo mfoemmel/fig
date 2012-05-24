@@ -86,23 +86,7 @@ class Fig::Command
     end
 
     configure()
-
-    base_action = @options.base_action()
-    if base_action.need_base_package?
-      if base_action.base_package_can_come_from_descriptor?
-        @base_package = @package_loader.load_package_object()
-      else
-        @base_package = @package_loader.load_package_object_from_file()
-      end
-
-      applier = new_package_applier()
-      if base_action.register_base_package?
-        applier.register_package_with_environment()
-      end
-      if base_action.apply_config?
-        applier.apply_config_to_environment(! base_action.apply_base_config?)
-      end
-    end
+    set_up_base_package()
 
     if @options.base_action().implemented?
       return @options.base_action().execute(@repository)
@@ -216,14 +200,6 @@ class Fig::Command
     end
 
     prepare_environment()
-
-    @package_loader = Fig::Command::PackageLoader.new(
-      @configuration,
-      @descriptor,
-      @options.package_definition_file,
-      base_config,
-      @repository
-    )
   end
 
   def prepare_environment()
@@ -241,6 +217,28 @@ class Fig::Command
     return
   end
 
+  def set_up_base_package()
+    base_action = @options.base_action()
+    if base_action.need_base_package?
+      package_loader = new_package_loader()
+      if base_action.base_package_can_come_from_descriptor?
+        @base_package = package_loader.load_package_object()
+      else
+        @base_package = package_loader.load_package_object_from_file()
+      end
+
+      applier = new_package_applier(package_loader.package_source_description())
+      if base_action.register_base_package?
+        applier.register_package_with_environment()
+      end
+      if base_action.apply_config?
+        applier.apply_config_to_environment(! base_action.apply_base_config?)
+      end
+    end
+
+    return
+  end
+
   def config_was_specified_by_user()
     return ! @options.config().nil?                   ||
            @descriptor && ! @descriptor.config().nil?
@@ -252,7 +250,17 @@ class Fig::Command
            Fig::Package::DEFAULT_CONFIG
   end
 
-  def new_package_applier()
+  def new_package_loader()
+    return Fig::Command::PackageLoader.new(
+      @configuration,
+      @descriptor,
+      @options.package_definition_file,
+      base_config(),
+      @repository
+    )
+  end
+
+  def new_package_applier(package_source_description)
     return Fig::Command::PackageApplier.new(
       @base_package,
       @environment,
@@ -260,7 +268,7 @@ class Fig::Command
       @descriptor,
       base_config(),
       config_was_specified_by_user(),
-      @package_loader.package_source_description()
+      package_source_description
     )
   end
 
