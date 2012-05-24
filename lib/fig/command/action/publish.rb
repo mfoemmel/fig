@@ -1,5 +1,6 @@
 require 'fig/command/action'
 require 'fig/command/action/role/has_no_sub_action'
+require 'fig/command/action/role/publish'
 
 module  Fig; end
 class   Fig::Command; end
@@ -8,28 +9,9 @@ module  Fig::Command::Action; end
 class Fig::Command::Action::Publish
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
+  include Fig::Command::Action::Role::Publish
 
   def options
     return %w<--publish>
-  end
-
-  def descriptor_requirement()
-    return :required
-  end
-
-  def need_base_package?()
-    return true
-  end
-
-  def need_base_config?()
-    return false
-  end
-
-  def register_base_package?()
-    return false
-  end
-
-  def apply_base_config?()
-    return true
   end
 end

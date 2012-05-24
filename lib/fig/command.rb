@@ -76,6 +76,9 @@ class Fig::Command
 
     @descriptor = @options.descriptor
     check_descriptor_requirement()
+    if @options.actions.any? {|action| not action.allow_both_descriptor_and_file? }
+      ensure_descriptor_and_file_were_not_both_specified()
+    end
 
     if @options.help? or @options.version?
       return @options.base_action().execute(@repository)
@@ -84,7 +87,6 @@ class Fig::Command
     configure()
 
     if @options.clean?
-      ensure_descriptor_and_file_were_not_both_specified()
       @repository.clean(@descriptor)
       return 0
     end
@@ -96,8 +98,6 @@ class Fig::Command
     if @options.publishing?
       return publish()
     end
-
-    ensure_descriptor_and_file_were_not_both_specified()
 
     load_package_object()
 
@@ -236,9 +236,6 @@ class Fig::Command
   # If the user has specified a descriptor, than any package.fig or --file
   # option is ignored.  Thus, in order to avoid confusing the user, we make
   # specifying both an error.
-  #
-  # The one exception to this rule is when we are publishing, which should
-  # already have been invoked by the time this is called.
   def ensure_descriptor_and_file_were_not_both_specified()
     file = @options.package_definition_file()
 

@@ -17,6 +17,11 @@ class Fig::Command::Action::Help
     return :ignore
   end
 
+  def allow_both_descriptor_and_file?
+    # Help has to basically allow anything.
+    return true
+  end
+
   def need_base_package?()
     return false
   end
