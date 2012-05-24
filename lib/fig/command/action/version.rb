@@ -34,7 +34,7 @@ class Fig::Command::Action::Version
     return false
   end
 
-  def execute()
+  def execute(repository)
     version = Fig::Command.get_version()
     return 1 if version.nil?
 

@@ -13,18 +13,6 @@ class Fig::Command; end
 module Fig::Command::Listing
   private
 
-  def display_local_package_list()
-    @repository.list_packages.sort.each do |item|
-      puts item
-    end
-  end
-
-  def display_remote_package_list()
-    @repository.list_remote_packages.sort.each do |item|
-      puts item
-    end
-  end
-
   def display_configs_in_local_packages_list()
     @base_package.configs.each do |config|
       puts config.name
@@ -36,9 +24,9 @@ module Fig::Command::Listing
   def handle_pre_parse_list_options()
     case @options.listing()
     when :local_packages
-      display_local_package_list()
+      @options.base_action().execute(@repository)
     when :remote_packages
-      display_remote_package_list()
+      @options.base_action().execute(@repository)
     else
       return false
     end

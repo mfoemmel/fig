@@ -7,7 +7,7 @@ module Fig::Command::Action
     # Do nothing by default.
   end
 
-  def execute()
+  def execute(repository)
     raise NotImplementedError
   end
 end

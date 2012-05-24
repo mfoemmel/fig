@@ -32,4 +32,10 @@ class Fig::Command::Action::ListLocal
   def apply_base_config?()
     return false
   end
+
+  def execute(repository)
+    repository.list_packages.sort.each {|item| puts item}
+
+    return 0
+  end
 end

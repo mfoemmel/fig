@@ -78,7 +78,7 @@ class Fig::Command
     check_descriptor_requirement()
 
     if @options.help? or @options.version?
-      return @options.base_action().execute()
+      return @options.base_action().execute(@repository)
     end
 
     configure()
