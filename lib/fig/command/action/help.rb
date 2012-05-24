@@ -9,7 +9,7 @@ class Fig::Command::Action::Help
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  def options
+  def options()
     return %w<--help>
   end
 
@@ -17,7 +17,7 @@ class Fig::Command::Action::Help
     return :ignore
   end
 
-  def allow_both_descriptor_and_file?
+  def allow_both_descriptor_and_file?()
     # Help has to basically allow anything.
     return true
   end

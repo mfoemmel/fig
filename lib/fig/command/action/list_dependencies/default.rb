@@ -4,7 +4,7 @@ module  Fig::Command::Action; end
 class   Fig::Command::Action::ListDependencies; end
 
 class Fig::Command::Action::ListDependencies::Default
-  def options
+  def options()
     return %w<--list-dependencies>
   end
 

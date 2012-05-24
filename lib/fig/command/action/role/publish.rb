@@ -8,13 +8,9 @@ module Fig::Command::Action::Role::Publish
     return :required
   end
 
-  def allow_both_descriptor_and_file?
+  def allow_both_descriptor_and_file?()
     # Actually, publishing requires a descriptor and another source of the base
     # package.
-    return true
-  end
-
-  def allow_both_descriptor_and_file?
     return true
   end
 

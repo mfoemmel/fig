@@ -8,7 +8,7 @@ module Fig::Command::Action::Role::Update
     return nil
   end
 
-  def allow_both_descriptor_and_file?
+  def allow_both_descriptor_and_file?()
     # We don't care, so we let the base action say what it wants.
     return true
   end

@@ -9,7 +9,7 @@ class Fig::Command::Action::ListDependencies
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasSubAction
 
-  def options
+  def options()
     if sub_action
       return sub_action.options
     end

@@ -11,7 +11,7 @@ class Fig::Command::Action::PublishLocal
   include Fig::Command::Action::Role::HasNoSubAction
   include Fig::Command::Action::Role::Publish
 
-  def options
+  def options()
     return %w<--publish-local>
   end
 end

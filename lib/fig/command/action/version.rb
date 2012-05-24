@@ -10,7 +10,7 @@ class Fig::Command::Action::Version
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  def options
+  def options()
     return %w<--version>
   end
 

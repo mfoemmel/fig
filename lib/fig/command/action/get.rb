@@ -9,7 +9,7 @@ class Fig::Command::Action::Get
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  def options
+  def options()
     return %w<--get>
   end
 

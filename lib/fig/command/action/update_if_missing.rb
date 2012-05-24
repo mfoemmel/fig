@@ -11,7 +11,7 @@ class Fig::Command::Action::UpdateIfMissing
   include Fig::Command::Action::Role::HasNoSubAction
   include Fig::Command::Action::Role::Update
 
-  def options
+  def options()
     return %w<--update-if-missing>
   end
 end
