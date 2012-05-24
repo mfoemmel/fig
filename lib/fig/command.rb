@@ -261,7 +261,7 @@ class Fig::Command
       when :required
         if not @descriptor
           raise Fig::UserInputError.new(
-            "Need to specify a descriptor for #{action.options[0]}."
+            "Need to specify a descriptor for #{action.primary_option()}."
           )
         end
       when :warn

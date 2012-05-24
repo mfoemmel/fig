@@ -687,7 +687,7 @@ Environment variables:
 
     if @base_action
       raise Fig::Command::OptionError.new(
-        "Cannot specify both #{@base_action.options[0]} and #{action.options[0]}."
+        "Cannot specify both #{@base_action.primary_option()} and #{action.primary_option()}."
       )
     end
 
@@ -700,7 +700,7 @@ Environment variables:
     update_action = update_action_class.new
     if @update_action
       raise Fig::Command::OptionError.new(
-        "Cannot specify both #{@update_action.options[0]} and #{update_action.options[0]}."
+        "Cannot specify both #{@update_action.primary_option()} and #{update_action.primary_option()}."
       )
     end
 

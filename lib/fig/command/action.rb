@@ -2,6 +2,10 @@ module Fig; end
 class Fig::Command; end
 
 module Fig::Command::Action
+  def primary_option()
+    return options()[0]
+  end
+
   def options()
     raise NotImplementedError
   end
