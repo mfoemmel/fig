@@ -97,11 +97,6 @@ class Fig::Command
 
     if @options.listing()
       handle_post_parse_list_options()
-    elsif @options.get()
-      # Ruby v1.8 emits "nil" for nil, whereas ruby v1.9 emits the empty
-      # string, so, for consistency, we need to ensure that we always emit the
-      # empty string.
-      puts @environment[@options.get()] || ''
     elsif @options.shell_command
       @environment.execute_shell(@options.shell_command) do
         |command| @operating_system.shell_exec command

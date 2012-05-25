@@ -9,6 +9,11 @@ class Fig::Command::Action::Get
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
+  # TODO: Delete this
+  def implemented?
+    return true
+  end
+
   def options()
     return %w<--get>
   end
@@ -35,5 +40,18 @@ class Fig::Command::Action::Get
 
   def apply_base_config?()
     return true
+  end
+
+  def configure(options)
+    @variable = options.get
+  end
+
+  def execute(execution_objects)
+    # Ruby v1.8 emits "nil" for nil, whereas ruby v1.9 emits the empty
+    # string, so, for consistency, we need to ensure that we always emit the
+    # empty string.
+    puts execution_objects.environment[@variable] || ''
+
+    return 0
   end
 end
