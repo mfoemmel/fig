@@ -17,14 +17,14 @@ class Fig::Command::Action::Publish
     return %w<--publish>
   end
 
-  def execute(execution_objects)
-    publish_preflight(execution_objects)
+  def execute()
+    publish_preflight()
 
     Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."
 
     package_description =
       Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
-    if execution_objects.repository.list_remote_packages.include?(
+    if @execution_context.repository.list_remote_packages.include?(
       package_description
     )
       Fig::Logging.info "#{@descriptor.to_string()} has already been published."
@@ -39,7 +39,7 @@ class Fig::Command::Action::Publish
     end
 
     Fig::Logging.info "Publishing #{@descriptor.to_string()}."
-    execution_objects.repository.publish_package(
+    @execution_context.repository.publish_package(
       @publish_statements, @descriptor, false
     )
 

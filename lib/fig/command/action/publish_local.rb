@@ -16,11 +16,11 @@ class Fig::Command::Action::PublishLocal
     return %w<--publish-local>
   end
 
-  def execute(execution_objects)
-    publish_preflight(execution_objects)
+  def execute()
+    publish_preflight()
 
     Fig::Logging.info "Publishing #{@descriptor.to_string()}."
-    execution_objects.repository.publish_package(
+    @execution_context.repository.publish_package(
       @publish_statements, @descriptor, :publish_local
     )
 

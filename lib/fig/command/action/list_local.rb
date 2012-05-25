@@ -26,8 +26,8 @@ class Fig::Command::Action::ListLocal
     return false
   end
 
-  def execute(execution_objects)
-    execution_objects.repository.list_packages.sort.each {|item| puts item}
+  def execute()
+    @execution_context.repository.list_packages.sort.each {|item| puts item}
 
     return 0
   end

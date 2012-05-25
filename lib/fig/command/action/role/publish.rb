@@ -55,7 +55,7 @@ module Fig::Command::Action::Role::Publish
     @force                  = options.force?
   end
 
-  def publish_preflight(execution_objects)
+  def publish_preflight()
     if @descriptor.name.nil? || @descriptor.version.nil?
       raise Fig::UserInputError.new(
         'Please specify a package name and a version name.'
@@ -87,8 +87,8 @@ module Fig::Command::Action::Role::Publish
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
       )
     else
-      if not execution_objects.base_package.statements.empty?
-        @publish_statements = execution_objects.base_package.statements
+      if not @execution_context.base_package.statements.empty?
+        @publish_statements = @execution_context.base_package.statements
       else
         raise Fig::UserInputError.new('Nothing to publish.')
       end

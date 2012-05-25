@@ -79,7 +79,8 @@ class Fig::Command
       |action|
 
       if action.execute_immediately_after_command_line_parse?
-        return action.execute(@repository)
+        # Note that the action doesn't get an execution context.
+        return action.execute()
       end
     end
 
@@ -99,10 +100,17 @@ class Fig::Command
     return 0 if @options.base_action.nil?
 
     if @options.base_action.implemented?
-      execution_objects = ExecutionObjects.new(
-        @base_package, @environment, @repository, @operating_system
+      base_action = @options.base_action
+
+      base_action.execution_context = ExecutionContext.new(
+        @base_package,
+        base_config(),
+        @environment,
+        @repository,
+        @operating_system
       )
-      return @options.base_action().execute(execution_objects)
+
+      return base_action.execute
     end
 
     if @options.listing()
@@ -149,8 +157,10 @@ class Fig::Command
   private
 
   # Wanted: Better name for this.
-  ExecutionObjects =
-    Struct.new(:base_package, :environment, :repository, :operating_system)
+  ExecutionContext =
+    Struct.new(
+      :base_package, :base_config, :environment, :repository, :operating_system
+    )
 
   def derive_remote_url()
     if remote_operation_necessary?()

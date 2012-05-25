@@ -13,16 +13,6 @@ class Fig::Command; end
 module Fig::Command::Listing
   private
 
-  def display_dependencies()
-    if @options.list_tree?
-      display_dependencies_in_tree()
-    else
-      display_dependencies_flat()
-    end
-
-    return
-  end
-
   def display_variables()
     if @options.list_tree?
       display_variables_in_tree()
@@ -30,17 +20,6 @@ module Fig::Command::Listing
       display_variables_flat_from_repository()
     else
       display_variables_flat_from_environment()
-    end
-
-    return
-  end
-
-  def display_dependencies_in_tree()
-    walk_dependency_tree(@base_package, derive_base_display_config_names(), nil, 0) do
-      |package, config_name, depth|
-
-      print ' ' * (depth * 4)
-      puts package.to_s_with_config(config_name)
     end
 
     return
@@ -80,34 +59,6 @@ module Fig::Command::Listing
           package, [descriptor.config], new_backtrace, depth + 1, &block
         )
       end
-    end
-
-    return
-  end
-
-  def display_dependencies_flat()
-    packages = gather_package_dependency_configurations()
-
-    if packages.empty? and $stdout.tty?
-      puts '<no dependencies>'
-    else
-      strings = []
-
-      packages.keys.each do
-        |package|
-
-        if @options.list_all_configs?
-          packages[package].each do
-            |config_name|
-
-            strings << package.to_s_with_config(config_name)
-          end
-        else
-          strings << package
-        end
-      end
-
-      puts strings.uniq.sort.join("\n")
     end
 
     return
@@ -156,8 +107,6 @@ module Fig::Command::Listing
 
   def handle_post_parse_list_options()
     case @options.listing()
-    when :dependencies
-      display_dependencies()
     when :variables
       display_variables()
     else

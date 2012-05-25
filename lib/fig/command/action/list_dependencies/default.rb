@@ -1,9 +1,19 @@
+require 'fig/command/action'
+require 'fig/command/action/role/list_base_config'
+require 'fig/command/action/role/list_dependencies_flat'
+require 'fig/command/action/role/list_walking_dependency_tree'
+
 module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
 class   Fig::Command::Action::ListDependencies; end
 
 class Fig::Command::Action::ListDependencies::Default
+  include Fig::Command::Action
+  include Fig::Command::Action::Role::ListBaseConfig
+  include Fig::Command::Action::Role::ListDependenciesFlat
+  include Fig::Command::Action::Role::ListWalkingDependencyTree
+
   def options()
     return %w<--list-dependencies>
   end
@@ -24,11 +34,11 @@ class Fig::Command::Action::ListDependencies::Default
     return false
   end
 
-  def apply_config?()
+  def apply_config?
     return false
   end
 
-  def apply_base_config?()
-    return false
+  def derive_package_strings(packages)
+    return packages.keys
   end
 end

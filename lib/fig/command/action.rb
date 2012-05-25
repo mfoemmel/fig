@@ -2,6 +2,8 @@ module Fig; end
 class Fig::Command; end
 
 module Fig::Command::Action
+  attr_writer :execution_context
+
   # TODO: delete this
   #
   # This is a cheat until the full refactoring is done.
@@ -18,7 +20,8 @@ module Fig::Command::Action
   end
 
   # Is this a special Action that should just be run on its own without looking
-  # at other Actions?
+  # at other Actions?  Note that anything that returns true won't get an
+  # execution context.
   def execute_immediately_after_command_line_parse?
     return false
   end
@@ -61,7 +64,7 @@ module Fig::Command::Action
     return
   end
 
-  def execute(execution_objects)
+  def execute()
     raise NotImplementedError
   end
 end

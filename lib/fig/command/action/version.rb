@@ -23,7 +23,7 @@ class Fig::Command::Action::Version
     return true
   end
 
-  def execute(execution_objects)
+  def execute()
     version = Fig::Command.get_version()
     return 1 if version.nil?
 

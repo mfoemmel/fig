@@ -38,8 +38,8 @@ class Fig::Command::Action::ListConfigs
     return false
   end
 
-  def execute(execution_objects)
-    execution_objects.base_package.configs.each do |config|
+  def execute()
+    @execution_context.base_package.configs.each do |config|
       puts config.name
     end
 
