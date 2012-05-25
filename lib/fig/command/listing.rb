@@ -13,14 +13,6 @@ class Fig::Command; end
 module Fig::Command::Listing
   private
 
-  def display_configs_in_local_packages_list()
-    @base_package.configs.each do |config|
-      puts config.name
-    end
-
-    return
-  end
-
   def display_dependencies()
     if @options.list_tree?
       display_dependencies_in_tree()
@@ -164,8 +156,6 @@ module Fig::Command::Listing
 
   def handle_post_parse_list_options()
     case @options.listing()
-    when :configs
-      display_configs_in_local_packages_list()
     when :dependencies
       display_dependencies()
     when :variables

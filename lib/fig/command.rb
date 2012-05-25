@@ -94,7 +94,11 @@ class Fig::Command
     configure()
     set_up_base_package()
 
-    if @options.base_action().implemented?
+    # TODO: fix this.  This will be the case if one of the --update* options
+    # were specified but there is nothing else to do.
+    return 0 if @options.base_action.nil?
+
+    if @options.base_action.implemented?
       execution_objects = ExecutionObjects.new(
         @base_package, @environment, @repository, @operating_system
       )
@@ -218,21 +222,27 @@ class Fig::Command
   end
 
   def set_up_base_package()
-    base_action = @options.base_action()
-    if base_action.need_base_package?
+    action_needing_package =
+      @options.actions.first {|action| action.need_base_package?}
+
+    return if action_needing_package.nil?
+
+    if action_needing_package.need_base_package?
       package_loader = new_package_loader()
-      if base_action.base_package_can_come_from_descriptor?
+      if action_needing_package.base_package_can_come_from_descriptor?
         @base_package = package_loader.load_package_object()
       else
         @base_package = package_loader.load_package_object_from_file()
       end
 
       applier = new_package_applier(package_loader.package_source_description())
-      if base_action.register_base_package?
+      if action_needing_package.register_base_package?
         applier.register_package_with_environment()
       end
-      if base_action.apply_config?
-        applier.apply_config_to_environment(! base_action.apply_base_config?)
+      if action_needing_package.apply_config?
+        applier.apply_config_to_environment(
+          ! action_needing_package.apply_base_config?
+        )
       end
     end
 

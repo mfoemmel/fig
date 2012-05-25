@@ -9,6 +9,11 @@ class Fig::Command::Action::ListConfigs
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
+  # TODO: Delete this.
+  def implemented?
+    return true
+  end
+
   def options()
     return %w<--list-configs>
   end
@@ -31,5 +36,13 @@ class Fig::Command::Action::ListConfigs
 
   def apply_config?()
     return false
+  end
+
+  def execute(execution_objects)
+    execution_objects.base_package.configs.each do |config|
+      puts config.name
+    end
+
+    return 0
   end
 end
