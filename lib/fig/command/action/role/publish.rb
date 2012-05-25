@@ -1,9 +1,18 @@
+require 'fig/package'
+require 'fig/statement/configuration'
+require 'fig/user_input_error'
+
 module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
 module  Fig::Command::Action::Role; end
 
 module Fig::Command::Action::Role::Publish
+  # TODO: delete this
+  def implemented?
+    return true
+  end
+
   def descriptor_requirement()
     return :required
   end
@@ -36,5 +45,55 @@ module Fig::Command::Action::Role::Publish
 
   def apply_base_config?()
     return false
+  end
+
+  def configure(options)
+    @descriptor             = options.descriptor
+    @environment_statements = options.environment_statements
+    @resource_statements    = options.resources
+    @archive_statements     = options.archives
+    @force                  = options.force?
+  end
+
+  def publish_preflight(execution_objects)
+    if @descriptor.name.nil? || @descriptor.version.nil?
+      raise Fig::UserInputError.new(
+        'Please specify a package name and a version name.'
+      )
+    end
+    if @descriptor.name == '_meta'
+      raise Fig::UserInputError.new(
+        %q<Due to implementation issues, cannot create a package named "_meta".>
+      )
+    end
+
+    # TODO: fail on environment statements && --file because the --file will
+    # get ignored as far as statements are concerned.
+    publish_statements = nil
+    if not @environment_statements.empty?
+      @publish_statements =
+        @resource_statements +
+        @archive_statements  +
+        [
+          Fig::Statement::Configuration.new(
+            nil,
+            nil,
+            Fig::Package::DEFAULT_CONFIG,
+            @environment_statements
+          )
+        ]
+    elsif not @resource_statements.empty? or not @archive_statements.empty?
+      raise Fig::UserInputError.new(
+        '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
+      )
+    else
+      if not execution_objects.base_package.statements.empty?
+        @publish_statements = execution_objects.base_package.statements
+      else
+        raise Fig::UserInputError.new('Nothing to publish.')
+      end
+    end
+
+    return
   end
 end

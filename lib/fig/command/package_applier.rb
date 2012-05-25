@@ -6,7 +6,13 @@ class Fig::Command; end
 
 class Fig::Command::PackageApplier
   def initialize(
-    base_package, environment, options, descriptor, base_config, config_was_specified_by_user, package_source_description
+    base_package,
+    environment,
+    options,
+    descriptor,
+    base_config,
+    config_was_specified_by_user,
+    package_source_description
   )
     @base_package                 = base_package
     @environment                  = environment

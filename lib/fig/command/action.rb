@@ -61,7 +61,7 @@ module Fig::Command::Action
     return
   end
 
-  def execute(repository)
+  def execute(execution_objects)
     raise NotImplementedError
   end
 end

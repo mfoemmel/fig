@@ -26,7 +26,7 @@ class Fig::Command::Action::Help
     @help_message = options.help_message
   end
 
-  def execute(repository)
+  def execute(execution_objects)
     puts @help_message
 
     return 0

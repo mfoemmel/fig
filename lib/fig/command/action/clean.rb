@@ -30,8 +30,8 @@ class Fig::Command::Action::Clean
     @descriptor = options.descriptor
   end
 
-  def execute(repository)
-    repository.clean(@descriptor)
+  def execute(execution_objects)
+    execution_objects.repository.clean(@descriptor)
 
     return 0
   end

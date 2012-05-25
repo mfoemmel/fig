@@ -89,11 +89,10 @@ class Fig::Command
     set_up_base_package()
 
     if @options.base_action().implemented?
-      return @options.base_action().execute(@repository)
-    end
-
-    if @options.publishing?
-      return publish()
+      execution_objects = ExecutionObjects.new(
+        @base_package, @environment, @repository, @operating_system
+      )
+      return @options.base_action().execute(execution_objects)
     end
 
     if @options.listing()
@@ -147,6 +146,10 @@ class Fig::Command
   end
 
   private
+
+  # Wanted: Better name for this.
+  ExecutionObjects =
+    Struct.new(:base_package, :environment, :repository, :operating_system)
 
   def derive_remote_url()
     if remote_operation_necessary?()
@@ -319,71 +322,6 @@ class Fig::Command
     return @options.updating?                     ||
            @options.publish?                      ||
            @options.listing == :remote_packages
-  end
-
-  def publish()
-    if @descriptor.name.nil? || @descriptor.version.nil?
-      raise Fig::UserInputError.new(
-        'Please specify a package name and a version name.'
-      )
-    end
-    if @descriptor.name == '_meta'
-      raise Fig::UserInputError.new(
-        %q<Due to implementation issues, cannot create a package named "_meta".>
-      )
-    end
-
-    # TODO: fail on environment statements && --file because the --file will
-    # get ignored as far as statements are concerned.
-    publish_statements = nil
-    if not @options.environment_statements().empty?
-      publish_statements =
-        @options.resources() +
-        @options.archives() +
-        [
-          Fig::Statement::Configuration.new(
-            nil,
-            nil,
-            Fig::Package::DEFAULT_CONFIG,
-            @options.environment_statements()
-          )
-        ]
-    elsif not @options.resources().empty? or not @options.archives().empty?
-      raise Fig::UserInputError.new(
-        '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
-      )
-    else
-      if not @base_package.statements.empty?
-        publish_statements = @base_package.statements
-      else
-        $stderr.puts 'Nothing to publish.'
-        return 1
-      end
-    end
-
-    if @options.publish?
-      Fig::Logging.info "Checking status of #{@descriptor.to_string()}..."
-
-      package_description =
-        Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
-      if @repository.list_remote_packages.include?("#{package_description}")
-        Fig::Logging.info "#{@descriptor.to_string()} has already been published."
-
-        if not @options.force?
-          Fig::Logging.fatal 'Use the --force option if you really want to overwrite, or use --publish-local for testing.'
-          return 1
-        else
-          Fig::Logging.info 'Overwriting...'
-        end
-      end
-    end
-
-    Fig::Logging.info "Publishing #{@descriptor.to_string()}."
-    @repository.publish_package(
-      publish_statements, @descriptor, @options.publish_local?
-    )
-
-    return 0
   end
 
   def log_error_message(error)
