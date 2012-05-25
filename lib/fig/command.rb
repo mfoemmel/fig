@@ -18,18 +18,10 @@ require 'fig/statement/configuration'
 require 'fig/user_input_error'
 require 'fig/working_directory_maintainer'
 
-# The following are a break out of parts of this class simply to keep the file
-# size down.
-#
-# You will need to look in this file for any stuff related to --list-* options.
-require 'fig/command/listing'
-
 module Fig; end
 
 # Main program
 class Fig::Command
-  include Fig::Command::Listing
-
   def self.get_version()
     line = nil
 
