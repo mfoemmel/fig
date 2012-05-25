@@ -23,30 +23,6 @@ class Fig::Command::Action::Version
     return true
   end
 
-  def descriptor_requirement()
-    return :ignore
-  end
-
-  def need_base_package?()
-    return false
-  end
-
-  def need_base_config?()
-    return false
-  end
-
-  def register_base_package?()
-    return false
-  end
-
-  def apply_config?()
-    return false
-  end
-
-  def apply_base_config?()
-    return false
-  end
-
   def execute(repository)
     version = Fig::Command.get_version()
     return 1 if version.nil?

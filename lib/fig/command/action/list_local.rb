@@ -26,22 +26,6 @@ class Fig::Command::Action::ListLocal
     return false
   end
 
-  def need_base_config?()
-    return false
-  end
-
-  def register_base_package?()
-    return false
-  end
-
-  def apply_config?()
-    return false
-  end
-
-  def apply_base_config?()
-    return false
-  end
-
   def execute(repository)
     repository.list_packages.sort.each {|item| puts item}
 

@@ -22,35 +22,6 @@ class Fig::Command::Action::Help
     return true
   end
 
-  def descriptor_requirement()
-    return :ignore
-  end
-
-  def allow_both_descriptor_and_file?()
-    # Help has to basically allow anything.
-    return true
-  end
-
-  def need_base_package?()
-    return false
-  end
-
-  def need_base_config?()
-    return false
-  end
-
-  def register_base_package?()
-    return false
-  end
-
-  def apply_config?()
-    return false
-  end
-
-  def apply_base_config?()
-    return false
-  end
-
   def configure(options)
     @help_message = options.help_message
   end
