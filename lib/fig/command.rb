@@ -69,6 +69,12 @@ class Fig::Command
       return @options.exit_code
     end
 
+    if @options.actions().empty?
+      $stderr.puts "Nothing to do.\n\n"
+      $stderr.puts %q<Run "fig --help" for a full list of commands.>
+      return 1
+    end
+
     @options.actions().each do
       |action|
 
@@ -110,10 +116,6 @@ class Fig::Command
         @descriptor,
         @options.command_extra_argv || []
       ) { |cmd| @operating_system.shell_exec cmd }
-    elsif not @repository.updating?
-      $stderr.puts "Nothing to do.\n\n"
-      $stderr.puts %q<Run "fig --help" for a full list of commands.>
-      return 1
     end
 
     return 0

@@ -156,7 +156,7 @@ describe 'Fig' do
 
     it %q<prints error when --include is specified without a package version> do
       (out, err, exitstatus) = fig(
-          '--include package-without-version',
+          '--include package-without-version --get FOO',
           :no_raise_on_error => true
         )
       exitstatus.should_not == 0

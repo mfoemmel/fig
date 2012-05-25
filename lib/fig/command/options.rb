@@ -307,11 +307,11 @@ Environment variables:
       return
     end
 
-    if not @base_action
+    derive_primary_descriptor(argv.first)
+    if not @base_action and @descriptor
       set_base_action(Fig::Command::Action::RunCommandStatement)
     end
     set_up_sub_actions()
-    derive_primary_descriptor(argv.first)
 
     actions().each {|action| action.configure(self)}
 
@@ -716,7 +716,7 @@ Environment variables:
   end
 
   def set_up_sub_actions()
-    if @base_action.sub_action?
+    if @base_action and @base_action.sub_action?
       # This is a cheat because the only things with sub-actions at present are
       # --list-dependencies and --list-variables.  This will need to be
       # refactored if we get further sub-action actions.
