@@ -113,9 +113,7 @@ class Fig::Command
       return base_action.execute
     end
 
-    if @options.listing()
-      handle_post_parse_list_options()
-    elsif @options.shell_command
+    if @options.shell_command
       @environment.execute_shell(@options.shell_command) do
         |command| @operating_system.shell_exec command
       end

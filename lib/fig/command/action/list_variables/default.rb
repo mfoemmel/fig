@@ -7,6 +7,12 @@ class   Fig::Command::Action::ListVariables; end
 
 class Fig::Command::Action::ListVariables::Default
   include Fig::Command::Action
+
+  # TODO: delete this
+  def implemented?
+    return true
+  end
+
   def options()
     return %w<--list-variables>
   end
@@ -33,5 +39,19 @@ class Fig::Command::Action::ListVariables::Default
 
   def apply_base_config?()
     return true
+  end
+
+  def execute()
+    variables = @execution_context.environment.variables()
+
+    if variables.empty? and $stdout.tty?
+      puts '<no variables>'
+    else
+      variables.keys.sort.each do |variable|
+        puts variable + "=" + variables[variable]
+      end
+    end
+
+    return 0
   end
 end
