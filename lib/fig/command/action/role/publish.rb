@@ -43,11 +43,12 @@ module Fig::Command::Action::Role::Publish
   end
 
   def configure(options)
-    @descriptor             = options.descriptor
-    @environment_statements = options.environment_statements
-    @resource_statements    = options.resources
-    @archive_statements     = options.archives
-    @force                  = options.force?
+    @descriptor                   = options.descriptor
+    @environment_statements       = options.environment_statements
+    @package_contents_statements  = options.package_contents_statements
+    @force                        = options.force?
+
+    return
   end
 
   def publish_preflight()
@@ -67,8 +68,7 @@ module Fig::Command::Action::Role::Publish
     publish_statements = nil
     if not @environment_statements.empty?
       @publish_statements =
-        @resource_statements +
-        @archive_statements  +
+        @package_contents_statements +
         [
           Fig::Statement::Configuration.new(
             nil,
@@ -77,7 +77,7 @@ module Fig::Command::Action::Role::Publish
             @environment_statements
           )
         ]
-    elsif not @resource_statements.empty? or not @archive_statements.empty?
+    elsif not @package_contents_statements.empty?
       raise Fig::UserInputError.new(
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
       )

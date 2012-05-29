@@ -113,10 +113,6 @@ Environment variables:
     return @base_action
   end
 
-  def archives()
-    return @options[:archives]
-  end
-
   def clean?()
     return @options[:clean]
   end
@@ -193,8 +189,8 @@ Environment variables:
     return publish? || publish_local?
   end
 
-  def resources()
-    return @options[:resources]
+  def package_contents_statements()
+    return @options[:package_contents_statements]
   end
 
   def suppress_warning_include_statement_missing_version?()
@@ -576,23 +572,22 @@ Environment variables:
   end
 
   def set_up_package_contents_statements(parser)
-    @options[:archives] = []
+    @options[:package_contents_statements] = []
     @switches << parser.define(
       '--archive PATH',
       STARTS_WITH_NON_HYPHEN,
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:archives] <<
+      @options[:package_contents_statements] <<
         Fig::Statement::Archive.new(nil, '--archive option', path)
     end
 
-    @options[:resources] =[]
     @switches << parser.define(
       '--resource PATH',
       STARTS_WITH_NON_HYPHEN,
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:resources] <<
+      @options[:package_contents_statements] <<
         Fig::Statement::Resource.new(nil, '--resource option', path)
     end
 
