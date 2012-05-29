@@ -24,6 +24,6 @@ class Fig::Command::Action::PublishLocal
       @publish_statements, @descriptor, :publish_local
     )
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

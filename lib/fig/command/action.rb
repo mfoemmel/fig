@@ -2,6 +2,9 @@ module Fig; end
 class Fig::Command; end
 
 module Fig::Command::Action
+  EXIT_SUCCESS = 0
+  EXIT_FAILURE = 1
+
   attr_writer :execution_context
 
   def primary_option()

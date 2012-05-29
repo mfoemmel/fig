@@ -47,6 +47,6 @@ class Fig::Command::Action::Get
     # empty string.
     puts @execution_context.environment[@variable] || ''
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

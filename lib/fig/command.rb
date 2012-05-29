@@ -3,6 +3,7 @@ require 'net/ftp'
 require 'set'
 
 require 'fig/at_exit'
+require 'fig/command/action'
 require 'fig/command/options'
 require 'fig/command/package_applier'
 require 'fig/command/package_loader'
@@ -54,7 +55,7 @@ class Fig::Command
       @options = Fig::Command::Options.new(argv)
     rescue Fig::UserInputError => error
       $stderr.puts error.to_s # Logging isn't set up yet.
-      return 1
+      return Fig::Command::Action::EXIT_FAILURE
     end
 
     if not @options.exit_code.nil?
@@ -64,7 +65,7 @@ class Fig::Command
     if @options.actions().empty?
       $stderr.puts "Nothing to do.\n\n"
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
-      return 1
+      return Fig::Command::Action::EXIT_FAILURE
     end
 
     @options.actions().each do
@@ -89,7 +90,7 @@ class Fig::Command
 
     # TODO: fix this.  This will be the case if one of the --update* options
     # were specified but there is nothing else to do.
-    return 0 if @options.base_action.nil?
+    return Fig::Command::Action::EXIT_SUCCESS if @options.base_action.nil?
 
     base_action = @options.base_action
 
@@ -111,17 +112,17 @@ class Fig::Command
     rescue Fig::URLAccessError => error
       urls = error.urls.join(', ')
       $stderr.puts "Access to #{urls} in #{error.package}/#{error.version} not allowed."
-      return 1
+      return Fig::Command::Action::EXIT_FAILURE
     rescue Fig::UserInputError => error
       log_error_message(error)
-      return 1
+      return Fig::Command::Action::EXIT_FAILURE
     rescue OptionParser::InvalidOption => error
       $stderr.puts error.to_s
       $stderr.puts Fig::Command::Options::USAGE
-      return 1
+      return Fig::Command::Action::EXIT_FAILURE
     rescue Fig::RepositoryError => error
       log_error_message(error)
-      return 1
+      return Fig::Command::Action::EXIT_FAILURE
     end
   end
 

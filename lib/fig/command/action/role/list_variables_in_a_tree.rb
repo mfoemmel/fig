@@ -1,3 +1,4 @@
+require 'fig/command/action'
 require 'fig/statement/path'
 require 'fig/statement/set'
 
@@ -35,7 +36,7 @@ module Fig::Command::Action::Role::ListVariablesInATree
       display_variable_tree_level(child, '', '')
     end
 
-    return 0
+    return Fig::Command::Action::EXIT_SUCCESS
   end
 
   private

@@ -60,6 +60,6 @@ class Fig::Command::Action::ListVariables::AllConfigs
 
     variable_names.sort.each { |name| puts name }
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

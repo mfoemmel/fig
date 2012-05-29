@@ -24,6 +24,6 @@ class Fig::Command::Action::Help
   def execute()
     puts @help_message
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

@@ -28,6 +28,6 @@ class Fig::Command::Action::Clean
   def execute()
     @execution_context.repository.clean(@descriptor)
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

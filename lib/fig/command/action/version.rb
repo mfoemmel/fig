@@ -20,10 +20,10 @@ class Fig::Command::Action::Version
 
   def execute()
     version = Fig::Command.get_version()
-    return 1 if version.nil?
+    return EXIT_FAILURE if version.nil?
 
     puts File.basename($0) + ' v' + version
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

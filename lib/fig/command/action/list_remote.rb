@@ -28,6 +28,6 @@ class Fig::Command::Action::ListRemote
   def execute()
     @execution_context.repository.list_remote_packages.sort.each {|item| puts item}
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

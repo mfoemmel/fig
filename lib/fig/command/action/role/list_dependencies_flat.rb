@@ -1,3 +1,5 @@
+require 'fig/command/action'
+
 module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
@@ -15,6 +17,6 @@ module Fig::Command::Action::Role::ListDependenciesFlat
       puts strings.uniq.sort.join("\n")
     end
 
-    return 0
+    return Fig::Command::Action::EXIT_SUCCESS
   end
 end

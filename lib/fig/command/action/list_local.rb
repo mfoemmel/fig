@@ -24,6 +24,6 @@ class Fig::Command::Action::ListLocal
   def execute()
     @execution_context.repository.list_packages.sort.each {|item| puts item}
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

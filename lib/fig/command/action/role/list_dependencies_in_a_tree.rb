@@ -1,3 +1,5 @@
+require 'fig/command/action'
+
 module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
@@ -14,6 +16,6 @@ module Fig::Command::Action::Role::ListDependenciesInATree
       puts package.to_s_with_config(config_name)
     end
 
-    return 0
+    return Fig::Command::Action::EXIT_SUCCESS
   end
 end

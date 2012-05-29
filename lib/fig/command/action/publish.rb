@@ -47,6 +47,6 @@ class Fig::Command::Action::Publish
       @publish_statements, @descriptor, false
     )
 
-    return 0
+    return EXIT_SUCCESS
   end
 end

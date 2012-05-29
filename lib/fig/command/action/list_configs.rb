@@ -38,6 +38,6 @@ class Fig::Command::Action::ListConfigs
       puts config.name
     end
 
-    return 0
+    return EXIT_SUCCESS
   end
 end
