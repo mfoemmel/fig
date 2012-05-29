@@ -105,21 +105,6 @@ class Fig::Command
       return base_action.execute
     end
 
-    if @options.shell_command
-      @environment.execute_shell(@options.shell_command) do
-        |command| @operating_system.shell_exec command
-      end
-    elsif @descriptor
-      # TODO: Elliot's current theory is that this is pointless as long as
-      # we've applied the config.
-      @environment.include_config(@base_package, @descriptor, nil)
-      @environment.execute_config(
-        @base_package,
-        @descriptor,
-        @options.command_extra_argv || []
-      ) { |cmd| @operating_system.shell_exec cmd }
-    end
-
     return 0
   end
 

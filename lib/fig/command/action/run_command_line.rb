@@ -9,6 +9,11 @@ class Fig::Command::Action::RunCommandLine
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
+  # TODO: delete this
+  def implemented?
+    return true
+  end
+
   def options()
     return %w<-->
   end
@@ -35,5 +40,15 @@ class Fig::Command::Action::RunCommandLine
 
   def apply_base_config?()
     return true
+  end
+
+  def configure(options)
+    @command_line = options.shell_command
+  end
+
+  def execute()
+    @execution_context.environment.execute_shell(@command_line) do
+      |command| @execution_context.operating_system.shell_exec command
+    end
   end
 end
