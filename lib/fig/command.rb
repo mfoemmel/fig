@@ -155,6 +155,20 @@ class Fig::Command
   end
 
   def configure()
+    set_up_application_configuration()
+
+    Fig::Logging.initialize_post_configuration(
+      @options.log_config() || @configuration['log configuration'],
+      @options.log_level()
+    )
+
+    @operating_system = Fig::OperatingSystem.new(@options.login?)
+
+    prepare_repository()
+    prepare_environment()
+  end
+
+  def set_up_application_configuration()
     @configuration = Fig::FigRC.find(
       @options.figrc(),
       derive_remote_url(),
@@ -163,12 +177,10 @@ class Fig::Command
       @options.no_figrc?
     )
 
-    Fig::Logging.initialize_post_configuration(
-      @options.log_config() || @configuration['log configuration'],
-      @options.log_level()
-    )
+    return
+  end
 
-    @operating_system = Fig::OperatingSystem.new(@options.login?)
+  def prepare_repository()
     @repository = Fig::Repository.new(
       @operating_system,
       @options.home(),
@@ -179,25 +191,25 @@ class Fig::Command
       check_include_statements_versions?
     )
 
-    @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
+    return
+  end
+
+  def prepare_environment()
+    working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
     Fig::AtExit.add do
-      @working_directory_maintainer.prepare_for_shutdown(
+      working_directory_maintainer.prepare_for_shutdown(
         retrieves_should_happen?
       )
     end
 
-    prepare_environment()
-  end
-
-  def prepare_environment()
     environment_variables = nil
     if reset_environment?
       environment_variables = Fig::OperatingSystem.get_environment_variables({})
     end
 
     @environment = Fig::Environment.new(
-      @repository, environment_variables, @working_directory_maintainer
+      @repository, environment_variables, working_directory_maintainer
     )
 
     Fig::AtExit.add { @environment.check_unused_retrieves() }
