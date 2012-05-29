@@ -58,6 +58,10 @@ module Fig::Command::Action
     return false
   end
 
+  def retrieves_should_happen?()
+    return false
+  end
+
   # Answers whether we should reset the environment to nothing, sort of like
   # the standardized environment that cron(1) creates.  At present, we're only
   # setting this when we're listing variables.  One could imagine allowing this

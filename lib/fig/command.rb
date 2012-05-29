@@ -182,7 +182,9 @@ class Fig::Command
     @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
     Fig::AtExit.add do
-      @working_directory_maintainer.prepare_for_shutdown(@options.updating?)
+      @working_directory_maintainer.prepare_for_shutdown(
+        retrieves_should_happen?
+      )
     end
 
     prepare_environment()
@@ -204,28 +206,23 @@ class Fig::Command
   end
 
   def set_up_base_package()
-    action_needing_package =
-      @options.actions.first {|action| action.need_base_package?}
+    actions = @options.actions.select {|action| action.need_base_package?}
+    return if actions.empty?
 
-    return if action_needing_package.nil?
+    package_loader = new_package_loader()
+    if actions.all? {|action| action.base_package_can_come_from_descriptor?}
+      @base_package = package_loader.load_package_object()
+    else
+      @base_package = package_loader.load_package_object_from_file()
+    end
 
-    if action_needing_package.need_base_package?
-      package_loader = new_package_loader()
-      if action_needing_package.base_package_can_come_from_descriptor?
-        @base_package = package_loader.load_package_object()
-      else
-        @base_package = package_loader.load_package_object_from_file()
-      end
+    applier = new_package_applier(package_loader.package_source_description())
 
-      applier = new_package_applier(package_loader.package_source_description())
-      if action_needing_package.register_base_package?
-        applier.register_package_with_environment()
-      end
-      if action_needing_package.apply_config?
-        applier.apply_config_to_environment(
-          ! action_needing_package.apply_base_config?
-        )
-      end
+    if register_base_package?(actions)
+      applier.register_package_with_environment()
+    end
+    if apply_config?(actions)
+      applier.apply_config_to_environment(! apply_base_config?(actions))
     end
 
     return
@@ -303,6 +300,41 @@ class Fig::Command
 
   def remote_operation_necessary?()
     return @options.actions.any? {|action| action.remote_operation_necessary?}
+  end
+
+  def retrieves_should_happen?()
+    return @options.actions.any? {|action| action.retrieves_should_happen?}
+  end
+
+  def register_base_package?(actions)
+    return should_perform?(
+      actions, %Q<the base package should be in the starting set of packages>
+    ) {|action| action.register_base_package?}
+  end
+
+  def apply_config?(actions)
+    return should_perform?(
+      actions, %Q<any config should be applied>
+    ) {|action| action.apply_config?}
+  end
+
+  def apply_base_config?(actions)
+    return should_perform?(
+      actions, %Q<the base config should be applied>
+    ) {|action| action.apply_base_config?}
+  end
+
+  def should_perform?(actions, failure_description, &predicate)
+    yes_actions, no_actions = actions.partition &predicate
+
+    return false if yes_actions.empty?
+    return true if no_actions.empty?
+
+    action_strings = actions.map {|action| action.options.join}
+    action_string = action_strings.join %q<", ">
+    raise UserInputError.new(
+      %Q<Cannot use "#{action_string}" together because they disagree on whether #{failure_description}.>
+    )
   end
 
   def reset_environment?()

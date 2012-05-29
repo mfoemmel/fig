@@ -32,4 +32,8 @@ module Fig::Command::Action::Role::Update
   def apply_base_config?()
     return true
   end
+
+  def retrieves_should_happen?()
+    return true
+  end
 end
