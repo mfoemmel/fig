@@ -125,9 +125,8 @@ Environment variables:
     return @options[:force]
   end
 
-  # TODO: rename
-  def get()
-    return @options[:get]
+  def variable_to_get()
+    return @options[:variable_to_get]
   end
 
   def home()
@@ -342,9 +341,9 @@ Environment variables:
       '--get VARIABLE',
       STARTS_WITH_NON_HYPHEN,
       'print value of environment variable VARIABLE'
-    ) do |get|
+    ) do |variable_to_get|
       set_base_action(Fig::Command::Action::Get)
-      @options[:get] = get
+      @options[:variable_to_get] = variable_to_get
     end
 
     set_up_listings(parser)

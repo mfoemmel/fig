@@ -38,7 +38,7 @@ class Fig::Command::Action::Get
   end
 
   def configure(options)
-    @variable = options.get
+    @variable = options.variable_to_get
   end
 
   def execute()
