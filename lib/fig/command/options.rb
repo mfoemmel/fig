@@ -175,12 +175,6 @@ Environment variables:
     return @options[:update_if_missing]
   end
 
-  # Other code shouldn't need to know this.  It should be provided by Action
-  # metadata.
-  def updating?()
-    return update? || update_if_missing?
-  end
-
   # This needs to be public for efficient use of custom command.rb wrappers.
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|

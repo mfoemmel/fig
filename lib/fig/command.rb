@@ -218,6 +218,9 @@ class Fig::Command
 
     applier = new_package_applier(package_loader.package_source_description())
 
+    if retrieves_should_happen?
+      applier.activate_retrieves()
+    end
     if register_base_package?(actions)
       applier.register_package_with_environment()
     end

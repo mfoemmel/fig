@@ -21,13 +21,15 @@ class Fig::Command::PackageApplier
     @package_source_description   = package_source_description
   end
 
-  def register_package_with_environment()
-    if @options.updating?
-      @base_package.retrieves.each do |statement|
-        @environment.add_retrieve(statement)
-      end
+  def activate_retrieves()
+    @base_package.retrieves.each do |statement|
+      @environment.add_retrieve(statement)
     end
 
+    return
+  end
+
+  def register_package_with_environment()
     @environment.register_package(@base_package)
 
     return
