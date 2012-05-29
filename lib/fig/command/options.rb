@@ -134,11 +134,6 @@ Environment variables:
     return @options[:home]
   end
 
-  # Used by remote_option_necessary?().  Refactor into Action method.
-  def listing()
-    return @options[:listing]
-  end
-
   def log_config()
     return @options[:log_config]
   end
@@ -163,11 +158,6 @@ Environment variables:
     return @options[:package_definition_file]
   end
 
-  # Used by remote_option_necessary?().  Refactor into Action method.
-  def publish?()
-    return @options[:publish]
-  end
-
   def package_contents_statements()
     return @options[:package_contents_statements]
   end
@@ -186,19 +176,10 @@ Environment variables:
     return @options[:update_if_missing]
   end
 
-  # Used by remote_option_necessary?().  Refactor into Action method.
+  # Other code shouldn't need to know this.  It should be provided by Action
+  # metadata.
   def updating?()
     return update? || update_if_missing?
-  end
-
-  # Answers whether we should reset the environment to nothing, sort of like
-  # the standardized environment that cron(1) creates.  At present, we're only
-  # setting this when we're listing variables.  One could imagine allowing this
-  # to be set by a command-line option in general; if we do this, the
-  # Environment class will need to be changed to support deletion of values
-  # from ENV.
-  def reset_environment?()
-    return listing() == :variables
   end
 
   # This needs to be public for efficient use of custom command.rb wrappers.
@@ -251,10 +232,6 @@ Environment variables:
 
   def list_all_configs?()
     return @options[:list_all_configs]
-  end
-
-  def publish_local?()
-    return @options[:publish_local]
   end
 
   def process_command_line(argv)
@@ -412,7 +389,6 @@ Environment variables:
       specification, action_class = *specification_action_class
       @switches << parser.define(*specification) do
         set_base_action(action_class)
-        @options[:listing] = type
       end
     end
 
@@ -441,14 +417,12 @@ Environment variables:
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
       set_base_action(Fig::Command::Action::Publish)
-      @options[:publish] = true
     end
 
     @switches << parser.define(
       '--publish-local', 'install package only in $FIG_HOME'
     ) do |publish_local|
       set_base_action(Fig::Command::Action::PublishLocal)
-      @options[:publish_local] = true
     end
 
     return

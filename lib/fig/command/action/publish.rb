@@ -17,6 +17,10 @@ class Fig::Command::Action::Publish
     return %w<--publish>
   end
 
+  def remote_operation_necessary?()
+    return true
+  end
+
   def execute()
     publish_preflight()
 

@@ -16,4 +16,8 @@ class Fig::Command::Action::ListVariables
 
     return %w<--list-variables>
   end
+
+  def reset_environment?()
+    return true
+  end
 end

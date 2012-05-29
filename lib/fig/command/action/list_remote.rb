@@ -21,6 +21,10 @@ class Fig::Command::Action::ListRemote
     return false
   end
 
+  def remote_operation_necessary?()
+    return true
+  end
+
   def execute()
     @execution_context.repository.list_remote_packages.sort.each {|item| puts item}
 

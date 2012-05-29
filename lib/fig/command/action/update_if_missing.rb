@@ -14,4 +14,8 @@ class Fig::Command::Action::UpdateIfMissing
   def options()
     return %w<--update-if-missing>
   end
+
+  def remote_operation_necessary?()
+    return true
+  end
 end

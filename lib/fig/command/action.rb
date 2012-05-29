@@ -51,6 +51,20 @@ module Fig::Command::Action
     raise NotImplementedError
   end
 
+  def remote_operation_necessary?()
+    return false
+  end
+
+  # Answers whether we should reset the environment to nothing, sort of like
+  # the standardized environment that cron(1) creates.  At present, we're only
+  # setting this when we're listing variables.  One could imagine allowing this
+  # to be set by a command-line option in general; if we do this, the
+  # Environment class will need to be changed to support deletion of values
+  # from ENV.
+  def reset_environment?()
+    return false
+  end
+
   # Slurp data out of command-line options.
   def configure(options)
     # Do nothing by default.

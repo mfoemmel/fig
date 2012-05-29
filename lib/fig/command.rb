@@ -189,7 +189,7 @@ class Fig::Command
 
   def prepare_environment()
     environment_variables = nil
-    if @options.reset_environment?
+    if reset_environment?
       environment_variables = Fig::OperatingSystem.get_environment_variables({})
     end
 
@@ -300,11 +300,12 @@ class Fig::Command
     return
   end
 
-  # TODO: Refactor into Action metadata.
   def remote_operation_necessary?()
-    return @options.updating?                     ||
-           @options.publish?                      ||
-           @options.listing == :remote_packages
+    return @options.actions.any? {|action| action.remote_operation_necessary?}
+  end
+
+  def reset_environment?()
+    return @options.actions.any? {|action| action.reset_environment?}
   end
 
   def log_error_message(error)
