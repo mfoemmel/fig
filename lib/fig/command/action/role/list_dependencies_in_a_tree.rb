@@ -4,11 +4,6 @@ module  Fig::Command::Action; end
 module  Fig::Command::Action::Role; end
 
 module Fig::Command::Action::Role::ListDependenciesInATree
-  # TODO: Delete this.
-  def implemented?
-    return true
-  end
-
   def execute()
     walk_dependency_tree(
       @execution_context.base_package, base_display_config_names(), nil, 0

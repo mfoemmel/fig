@@ -4,11 +4,6 @@ module  Fig::Command::Action; end
 module  Fig::Command::Action::Role; end
 
 module Fig::Command::Action::Role::ListDependenciesFlat
-  # TODO: Delete this.
-  def implemented?
-    return true
-  end
-
   def execute()
     packages = gather_package_dependency_configurations()
 

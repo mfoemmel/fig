@@ -91,21 +91,17 @@ class Fig::Command
     # were specified but there is nothing else to do.
     return 0 if @options.base_action.nil?
 
-    if @options.base_action.implemented?
-      base_action = @options.base_action
+    base_action = @options.base_action
 
-      base_action.execution_context = ExecutionContext.new(
-        @base_package,
-        base_config(),
-        @environment,
-        @repository,
-        @operating_system
-      )
+    base_action.execution_context = ExecutionContext.new(
+      @base_package,
+      base_config(),
+      @environment,
+      @repository,
+      @operating_system
+    )
 
-      return base_action.execute
-    end
-
-    return 0
+    return base_action.execute
   end
 
   def run_with_exception_handling(argv)

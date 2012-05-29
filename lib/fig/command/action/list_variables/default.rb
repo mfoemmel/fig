@@ -8,11 +8,6 @@ class   Fig::Command::Action::ListVariables; end
 class Fig::Command::Action::ListVariables::Default
   include Fig::Command::Action
 
-  # TODO: delete this
-  def implemented?
-    return true
-  end
-
   def options()
     return %w<--list-variables>
   end

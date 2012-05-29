@@ -16,11 +16,6 @@ class Fig::Command::Action::ListVariables::AllConfigs
   include Fig::Command::Action::Role::ListAllConfigs
   include Fig::Command::Action::Role::ListWalkingDependencyTree
 
-  # TODO: delete this
-  def implemented?
-    return true
-  end
-
   def options()
     return %w<--list-variables --list-all-configs>
   end

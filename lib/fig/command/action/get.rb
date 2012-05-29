@@ -9,11 +9,6 @@ class Fig::Command::Action::Get
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  # TODO: Delete this
-  def implemented?
-    return true
-  end
-
   def options()
     return %w<--get>
   end

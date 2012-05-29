@@ -4,13 +4,6 @@ class Fig::Command; end
 module Fig::Command::Action
   attr_writer :execution_context
 
-  # TODO: delete this
-  #
-  # This is a cheat until the full refactoring is done.
-  def implemented?()
-    return false
-  end
-
   def primary_option()
     return options()[0]
   end

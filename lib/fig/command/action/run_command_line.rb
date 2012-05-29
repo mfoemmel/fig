@@ -9,11 +9,6 @@ class Fig::Command::Action::RunCommandLine
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  # TODO: delete this
-  def implemented?
-    return true
-  end
-
   def options()
     return %w<-->
   end

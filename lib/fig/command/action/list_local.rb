@@ -9,11 +9,6 @@ class Fig::Command::Action::ListLocal
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  # TODO: delete this
-  def implemented?
-    return true
-  end
-
   def options()
     return %w<--list-local>
   end

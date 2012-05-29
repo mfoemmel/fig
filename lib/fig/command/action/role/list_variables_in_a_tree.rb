@@ -7,11 +7,6 @@ module  Fig::Command::Action; end
 module  Fig::Command::Action::Role; end
 
 module Fig::Command::Action::Role::ListVariablesInATree
-  # TODO: Delete this.
-  def implemented?
-    return true
-  end
-
   def descriptor_requirement()
     return nil
   end

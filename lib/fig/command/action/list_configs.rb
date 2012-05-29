@@ -9,11 +9,6 @@ class Fig::Command::Action::ListConfigs
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
-  # TODO: Delete this.
-  def implemented?
-    return true
-  end
-
   def options()
     return %w<--list-configs>
   end
