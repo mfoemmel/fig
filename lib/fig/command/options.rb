@@ -113,10 +113,6 @@ Environment variables:
     return @base_action
   end
 
-  def clean?()
-    return @options[:clean]
-  end
-
   def config()
     return @options[:config]
   end
@@ -129,28 +125,18 @@ Environment variables:
     return @options[:force]
   end
 
+  # TODO: rename
   def get()
     return @options[:get]
-  end
-
-  def help?()
-    return @options[:help]
   end
 
   def home()
     return @options[:home]
   end
 
+  # Used by remote_option_necessary?().  Refactor into Action method.
   def listing()
     return @options[:listing]
-  end
-
-  def list_tree?()
-    return @options[:list_tree]
-  end
-
-  def list_all_configs?()
-    return @options[:list_all_configs]
   end
 
   def log_config()
@@ -177,16 +163,9 @@ Environment variables:
     return @options[:package_definition_file]
   end
 
+  # Used by remote_option_necessary?().  Refactor into Action method.
   def publish?()
     return @options[:publish]
-  end
-
-  def publish_local?()
-    return @options[:publish_local]
-  end
-
-  def publishing?()
-    return publish? || publish_local?
   end
 
   def package_contents_statements()
@@ -197,20 +176,19 @@ Environment variables:
     return @options[:suppress_warning_include_statement_missing_version]
   end
 
+  # Fed to Repository.  This is bugly.  Fix it.
   def update?()
     return @options[:update]
   end
 
+  # Fed to Repository.  This is bugly.  Fix it.
   def update_if_missing?()
     return @options[:update_if_missing]
   end
 
+  # Used by remote_option_necessary?().  Refactor into Action method.
   def updating?()
     return update? || update_if_missing?
-  end
-
-  def version?()
-    return @options[:version]
   end
 
   # Answers whether we should reset the environment to nothing, sort of like
@@ -266,6 +244,18 @@ Environment variables:
     '--set'    => Fig::Statement::Set::ARGUMENT_DESCRIPTION,
     '--append' => Fig::Statement::Path::ARGUMENT_DESCRIPTION
   }
+
+  def list_tree?()
+    return @options[:list_tree]
+  end
+
+  def list_all_configs?()
+    return @options[:list_all_configs]
+  end
+
+  def publish_local?()
+    return @options[:publish_local]
+  end
 
   def process_command_line(argv)
     argv = argv.clone
@@ -364,12 +354,10 @@ Environment variables:
       '-?', '-h','--help','display this help text'
     ) do
       set_base_action(Fig::Command::Action::Help)
-      @options[:help] = true
     end
 
     @switches << parser.define_tail('-v', '--version', 'print Fig version') do
       set_base_action(Fig::Command::Action::Version)
-      @options[:version] = true
     end
 
     @switches << parser.define(
@@ -447,7 +435,6 @@ Environment variables:
   def set_up_commands(parser)
     @switches << parser.define('--clean', 'remove package from $FIG_HOME') do
       set_base_action(Fig::Command::Action::Clean)
-      @options[:clean] = true
     end
 
     @switches << parser.define(
@@ -728,7 +715,7 @@ Environment variables:
   end
 
   # This will be the base package, unless we're publishing (in which case it's
-  # the name to publish to.
+  # the name to publish to).
   def derive_primary_descriptor(raw_string)
     return if raw_string.nil?
 

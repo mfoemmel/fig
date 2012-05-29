@@ -95,10 +95,6 @@ class Fig::Command::PackageApplier
       Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
     message += %q<".>
 
-    if @options.publishing?
-      message += ' (Yes, this does work with --publish.)'
-    end
-
     raise Fig::UserInputError.new(message)
   end
 
