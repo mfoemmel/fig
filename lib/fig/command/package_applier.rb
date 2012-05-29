@@ -11,7 +11,6 @@ class Fig::Command::PackageApplier
     options,
     descriptor,
     base_config,
-    config_was_specified_by_user,
     package_source_description
   )
     @base_package                 = base_package
@@ -19,7 +18,6 @@ class Fig::Command::PackageApplier
     @options                      = options
     @descriptor                   = descriptor
     @base_config                  = base_config
-    @config_was_specified_by_user = config_was_specified_by_user
     @package_source_description   = package_source_description
   end
 
@@ -50,6 +48,11 @@ class Fig::Command::PackageApplier
   end
 
   private
+
+  def config_was_specified_by_user()
+    return ! @options.config().nil?                   ||
+           @descriptor && ! @descriptor.config().nil?
+  end
 
   def synthesize_package_for_command_line_options(ignore_base_config)
     configuration_statements = []
@@ -100,7 +103,7 @@ class Fig::Command::PackageApplier
   end
 
   def make_no_such_package_exception_descriptive_without_descriptor(exception)
-    raise exception if @config_was_specified_by_user
+    raise exception if config_was_specified_by_user()
     raise exception if not exception.descriptor.nil?
 
     source = derive_exception_source()

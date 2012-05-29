@@ -230,11 +230,6 @@ class Fig::Command
     return
   end
 
-  def config_was_specified_by_user()
-    return ! @options.config().nil?                   ||
-           @descriptor && ! @descriptor.config().nil?
-  end
-
   def base_config()
     return @options.config()                 ||
            @descriptor && @descriptor.config ||
@@ -258,7 +253,6 @@ class Fig::Command
       @options,
       @descriptor,
       base_config(),
-      config_was_specified_by_user(),
       package_source_description
     )
   end
@@ -306,6 +300,7 @@ class Fig::Command
     return
   end
 
+  # TODO: Refactor into Action metadata.
   def remote_operation_necessary?()
     return @options.updating?                     ||
            @options.publish?                      ||
