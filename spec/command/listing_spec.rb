@@ -1546,7 +1546,7 @@ describe 'Fig' do
         remove_any_package_dot_fig
       end
 
-      it %<plain (goes through Environment object)> do
+      it %<plain (goes through RuntimeEnvironment object)> do
         expected = clean_expected(<<-END_EXPECTED_OUTPUT)
           C=4.5.6
         END_EXPECTED_OUTPUT

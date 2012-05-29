@@ -1,9 +1,9 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-require 'fig/environment'
 require 'fig/environment_variables/case_sensitive'
 require 'fig/package'
 require 'fig/package_descriptor'
+require 'fig/runtime_environment'
 require 'fig/statement/configuration'
 require 'fig/statement/retrieve'
 require 'fig/statement/set'
@@ -30,7 +30,7 @@ def new_example_package(environment, name, extra_statements, variable_value)
   environment.register_package(package)
 
   # Kind of a cheat: we're creating a "set" statement that isn't in a "config"
-  # block and then shoving it through the Environment directly.
+  # block and then shoving it through the RuntimeEnvironment directly.
   set_statement = Fig::Statement::Set.new(
     nil, nil, "WHATEVER_#{name.upcase}", variable_value
   )
@@ -44,7 +44,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   maintainer_double.stub(:switch_to_package_version)
   maintainer_double.stub(:retrieve)
   environment =
-    Fig::Environment.new(
+    Fig::RuntimeEnvironment.new(
       nil,
       Fig::EnvironmentVariables::CaseSensitive.new({'FOO' => 'bar'}),
       maintainer_double
@@ -133,7 +133,7 @@ def substitute_variable(variable_value, retrieve_vars = {})
   return output
 end
 
-describe 'Environment' do
+describe 'RuntimeEnvironment' do
   before(:all) do
     set_up_test_environment()
   end

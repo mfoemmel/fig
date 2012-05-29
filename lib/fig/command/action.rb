@@ -66,8 +66,8 @@ module Fig::Command::Action
   # the standardized environment that cron(1) creates.  At present, we're only
   # setting this when we're listing variables.  One could imagine allowing this
   # to be set by a command-line option in general; if we do this, the
-  # Environment class will need to be changed to support deletion of values
-  # from ENV.
+  # RuntimeEnvironment class will need to be changed to support deletion of
+  # values from ENV.
   def reset_environment?()
     return false
   end

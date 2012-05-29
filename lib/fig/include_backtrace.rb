@@ -7,7 +7,7 @@ module Fig; end
 # Keeps track of overrides and can produce package definition stack traces.
 #
 # Pushing and popping actually happens via instances being held/let go by
-# recursive method calls on Environment.
+# recursive method calls on RuntimeEnvironment.
 class Fig::IncludeBacktrace
   attr_reader :overrides
 

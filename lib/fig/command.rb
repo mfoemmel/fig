@@ -7,7 +7,6 @@ require 'fig/command/action'
 require 'fig/command/options'
 require 'fig/command/package_applier'
 require 'fig/command/package_loader'
-require 'fig/environment'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/operating_system'
@@ -15,6 +14,7 @@ require 'fig/package'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/repository_error'
+require 'fig/runtime_environment'
 require 'fig/statement/configuration'
 require 'fig/user_input_error'
 require 'fig/working_directory_maintainer'
@@ -208,7 +208,7 @@ class Fig::Command
       environment_variables = Fig::OperatingSystem.get_environment_variables({})
     end
 
-    @environment = Fig::Environment.new(
+    @environment = Fig::RuntimeEnvironment.new(
       @repository, environment_variables, working_directory_maintainer
     )
 

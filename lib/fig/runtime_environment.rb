@@ -15,7 +15,7 @@ module Fig; end
 # Manages the program's metadata, including packages and environment
 # variables, and sets things up for running commands (from "command"
 # statements in definition files or from the command-line).
-class Fig::Environment
+class Fig::RuntimeEnvironment
   # Note: when reading this code, understand that the word "retrieve" is a
   # noun and not a verb, e.g. "retrieve path" means the value of a retrieve
   # statement and not the action of retrieving a path.
