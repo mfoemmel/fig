@@ -28,10 +28,6 @@ class Fig::Command::Action::ListVariables::AllConfigs
     return true
   end
 
-  def need_base_config?()
-    return false
-  end
-
   def register_base_package?()
     return false
   end

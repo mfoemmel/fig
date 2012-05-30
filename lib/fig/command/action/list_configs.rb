@@ -21,10 +21,6 @@ class Fig::Command::Action::ListConfigs
     return true
   end
 
-  def need_base_config?()
-    return false
-  end
-
   def register_base_package?()
     return false
   end

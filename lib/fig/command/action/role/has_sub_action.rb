@@ -26,11 +26,6 @@ module Fig::Command::Action::Role::HasSubAction
     return sub_action.need_base_package?
   end
 
-  def need_base_config?()
-    check_sub_action_presence()
-    return sub_action.need_base_package?
-  end
-
   def register_base_package?()
     check_sub_action_presence()
     return sub_action.register_base_package?

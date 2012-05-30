@@ -38,10 +38,6 @@ module Fig::Command::Action
     return true
   end
 
-  def need_base_config?()
-    raise NotImplementedError
-  end
-
   def register_base_package?()
     raise NotImplementedError
   end

@@ -17,10 +17,6 @@ module Fig::Command::Action::Role::Update
     return true
   end
 
-  def need_base_config?()
-    return true
-  end
-
   def register_base_package?()
     return true
   end

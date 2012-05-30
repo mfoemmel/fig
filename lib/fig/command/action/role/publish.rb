@@ -26,10 +26,6 @@ module Fig::Command::Action::Role::Publish
     return false
   end
 
-  def need_base_config?()
-    return false
-  end
-
   def register_base_package?()
     return false
   end
