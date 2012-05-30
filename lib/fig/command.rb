@@ -201,18 +201,17 @@ class Fig::Command
   end
 
   def set_up_base_package()
-    actions = @options.actions.select {|action| action.need_base_package?}
-    return if actions.empty?
+    return if ! load_base_package?
 
     # We get these before loading the package so that we detect conflicts
     # between actions.
     retrieves_should_happen = retrieves_should_happen?
-    register_base_package   = register_base_package?(actions)
-    apply_config            = apply_config?(actions)
-    apply_base_config       = apply_config ? apply_base_config?(actions) : nil
+    register_base_package   = register_base_package?
+    apply_config            = apply_config?
+    apply_base_config       = apply_config ? apply_base_config? : nil
 
     package_loader = new_package_loader()
-    if actions.all? {|action| action.base_package_can_come_from_descriptor?}
+    if @options.actions.all? {|action| action.base_package_can_come_from_descriptor?}
       @base_package = package_loader.load_package_object()
     else
       @base_package = package_loader.load_package_object_from_file()
@@ -307,25 +306,31 @@ class Fig::Command
     return @options.actions.any? {|action| action.remote_operation_necessary?}
   end
 
+  def load_base_package?()
+    return should_perform?(
+      @options.actions, %Q<the base package should be loaded>
+    ) {|action| action.load_base_package?}
+  end
+
   def retrieves_should_happen?()
     return @options.actions.any? {|action| action.retrieves_should_happen?}
   end
 
-  def register_base_package?(actions)
+  def register_base_package?()
     return should_perform?(
-      actions, %Q<the base package should be in the starting set of packages>
+      @options.actions, %Q<the base package should be in the starting set of packages>
     ) {|action| action.register_base_package?}
   end
 
-  def apply_config?(actions)
+  def apply_config?()
     return should_perform?(
-      actions, %Q<any config should be applied>
+      @options.actions, %Q<any config should be applied>
     ) {|action| action.apply_config?}
   end
 
-  def apply_base_config?(actions)
+  def apply_base_config?()
     actions_wanting_application =
-      actions.select {|action| action.apply_config?}
+      @options.actions.select {|action| action.apply_config?}
 
     return should_perform?(
       actions_wanting_application, %Q<the base config should be applied>

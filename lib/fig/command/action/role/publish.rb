@@ -18,7 +18,7 @@ module Fig::Command::Action::Role::Publish
     return true
   end
 
-  def need_base_package?()
+  def load_base_package?()
     return true
   end
 

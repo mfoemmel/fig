@@ -17,7 +17,7 @@ class Fig::Command::Action::Clean
     return :required
   end
 
-  def need_base_package?()
+  def load_base_package?()
     return false
   end
 

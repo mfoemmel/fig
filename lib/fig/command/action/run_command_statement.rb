@@ -17,7 +17,7 @@ class Fig::Command::Action::RunCommandStatement
     return nil
   end
 
-  def need_base_package?()
+  def load_base_package?()
     return true
   end
 

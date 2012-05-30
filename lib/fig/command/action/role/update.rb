@@ -15,7 +15,7 @@ module Fig::Command::Action::Role::Update
     return true
   end
 
-  def need_base_package?()
+  def load_base_package?()
     return true
   end
 

@@ -21,9 +21,9 @@ module Fig::Command::Action::Role::HasSubAction
     return sub_action.descriptor_requirement()
   end
 
-  def need_base_package?()
+  def load_base_package?()
     check_sub_action_presence()
-    return sub_action.need_base_package?
+    return sub_action.load_base_package?
   end
 
   def register_base_package?()

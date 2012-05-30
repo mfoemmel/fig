@@ -17,8 +17,8 @@ class Fig::Command::Action::ListLocal
     return :warn
   end
 
-  def need_base_package?()
-    return false
+  def load_base_package?()
+    return nil # Don't care.
   end
 
   def execute()

@@ -17,8 +17,8 @@ class Fig::Command::Action::ListRemote
     return :warn
   end
 
-  def need_base_package?()
-    return false
+  def load_base_package?()
+    return nil # Don't care.
   end
 
   def remote_operation_necessary?()

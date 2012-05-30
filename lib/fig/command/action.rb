@@ -30,7 +30,7 @@ module Fig::Command::Action
     return false
   end
 
-  def need_base_package?()
+  def load_base_package?()
     raise NotImplementedError
   end
 

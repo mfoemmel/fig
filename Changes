@@ -2,10 +2,20 @@ v0.1.xxx
 
   Backwards incompatibilities:
 
-  - Using --publish with --update{,-if-missing} may fail if you have
-    versionless includes.  Fig would previously ignore the
-    --update{,-if-missing} but it now always applies the update.  Workaround:
-    do the update and the publish separately.
+  - The --update and --update-if-missing options are always paid attention to.
+    (Hey, you said update; Fig endeavors to comply.) This causes problems where
+    these were previously ignored.
+
+    - If you specify --clean, you'll get an error about the options not
+      agreeing about whether the base package should be loaded.
+
+    - Publishing may fail if you have versionless includes.  Workaround: don't
+      use versionless includes or do the update and the publish separately.
+
+  Bug fixes:
+
+  - Updating and using any of the --list-* options would delete any previously
+    retrieved files.
 
 v0.1.65
 
