@@ -182,7 +182,7 @@ class Fig::Command
 
     Fig::AtExit.add do
       working_directory_maintainer.prepare_for_shutdown(
-        retrieves_should_happen?
+        @base_package && retrieves_should_happen?
       )
     end
 
@@ -204,6 +204,13 @@ class Fig::Command
     actions = @options.actions.select {|action| action.need_base_package?}
     return if actions.empty?
 
+    # We get these before loading the package so that we detect conflicts
+    # between actions.
+    retrieves_should_happen = retrieves_should_happen?
+    register_base_package   = register_base_package?(actions)
+    apply_config            = apply_config?(actions)
+    apply_base_config       = apply_config ? apply_base_config?(actions) : nil
+
     package_loader = new_package_loader()
     if actions.all? {|action| action.base_package_can_come_from_descriptor?}
       @base_package = package_loader.load_package_object()
@@ -213,14 +220,14 @@ class Fig::Command
 
     applier = new_package_applier(package_loader.package_source_description())
 
-    if retrieves_should_happen?
+    if retrieves_should_happen
       applier.activate_retrieves()
     end
-    if register_base_package?(actions)
+    if register_base_package
       applier.register_package_with_environment()
     end
-    if apply_config?(actions)
-      applier.apply_config_to_environment(! apply_base_config?(actions))
+    if apply_config
+      applier.apply_config_to_environment(! apply_base_config)
     end
 
     return
@@ -330,7 +337,7 @@ class Fig::Command
 
     action_strings = actions.map {|action| action.options.join}
     action_string = action_strings.join %q<", ">
-    raise UserInputError.new(
+    raise Fig::UserInputError.new(
       %Q<Cannot use "#{action_string}" together because they disagree on whether #{failure_description}.>
     )
   end
