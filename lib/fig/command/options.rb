@@ -90,6 +90,7 @@ Environment variables:
   attr_reader :command_extra_argv
   attr_reader :descriptor
   attr_reader :exit_code
+  attr_reader :update_packages
 
   def initialize(argv)
     process_command_line(argv)
@@ -98,6 +99,8 @@ Environment variables:
   def actions()
     actions = []
 
+    # Update has got to come first so that the Repository knows what's going
+    # on.
     if @update_action
       actions << @update_action
     end
@@ -158,16 +161,6 @@ Environment variables:
 
   def suppress_warning_include_statement_missing_version?()
     return @options[:suppress_warning_include_statement_missing_version]
-  end
-
-  # Fed to Repository.  This is bugly.  Fix it.
-  def update?()
-    return @options[:update]
-  end
-
-  # Fed to Repository.  This is bugly.  Fix it.
-  def update_if_missing?()
-    return @options[:update_if_missing]
   end
 
   # This needs to be public for efficient use of custom command.rb wrappers.
@@ -549,8 +542,7 @@ Environment variables:
       '--update',
       'check remote repo for updates and download to $FIG_HOME as necessary'
     ) do
-      set_update_action(Fig::Command::Action::Update)
-      @options[:update] = true
+      set_update_action(Fig::Command::Action::Update, :unconditionally)
     end
 
     @switches << parser.define(
@@ -558,8 +550,7 @@ Environment variables:
       '--update-if-missing',
       'check remote repo for updates only if package missing from $FIG_HOME'
     ) do
-      set_update_action(Fig::Command::Action::UpdateIfMissing)
-      @options[:update_if_missing] = true
+      set_update_action(Fig::Command::Action::UpdateIfMissing, :if_missing)
     end
 
     @switches << parser.define(
@@ -640,7 +631,7 @@ Environment variables:
     return
   end
 
-  def set_update_action(update_action_class)
+  def set_update_action(update_action_class, update_packages)
     update_action = update_action_class.new
     if @update_action
       raise Fig::Command::OptionError.new(
@@ -649,6 +640,7 @@ Environment variables:
     end
 
     @update_action = update_action
+    @update_packages = update_packages
   end
 
   def new_variable_statement(option, name_value, statement_class)

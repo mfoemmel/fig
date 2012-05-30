@@ -34,16 +34,12 @@ class Fig::Repository
     local_repository_directory,
     application_config,
     remote_repository_user,
-    update,
-    update_if_missing,
     check_include_versions
   )
     @operating_system             = os
     @local_repository_directory   = local_repository_directory
     @application_config           = application_config
     @remote_repository_user       = remote_repository_user
-    @update                       = update
-    @update_if_missing            = update_if_missing
 
     @parser = Fig::Parser.new(application_config, check_include_versions)
 
@@ -158,6 +154,14 @@ class Fig::Repository
     FileUtils.rm_rf(temp_dir)
 
     return true
+  end
+
+  def update_unconditionally()
+    @update_condition = :unconditionally
+  end
+
+  def update_if_missing()
+    @update_condition = :if_missing
   end
 
   private
@@ -286,9 +290,9 @@ class Fig::Repository
   end
 
   def should_update?(descriptor)
-    return true if @update
+    return true if @update_condition == :unconditionally
 
-    return @update_if_missing && package_missing?(descriptor)
+    return @update_condition == :if_missing && package_missing?(descriptor)
   end
 
   def read_local_package(descriptor)

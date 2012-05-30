@@ -9,15 +9,16 @@ require 'fig/statement/resource'
 
 def create_local_repository()
   application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_URL)
+
   repository = Fig::Repository.new(
     Fig::OperatingSystem.new(nil),
     FIG_HOME,
     application_config,
     nil,   # remote user
-    false, # unconditional update
-    :update_if_missing,
     false # check include statement versions
   )
+  repository.update_if_missing
+
   return repository
 end
 

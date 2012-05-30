@@ -134,7 +134,6 @@ class Fig::Command
 
   private
 
-  # Wanted: Better name for this.
   ExecutionContext =
     Struct.new(
       :base_package, :base_config, :environment, :repository, :operating_system
@@ -192,10 +191,15 @@ class Fig::Command
       @options.home(),
       @configuration,
       nil, # remote_user
-      @options.update?,
-      @options.update_if_missing?,
       check_include_statements_versions?
     )
+
+    case @options.update_packages
+    when :unconditionally
+      @repository.update_unconditionally
+    when :if_missing
+      @repository.update_if_missing
+    end
 
     return
   end
