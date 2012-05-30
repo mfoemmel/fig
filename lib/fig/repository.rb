@@ -3,6 +3,7 @@ require 'socket'
 require 'sys/admin'
 require 'tmpdir'
 
+require 'fig'
 require 'fig/at_exit'
 require 'fig/command'
 require 'fig/logging'
@@ -493,7 +494,7 @@ class Fig::Repository
       %Q<#     User: #{Sys::Admin.get_login()}>,
       %Q<#     Host: #{Socket.gethostname()}>,
       %Q<#     Args: "#{ARGV.join %q[", "]}">,
-      %Q<#     Fig:  v#{Fig::Command.get_version()}>,
+      %Q<#     Fig:  v#{Fig::VERSION}>,
       asset_summary,
       %Q<\n>,
     ].flatten()

@@ -1,3 +1,4 @@
+require 'fig'
 require 'fig/command'
 require 'fig/command/action'
 require 'fig/command/action/role/has_no_sub_action'
@@ -19,10 +20,7 @@ class Fig::Command::Action::Version
   end
 
   def execute()
-    version = Fig::Command.get_version()
-    return EXIT_FAILURE if version.nil?
-
-    puts File.basename($0) + ' v' + version
+    puts File.basename($0) + ' v' + Fig::VERSION
 
     return EXIT_SUCCESS
   end

@@ -10,17 +10,9 @@ require 'rubygems/package_task'
 
 include FileUtils
 
-$major_version = nil
-$minor_version = nil
-$patch_version = nil
-version = nil
-
-File.open('VERSION', 'r') do |file|
-  version = file.gets
-  matches = version.match(/(\d+)\.(\d+)\.(\d+)/)
-  $major_version = matches[1]
-  $minor_version = matches[2]
-  $patch_version = matches[3]
+def get_version
+  require './lib/fig.rb'
+  return Fig::VERSION
 end
 
 def clean_git_working_directory?
@@ -112,12 +104,6 @@ def push_to_rubygems(version)
   end
 end
 
-def write_version_file()
-  File.open('VERSION', 'w') do |file|
-    file.print "#{$major_version}.#{$minor_version}.#{$patch_version}"
-  end
-end
-
 def clean_up_after_testing()
   rm_rf './.fig'
 end
@@ -130,7 +116,7 @@ fig_gemspec = Gem::Specification.new do |gemspec|
   gemspec.homepage = 'http://github.com/mfoemmel/fig'
   gemspec.authors = ['Matthew Foemmel']
   gemspec.platform = Gem::Platform::RUBY
-  gemspec.version = version.chomp
+  gemspec.version = get_version
 
   gemspec.add_dependency              'colorize',          '>= 0.5.8'
   gemspec.add_dependency              'highline',          '>= 1.6.2'
@@ -147,9 +133,8 @@ fig_gemspec = Gem::Specification.new do |gemspec|
 
   gemspec.files = FileList[
     "Changes",
-    "VERSION",
     "bin/*",
-    "lib/fig/**/*",
+    "lib/**/*",
   ].to_a
 
   gemspec.executables = ['fig', 'fig-download']
@@ -177,24 +162,6 @@ task :simplecov do
   clean_up_after_testing()
 end
 
-desc 'Increments the major version number by one.'
-task :increment_major_version do
-    $major_version.succ!
-    write_version_file()
-end
-
-desc 'Increments the minor version number by one.'
-task :increment_minor_version do
-    $minor_version.succ!
-    write_version_file()
-end
-
-desc 'Increments the patch version number by one.'
-task :increment_patch_version do
-    $patch_version.succ!
-    write_version_file()
-end
-
 Gem::PackageTask.new(fig_gemspec).define
 
 desc 'Alias for the gem task.'
@@ -203,8 +170,9 @@ task :build => :gem
 desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
 task :publish do
   if local_repo_is_updated?
-    if push_to_rubygems(version.chomp)
-      tag_and_push_to_git(version.chomp)
+    version = get_version
+    if push_to_rubygems(version)
+      tag_and_push_to_git(version)
     end
   end
 end
@@ -212,10 +180,8 @@ end
 task :default => :spec
 
 RDoc::Task.new do |rdoc|
-  version = File.exist?('VERSION') ? File.read('VERSION') : ''
-
   rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "fig #{version}"
+  rdoc.title = "fig #{get_version}"
   rdoc.rdoc_files.include('README*')
   rdoc.rdoc_files.include('lib/**/*.rb')
 end

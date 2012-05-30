@@ -23,33 +23,6 @@ module Fig; end
 
 # Main program
 class Fig::Command
-  def self.get_version()
-    line = nil
-
-    begin
-      File.open(
-        "#{File.expand_path(File.dirname(__FILE__) + '/../../VERSION')}"
-      ) do |file|
-        line = file.gets
-      end
-    rescue
-      $stderr.puts 'Could not retrieve version number. Something has mucked with your Fig install.'
-
-      return nil
-    end
-
-    # Note that we accept anything that contains three decimal numbers
-    # seperated by periods.  This allows for versions like
-    # "4.3.2-super-special-version-in-3D".
-    if line !~ %r< \b \d+ [.] \d+ [.] \d+ \b >x
-      $stderr.puts %Q<"#{line}" does not look like a version number. Something has mucked with your Fig install.>
-
-      return nil
-    end
-
-    return line
-  end
-
   def run_fig(argv)
     begin
       @options = Fig::Command::Options.new(argv)
