@@ -160,10 +160,6 @@ class Fig::Repository
     return true
   end
 
-  def updating?
-    return @update || @update_if_missing
-  end
-
   private
 
   PACKAGE_FILE_IN_REPO = '.fig'
