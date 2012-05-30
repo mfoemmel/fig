@@ -74,7 +74,7 @@ class Fig::WorkingDirectoryMaintainer
         end
         package_meta.add_file(target)
       else
-        raise "parse error in #{file}: #{line}"
+        raise "parse error in #{@metadata_file}: #{line}"
       end
     end
 

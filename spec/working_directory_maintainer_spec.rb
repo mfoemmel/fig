@@ -34,29 +34,29 @@ describe 'WorkingDirectoryMaintainer' do
     working_baz = File.join(working_directory, 'baz.txt')
 
     # Retrieve files A and B
-    r = Fig::WorkingDirectoryMaintainer.new(working_directory)
-    r.switch_to_package_version('foo', '1.2.3')
-    r.retrieve(source_foo, 'foo.txt')
-    r.retrieve(source_bar, 'bar.txt')
+    maintainer = Fig::WorkingDirectoryMaintainer.new(working_directory)
+    maintainer.switch_to_package_version('foo', '1.2.3')
+    maintainer.retrieve(source_foo, 'foo.txt')
+    maintainer.retrieve(source_bar, 'bar.txt')
     File.read(working_foo).should == 'FOO'
     File.read(working_bar).should == 'BAR'
 
     # Retrieve files B and C for a different version
-    r.switch_to_package_version('foo', '4.5.6')
-    r.retrieve(source_bar, 'bar.txt')
-    r.retrieve(source_baz, 'baz.txt')
+    maintainer.switch_to_package_version('foo', '4.5.6')
+    maintainer.retrieve(source_bar, 'bar.txt')
+    maintainer.retrieve(source_baz, 'baz.txt')
     File.read(working_bar).should == 'BAR'
     File.read(working_baz).should == 'BAZ'
     File.exist?(working_foo).should == false
 
     # Save and reload
-    r.prepare_for_shutdown(:purged_unused_packages)
-    r = Fig::WorkingDirectoryMaintainer.new(working_directory)
+    maintainer.prepare_for_shutdown(:purged_unused_packages)
+    maintainer = Fig::WorkingDirectoryMaintainer.new(working_directory)
 
     # Switch back to original version
-    r.switch_to_package_version('foo', '1.2.3')
-    r.retrieve(source_foo, 'foo.txt')
-    r.retrieve(source_bar, 'bar.txt')
+    maintainer.switch_to_package_version('foo', '1.2.3')
+    maintainer.retrieve(source_foo, 'foo.txt')
+    maintainer.retrieve(source_bar, 'bar.txt')
 
     File.read(working_foo).should == 'FOO'
     File.read(working_bar).should == 'BAR'
@@ -68,12 +68,21 @@ describe 'WorkingDirectoryMaintainer' do
     File.open("#{source_directory}/executable", 'w') {|f| f << 'executable.exe'}
     FileUtils.chmod(0755, "#{source_directory}/executable")
 
-    r = Fig::WorkingDirectoryMaintainer.new(working_directory)
-    r.switch_to_package_version('foo', '1.2.3')
-    r.retrieve("#{source_directory}/plain", 'plain')
-    r.retrieve("#{source_directory}/executable", 'executable.exe')
+    maintainer = Fig::WorkingDirectoryMaintainer.new(working_directory)
+    maintainer.switch_to_package_version('foo', '1.2.3')
+    maintainer.retrieve("#{source_directory}/plain", 'plain')
+    maintainer.retrieve("#{source_directory}/executable", 'executable.exe')
 
     File.stat(File.join(working_directory, 'plain')).executable?.should == false
     File.stat(File.join(working_directory, 'executable.exe')).executable?.should == true
+  end
+
+  it 'fails on corrupted metadata' do
+    FileUtils.mkdir_p("#{working_directory}/.fig")
+    write_file("#{working_directory}/.fig/retrieve", 'random garbage')
+
+    expect {
+      Fig::WorkingDirectoryMaintainer.new(working_directory)
+    }.to raise_error(/parse error/)
   end
 end
