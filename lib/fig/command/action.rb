@@ -38,14 +38,17 @@ module Fig::Command::Action
     return true
   end
 
+  # true, false, or nil if don't care.
   def register_base_package?()
     raise NotImplementedError
   end
 
+  # true, false, or nil if don't care.
   def apply_config?()
     raise NotImplementedError
   end
 
+  # true, false, or nil if don't care.
   def apply_base_config?()
     raise NotImplementedError
   end

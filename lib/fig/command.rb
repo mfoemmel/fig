@@ -324,13 +324,18 @@ class Fig::Command
   end
 
   def apply_base_config?(actions)
+    actions_wanting_application =
+      actions.select {|action| action.apply_config?}
+
     return should_perform?(
-      actions, %Q<the base config should be applied>
+      actions_wanting_application, %Q<the base config should be applied>
     ) {|action| action.apply_base_config?}
   end
 
   def should_perform?(actions, failure_description, &predicate)
     yes_actions, no_actions = actions.partition &predicate
+    # Filter out the "don't care" actions".
+    no_actions = no_actions.select { |action| ! predicate.call(action).nil?  }
 
     return false if yes_actions.empty?
     return true if no_actions.empty?

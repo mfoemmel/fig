@@ -35,7 +35,7 @@ module Fig::Command::Action::Role::Publish
   end
 
   def apply_base_config?()
-    return false
+    return nil # don't care
   end
 
   def configure(options)

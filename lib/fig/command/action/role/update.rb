@@ -39,10 +39,6 @@ module Fig::Command::Action::Role::Update
     return true
   end
 
-  def configure(options)
-    # Don't need anything.
-  end
-
   def execute()
     # Don't do anything.
     return Fig::Command::Action::EXIT_SUCCESS
