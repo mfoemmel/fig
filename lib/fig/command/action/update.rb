@@ -14,8 +14,4 @@ class Fig::Command::Action::Update
   def options()
     return %w<--update>
   end
-
-  def remote_operation_necessary?()
-    return true
-  end
 end

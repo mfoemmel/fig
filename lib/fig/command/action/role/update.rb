@@ -1,3 +1,5 @@
+require 'fig/command/action'
+
 module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
@@ -31,5 +33,18 @@ module Fig::Command::Action::Role::Update
 
   def retrieves_should_happen?()
     return true
+  end
+
+  def remote_operation_necessary?()
+    return true
+  end
+
+  def configure(options)
+    # Don't need anything.
+  end
+
+  def execute()
+    # Don't do anything.
+    return Fig::Command::Action::EXIT_SUCCESS
   end
 end

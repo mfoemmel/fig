@@ -62,13 +62,14 @@ class Fig::Command
       return @options.exit_code
     end
 
-    if @options.actions().empty?
+    actions = @options.actions()
+    if actions.empty?
       $stderr.puts "Nothing to do.\n\n"
       $stderr.puts %q<Run "fig --help" for a full list of commands.>
       return Fig::Command::Action::EXIT_FAILURE
     end
 
-    @options.actions().each do
+    actions.each do
       |action|
 
       if action.execute_immediately_after_command_line_parse?
@@ -81,20 +82,14 @@ class Fig::Command
 
     @descriptor = @options.descriptor
     check_descriptor_requirement()
-    if @options.actions.any? {|action| not action.allow_both_descriptor_and_file? }
+    if actions.any? {|action| not action.allow_both_descriptor_and_file? }
       ensure_descriptor_and_file_were_not_both_specified()
     end
 
     configure()
     set_up_base_package()
 
-    # TODO: fix this.  This will be the case if one of the --update* options
-    # were specified but there is nothing else to do.
-    return Fig::Command::Action::EXIT_SUCCESS if @options.base_action.nil?
-
-    base_action = @options.base_action
-
-    base_action.execution_context = ExecutionContext.new(
+    context = ExecutionContext.new(
       @base_package,
       base_config(),
       @environment,
@@ -102,7 +97,18 @@ class Fig::Command
       @operating_system
     )
 
-    return base_action.execute
+    actions.each do
+      |action|
+
+      action.execution_context = context
+
+      exit_code = action.execute
+      if exit_code != Fig::Command::Action::EXIT_SUCCESS
+        return exit_code
+      end
+    end
+
+    return Fig::Command::Action::EXIT_SUCCESS
   end
 
   def run_with_exception_handling(argv)
