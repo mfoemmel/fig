@@ -7,11 +7,9 @@ describe 'WorkingDirectoryMaintainer' do
   let(:working_directory) { "#{base_directory}/working" }
   let(:source_directory)  { "#{base_directory}/source" }
 
-  before(:all) do
-    set_up_test_environment
-  end
-
   before(:each) do
+    set_up_test_environment
+
     [working_directory, source_directory].each do
       |directory|
 
