@@ -86,6 +86,27 @@ Environment variables:
   LOG_LEVELS = %w[ off fatal error warn info debug all ]
   LOG_ALIASES = { 'warning' => 'warn' }
 
+  # Public version of #strip_shell_command() here so that it can be kept in
+  # sync.
+  def self.strip_shell_command(argv)
+    argv.each_with_index do |arg, i|
+      found_command_line_end = false
+
+      case arg
+        when '--'
+          found_command_line_end = true
+        when '--command-extra-args'
+          found_command_line_end = true
+      end
+
+      if found_command_line_end
+        return argv.slice(i..-1)
+      end
+    end
+
+    return argv
+  end
+
   attr_reader :shell_command
   attr_reader :command_extra_argv
   attr_reader :descriptor
@@ -163,29 +184,6 @@ Environment variables:
     return @options[:suppress_warning_include_statement_missing_version]
   end
 
-  # This needs to be public for efficient use of custom command.rb wrappers.
-  def strip_shell_command(argv)
-    argv.each_with_index do |arg, i|
-      terminating_option = nil
-
-      case arg
-        when '--'
-          set_base_action(Fig::Command::Action::RunCommandLine)
-          @shell_command = argv[(i+1)..-1]
-        when '--command-extra-args'
-          set_base_action(Fig::Command::Action::RunCommandStatement)
-          @command_extra_argv = argv[(i+1)..-1]
-      end
-
-      if @base_action
-        argv.slice!(i..-1)
-        break
-      end
-    end
-
-    return
-  end
-
   def help_message()
     return @help_message + <<-'END_MESSAGE'
         --                           end of Fig options; anything after this is used as a command to run
@@ -258,6 +256,28 @@ Environment variables:
     set_up_sub_actions()
 
     actions().each {|action| action.configure(self)}
+
+    return
+  end
+
+  def strip_shell_command(argv)
+    argv.each_with_index do |arg, i|
+      terminating_option = nil
+
+      case arg
+        when '--'
+          set_base_action(Fig::Command::Action::RunCommandLine)
+          @shell_command = argv[(i+1)..-1]
+        when '--command-extra-args'
+          set_base_action(Fig::Command::Action::RunCommandStatement)
+          @command_extra_argv = argv[(i+1)..-1]
+      end
+
+      if @base_action
+        argv.slice!(i..-1)
+        break
+      end
+    end
 
     return
   end

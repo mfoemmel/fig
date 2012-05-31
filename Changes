@@ -12,6 +12,9 @@ v0.1.xxx
     - Publishing may fail if you have versionless includes.  Workaround: don't
       use versionless includes or do the update and the publish separately.
 
+  - Fig::Command::Options#strip_shell_command() is no longer public.  Use
+    Fig::Command::Options.strip_shell_command() instead.
+
   Bug fixes:
 
   - Updating and using any of the --list-* options would delete any previously
