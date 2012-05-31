@@ -123,7 +123,7 @@ class Fig::WorkingDirectoryMaintainer
 
         # If the source is a dangling symlink, then there's no time, etc. to
         # preserve.
-        preserve = File.exist?(source)
+        preserve = File.exist?(source) && ! File.symlink?(source)
 
         FileUtils.copy_entry(
           source, target, preserve, false, :remove_destination
