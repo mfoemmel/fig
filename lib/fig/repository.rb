@@ -313,8 +313,7 @@ class Fig::Repository
 
       raise Fig::RepositoryError.new
     rescue StandardError => exception
-      Fig::Logging.debug exception
-      Fig::Logging.fatal 'Install failed, cleaning up.'
+      Fig::Logging.fatal %Q<Install failed, cleaning up: #{exception}>
 
       delete_local_package(descriptor)
 
