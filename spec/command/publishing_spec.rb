@@ -47,6 +47,18 @@ describe 'Fig' do
         end
       end
 
+      it 'complains when resources refer to non-existent local paths' do
+        out, err, exit_code =
+            fig(
+              '--publish foo/1.2.3 --resource does-not-exist --set VARIABLE=VALUE',
+              :no_raise_on_error => true
+            )
+
+        err.should =~ /\bcould not find file\b/i
+        err.should =~ /\bdoes-not-exist\b/
+        exit_code.should_not == 0
+      end
+
       it 'publishes to remote repository' do
         input = <<-END
           config default
@@ -57,7 +69,7 @@ describe 'Fig' do
         fig('--publish foo/1.2.3', input)
       end
 
-      it %q<--publish should complain if local repository isn't in the expected format version> do
+      it %q<--publish complains if local repository isn't in the expected format version> do
         input = <<-END
           config default
             set FOO=BAR
@@ -72,7 +84,7 @@ describe 'Fig' do
         exit_code.should_not == 0
       end
 
-      it %q<--publish-local should complain if local repository isn't in the expected format version> do
+      it %q<--publish-local complains if local repository isn't in the expected format version> do
         input = <<-END
           config default
             set FOO=BAR
