@@ -13,56 +13,47 @@ describe 'Fig' do
       FileUtils.mkdir_p(lib_directory)
     end
 
-    it 'retrieves resource' do
-      write_file("#{lib_directory}/a-library", 'some library')
-      input = <<-END
-        resource lib/a-library
-        config default
-          append FOOPATH=@/lib/a-library
-        end
-      END
-      fig(
-        '--publish prerequisite/1.2.3',
-        input,
-        :current_directory => publish_from_directory
-      )
-      input = <<-END
-        # Leading slash on path to test warning.
-        retrieve FOOPATH->/retrieve/[package]
-        config default
-          include prerequisite/1.2.3
-        end
-      END
-      out, err, exit_code = fig('--update-if-missing', input)
-      File.read("#{retrieve_directory}/prerequisite/a-library").should == 'some library'
+    describe 'retrieves resource' do
+      before(:each) do
+        write_file("#{lib_directory}/a-library", 'some library')
+        fig(
+          '--publish prerequisite/1.2.3 --resource lib/a-library --append FOOPATH=@/lib/a-library',
+          :current_directory => publish_from_directory
+        )
+      end
 
-      err.should =~ /absolute/
-      err.should =~ /relative/
-      err.should =~ %r</retrieve/\[package\]>
-    end
+      it 'and produces absolute path warning' do
+        input = <<-END
+          # Leading slash on path to test warning.
+          retrieve FOOPATH->/retrieve/[package]
+          config default
+            include prerequisite/1.2.3
+          end
+        END
+        out, err, exit_code = fig('--update-if-missing', input)
+        exit_code.should == 0
+        File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+          'some library'
 
-    it 'retrieves resource and ignores the append statement in the updating config' do
-      write_file("#{lib_directory}/a-library", 'some library')
-      input = <<-END
-        resource lib/a-library
-        config default
-          append FOOPATH=@/lib/a-library
-        end
-      END
-      fig(
-        '--publish prerequisite/1.2.3',
-        input,
-        :current_directory => publish_from_directory
-      )
-      input = <<-END
-        retrieve FOOPATH->retrieve/[package]
-        config default
-          include prerequisite/1.2.3
-          append FOOPATH=@/does/not/exist
-        end
-      END
-      fig('--update-if-missing', input)
-      File.read("#{retrieve_directory}/prerequisite/a-library").should == 'some library'
+        # Check for warning about the leading slash in FOOPATH looking like an
+        # absolute path.
+        err.should =~ /absolute/
+        err.should =~ /relative/
+        err.should =~ %r</retrieve/\[package\]>
+      end
+
+      it 'and ignores the append statement in the updating config' do
+        input = <<-END
+          retrieve FOOPATH->retrieve/[package]
+          config default
+            include prerequisite/1.2.3
+            append FOOPATH=@/does/not/exist
+          end
+        END
+        fig('--update-if-missing', input)
+        File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+          'some library'
+      end
     end
 
     it 'retrieves resource that is a directory' do
@@ -87,7 +78,32 @@ describe 'Fig' do
         end
       END
       fig('--update-if-missing', input)
-      File.read("#{retrieve_directory}/prerequisite/a-library").should == 'some library'
+      File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+        'some library'
+    end
+
+    it 'reports error for missing file in a package' do
+      write_file("#{lib_directory}/a-library", 'some library')
+      fig(
+        '--publish prerequisite/1.2.3 --resource lib/a-library --append FOOPATH=@/lib/a-library',
+        :current_directory => publish_from_directory
+      )
+      FileUtils.rm("#{FIG_HOME}/repos/prerequisite/1.2.3/lib/a-library")
+
+      input = <<-END
+        retrieve FOOPATH->retrieve/[package]
+        config default
+          include prerequisite/1.2.3
+        end
+      END
+      out, err, exit_code = fig(
+        '--update-if-missing', input, :no_raise_on_error => true
+      )
+require 'pp'
+pp [out, err, exit_code]
+      exit_code.should_not == 0
+      err.should =~
+        %r<the FOOPATH variable points to a path that does not exist>i
     end
 
     it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
@@ -117,8 +133,12 @@ describe 'Fig' do
       END
       fig('--update', input)
 
-      File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello.h").should == 'a header file'
-      File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello2.h").should == 'another header file'
+      File.read(
+        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello.h"
+      ).should == 'a header file'
+      File.read(
+        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello2.h"
+      ).should == 'another header file'
     end
 
     it 'updates without there being a copy of the package in the FIG_HOME left there from publishing' do
@@ -150,8 +170,12 @@ describe 'Fig' do
       END
       fig('-u', input)
 
-      File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello.h").should == 'a header file'
-      File.read("#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello2.h").should == 'another header file'
+      File.read(
+        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello.h"
+      ).should == 'a header file'
+      File.read(
+        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello2.h"
+      ).should == 'another header file'
     end
 
     it 'packages multiple resources' do
@@ -177,8 +201,10 @@ describe 'Fig' do
         end
       END
       fig('-m', input)
-      File.read("#{retrieve_directory}/prerequisite/a-library").should == 'some library'
-      File.read("#{retrieve_directory}/prerequisite/a-library2").should == 'some other library'
+      File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+        'some library'
+      File.read("#{retrieve_directory}/prerequisite/a-library2").should ==
+        'some other library'
     end
 
     it 'packages multiple resources with wildcards' do
@@ -202,7 +228,8 @@ describe 'Fig' do
         end
       END
       fig('--update-if-missing', input)
-      File.read("#{retrieve_directory}/prerequisite/foo.jar").should == 'some library'
+      File.read("#{retrieve_directory}/prerequisite/foo.jar").should ==
+        'some library'
     end
 
     if Fig::OperatingSystem.unix?
