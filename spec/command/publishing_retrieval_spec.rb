@@ -99,8 +99,6 @@ describe 'Fig' do
       out, err, exit_code = fig(
         '--update-if-missing', input, :no_raise_on_error => true
       )
-require 'pp'
-pp [out, err, exit_code]
       exit_code.should_not == 0
       err.should =~
         %r<the FOOPATH variable points to a path that does not exist>i
