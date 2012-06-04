@@ -255,7 +255,11 @@ class Fig::RuntimeEnvironment
       package.backtrace = backtrace
       @packages[name] = package
     elsif version && version != package.version
-      raise_repository_error("Version mismatch: #{name}", backtrace, package)
+      raise_repository_error(
+        "Version mismatch for package #{name} (#{version} vs #{package.version}).",
+        backtrace,
+        package
+      )
     end
 
     return package

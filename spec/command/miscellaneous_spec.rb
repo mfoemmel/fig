@@ -46,7 +46,19 @@ describe 'Fig' do
         set FOO=BAR
       end
     END
-    fig("--no-file --get FOO")[0].should == ''
+    fig('--no-file --get FOO')[0].should == ''
+  end
+
+  it 'complains about conflicting package versions' do
+    fig('--publish foo/1.2.3 --set VARIABLE=VALUE')
+    fig('--publish foo/4.5.6 --set VARIABLE=VALUE')
+
+    out, err, exit_code = fig(
+      '--update --include foo/1.2.3 --include foo/4.5.6',
+      :no_raise_on_error => true
+    )
+    exit_code.should_not == 0
+    err.should =~ /version mismatch for package foo/i
   end
 
   it 'prints the version number' do
