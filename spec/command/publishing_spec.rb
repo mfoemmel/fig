@@ -47,16 +47,20 @@ describe 'Fig' do
         end
       end
 
-      it 'complains when resources refer to non-existent local paths' do
-        out, err, exit_code =
+      %w< archive resource >.each do
+        |asset_type|
+
+        it "complains when #{asset_type}s refer to non-existent local paths" do
+          out, err, exit_code =
             fig(
-              '--publish foo/1.2.3 --resource does-not-exist --set VARIABLE=VALUE',
+              "--publish foo/1.2.3 --#{asset_type} does-not-exist --set VARIABLE=VALUE",
               :no_raise_on_error => true
             )
 
-        err.should =~ /\bcould not find file\b/i
-        err.should =~ /\bdoes-not-exist\b/
-        exit_code.should_not == 0
+          err.should =~ /\bcould not find file\b/i
+          err.should =~ /\bdoes-not-exist\b/
+          exit_code.should_not == 0
+        end
       end
 
       it 'publishes to remote repository' do
