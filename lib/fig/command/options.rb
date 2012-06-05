@@ -631,7 +631,7 @@ Environment variables:
       '--update-lock-response TYPE',
       update_lock_responses,
       'what to do when update lock already exists',
-      "  (#{response_list}, default is fail)",
+      "  (#{response_list}, default is fail)"
     ) do |response|
       @options[:update_lock_response] = response
     end
