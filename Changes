@@ -1,3 +1,10 @@
+v0.1.66.beta.2
+
+  Bug fixes:
+
+  - Better error reporting for failed installations and package version
+    conflicts.
+
 v0.1.66.beta.1
 
   Backwards incompatibilities:
