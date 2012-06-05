@@ -1,3 +1,4 @@
+require 'fileutils'
 require 'set'
 require 'socket'
 require 'sys/admin'
@@ -170,9 +171,7 @@ class Fig::Repository
   PACKAGE_FILE_IN_REPO = '.fig'
 
   def initialize_local_repository()
-    if not File.exist?(@local_repository_directory)
-      Dir.mkdir(@local_repository_directory)
-    end
+    FileUtils.mkdir_p(@local_repository_directory)
 
     version_file = local_version_file()
     if not File.exist?(version_file)

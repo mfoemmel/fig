@@ -1,4 +1,4 @@
-require 'rubygems'
+require 'fileutils'
 require 'net/ftp'
 require 'set'
 
@@ -126,6 +126,7 @@ class Fig::Command
   end
 
   def configure()
+    set_up_update_lock()
     set_up_application_configuration()
 
     Fig::Logging.initialize_post_configuration(
@@ -137,6 +138,38 @@ class Fig::Command
 
     prepare_repository()
     prepare_environment()
+  end
+
+  def set_up_update_lock()
+    return if not @options.update_packages
+
+    update_lock_response = @options.update_lock_response
+    return if update_lock_response == :ignore
+
+    lock_directory = @options.home
+    FileUtils.mkdir_p(lock_directory)
+
+    @update_lock = File.new(lock_directory)
+    @update_lock.close_on_exec = true
+    if update_lock_response == :wait
+      @update_lock.flock(File::LOCK_EX)
+    else
+      if ! @update_lock.flock(File::LOCK_EX | File::LOCK_NB)
+        raise Fig::UserInputError.new(<<-END_MESSAGE)
+Cannot update while another instance of Fig is updating #{lock_directory}.
+
+You can tell Fig to wait for update with
+
+    fig --update --update-lock-response wait ...
+
+or you can ignore the whole issue with
+
+    fig --update --update-lock-response ignore ...
+        END_MESSAGE
+      end
+    end
+
+    return
   end
 
   def set_up_application_configuration()

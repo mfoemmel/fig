@@ -1,3 +1,24 @@
+v0.1.68.beta.1
+
+  New features:
+
+  - Locks FIG_HOME when updating.  (Or attempts to.  If FIG_HOME is on NFS, all
+    bets are off.)  By default, if Fig is updating and notices another instance
+    updating, it will fail.  You can override this behavior via
+    --update-lock-response.  Specify "wait" to get Fig to wait for lock release
+    or "ignore" for it to skip lock checking.
+
+    The default behavior of failing was chosen to prevent surprises in the
+    scenario of starting multiple servers out of the same directory:
+
+        for exchange in cme ice liffe cboe
+        do
+            fig --update -- run-server $exchange &
+        done
+
+    If Fig defaulted to waiting, the above scenario would silently cause three
+    out of the four servers to block until the other one was shut down.
+
 v0.1.66.beta.2
 
   Bug fixes:

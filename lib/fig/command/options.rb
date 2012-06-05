@@ -83,7 +83,7 @@ Environment variables:
   FIG_HOME (path to local repository cache, defaults to $HOME/.fighome).
   EOF
 
-  LOG_LEVELS = %w[ off fatal error warn info debug all ]
+  LOG_LEVELS = %w< off fatal error warn info debug all >
   LOG_ALIASES = { 'warning' => 'warn' }
 
   # Public version of #strip_shell_command() here so that it can be kept in
@@ -136,6 +136,10 @@ Environment variables:
     return @options[:config]
   end
 
+  def environment_statements()
+    return @options[:environment_statements]
+  end
+
   def figrc()
     return @options[:figrc]
   end
@@ -144,8 +148,13 @@ Environment variables:
     return @options[:force]
   end
 
-  def variable_to_get()
-    return @options[:variable_to_get]
+  def help_message()
+    return @help_message + <<-'END_MESSAGE'
+        --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
+
+    END_MESSAGE
   end
 
   def home()
@@ -156,41 +165,36 @@ Environment variables:
     return @options[:log_config]
   end
 
-  def login?()
-    return @options[:login]
-  end
-
   def log_level()
     return @options[:log_level]
+  end
+
+  def login?()
+    return @options[:login]
   end
 
   def no_figrc?()
     return @options[:no_figrc]
   end
 
-  def environment_statements()
-    return @options[:environment_statements]
+  def package_contents_statements()
+    return @options[:package_contents_statements]
   end
 
   def package_definition_file()
     return @options[:package_definition_file]
   end
 
-  def package_contents_statements()
-    return @options[:package_contents_statements]
-  end
-
   def suppress_warning_include_statement_missing_version?()
     return @options[:suppress_warning_include_statement_missing_version]
   end
 
-  def help_message()
-    return @help_message + <<-'END_MESSAGE'
-        --                           end of Fig options; anything after this is used as a command to run
-        --command-extra-args         end of Fig options; anything after this is appended to the end of a
-                                     "command" statement in a "config" block.
+  def update_lock_response()
+    return @options[:update_lock_response]
+  end
 
-    END_MESSAGE
+  def variable_to_get()
+    return @options[:variable_to_get]
   end
 
   private
@@ -618,6 +622,18 @@ Environment variables:
       "  (#{level_list})"
     ) do |log_level|
       @options[:log_level] = log_level
+    end
+
+    @options[:update_lock_response] = :fail
+    update_lock_responses = [:fail, :wait, :ignore]
+    response_list = update_lock_responses.join(', ')
+    @switches << parser.define(
+      '--update-lock-response TYPE',
+      update_lock_responses,
+      'what to do when update lock already exists',
+      "  (#{response_list}, default is fail)",
+    ) do |response|
+      @options[:update_lock_response] = response
     end
 
     @switches << parser.define(
