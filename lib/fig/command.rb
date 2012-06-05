@@ -95,9 +95,6 @@ class Fig::Command
     rescue Fig::UserInputError => error
       log_error_message(error)
       return Fig::Command::Action::EXIT_FAILURE
-    rescue Fig::RepositoryError => error
-      log_error_message(error)
-      return Fig::Command::Action::EXIT_FAILURE
     end
   end
 
