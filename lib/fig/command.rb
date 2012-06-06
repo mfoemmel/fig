@@ -149,7 +149,15 @@ class Fig::Command
     lock_directory = @options.home
     FileUtils.mkdir_p(lock_directory)
 
-    @update_lock = File.new(lock_directory)
+    # Tried using the directory itself as the lock, but Windows is
+    # non-cooperative.
+    lock_file = lock_directory + '/lock'
+
+    # Use this instead of creating the file via File.open(lock_file, 'w') in
+    # order to avoid Windows file locking issues as much as possible.
+    FileUtils.touch(lock_file)
+
+    @update_lock = File.new(lock_file)
 
     # *sigh* Ruby 1.8 doesn't support close_on_exec(), but we'll still use it
     # if we can as a better attempt at safety.
