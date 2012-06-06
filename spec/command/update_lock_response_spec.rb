@@ -19,7 +19,7 @@ describe 'Fig' do
       @update_lock = nil
     end
 
-    it 'ignore' do
+    it %q<doesn't wait when set to "ignore"> do
       out, err, exit_code =
         fig('--update --update-lock-response ignore --set FOO=BAR --get FOO')
 
@@ -27,7 +27,7 @@ describe 'Fig' do
       exit_code.should == 0
     end
 
-    it 'fail' do
+    it %q<results in an error when set to "fail"> do
       out, err, exit_code =
         fig(
           '--update --update-lock-response fail --set FOO=BAR --get FOO',
