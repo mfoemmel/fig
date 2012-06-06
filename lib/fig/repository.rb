@@ -325,12 +325,16 @@ class Fig::Repository
   end
 
   def install_package(descriptor, temp_dir)
+    remote_fig_file = remote_fig_file_for_package(descriptor)
+    local_dir       = local_dir_for_package(descriptor)
+    local_fig_file  = fig_file_for_package_download(local_dir)
+    return if not @operating_system.download(remote_fig_file, local_fig_file)
+
     @operating_system.delete_and_recreate_directory(temp_dir)
 
-    remote_fig_file = remote_fig_file_for_package(descriptor)
-    local_fig_file = fig_file_for_package_download(temp_dir)
+    temp_fig_file = fig_file_for_package_download(temp_dir)
 
-    return if not @operating_system.download(remote_fig_file, local_fig_file)
+    @operating_system.download(remote_fig_file, temp_fig_file)
 
     package = read_package_from_directory(temp_dir, descriptor)
 
@@ -348,7 +352,6 @@ class Fig::Repository
       @operating_system.download_resource(resource_url, temp_dir)
     end
 
-    local_dir = local_dir_for_package(descriptor)
     FileUtils.rm_rf(local_dir)
     FileUtils.mkdir_p( File.dirname(local_dir) )
     FileUtils.mv(temp_dir, local_dir)

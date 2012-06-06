@@ -1,3 +1,10 @@
+v0.1.68.???
+
+  Bug fixes:
+
+  - Specifying --update with FIG_REMOTE_URL using FTP should be fast as it used
+    to be.
+
 v0.1.68.beta.1
 
   New features:
@@ -485,7 +492,7 @@ v0.1.42
 
   - Fig::Package refactoring.
 
-  - "file:" protocol works for FIG_REMOTE_HOME.
+  - "file:" protocol works for FIG_REMOTE_URL.
 
   - Testing no longer requires ssh.
 
