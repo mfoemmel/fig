@@ -16,6 +16,7 @@ require 'fig/repository'
 require 'fig/repository_error'
 require 'fig/runtime_environment'
 require 'fig/statement/configuration'
+require 'fig/update_lock'
 require 'fig/user_input_error'
 require 'fig/working_directory_maintainer'
 
@@ -146,49 +147,13 @@ class Fig::Command
     update_lock_response = @options.update_lock_response
     return if update_lock_response == :ignore
 
-    lock_directory = @options.home
-    FileUtils.mkdir_p(lock_directory)
+    @update_lock = Fig::UpdateLock.new(@options.home, update_lock_response)
 
-    # Tried using the directory itself as the lock, but Windows is
-    # non-cooperative.
-    lock_file = lock_directory + '/lock'
-
-    # Use this instead of creating the file via File.open(lock_file, 'w') in
-    # order to avoid Windows file locking issues as much as possible.
-    FileUtils.touch(lock_file)
-
-    @update_lock = File.new(lock_file)
-
-    # *sigh* Ruby 1.8 doesn't support close_on_exec(), but we'll still use it
-    # if we can as a better attempt at safety.
-    if @update_lock.respond_to? :close_on_exec=
-      @update_lock.close_on_exec = true
-    end
+    # *sigh* Ruby 1.8 doesn't support close_on_exec(), so we've got to ensure
+    # this stuff on our own.
     Fig::AtExit.add { @update_lock.close }
 
-    if update_lock_response == :wait
-      @update_lock.flock(File::LOCK_EX)
-    else
-      if ! @update_lock.flock(File::LOCK_EX | File::LOCK_NB)
-        raise_lock_usage_error(lock_directory)
-      end
-    end
-
     return
-  end
-
-  def raise_lock_usage_error(lock_directory)
-    raise Fig::UserInputError.new(<<-END_MESSAGE)
-Cannot update while another instance of Fig is updating #{lock_directory}.
-
-You can tell Fig to wait for update with
-
-    fig --update --update-lock-response wait ...
-
-or you can throw caution to the wind with
-
-    fig --update --update-lock-response ignore ...
-    END_MESSAGE
   end
 
   def set_up_application_configuration()
