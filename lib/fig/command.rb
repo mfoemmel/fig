@@ -150,26 +150,37 @@ class Fig::Command
     FileUtils.mkdir_p(lock_directory)
 
     @update_lock = File.new(lock_directory)
-    @update_lock.close_on_exec = true
+
+    # *sigh* Ruby 1.8 doesn't support close_on_exec(), but we'll still use it
+    # if we can as a better attempt at safety.
+    if @update_lock.respond_to? :close_on_exec=
+      @update_lock.close_on_exec = true
+    end
+    Fig::AtExit.add { @update_lock.close }
+
     if update_lock_response == :wait
       @update_lock.flock(File::LOCK_EX)
     else
       if ! @update_lock.flock(File::LOCK_EX | File::LOCK_NB)
-        raise Fig::UserInputError.new(<<-END_MESSAGE)
+        raise_lock_usage_error(lock_directory)
+      end
+    end
+
+    return
+  end
+
+  def raise_lock_usage_error(lock_directory)
+    raise Fig::UserInputError.new(<<-END_MESSAGE)
 Cannot update while another instance of Fig is updating #{lock_directory}.
 
 You can tell Fig to wait for update with
 
     fig --update --update-lock-response wait ...
 
-or you can ignore the whole issue with
+or you can throw caution to the wind with
 
     fig --update --update-lock-response ignore ...
-        END_MESSAGE
-      end
-    end
-
-    return
+    END_MESSAGE
   end
 
   def set_up_application_configuration()
