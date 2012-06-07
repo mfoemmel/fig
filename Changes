@@ -5,9 +5,12 @@ v0.1.68.???
   - Specifying --update with FIG_REMOTE_URL using FTP should be fast as it used
     to be.
 
+  - Skips retrieving directories and files to themselves.  (Tragic accident of
+    retrieving "." onto itself resulted in a corrupted git repo.)
+
 v0.1.68.beta.1
 
-  New features:
+  New feature (and backwards incompatibility):
 
   - Locks FIG_HOME when updating.  (Or attempts to.  If FIG_HOME is on NFS, all
     bets are off.)  By default, if Fig is updating and notices another instance

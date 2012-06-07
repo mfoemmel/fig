@@ -37,8 +37,8 @@ class Fig::WorkingDirectoryMaintainer
     return
   end
 
-  def retrieve(source, relpath)
-    copy(source, relpath)
+  def retrieve(source, relpath, &failure_block)
+    copy(source, relpath, &failure_block)
 
     return
   end
@@ -95,44 +95,76 @@ class Fig::WorkingDirectoryMaintainer
 
   def copy(source, relpath)
     target = File.join(@base_dir, relpath)
+
+    if source_and_target_are_same?(source, target)
+      # Actually happened: Retrieve and "set" both set to ".". Victim's current
+      # directory included a ".git" directory. Update was done and then later,
+      # an update with different dependencies. Fig proceeded to delete all
+      # files that had previously existed in the current directory, including
+      # out of the git repo. Whoops.
+      Fig::Logging.warn %Q<Skipping copying "#{source}" to itself.>
+      return
+    end
+
     if File.directory?(source)
-      FileUtils.mkdir_p(target)
-      Fig::Logging.debug "Copying directory #{source} to #{target}."
-      Dir.foreach(source) do |child|
-        if child != '.' and child != '..'
-          source_file = File.join(source, child)
-          target_file = File.join(relpath, child)
-          copy(source_file, target_file)
-        end
-      end
+      copy_directory(source, relpath, target, &failure_block)
     else
-      if should_copy_file?(source, target)
-        if Fig::Logging.debug?
-          Fig::Logging.debug \
-            "Copying file from #{source} to #{target}."
-        else
-          Fig::Logging.info(
-            Fig::Logging::Colorizable.new(
-              "+ [#{formatted_meta()}] #{relpath}",
-              :green,
-              nil
-            )
+      copy_file(source, relpath, target)
+    end
+
+    return
+  end
+
+  def source_and_target_are_same?(source, target)
+    source_absolute = File.absolute_path(source)
+    target_absolute = File.absolute_path(target)
+
+    return source_absolute == target_absolute
+  end
+
+  def copy_directory(source, relpath, target)
+    FileUtils.mkdir_p(target)
+    Fig::Logging.debug "Copying directory #{source} to #{target}."
+
+    Dir.foreach(source) do |child|
+      if child != '.' and child != '..'
+        source_file = File.join(source, child)
+        target_file = File.join(relpath, child)
+        copy(source_file, target_file)
+      end
+    end
+
+    return
+  end
+
+  def copy_file(source, relpath, target)
+    if should_copy_file?(source, target)
+      if Fig::Logging.debug?
+        Fig::Logging.debug \
+          "Copying file from #{source} to #{target}."
+      else
+        Fig::Logging.info(
+          Fig::Logging::Colorizable.new(
+            "+ [#{formatted_meta()}] #{relpath}",
+            :green,
+            nil
           )
-        end
-        FileUtils.mkdir_p(File.dirname(target))
-
-        # If the source is a dangling symlink, then there's no time, etc. to
-        # preserve.
-        preserve = File.exist?(source) && ! File.symlink?(source)
-
-        FileUtils.copy_entry(
-          source, target, preserve, false, :remove_destination
         )
       end
-      if @package_meta
-        @package_meta.add_file(relpath)
-        @package_meta.mark_as_retrieved()
-      end
+      FileUtils.mkdir_p(File.dirname(target))
+
+      # If the source is a dangling symlink, then there's no time, etc. to
+      # preserve.
+      preserve = File.exist?(source) && ! File.symlink?(source)
+
+      FileUtils.copy_entry(
+        source, target, preserve, false, :remove_destination
+      )
+    end
+
+    if @package_meta
+      @package_meta.add_file(relpath)
+      @package_meta.mark_as_retrieved()
     end
 
     return

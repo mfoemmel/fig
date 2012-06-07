@@ -104,6 +104,23 @@ describe 'Fig' do
         %r<the FOOPATH variable points to a path that does not exist>i
     end
 
+    it 'reports error for retrieve of source and destination being the same path' do
+      fig('--publish prerequisite/1.2.3 --set SOME_PATH=.')
+
+      input = <<-END
+        retrieve SOME_PATH->.
+        config default
+          include prerequisite/1.2.3
+        end
+      END
+      out, err, exit_code = fig('--update-if-missing', input)
+
+      err.should =~ %r<skipping copying>i
+      err.should =~ %r<" [.] ">x
+      err.should =~ %r<to itself>i
+      exit_code.should == 0
+    end
+
     it %q<preserves the path after '//' when copying files into your project directory while retrieving> do
       include_directory = "#{publish_from_directory}/include"
       FileUtils.mkdir_p(include_directory)
