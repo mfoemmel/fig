@@ -234,5 +234,20 @@ describe 'Fig' do
       err.should =~ %r<\ba-package\b.*has not been referenced>
       out.should == ''
     end
+
+    it %q<prints error when FIG_REMOTE_URL is not defined> do
+      begin
+        ENV.delete('FIG_REMOTE_URL')
+
+        (out, err, exitstatus) =
+          fig('--list-remote', :no_raise_on_error => true)
+
+        err.should =~ %r<FIG_REMOTE_URL>
+        out.should == ''
+        exitstatus.should_not == 0
+      ensure
+        ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+      end
+    end
   end
 end
