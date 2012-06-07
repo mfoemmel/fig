@@ -13,11 +13,23 @@ describe 'Fig' do
       FileUtils.mkdir_p(lib_directory)
     end
 
-    describe 'retrieves resource' do
+    describe 'retrieves resources' do
       before(:each) do
         write_file("#{lib_directory}/a-library", 'some library')
+
+        another_library = "#{lib_directory}/another-library"
+        url = 'file://' + File.expand_path(another_library)
+        write_file(another_library, 'some other library')
+
         fig(
-          '--publish prerequisite/1.2.3 --resource lib/a-library --append FOOPATH=@/lib/a-library',
+          [
+            '--publish',
+            'prerequisite/1.2.3',
+            '--resource lib/a-library',
+            "--resource #{url}",
+            '--append FOOPATH=@/lib/a-library',
+            '--append FOOPATH=@/another-library'
+          ].join(' '),
           :current_directory => publish_from_directory
         )
       end
@@ -34,6 +46,8 @@ describe 'Fig' do
         exit_code.should == 0
         File.read("#{retrieve_directory}/prerequisite/a-library").should ==
           'some library'
+        File.read("#{retrieve_directory}/prerequisite/another-library").should ==
+          'some other library'
 
         # Check for warning about the leading slash in FOOPATH looking like an
         # absolute path.
@@ -53,6 +67,8 @@ describe 'Fig' do
         fig('--update-if-missing', input)
         File.read("#{retrieve_directory}/prerequisite/a-library").should ==
           'some library'
+        File.read("#{retrieve_directory}/prerequisite/another-library").should ==
+          'some other library'
       end
     end
 
