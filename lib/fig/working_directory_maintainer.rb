@@ -37,8 +37,8 @@ class Fig::WorkingDirectoryMaintainer
     return
   end
 
-  def retrieve(source, relpath, &failure_block)
-    copy(source, relpath, &failure_block)
+  def retrieve(source, relpath)
+    copy(source, relpath)
 
     return
   end
@@ -107,7 +107,7 @@ class Fig::WorkingDirectoryMaintainer
     end
 
     if File.directory?(source)
-      copy_directory(source, relpath, target, &failure_block)
+      copy_directory(source, relpath, target)
     else
       copy_file(source, relpath, target)
     end
