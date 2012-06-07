@@ -269,9 +269,9 @@ class Fig::Command
     )
   end
 
-  # If the user has specified a descriptor, than any package.fig or --file
-  # option is ignored.  Thus, in order to avoid confusing the user, we make
-  # specifying both an error.
+  # If the user has specified a descriptor and we are not publishing, than any
+  # package.fig or --file option is ignored.  Thus, in order to avoid confusing
+  # the user, we make specifying both an error.
   def ensure_descriptor_and_file_were_not_both_specified()
     file = @options.package_definition_file()
 
@@ -280,7 +280,7 @@ class Fig::Command
     # processed.
     file_specified = ! file.nil? && file != :none
 
-    if @descriptor and file_specified
+    if @descriptor && file_specified
       raise Fig::UserInputError.new(
         %Q<Cannot specify both a package descriptor (#{@descriptor.original_string}) and the --file option (#{file}).>
       )

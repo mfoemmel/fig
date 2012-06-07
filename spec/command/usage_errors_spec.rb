@@ -71,6 +71,16 @@ describe 'Fig' do
       out.should == ''
     end
 
+    it %q<prints error when a descriptor and --file is specified> do
+      (out, err, exitstatus) = fig(
+          'package/version:default --file some.fig',
+          :no_raise_on_error => true
+        )
+      exitstatus.should == 1
+      err.should =~ /cannot specify both a package descriptor.*and the --file option/i
+      out.should == ''
+    end
+
     it %q<prints error when a descriptor contains a config and --config is specified> do
       (out, err, exitstatus) = fig(
           'package/version:default --config nondefault',
