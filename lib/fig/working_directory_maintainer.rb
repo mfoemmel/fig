@@ -116,8 +116,10 @@ class Fig::WorkingDirectoryMaintainer
   end
 
   def source_and_target_are_same?(source, target)
-    source_absolute = File.absolute_path(source)
-    target_absolute = File.absolute_path(target)
+    # Ruby 1.8 doesn't have File.absolute_path(), so we have to fall back to
+    # .expand_path().
+    source_absolute = File.expand_path(source)
+    target_absolute = File.expand_path(target)
 
     return source_absolute == target_absolute
   end
