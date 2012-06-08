@@ -1,5 +1,3 @@
-require 'optparse'
-
 require 'fig/command/action/clean'
 require 'fig/command/action/get'
 require 'fig/command/action/help'
@@ -24,7 +22,7 @@ require 'fig/command/action/update'
 require 'fig/command/action/update_if_missing'
 require 'fig/command/action/version'
 require 'fig/command/option_error'
-require 'fig/package'
+require 'fig/command/options/parser'
 require 'fig/package_descriptor'
 require 'fig/statement/archive'
 require 'fig/statement/include'
@@ -37,55 +35,6 @@ class Fig::Command; end
 
 # Command-line processing.
 class Fig::Command::Options
-  USAGE = <<-EOF
-Usage:
-
-  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [-- COMMAND]
-  fig [...] [DESCRIPTOR] [--update | --update-if-missing] [--command-extra-args VALUES]
-
-  fig {--publish | --publish-local} DESCRIPTOR
-      [--resource PATH]
-      [--archive  PATH]
-      [--include  DESCRIPTOR]
-      [--override DESCRIPTOR]
-      [--force]
-      [...]
-
-  fig --clean DESCRIPTOR [...]
-
-  fig --get VARIABLE                                         [DESCRIPTOR] [...]
-  fig --list-configs                                         [DESCRIPTOR] [...]
-  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
-  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
-  fig {--list-local | --list-remote}                                      [...]
-
-  fig {--version | --help}
-
-
-A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",
-"foo/1.2.3", and "foo/1.2.3:default". Whether ":<config>" and "/<version>" are
-required or allowed is dependent upon what your are doing.
-
-Standard options (represented as "[...]" above):
-
-      [--set    VARIABLE=VALUE]
-      [--append VARIABLE=VALUE]
-      [--file PATH] [--no-file]
-      [--config CONFIG]
-      [--login]
-      [--log-level LEVEL] [--log-config PATH]
-      [--figrc PATH] [--no-figrc]
-      [--suppress-warning-include-statement-missing-version]
-
-Environment variables:
-
-  FIG_REMOTE_URL (required),
-  FIG_HOME (path to local repository cache, defaults to $HOME/.fighome).
-  EOF
-
-  LOG_LEVELS = %w< off fatal error warn info debug all >
-  LOG_ALIASES = { 'warning' => 'warn' }
-
   # Public version of #strip_shell_command() here so that it can be kept in
   # sync.
   def self.strip_shell_command(argv)
@@ -124,30 +73,18 @@ Environment variables:
   attr_reader :variable_to_get
 
   def initialize()
-    @switches = []
-    @home     = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
+    @home   = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
+    @parser = Fig::Command::Options::Parser.new()
   end
 
   def process_command_line(argv)
     argv = argv.clone
     strip_shell_command(argv)
 
-    parser = new_parser()
-    @help_message = parser.help
+    set_up_parser()
+    @help_message = @parser.help
 
-    begin
-      parser.parse!(argv)
-    rescue OptionParser::InvalidArgument => error
-      raise_invalid_argument(error.args[0], error.args[1])
-    rescue OptionParser::MissingArgument => error
-      raise_missing_argument(error.args[0])
-    rescue OptionParser::InvalidOption => error
-      raise Fig::Command::OptionError.new(
-        "Unknown option #{error.args[0]}.\n\n#{USAGE}"
-      )
-    rescue OptionParser::ParseError => error
-      raise Fig::Command::OptionError.new(error.to_s)
-    end
+    @parser.parse!(argv)
 
     if not exit_code.nil?
       return
@@ -217,11 +154,6 @@ Environment variables:
   # regex with "\A" and "\z".
   STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >x
 
-  ARGUMENT_DESCRIPTION = {
-    '--set'    => Fig::Statement::Set::ARGUMENT_DESCRIPTION,
-    '--append' => Fig::Statement::Path::ARGUMENT_DESCRIPTION
-  }
-
   def list_all_configs?()
     return @list_all_configs
   end
@@ -252,63 +184,30 @@ Environment variables:
     return
   end
 
-  def raise_missing_argument(option)
-    raise Fig::Command::OptionError.new(
-      "Please provide a value for #{option}."
-    )
+  def set_up_parser
+    set_up_queries()
+    set_up_commands()
+    set_up_package_configuration_source()
+    set_up_environment_statements()
+    set_up_package_contents_statements()
+    set_up_remote_repository_access()
+    set_up_program_configuration()
+
+    return
   end
 
-  def raise_invalid_argument(option, value)
-    # *sigh* OptionParser does not raise MissingArgument for the case of an
-    # option with a required value being followed by another option.  It
-    # assigns the next option as the value instead.  E.g. for
-    #
-    #    fig --set --get FOO
-    #
-    # it assigns "--get" as the value of the "--set" option.
-    switch_strings =
-      (@switches.collect {|switch| [switch.short, switch.long]}).flatten
-    if switch_strings.any? {|string| string == value}
-      raise_missing_argument(option)
-    end
-
-    description = ARGUMENT_DESCRIPTION[option]
-    if description.nil?
-      description = ''
-    else
-      description = ' ' + description
-    end
-
-    raise Fig::Command::OptionError.new(
-      %Q<Invalid value for #{option}: "#{value}".#{description}>
-    )
-  end
-
-  def new_parser
-    return OptionParser.new do |parser|
-      set_up_queries(parser)
-      set_up_commands(parser)
-      set_up_package_configuration_source(parser)
-      set_up_environment_statements(parser)
-      set_up_package_contents_statements(parser)
-      set_up_remote_repository_access(parser)
-      set_up_program_configuration(parser)
-    end
-  end
-
-  def set_up_queries(parser)
-    parser.banner = "#{USAGE}\n"
-    @switches << parser.define_tail(
+  def set_up_queries()
+    @parser.on_tail(
       '-?', '-h','--help','display this help text'
     ) do
       set_base_action(Fig::Command::Action::Help)
     end
 
-    @switches << parser.define_tail('-v', '--version', 'print Fig version') do
+    @parser.on_tail('-v', '--version', 'print Fig version') do
       set_base_action(Fig::Command::Action::Version)
     end
 
-    @switches << parser.define(
+    @parser.on(
       '-g',
       '--get VARIABLE',
       STARTS_WITH_NON_HYPHEN,
@@ -318,12 +217,12 @@ Environment variables:
       @variable_to_get = variable_to_get
     end
 
-    set_up_listings(parser)
+    set_up_listings()
 
     return
   end
 
-  def set_up_listings(parser)
+  def set_up_listings()
     option_mapping = {
       :local_packages => [
         ['--list-local', '--list', 'list packages in $FIG_HOME'],
@@ -358,18 +257,18 @@ Environment variables:
       | type, specification_action_class |
 
       specification, action_class = *specification_action_class
-      @switches << parser.define(*specification) do
+      @parser.on(*specification) do
         set_base_action(action_class)
       end
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--list-tree', 'for listings, output a tree instead of a list'
     ) do
       @list_tree = true
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--list-all-configs',
       'for listings, follow all configurations of the base package'
     ) do
@@ -379,18 +278,18 @@ Environment variables:
     return
   end
 
-  def set_up_commands(parser)
-    @switches << parser.define('--clean', 'remove package from $FIG_HOME') do
+  def set_up_commands()
+    @parser.on('--clean', 'remove package from $FIG_HOME') do
       set_base_action(Fig::Command::Action::Clean)
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
       set_base_action(Fig::Command::Action::Publish)
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--publish-local', 'install package only in $FIG_HOME'
     ) do |publish_local|
       set_base_action(Fig::Command::Action::PublishLocal)
@@ -409,8 +308,8 @@ Environment variables:
       \z
     >x
 
-  def set_up_package_configuration_source(parser)
-    @switches << parser.define(
+  def set_up_package_configuration_source()
+    @parser.on(
       '-c',
       '--config CONFIG',
       STARTS_WITH_NON_HYPHEN,
@@ -420,7 +319,7 @@ Environment variables:
     end
 
     @package_definition_file = nil
-    @switches << parser.define(
+    @parser.on(
       '--file FILE',
       FILE_OPTION_VALUE_PATTERN,
       %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
@@ -428,7 +327,7 @@ Environment variables:
       @package_definition_file = path
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--no-file', 'ignore package.fig file in current directory'
     ) do |path|
       @package_definition_file = :none
@@ -437,9 +336,9 @@ Environment variables:
     return
   end
 
-  def set_up_environment_statements(parser)
+  def set_up_environment_statements()
     @environment_statements = []
-    @switches << parser.define(
+    @parser.on(
       '-p',
       '--append VARIABLE=VALUE',
       STARTS_WITH_NON_HYPHEN,
@@ -448,8 +347,11 @@ Environment variables:
       @environment_statements <<
         new_variable_statement('--append', name_value, Fig::Statement::Path)
     end
+    @parser.add_argument_description(
+      %w<-p --append>, Fig::Statement::Path::ARGUMENT_DESCRIPTION
+    )
 
-    @switches << parser.define(
+    @parser.on(
       '-s',
       '--set VARIABLE=VALUE',
       STARTS_WITH_NON_HYPHEN,
@@ -458,8 +360,11 @@ Environment variables:
       @environment_statements <<
         new_variable_statement('--set', name_value, Fig::Statement::Set)
     end
+    @parser.add_argument_description(
+      %w<-s --set>, Fig::Statement::Set::ARGUMENT_DESCRIPTION
+    )
 
-    @switches << parser.define(
+    @parser.on(
       '-i',
       '--include DESCRIPTOR',
       STARTS_WITH_NON_HYPHEN,
@@ -482,7 +387,7 @@ Environment variables:
       @environment_statements << statement
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--override DESCRIPTOR',
       STARTS_WITH_NON_HYPHEN,
       'dictate version of package as specified in DESCRIPTOR'
@@ -503,9 +408,9 @@ Environment variables:
     return
   end
 
-  def set_up_package_contents_statements(parser)
+  def set_up_package_contents_statements()
     @package_contents_statements = []
-    @switches << parser.define(
+    @parser.on(
       '--archive PATH',
       STARTS_WITH_NON_HYPHEN,
       'include PATH archive in package (when using --publish)'
@@ -514,7 +419,7 @@ Environment variables:
         Fig::Statement::Archive.new(nil, '--archive option', path)
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--resource PATH',
       STARTS_WITH_NON_HYPHEN,
       'include PATH resource in package (when using --publish)'
@@ -526,8 +431,8 @@ Environment variables:
     return
   end
 
-  def set_up_remote_repository_access(parser)
-    @switches << parser.define(
+  def set_up_remote_repository_access()
+    @parser.on(
       '-u',
       '--update',
       'check remote repo for updates and download to $FIG_HOME as necessary'
@@ -535,7 +440,7 @@ Environment variables:
       set_update_action(Fig::Command::Action::Update, :unconditionally)
     end
 
-    @switches << parser.define(
+    @parser.on(
       '-m',
       '--update-if-missing',
       'check remote repo for updates only if package missing from $FIG_HOME'
@@ -543,14 +448,14 @@ Environment variables:
       set_update_action(Fig::Command::Action::UpdateIfMissing, :if_missing)
     end
 
-    @switches << parser.define(
+    @parser.on(
       '-l', '--login', 'login to remote repo as a non-anonymous user'
     ) do
       @login = true
     end
 
     @force = nil
-    @switches << parser.define(
+    @parser.on(
       '--force',
       'force-overwrite existing version of a package to the remote repo'
     ) do |force|
@@ -560,8 +465,11 @@ Environment variables:
     return
   end
 
-  def set_up_program_configuration(parser)
-    @switches << parser.define(
+  LOG_LEVELS = %w< off fatal error warn info debug all >
+  LOG_ALIASES = { 'warning' => 'warn' }
+
+  def set_up_program_configuration()
+    @parser.on(
       '--figrc PATH',
       STARTS_WITH_NON_HYPHEN,
       'add PATH to configuration used for Fig'
@@ -569,9 +477,9 @@ Environment variables:
       @figrc = path
     end
 
-    @switches << parser.define('--no-figrc', 'ignore ~/.figrc') { @no_figrc = true }
+    @parser.on('--no-figrc', 'ignore ~/.figrc') { @no_figrc = true }
 
-    @switches << parser.define(
+    @parser.on(
       '--log-config PATH',
       STARTS_WITH_NON_HYPHEN,
       'use PATH file as configuration for Log4r'
@@ -580,7 +488,7 @@ Environment variables:
     end
 
     level_list = LOG_LEVELS.join(', ')
-    @switches << parser.define(
+    @parser.on(
       '--log-level LEVEL',
       LOG_LEVELS,
       LOG_ALIASES,
@@ -593,7 +501,7 @@ Environment variables:
     @update_lock_response = :fail
     update_lock_responses = [:fail, :wait, :ignore]
     response_list = update_lock_responses.join(', ')
-    @switches << parser.define(
+    @parser.on(
       '--update-lock-response TYPE',
       update_lock_responses,
       'what to do when update lock already exists',
@@ -602,7 +510,7 @@ Environment variables:
       @update_lock_response = response
     end
 
-    @switches << parser.define(
+    @parser.on(
       '--suppress-warning-include-statement-missing-version',
       %q<don't complain about "include package" without a version>
     ) do
@@ -647,7 +555,7 @@ Environment variables:
 
   def new_variable_statement(option, name_value, statement_class)
     variable, value = statement_class.parse_name_value(name_value) {
-      raise_invalid_argument(option, name_value)
+      @parser.raise_invalid_argument(option, name_value)
     }
 
     return statement_class.new(nil, "#{option} option", variable, value)
