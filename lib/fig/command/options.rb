@@ -107,11 +107,21 @@ Environment variables:
     return argv
   end
 
-  attr_reader :shell_command
   attr_reader :command_extra_argv
+  attr_reader :config
   attr_reader :descriptor
+  attr_reader :environment_statements
   attr_reader :exit_code
+  attr_reader :figrc
+  attr_reader :home
+  attr_reader :log_config
+  attr_reader :log_level
+  attr_reader :package_contents_statements
+  attr_reader :package_definition_file
+  attr_reader :shell_command
+  attr_reader :update_lock_response
   attr_reader :update_packages
+  attr_reader :variable_to_get
 
   def initialize(argv)
     process_command_line(argv)
@@ -132,20 +142,8 @@ Environment variables:
     return actions
   end
 
-  def config()
-    return @options[:config]
-  end
-
-  def environment_statements()
-    return @options[:environment_statements]
-  end
-
-  def figrc()
-    return @options[:figrc]
-  end
-
   def force?()
-    return @options[:force]
+    return @force
   end
 
   def help_message()
@@ -157,44 +155,16 @@ Environment variables:
     END_MESSAGE
   end
 
-  def home()
-    return @options[:home]
-  end
-
-  def log_config()
-    return @options[:log_config]
-  end
-
-  def log_level()
-    return @options[:log_level]
-  end
-
   def login?()
-    return @options[:login]
+    return @login
   end
 
   def no_figrc?()
-    return @options[:no_figrc]
-  end
-
-  def package_contents_statements()
-    return @options[:package_contents_statements]
-  end
-
-  def package_definition_file()
-    return @options[:package_definition_file]
+    return @no_figrc
   end
 
   def suppress_warning_include_statement_missing_version?()
-    return @options[:suppress_warning_include_statement_missing_version]
-  end
-
-  def update_lock_response()
-    return @options[:update_lock_response]
-  end
-
-  def variable_to_get()
-    return @options[:variable_to_get]
+    return @suppress_warning_include_statement_missing_version
   end
 
   private
@@ -209,12 +179,12 @@ Environment variables:
     '--append' => Fig::Statement::Path::ARGUMENT_DESCRIPTION
   }
 
-  def list_tree?()
-    return @options[:list_tree]
+  def list_all_configs?()
+    return @list_all_configs
   end
 
-  def list_all_configs?()
-    return @options[:list_all_configs]
+  def list_tree?()
+    return @list_tree
   end
 
   def process_command_line(argv)
@@ -222,9 +192,8 @@ Environment variables:
     strip_shell_command(argv)
 
     @switches = []
-    @options = {}
 
-    @options[:home] = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
+    @home = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
 
     parser = new_parser()
     @help_message = parser.help
@@ -349,7 +318,7 @@ Environment variables:
       'print value of environment variable VARIABLE'
     ) do |variable_to_get|
       set_base_action(Fig::Command::Action::Get)
-      @options[:variable_to_get] = variable_to_get
+      @variable_to_get = variable_to_get
     end
 
     set_up_listings(parser)
@@ -400,14 +369,14 @@ Environment variables:
     @switches << parser.define(
       '--list-tree', 'for listings, output a tree instead of a list'
     ) do
-      @options[:list_tree] = true
+      @list_tree = true
     end
 
     @switches << parser.define(
       '--list-all-configs',
       'for listings, follow all configurations of the base package'
     ) do
-      @options[:list_all_configs] = true
+      @list_all_configs = true
     end
 
     return
@@ -450,36 +419,36 @@ Environment variables:
       STARTS_WITH_NON_HYPHEN,
       %q<apply configuration CONFIG, default is "default">
     ) do |config|
-      @options[:config] = config
+      @config = config
     end
 
-    @options[:package_definition_file] = nil
+    @package_definition_file = nil
     @switches << parser.define(
       '--file FILE',
       FILE_OPTION_VALUE_PATTERN,
       %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
-      @options[:package_definition_file] = path
+      @package_definition_file = path
     end
 
     @switches << parser.define(
       '--no-file', 'ignore package.fig file in current directory'
     ) do |path|
-      @options[:package_definition_file] = :none
+      @package_definition_file = :none
     end
 
     return
   end
 
   def set_up_environment_statements(parser)
-    @options[:environment_statements] = []
+    @environment_statements = []
     @switches << parser.define(
       '-p',
       '--append VARIABLE=VALUE',
       STARTS_WITH_NON_HYPHEN,
       'append (actually, prepend) VALUE to PATH-like environment variable VARIABLE'
     ) do |name_value|
-      @options[:environment_statements] <<
+      @environment_statements <<
         new_variable_statement('--append', name_value, Fig::Statement::Path)
     end
 
@@ -489,7 +458,7 @@ Environment variables:
       STARTS_WITH_NON_HYPHEN,
       'set environment variable VARIABLE to VALUE'
     ) do |name_value|
-      @options[:environment_statements] <<
+      @environment_statements <<
         new_variable_statement('--set', name_value, Fig::Statement::Set)
     end
 
@@ -513,7 +482,7 @@ Environment variables:
       # We've never allowed versionless includes from the command-line. Hooray!
       statement.complain_if_version_missing()
 
-      @options[:environment_statements] << statement
+      @environment_statements << statement
     end
 
     @switches << parser.define(
@@ -531,20 +500,20 @@ Environment variables:
           nil, '--override option', descriptor.name, descriptor.version
         )
 
-      @options[:environment_statements] << statement
+      @environment_statements << statement
     end
 
     return
   end
 
   def set_up_package_contents_statements(parser)
-    @options[:package_contents_statements] = []
+    @package_contents_statements = []
     @switches << parser.define(
       '--archive PATH',
       STARTS_WITH_NON_HYPHEN,
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @options[:package_contents_statements] <<
+      @package_contents_statements <<
         Fig::Statement::Archive.new(nil, '--archive option', path)
     end
 
@@ -553,7 +522,7 @@ Environment variables:
       STARTS_WITH_NON_HYPHEN,
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @options[:package_contents_statements] <<
+      @package_contents_statements <<
         Fig::Statement::Resource.new(nil, '--resource option', path)
     end
 
@@ -580,15 +549,15 @@ Environment variables:
     @switches << parser.define(
       '-l', '--login', 'login to remote repo as a non-anonymous user'
     ) do
-      @options[:login] = true
+      @login = true
     end
 
-    @options[:force] = nil
+    @force = nil
     @switches << parser.define(
       '--force',
       'force-overwrite existing version of a package to the remote repo'
     ) do |force|
-      @options[:force] = force
+      @force = force
     end
 
     return
@@ -600,17 +569,17 @@ Environment variables:
       STARTS_WITH_NON_HYPHEN,
       'add PATH to configuration used for Fig'
     ) do |path|
-      @options[:figrc] = path
+      @figrc = path
     end
 
-    @switches << parser.define('--no-figrc', 'ignore ~/.figrc') { @options[:no_figrc] = true }
+    @switches << parser.define('--no-figrc', 'ignore ~/.figrc') { @no_figrc = true }
 
     @switches << parser.define(
       '--log-config PATH',
       STARTS_WITH_NON_HYPHEN,
       'use PATH file as configuration for Log4r'
     ) do |path|
-      @options[:log_config] = path
+      @log_config = path
     end
 
     level_list = LOG_LEVELS.join(', ')
@@ -621,10 +590,10 @@ Environment variables:
       'set logging level to LEVEL',
       "  (#{level_list})"
     ) do |log_level|
-      @options[:log_level] = log_level
+      @log_level = log_level
     end
 
-    @options[:update_lock_response] = :fail
+    @update_lock_response = :fail
     update_lock_responses = [:fail, :wait, :ignore]
     response_list = update_lock_responses.join(', ')
     @switches << parser.define(
@@ -633,14 +602,14 @@ Environment variables:
       'what to do when update lock already exists',
       "  (#{response_list}, default is fail)"
     ) do |response|
-      @options[:update_lock_response] = response
+      @update_lock_response = response
     end
 
     @switches << parser.define(
       '--suppress-warning-include-statement-missing-version',
       %q<don't complain about "include package" without a version>
     ) do
-      @options[:suppress_warning_include_statement_missing_version] = true
+      @suppress_warning_include_statement_missing_version = true
     end
 
     return
