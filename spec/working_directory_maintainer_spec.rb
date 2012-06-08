@@ -78,10 +78,18 @@ describe 'WorkingDirectoryMaintainer' do
 
   it 'fails on corrupted metadata' do
     FileUtils.mkdir_p("#{working_directory}/.fig")
-    write_file("#{working_directory}/.fig/retrieve", 'random garbage')
+
+    metadata_file = "#{working_directory}/.fig/retrieve"
+    write_file(metadata_file, 'random garbage')
 
     expect {
       Fig::WorkingDirectoryMaintainer.new(working_directory)
     }.to raise_error(/parse error/)
+
+    # This is so much fun.  It appears that once we've had a file open within
+    # this process, we cannot delete that file, i.e. "File.rm(metadata_file)"
+    # results in an EACCESS on Windows.  So, in lieu of removing the file, we
+    # just make it empty.
+    write_file(metadata_file, '')
   end
 end
