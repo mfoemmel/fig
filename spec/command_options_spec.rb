@@ -3,22 +3,27 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fig/command/option_error'
 require 'fig/command/options'
 
-  def check_environment_variable_option(option_name)
-    it 'complains if there is no variable name' do
-      expect_invalid_value_error(option_name, '=whatever')
-    end
+def new_options(argv)
+  options = Fig::Command::Options.new()
+  options.process_command_line(argv)
 
-    it 'accepts a simple variable value' do
-      Fig::Command::Options.new(["--#{option_name}", 'variable=value'])
-      # no exception
-    end
+  return options
+end
+
+def check_environment_variable_option(option_name)
+  it 'complains if there is no variable name' do
+    expect_invalid_value_error(option_name, '=whatever')
   end
+
+  it 'accepts a simple variable value' do
+    new_options(["--#{option_name}", 'variable=value'])
+    # no exception
+  end
+end
 
 describe 'Command::Options' do
   def expect_invalid_value_error(option_name, value)
-    expect {
-      Fig::Command::Options.new(["--#{option_name}", value])
-    }.to raise_error(
+    expect { new_options(["--#{option_name}", value]) }.to raise_error(
       Fig::Command::OptionError,
       %r<\AInvalid value for --#{option_name}: "#{Regexp.quote(value)}"[.]>
     )
@@ -35,9 +40,7 @@ describe 'Command::Options' do
 
       describe "--#{option_name}" do
         it 'when it is the last option on the command-line' do
-          expect {
-            Fig::Command::Options.new(["--#{option_name}"])
-          }.to raise_error(
+          expect { new_options(["--#{option_name}"]) }.to raise_error(
             Fig::Command::OptionError,
             "Please provide a value for --#{option_name}."
           )
@@ -50,9 +53,7 @@ describe 'Command::Options' do
 
             it following_option do
               expect {
-                Fig::Command::Options.new(
-                  ["--#{option_name}", following_option]
-                )
+                new_options( ["--#{option_name}", following_option])
               }.to raise_error(
                 Fig::Command::OptionError,
                 "Please provide a value for --#{option_name}."
@@ -73,8 +74,7 @@ describe 'Command::Options' do
       |option_value, description|
 
       it %Q<allows #{description} ("#{option_value}") as a value> do
-        options =
-          Fig::Command::Options.new(['--file', option_value])
+        options = new_options(['--file', option_value])
         options.package_definition_file.should == option_value
       end
     end
@@ -84,12 +84,12 @@ describe 'Command::Options' do
     check_environment_variable_option('set')
 
     it 'allows the absence of an equals sign' do
-      Fig::Command::Options.new(%w< --set whatever >)
+      new_options(%w< --set whatever >)
       # no exception
     end
 
     it 'allows an empty value' do
-      Fig::Command::Options.new(%w< --set whatever= >)
+      new_options(%w< --set whatever= >)
       # no exception
     end
   end

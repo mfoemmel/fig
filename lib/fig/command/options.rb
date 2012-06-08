@@ -123,8 +123,51 @@ Environment variables:
   attr_reader :update_packages
   attr_reader :variable_to_get
 
-  def initialize(argv)
-    process_command_line(argv)
+  def initialize()
+    @switches = []
+    @home     = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
+  end
+
+  def process_command_line(argv)
+    argv = argv.clone
+    strip_shell_command(argv)
+
+    parser = new_parser()
+    @help_message = parser.help
+
+    begin
+      parser.parse!(argv)
+    rescue OptionParser::InvalidArgument => error
+      raise_invalid_argument(error.args[0], error.args[1])
+    rescue OptionParser::MissingArgument => error
+      raise_missing_argument(error.args[0])
+    rescue OptionParser::InvalidOption => error
+      raise Fig::Command::OptionError.new(
+        "Unknown option #{error.args[0]}.\n\n#{USAGE}"
+      )
+    rescue OptionParser::ParseError => error
+      raise Fig::Command::OptionError.new(error.to_s)
+    end
+
+    if not exit_code.nil?
+      return
+    end
+
+    if argv.size > 1
+      $stderr.puts %q<Extra arguments. Should only have a package/version after all other options. Had "> + argv.join(%q<", ">) + %q<" left over.>
+      @exit_code = 1
+      return
+    end
+
+    derive_primary_descriptor(argv.first)
+    if not @base_action and @descriptor
+      set_base_action(Fig::Command::Action::RunCommandStatement)
+    end
+    set_up_sub_actions()
+
+    actions().each {|action| action.configure(self)}
+
+    return
   end
 
   def actions()
@@ -185,52 +228,6 @@ Environment variables:
 
   def list_tree?()
     return @list_tree
-  end
-
-  def process_command_line(argv)
-    argv = argv.clone
-    strip_shell_command(argv)
-
-    @switches = []
-
-    @home = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
-
-    parser = new_parser()
-    @help_message = parser.help
-
-    begin
-      parser.parse!(argv)
-    rescue OptionParser::InvalidArgument => error
-      raise_invalid_argument(error.args[0], error.args[1])
-    rescue OptionParser::MissingArgument => error
-      raise_missing_argument(error.args[0])
-    rescue OptionParser::InvalidOption => error
-      raise Fig::Command::OptionError.new(
-        "Unknown option #{error.args[0]}.\n\n#{USAGE}"
-      )
-    rescue OptionParser::ParseError => error
-      raise Fig::Command::OptionError.new(error.to_s)
-    end
-
-    if not exit_code.nil?
-      return
-    end
-
-    if argv.size > 1
-      $stderr.puts %q<Extra arguments. Should only have a package/version after all other options. Had "> + argv.join(%q<", ">) + %q<" left over.>
-      @exit_code = 1
-      return
-    end
-
-    derive_primary_descriptor(argv.first)
-    if not @base_action and @descriptor
-      set_base_action(Fig::Command::Action::RunCommandStatement)
-    end
-    set_up_sub_actions()
-
-    actions().each {|action| action.configure(self)}
-
-    return
   end
 
   def strip_shell_command(argv)
