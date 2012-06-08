@@ -67,6 +67,7 @@ class Fig::Command::Options
   attr_reader :log_level
   attr_reader :package_contents_statements
   attr_reader :package_definition_file
+  attr_reader :parser
   attr_reader :shell_command
   attr_reader :update_lock_response
   attr_reader :update_packages
