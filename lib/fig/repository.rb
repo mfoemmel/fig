@@ -124,7 +124,9 @@ class Fig::Repository
     return
   end
 
-  def publish_package(package_statements, descriptor, local_only)
+  def publish_package(
+    package_statements, descriptor, local_only, source_package
+  )
     check_local_repository_format()
     if not local_only
       check_remote_repository_format()
@@ -138,7 +140,7 @@ class Fig::Repository
     @operating_system.delete_and_recreate_directory(local_dir)
     fig_file = File.join(temp_dir, PACKAGE_FILE_IN_REPO)
     content = publish_package_content_and_derive_dot_fig_contents(
-      package_statements, descriptor, local_dir, local_only
+      package_statements, descriptor, local_dir, local_only, source_package
     )
     @operating_system.write(fig_file, content)
 
@@ -452,7 +454,7 @@ class Fig::Repository
   end
 
   def publish_package_content_and_derive_dot_fig_contents(
-    package_statements, descriptor, local_dir, local_only
+    package_statements, descriptor, local_dir, local_only, source_package
   )
     header_strings = derive_package_metadata_comments(
       package_statements, descriptor
@@ -461,7 +463,15 @@ class Fig::Repository
       package_statements, descriptor, local_dir, local_only
     )
 
-    statement_strings = [header_strings, deparsed_statement_strings].flatten()
+    statement_strings = [header_strings, deparsed_statement_strings]
+    if source_package && source_package.unparsed_text
+      statement_strings << ''
+      statement_strings << '# Original, unparsed package text:'
+      statement_strings << '# '
+      statement_strings << source_package.unparsed_text.gsub(/^/, '# ')
+    end
+
+    statement_strings.flatten!
     return statement_strings.join("\n").gsub(/\n{3,}/, "\n\n").strip() + "\n"
   end
 
