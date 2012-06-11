@@ -21,13 +21,13 @@ class Fig::Parser
     @check_include_versions = check_include_versions
   end
 
-  def parse_package(descriptor, directory, source_description, input)
+  def parse_package(descriptor, directory, source_description, unparsed_text)
     # Bye bye comments.
-    input = input.gsub(/#.*$/, '')
+    stripped_text = unparsed_text.gsub(/#.*$/, '')
 
     # Extra space at the end because most of the rules in the grammar require
     # trailing whitespace.
-    result = @treetop_parser.parse(input + ' ')
+    result = @treetop_parser.parse(stripped_text + ' ')
 
     extended_description =
       extend_source_description(directory, source_description)
@@ -40,6 +40,7 @@ class Fig::Parser
       directory,
       Fig::ParserPackageBuildState.new(descriptor, extended_description)
     )
+    package.unparsed_text = unparsed_text
 
     check_for_bad_urls(package, descriptor)
     check_for_multiple_command_statements(package)

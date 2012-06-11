@@ -21,7 +21,10 @@ class Fig::Command::Action::PublishLocal
 
     Fig::Logging.info "Publishing #{@descriptor.to_string()}."
     @execution_context.repository.publish_package(
-      @publish_statements, @descriptor, :publish_local
+      @publish_statements,
+      @descriptor,
+      :publish_local,
+      @execution_context.base_package
     )
 
     return EXIT_SUCCESS

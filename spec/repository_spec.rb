@@ -50,7 +50,7 @@ describe 'Repository' do
     package_statements = generate_package_statements
 
     descriptor = Fig::PackageDescriptor.new('foo', '1.0.0', nil)
-    repository.publish_package(package_statements, descriptor, false)
+    repository.publish_package(package_statements, descriptor, false, nil)
 
     repository.list_packages.include?('foo/1.0.0').should be_true
 
