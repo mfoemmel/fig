@@ -24,9 +24,9 @@ module Fig; end
 
 # Main program
 class Fig::Command
-  def run_fig(argv)
+  def run_fig(argv, options = nil)
     begin
-      @options = Fig::Command::Options.new()
+      @options = options || Fig::Command::Options.new()
       @options.process_command_line(argv)
     rescue Fig::UserInputError => error
       $stderr.puts error.to_s # Logging isn't set up yet.
