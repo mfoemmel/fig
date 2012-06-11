@@ -19,8 +19,12 @@ class Fig::Command::Action::Version
     return true
   end
 
+  def configure(options)
+    @version_message = options.version_message
+  end
+
   def execute()
-    puts File.basename($0) + ' v' + Fig::VERSION
+    puts @version_message || File.basename($0) + ' v' + Fig::VERSION
 
     return EXIT_SUCCESS
   end

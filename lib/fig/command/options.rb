@@ -56,22 +56,23 @@ class Fig::Command::Options
     return argv
   end
 
-  attr_reader :command_extra_argv
-  attr_reader :config
-  attr_reader :descriptor
-  attr_reader :environment_statements
-  attr_reader :exit_code
-  attr_reader :figrc
-  attr_reader :home
-  attr_reader :log_config
-  attr_reader :log_level
-  attr_reader :package_contents_statements
-  attr_reader :package_definition_file
-  attr_reader :parser
-  attr_reader :shell_command
-  attr_reader :update_lock_response
-  attr_reader :update_packages
-  attr_reader :variable_to_get
+  attr_reader   :command_extra_argv
+  attr_reader   :config
+  attr_reader   :descriptor
+  attr_reader   :environment_statements
+  attr_reader   :exit_code
+  attr_reader   :figrc
+  attr_reader   :home
+  attr_reader   :log_config
+  attr_reader   :log_level
+  attr_reader   :package_contents_statements
+  attr_reader   :package_definition_file
+  attr_reader   :parser
+  attr_reader   :shell_command
+  attr_reader   :update_lock_response
+  attr_reader   :update_packages
+  attr_reader   :variable_to_get
+  attr_accessor :version_message
 
   def initialize()
     @home   = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
