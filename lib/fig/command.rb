@@ -86,18 +86,18 @@ class Fig::Command
     return Fig::Command::Action::EXIT_SUCCESS
   end
 
-  def run_with_exception_handling(argv)
+  def run_with_exception_handling(argv, options = nil)
     begin
-      return_code = run_fig(argv)
-      return return_code
+      return run_fig(argv, options)
     rescue Fig::URLAccessError => error
       urls = error.urls.join(', ')
-      $stderr.puts "Access to #{urls} in #{error.package}/#{error.version} not allowed."
-      return Fig::Command::Action::EXIT_FAILURE
+      $stderr.puts \
+        "Access to #{urls} in #{error.package}/#{error.version} not allowed."
     rescue Fig::UserInputError => error
       log_error_message(error)
-      return Fig::Command::Action::EXIT_FAILURE
     end
+
+    return Fig::Command::Action::EXIT_FAILURE
   end
 
   private
