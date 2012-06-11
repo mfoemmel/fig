@@ -156,7 +156,7 @@ Environment variables:
 
   private
 
-  def make_switch_array(*arguments, block)
+  def make_switch_array(arguments, block)
     # From the OptionParser code, the contents of the array:
     #
     # +switch+::      OptionParser::Switch instance to be inserted.
@@ -167,7 +167,7 @@ Environment variables:
     # Why returning this data separate from the Switch object is necessary, I
     # do not understand.
 
-    switch_array = @parser.make_switch(*arguments, block)
+    switch_array = @parser.make_switch(arguments, block)
     switch = switch_array[0]
 
     options = [switch.long, switch.short].flatten
