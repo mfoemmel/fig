@@ -8,6 +8,8 @@ class Fig::Command::Options; end
 
 # Command-line processing.
 class Fig::Command::Options::Parser
+  # This class knows way too much about how OptionParser works.
+
   USAGE = <<-EOF
 Usage:
 
@@ -55,7 +57,7 @@ Environment variables:
   EOF
 
   def initialize()
-    @switches             = []
+    @switches             = {}
     @argument_description = {}
     @parser               = OptionParser.new
 
@@ -77,25 +79,31 @@ Environment variables:
   end
 
   def on_head(*arguments, &block)
-    switch_array = @parser.make_switch(arguments, block)
+    switch_array = make_switch_array(arguments, block)
+
+    return if not switch_array
+
     @parser.top.prepend(*switch_array)
-    @switches << switch_array[0]
 
     return
   end
 
   def on(*arguments, &block)
-    switch_array = @parser.make_switch(arguments, block)
+    switch_array = make_switch_array(arguments, block)
+
+    return if not switch_array
+
     @parser.top.append(*switch_array)
-    @switches << switch_array[0]
 
     return
   end
 
   def on_tail(*arguments, &block)
-    switch_array = @parser.make_switch(arguments, block)
+    switch_array = make_switch_array(arguments, block)
+
+    return if not switch_array
+
     @parser.base.append(*switch_array)
-    @switches << switch_array[0]
 
     return
   end
@@ -130,9 +138,7 @@ Environment variables:
     #    fig --set --get FOO
     #
     # it assigns "--get" as the value of the "--set" option.
-    switch_strings =
-      (@switches.collect {|switch| [switch.short, switch.long]}).flatten
-    if switch_strings.any? {|string| string == value}
+    if @switches.has_key? value
       raise_missing_argument(option)
     end
 
@@ -149,6 +155,29 @@ Environment variables:
   end
 
   private
+
+  def make_switch_array(*arguments, block)
+    # From the OptionParser code, the contents of the array:
+    #
+    # +switch+::      OptionParser::Switch instance to be inserted.
+    # +short_opts+::  List of short style options.
+    # +long_opts+::   List of long style options.
+    # +nolong_opts+:: List of long style options with "no-" prefix.
+    #
+    # Why returning this data separate from the Switch object is necessary, I
+    # do not understand.
+
+    switch_array = @parser.make_switch(*arguments, block)
+    switch = switch_array[0]
+
+    options = [switch.long, switch.short].flatten
+
+    return if options.any? {|option| @switches.has_key? option}
+
+    options.each {|option| @switches[option] = switch}
+
+    return switch_array
+  end
 
   def raise_missing_argument(option)
     raise Fig::Command::OptionError.new(
