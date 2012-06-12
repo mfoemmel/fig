@@ -12,8 +12,7 @@ require 'fig/package_cache'
 require 'fig/package_descriptor'
 require 'fig/parser'
 require 'fig/repository_error'
-require 'fig/statement/archive'
-require 'fig/statement/resource'
+require 'fig/repository_package_publisher'
 
 module Fig; end
 
@@ -21,6 +20,7 @@ module Fig; end
 # defers remote operations to others.
 class Fig::Repository
   METADATA_SUBDIRECTORY = '_meta'
+  PACKAGE_FILE_IN_REPO  = '.fig'
   RESOURCES_FILE        = 'resources.tar.gz'
   VERSION_FILE_NAME     = 'repository-format-version'
   VERSION_SUPPORTED     = 1
@@ -130,37 +130,22 @@ class Fig::Repository
       check_remote_repository_format()
     end
 
-    validate_asset_names(package_statements)
+    publisher = Fig::RepositoryPackagePublisher.new
+    publisher.operating_system       = @operating_system
+    publisher.publish_listeners      = @publish_listeners
+    publisher.package_statements     = package_statements
+    publisher.descriptor             = descriptor
+    publisher.source_package         = source_package
+    publisher.base_temp_dir          = base_temp_dir
+    publisher.local_dir_for_package  = local_dir_for_package(descriptor)
+    publisher.remote_dir_for_package = remote_dir_for_package(descriptor)
+    publisher.local_only             = local_only
+    publisher.local_fig_file_for_package =
+      local_fig_file_for_package(descriptor)
+    publisher.remote_fig_file_for_package =
+      remote_fig_file_for_package(descriptor)
 
-    temp_dir = publish_temp_dir()
-    @operating_system.delete_and_recreate_directory(temp_dir)
-    local_dir = local_dir_for_package(descriptor)
-    @operating_system.delete_and_recreate_directory(local_dir)
-    fig_file = File.join(temp_dir, PACKAGE_FILE_IN_REPO)
-    content = publish_package_content_and_derive_dot_fig_contents(
-      package_statements, descriptor, local_dir, local_only, source_package
-    )
-    @operating_system.write(fig_file, content)
-
-    if not local_only
-      @operating_system.upload(
-        fig_file,
-        remote_fig_file_for_package(descriptor)
-      )
-    end
-    @operating_system.copy(
-      fig_file, local_fig_file_for_package(descriptor)
-    )
-
-    @publish_listeners.each do
-      |listener|
-
-      listener.published(descriptor)
-    end
-
-    FileUtils.rm_rf(temp_dir)
-
-    return true
+    return publisher.publish_package()
   end
 
   def update_unconditionally()
@@ -172,8 +157,6 @@ class Fig::Repository
   end
 
   private
-
-  PACKAGE_FILE_IN_REPO = '.fig'
 
   def initialize_local_repository()
     FileUtils.mkdir_p(@local_repository_directory)
@@ -265,31 +248,6 @@ class Fig::Repository
     return version_string.to_i()
   end
 
-  def validate_asset_names(package_statements)
-    asset_statements = package_statements.select { |s| s.is_asset? }
-
-    asset_names = Set.new()
-    asset_statements.each do
-      |statement|
-
-      asset_name = statement.asset_name()
-      if not asset_name.nil?
-        if asset_name == RESOURCES_FILE
-          Fig::Logging.fatal \
-            %Q<You cannot have an asset with the name "#{RESOURCES_FILE}"#{statement.position_string()} due to Fig implementation details.>
-        end
-
-        if asset_names.include?(asset_name)
-          Fig::Logging.fatal \
-            %Q<Found multiple archives with the name "#{asset_name}"#{statement.position_string()}. If these were allowed, archives would overwrite each other.>
-          raise Fig::RepositoryError.new
-        else
-          asset_names.add(asset_name)
-        end
-      end
-    end
-  end
-
   def remote_repository_url()
     return @application_config.remote_repository_url()
   end
@@ -364,25 +322,6 @@ class Fig::Repository
     return
   end
 
-  # 'resources' is an Array of fileglob patterns: ['tmp/foo/file1',
-  # 'tmp/foo/*.jar']
-  def expand_globs_from(resources)
-    expanded_files = []
-
-    resources.each do
-      |path|
-
-      globbed_files = Dir.glob(path)
-      if globbed_files.empty?
-        expanded_files << path
-      else
-        expanded_files.concat(globbed_files)
-      end
-    end
-
-    return expanded_files
-  end
-
   def read_package_from_directory(directory, descriptor)
     dot_fig_file = File.join(directory, PACKAGE_FILE_IN_REPO)
     if not File.exist?(dot_fig_file)
@@ -439,10 +378,6 @@ class Fig::Repository
     File.join(@local_repository_directory, 'tmp')
   end
 
-  def publish_temp_dir()
-    File.join(base_temp_dir(), 'publish')
-  end
-
   def package_download_temp_dir(descriptor)
     base_directory = File.join(base_temp_dir(), 'package-download')
     FileUtils.mkdir_p(base_directory)
@@ -454,170 +389,5 @@ class Fig::Repository
 
   def package_missing?(descriptor)
     not File.exist?(local_fig_file_for_package(descriptor))
-  end
-
-  def publish_package_content_and_derive_dot_fig_contents(
-    package_statements, descriptor, local_dir, local_only, source_package
-  )
-    header_strings = derive_package_metadata_comments(
-      package_statements, descriptor
-    )
-    deparsed_statement_strings = publish_package_content(
-      package_statements, descriptor, local_dir, local_only
-    )
-
-    statement_strings = [header_strings, deparsed_statement_strings]
-    if source_package && source_package.unparsed_text
-      statement_strings << ''
-      statement_strings << '# Original, unparsed package text:'
-      statement_strings << '# '
-      statement_strings << source_package.unparsed_text.gsub(/^/, '# ')
-    end
-
-    statement_strings.flatten!
-    return statement_strings.join("\n").gsub(/\n{3,}/, "\n\n").strip() + "\n"
-  end
-
-  def derive_package_metadata_comments(package_statements, descriptor)
-    now = Time.now()
-
-    asset_statements =
-      package_statements.select { |statement| statement.is_asset? }
-    asset_strings =
-      asset_statements.collect { |statement| statement.unparse('#    ') }
-    asset_summary = nil
-
-    if asset_strings.empty?
-      asset_summary = [
-        %q<#>,
-        %q<# There were no asset statements in the unpublished package definition.>
-      ]
-    else
-      asset_summary = [
-        %q<#>,
-        %q<# Original asset statements: >,
-        %q<#>,
-        asset_strings
-      ]
-    end
-
-    return [
-      %Q<# Publishing information for #{descriptor.to_string()}:>,
-      %q<#>,
-      %Q<#     Time: #{now} (epoch: #{now.to_i()})>,
-      %Q<#     User: #{Sys::Admin.get_login()}>,
-      %Q<#     Host: #{Socket.gethostname()}>,
-      %Q<#     Args: "#{ARGV.join %q[", "]}">,
-      %Q<#     Fig:  v#{Fig::VERSION}>,
-      asset_summary,
-      %Q<\n>,
-    ].flatten()
-  end
-
-  # Deals with Archive and Resource statements.  It downloads any remote
-  # files (those where the statement references a URL as opposed to a local
-  # file) and then copies all files into the local repository and the remote
-  # repository (if not a local-only publish).
-  #
-  # Returns the deparsed strings for the resource statements with URLs
-  # replaced with in-package paths.
-  def publish_package_content(
-    package_statements, descriptor, local_dir, local_only
-  )
-    return create_resource_archive(package_statements).map do |statement|
-      if statement.is_asset?
-        asset_name = statement.asset_name()
-        asset_remote = "#{remote_dir_for_package(descriptor)}/#{asset_name}"
-
-        if Fig::Repository.is_url?(statement.url)
-          asset_local = File.join(publish_temp_dir(), asset_name)
-
-          begin
-            @operating_system.download(statement.url, asset_local)
-          rescue Fig::NotFoundError
-            Fig::Logging.fatal "Could not download #{statement.url}."
-            raise Fig::RepositoryError.new
-          end
-        else
-          asset_local = statement.url
-          check_asset_path(asset_local)
-        end
-
-        if not local_only
-          @operating_system.upload(
-            asset_local, asset_remote
-          )
-        end
-
-        @operating_system.copy(asset_local, local_dir + '/' + asset_name)
-        if statement.is_a?(Fig::Statement::Archive)
-          @operating_system.unpack_archive(local_dir, asset_name)
-        end
-
-        statement.class.new(nil, nil, asset_name).unparse('')
-      else
-        statement.unparse('')
-      end
-    end
-  end
-
-  # Grabs all of the Resource statements that don't reference URLs, creates a
-  # "resources.tar.gz" file containing all the referenced files, strips the
-  # Resource statements out of the statements, replacing them with a single
-  # Archive statement.  Thus the caller should substitute its set of
-  # statements with the return value.
-  def create_resource_archive(package_statements)
-    asset_paths = []
-    new_package_statements = package_statements.reject do |statement|
-      if (
-        statement.is_a?(Fig::Statement::Resource) &&
-        ! Fig::Repository.is_url?(statement.url)
-      )
-        asset_paths << statement.url
-        true
-      else
-        false
-      end
-    end
-
-    if asset_paths.size > 0
-      asset_paths = expand_globs_from(asset_paths)
-      check_asset_paths(asset_paths)
-
-      file = RESOURCES_FILE
-      @operating_system.create_archive(file, asset_paths)
-      new_package_statements.unshift(
-        Fig::Statement::Archive.new(nil, nil, file)
-      )
-      Fig::AtExit.add { File.delete(file) }
-    end
-
-    return new_package_statements
-  end
-
-  def check_asset_path(asset_path)
-    if not File.exist?(asset_path)
-      Fig::Logging.fatal "Could not find file #{asset_path}."
-      raise Fig::RepositoryError.new
-    end
-
-    return
-  end
-
-  def check_asset_paths(asset_paths)
-    non_existing_paths =
-      asset_paths.select {|path| ! File.exist?(path) && ! File.symlink?(path) }
-
-    if not non_existing_paths.empty?
-      if non_existing_paths.size > 1
-        Fig::Logging.fatal "Could not find files: #{ non_existing_paths.join(', ') }"
-      else
-        Fig::Logging.fatal "Could not find file #{non_existing_paths[0]}."
-      end
-
-      raise Fig::RepositoryError.new
-    end
-
-    return
   end
 end
