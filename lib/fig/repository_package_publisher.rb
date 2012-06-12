@@ -36,25 +36,18 @@ class Fig::RepositoryPackagePublisher
 
     temp_dir = publish_temp_dir()
     @operating_system.delete_and_recreate_directory(temp_dir)
-    local_dir = local_dir_for_package()
-    @operating_system.delete_and_recreate_directory(local_dir)
+    @operating_system.delete_and_recreate_directory(@local_dir_for_package)
+
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
-    content = publish_package_content_and_derive_dot_fig_contents(local_dir)
+    content = publish_package_content_and_derive_definition_file()
     @operating_system.write(fig_file, content)
 
     if not @local_only
-      @operating_system.upload(
-        fig_file,
-        remote_fig_file_for_package()
-      )
+      @operating_system.upload(fig_file, remote_fig_file_for_package())
     end
     @operating_system.copy(fig_file, local_fig_file_for_package())
 
-    @publish_listeners.each do
-      |listener|
-
-      listener.published(@descriptor)
-    end
+    notify_listeners
 
     FileUtils.rm_rf(temp_dir)
 
@@ -88,60 +81,51 @@ class Fig::RepositoryPackagePublisher
     end
   end
 
-  def publish_temp_dir()
-    File.join(base_temp_dir(), 'publish')
+  def publish_package_content_and_derive_definition_file()
+    @definition_file_lines = []
+
+    add_package_metadata_comments()
+    publish_package_content()
+    add_unparsed_text()
+
+    @definition_file_lines.flatten!
+    file_content = @definition_file_lines.join("\n")
+    file_content.gsub!(/\n{3,}/, "\n\n")
+
+    return file_content.strip() + "\n"
   end
 
-  def publish_package_content_and_derive_dot_fig_contents(local_dir)
-    header_strings = derive_package_metadata_comments()
-    deparsed_statement_strings = publish_package_content(local_dir)
+  def add_package_metadata_comments()
+    @definition_file_lines <<
+      %Q<# Publishing information for #{@descriptor.to_string()}:>
+    @definition_file_lines << %q<#>
 
-    statement_strings = [header_strings, deparsed_statement_strings]
-    if @source_package && @source_package.unparsed_text
-      statement_strings << ''
-      statement_strings << '# Original, unparsed package text:'
-      statement_strings << '# '
-      statement_strings << @source_package.unparsed_text.gsub(/^/, '# ')
-    end
-
-    statement_strings.flatten!
-    return statement_strings.join("\n").gsub(/\n{3,}/, "\n\n").strip() + "\n"
-  end
-
-  def derive_package_metadata_comments()
     now = Time.now()
+    @definition_file_lines << %Q<#     Time: #{now} (epoch: #{now.to_i()})>
+
+    @definition_file_lines << %Q<#     User: #{Sys::Admin.get_login()}>
+    @definition_file_lines << %Q<#     Host: #{Socket.gethostname()}>
+    @definition_file_lines << %Q<#     Args: "#{ARGV.join %q[", "]}">
+    @definition_file_lines << %Q<#     Fig:  v#{Fig::VERSION}>
+    @definition_file_lines << %q<#>
 
     asset_statements =
       @package_statements.select { |statement| statement.is_asset? }
     asset_strings =
       asset_statements.collect { |statement| statement.unparse('#    ') }
-    asset_summary = nil
 
     if asset_strings.empty?
-      asset_summary = [
-        %q<#>,
+      @definition_file_lines <<
         %q<# There were no asset statements in the unpublished package definition.>
-      ]
     else
-      asset_summary = [
-        %q<#>,
-        %q<# Original asset statements: >,
-        %q<#>,
-        asset_strings
-      ]
+      @definition_file_lines << %q<# Original asset statements: >
+      @definition_file_lines << %q<#>
+      @definition_file_lines << asset_strings
     end
 
-    return [
-      %Q<# Publishing information for #{@descriptor.to_string()}:>,
-      %q<#>,
-      %Q<#     Time: #{now} (epoch: #{now.to_i()})>,
-      %Q<#     User: #{Sys::Admin.get_login()}>,
-      %Q<#     Host: #{Socket.gethostname()}>,
-      %Q<#     Args: "#{ARGV.join %q[", "]}">,
-      %Q<#     Fig:  v#{Fig::VERSION}>,
-      asset_summary,
-      %Q<\n>,
-    ].flatten()
+    @definition_file_lines << %Q<\n>
+
+    return
   end
 
   # Deals with Archive and Resource statements.  It downloads any remote
@@ -151,8 +135,8 @@ class Fig::RepositoryPackagePublisher
   #
   # Returns the deparsed strings for the resource statements with URLs
   # replaced with in-package paths.
-  def publish_package_content(local_dir)
-    return create_resource_archive().map do |statement|
+  def publish_package_content()
+    @definition_file_lines << create_resource_archive().map do |statement|
       if statement.is_asset?
         asset_name = statement.asset_name()
         asset_remote = "#{remote_dir_for_package()}/#{asset_name}"
@@ -177,9 +161,11 @@ class Fig::RepositoryPackagePublisher
           )
         end
 
-        @operating_system.copy(asset_local, local_dir + '/' + asset_name)
+        @operating_system.copy(
+          asset_local, @local_dir_for_package + '/' + asset_name
+        )
         if statement.is_a?(Fig::Statement::Archive)
-          @operating_system.unpack_archive(local_dir, asset_name)
+          @operating_system.unpack_archive(@local_dir_for_package, asset_name)
         end
 
         statement.class.new(nil, nil, asset_name).unparse('')
@@ -187,6 +173,8 @@ class Fig::RepositoryPackagePublisher
         statement.unparse('')
       end
     end
+
+    return
   end
 
   # Grabs all of the Resource statements that don't reference URLs, creates a
@@ -221,6 +209,31 @@ class Fig::RepositoryPackagePublisher
     end
 
     return new_package_statements
+  end
+
+  def add_unparsed_text()
+    if @source_package && @source_package.unparsed_text
+      @definition_file_lines << ''
+      @definition_file_lines << '# Original, unparsed package text:'
+      @definition_file_lines << '# '
+      @definition_file_lines << @source_package.unparsed_text.gsub(/^/, '# ')
+    end
+
+    return
+  end
+
+  def notify_listeners()
+    @publish_listeners.each do
+      |listener|
+
+      listener.published(@descriptor)
+    end
+
+    return
+  end
+
+  def publish_temp_dir()
+    File.join(base_temp_dir(), 'publish')
   end
 
   def check_asset_path(asset_path)
