@@ -39,6 +39,9 @@ RUBY_EXE =
     RbConfig::CONFIG['EXEEXT']
   ].join
 
+# Allow for non-ruby invocation of fig. A shell script for instance.
+RUBY_EXE = ENV['ALTERNATE_PATH'] ? '' : RUBY_EXE
+
 ENV['FIG_HOME'] = FIG_HOME
 ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
 ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
