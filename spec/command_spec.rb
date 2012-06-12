@@ -18,11 +18,13 @@ describe 'Command (in-process, instead of external program)' do
     listener = mock('publish listener')
     listener.should_receive(:published).with(
       hash_including(
-        :descriptor => instance_of(Fig::PackageDescriptor),
-        :time       => anything(),
-        :login      => anything(),
-        :host       => anything(),
-        :local_only => anything()
+        :descriptor         => instance_of(Fig::PackageDescriptor),
+        :time               => anything(),
+        :login              => anything(),
+        :host               => anything(),
+        :local_destination  => anything(),
+        :remote_destination => anything(),
+        :local_only         => anything()
       )
     )
 

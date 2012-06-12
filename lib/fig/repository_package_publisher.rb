@@ -243,11 +243,13 @@ class Fig::RepositoryPackagePublisher
 
   def notify_listeners()
     publish_information = {}
-    publish_information[:descriptor] = @descriptor
-    publish_information[:time]       = @publish_time
-    publish_information[:login]      = @publish_login
-    publish_information[:host]       = @publish_host
-    publish_information[:local_only] = @local_only
+    publish_information[:descriptor]          = @descriptor
+    publish_information[:time]                = @publish_time
+    publish_information[:login]               = @publish_login
+    publish_information[:host]                = @publish_host
+    publish_information[:local_destination]   = @local_dir_for_package
+    publish_information[:remote_destination]  = @remote_dir_for_package
+    publish_information[:local_only]          = @local_only
 
     @publish_listeners.each do
       |listener|
