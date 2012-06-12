@@ -23,8 +23,8 @@ FIG_SPEC_BASE_DIRECTORY =
 FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
 FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
 FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
-FIG_BIN        = File.expand_path(File.dirname(__FILE__) + "/..#{ENV['ALTERNATE_PATH'] || ''}/bin")
-FIG_EXE        = %Q<#{FIG_BIN}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
+FIG_DIRECTORY  = ENV['FIG_PROGRAM_PATH_OVERRIDE'] || File.expand_path(File.dirname(__FILE__)) + '/../bin'
+FIG_PROGRAM    = %Q<#{FIG_DIRECTORY}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
@@ -39,8 +39,10 @@ RUBY_EXE =
     RbConfig::CONFIG['EXEEXT']
   ].join
 
-# Allow for non-ruby invocation of fig. A shell script for instance.
-RUBY_EXE = ENV['ALTERNATE_PATH'] ? '' : RUBY_EXE
+BASE_FIG_COMMAND_LINE =
+  ENV['FIG_PROGRAM_PATH_OVERRIDE'] ?
+    FIG_PROGRAM                    :
+    "#{RUBY_EXE} #{FIG_PROGRAM}"
 
 ENV['FIG_HOME'] = FIG_HOME
 ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
@@ -104,7 +106,7 @@ def fig(args, first_extra = nil, rest_extra = nil)
     out = nil
     err = nil
 
-    result = Popen.popen(*("#{RUBY_EXE} #{FIG_EXE} #{args}".split)) do
+    result = Popen.popen(*("#{BASE_FIG_COMMAND_LINE} #{args}".split)) do
       |stdin, stdout, stderr|
 
       if input
