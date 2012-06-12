@@ -1,4 +1,5 @@
 require 'fig/command'
+require 'fig/package_descriptor'
 
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
@@ -15,7 +16,14 @@ describe 'Command (in-process)' do
     command = Fig::Command.new
 
     listener = mock('publish listener')
-    listener.should_receive(:published)
+    listener.should_receive(:published).with(
+      hash_including(
+        :descriptor => instance_of(Fig::PackageDescriptor),
+        :time       => anything(),
+        :login      => anything(),
+        :host       => anything()
+      )
+    )
 
     command.add_publish_listener(listener)
 

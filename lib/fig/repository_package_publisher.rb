@@ -32,6 +32,7 @@ class Fig::RepositoryPackagePublisher
   attr_accessor :local_only
 
   def publish_package()
+    derive_publish_metadata()
     validate_asset_names()
 
     temp_dir = publish_temp_dir()
@@ -81,6 +82,14 @@ class Fig::RepositoryPackagePublisher
     end
   end
 
+  def derive_publish_metadata()
+    @publish_time  = Time.now()
+    @publish_login = Sys::Admin.get_login()
+    @publish_host  = Socket.gethostname()
+
+    return
+  end
+
   def publish_package_content_and_derive_definition_file()
     @definition_file_lines = []
 
@@ -100,11 +109,11 @@ class Fig::RepositoryPackagePublisher
       %Q<# Publishing information for #{@descriptor.to_string()}:>
     @definition_file_lines << %q<#>
 
-    now = Time.now()
-    @definition_file_lines << %Q<#     Time: #{now} (epoch: #{now.to_i()})>
+    @definition_file_lines <<
+      %Q<#     Time: #{@publish_time} (epoch: #{@publish_time.to_i()})>
 
-    @definition_file_lines << %Q<#     User: #{Sys::Admin.get_login()}>
-    @definition_file_lines << %Q<#     Host: #{Socket.gethostname()}>
+    @definition_file_lines << %Q<#     User: #{@publish_login}>
+    @definition_file_lines << %Q<#     Host: #{@publish_host}>
     @definition_file_lines << %Q<#     Args: "#{ARGV.join %q[", "]}">
     @definition_file_lines << %Q<#     Fig:  v#{Fig::VERSION}>
     @definition_file_lines << %q<#>
@@ -132,9 +141,6 @@ class Fig::RepositoryPackagePublisher
   # files (those where the statement references a URL as opposed to a local
   # file) and then copies all files into the local repository and the remote
   # repository (if not a local-only publish).
-  #
-  # Returns the deparsed strings for the resource statements with URLs
-  # replaced with in-package paths.
   def publish_package_content()
     initialize_statements_to_publish()
     create_resource_archive()
@@ -236,10 +242,16 @@ class Fig::RepositoryPackagePublisher
   end
 
   def notify_listeners()
+    publish_information = {}
+    publish_information[:descriptor] = @descriptor
+    publish_information[:time]       = @publish_time
+    publish_information[:login]      = @publish_login
+    publish_information[:host]       = @publish_host
+
     @publish_listeners.each do
       |listener|
 
-      listener.published(@descriptor)
+      listener.published(publish_information)
     end
 
     return
