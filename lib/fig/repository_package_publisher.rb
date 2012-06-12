@@ -247,6 +247,7 @@ class Fig::RepositoryPackagePublisher
     publish_information[:time]       = @publish_time
     publish_information[:login]      = @publish_login
     publish_information[:host]       = @publish_host
+    publish_information[:local_only] = @local_only
 
     @publish_listeners.each do
       |listener|

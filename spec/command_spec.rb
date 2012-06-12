@@ -21,7 +21,8 @@ describe 'Command (in-process)' do
         :descriptor => instance_of(Fig::PackageDescriptor),
         :time       => anything(),
         :login      => anything(),
-        :host       => anything()
+        :host       => anything(),
+        :local_only => anything()
       )
     )
 
