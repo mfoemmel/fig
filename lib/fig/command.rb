@@ -185,7 +185,6 @@ class Fig::Command
       @options.home(),
       @application_configuration,
       @publish_listeners,
-      nil, # remote_user
       check_include_statements_versions?
     )
 

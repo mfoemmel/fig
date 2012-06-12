@@ -242,7 +242,7 @@ class Fig::OperatingSystem
     end
   end
 
-  def upload(local_file, remote_file, user)
+  def upload(local_file, remote_file)
     Fig::Logging.debug "Uploading #{local_file} to #{remote_file}."
     uri = URI.parse(remote_file)
     case uri.scheme

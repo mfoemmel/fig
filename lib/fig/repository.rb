@@ -6,7 +6,6 @@ require 'tmpdir'
 
 require 'fig'
 require 'fig/at_exit'
-require 'fig/command'
 require 'fig/logging'
 require 'fig/not_found_error'
 require 'fig/package_cache'
@@ -15,7 +14,6 @@ require 'fig/parser'
 require 'fig/repository_error'
 require 'fig/statement/archive'
 require 'fig/statement/resource'
-require 'fig/url_access_error'
 
 module Fig; end
 
@@ -36,14 +34,12 @@ class Fig::Repository
     local_repository_directory,
     application_config,
     publish_listeners,
-    remote_repository_user,
     check_include_versions
   )
     @operating_system             = os
     @local_repository_directory   = local_repository_directory
     @application_config           = application_config
     @publish_listeners            = publish_listeners
-    @remote_repository_user       = remote_repository_user
 
     @parser = Fig::Parser.new(application_config, check_include_versions)
 
@@ -149,8 +145,7 @@ class Fig::Repository
     if not local_only
       @operating_system.upload(
         fig_file,
-        remote_fig_file_for_package(descriptor),
-        @remote_repository_user
+        remote_fig_file_for_package(descriptor)
       )
     end
     @operating_system.copy(
@@ -550,7 +545,7 @@ class Fig::Repository
 
         if not local_only
           @operating_system.upload(
-            asset_local, asset_remote, @remote_repository_user
+            asset_local, asset_remote
           )
         end
 

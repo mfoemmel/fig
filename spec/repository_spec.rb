@@ -16,7 +16,7 @@ def create_local_repository()
     Fig::OperatingSystem.new(nil),
     FIG_HOME,
     application_config,
-    nil,  # remote user
+    [],   # publish listeners
     false # check include statement versions
   )
   repository.update_if_missing
