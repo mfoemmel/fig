@@ -136,79 +136,92 @@ class Fig::RepositoryPackagePublisher
   # Returns the deparsed strings for the resource statements with URLs
   # replaced with in-package paths.
   def publish_package_content()
-    @definition_file_lines << create_resource_archive().map do |statement|
+    initialize_statements_to_publish()
+    create_resource_archive()
+
+    @statements_to_publish.each do
+      |statement|
+
       if statement.is_asset?
-        asset_name = statement.asset_name()
-        asset_remote = "#{remote_dir_for_package()}/#{asset_name}"
-
-        if Fig::Repository.is_url?(statement.url)
-          asset_local = File.join(publish_temp_dir(), asset_name)
-
-          begin
-            @operating_system.download(statement.url, asset_local)
-          rescue Fig::NotFoundError
-            Fig::Logging.fatal "Could not download #{statement.url}."
-            raise Fig::RepositoryError.new
-          end
-        else
-          asset_local = statement.url
-          check_asset_path(asset_local)
-        end
-
-        if not @local_only
-          @operating_system.upload(
-            asset_local, asset_remote
-          )
-        end
-
-        @operating_system.copy(
-          asset_local, @local_dir_for_package + '/' + asset_name
-        )
-        if statement.is_a?(Fig::Statement::Archive)
-          @operating_system.unpack_archive(@local_dir_for_package, asset_name)
-        end
-
-        statement.class.new(nil, nil, asset_name).unparse('')
+        publish_asset(statement)
       else
-        statement.unparse('')
+        @definition_file_lines << statement.unparse('')
       end
     end
 
     return
   end
 
-  # Grabs all of the Resource statements that don't reference URLs, creates a
-  # "resources.tar.gz" file containing all the referenced files, strips the
-  # Resource statements out of the statements, replacing them with a single
-  # Archive statement.  Thus the caller should substitute its set of
-  # statements with the return value.
-  def create_resource_archive()
-    asset_paths = []
-    new_package_statements = @package_statements.reject do |statement|
+  def initialize_statements_to_publish()
+    @resource_paths = []
+
+    @statements_to_publish = @package_statements.reject do |statement|
       if (
         statement.is_a?(Fig::Statement::Resource) &&
         ! Fig::Repository.is_url?(statement.url)
       )
-        asset_paths << statement.url
+        @resource_paths << statement.url
         true
       else
         false
       end
     end
 
-    if asset_paths.size > 0
-      asset_paths = expand_globs_from(asset_paths)
+    return
+  end
+
+  def create_resource_archive()
+    if @resource_paths.size > 0
+      asset_paths = expand_globs_from(@resource_paths)
       check_asset_paths(asset_paths)
 
       file = Fig::Repository::RESOURCES_FILE
       @operating_system.create_archive(file, asset_paths)
-      new_package_statements.unshift(
+      Fig::AtExit.add { File.delete(file) }
+
+      @statements_to_publish.unshift(
         Fig::Statement::Archive.new(nil, nil, file)
       )
-      Fig::AtExit.add { File.delete(file) }
     end
 
-    return new_package_statements
+    return
+  end
+
+  def publish_asset(asset_statement)
+    asset_name = asset_statement.asset_name()
+    asset_remote = "#{remote_dir_for_package()}/#{asset_name}"
+
+    if Fig::Repository.is_url?(asset_statement.url)
+      asset_local = File.join(publish_temp_dir(), asset_name)
+
+      begin
+        @operating_system.download(asset_statement.url, asset_local)
+      rescue Fig::NotFoundError
+        Fig::Logging.fatal "Could not download #{asset_statement.url}."
+        raise Fig::RepositoryError.new
+      end
+    else
+      asset_local = asset_statement.url
+      check_asset_path(asset_local)
+    end
+
+    if not @local_only
+      @operating_system.upload(
+        asset_local, asset_remote
+      )
+    end
+
+    @operating_system.copy(
+      asset_local, @local_dir_for_package + '/' + asset_name
+    )
+    if asset_statement.is_a?(Fig::Statement::Archive)
+      @operating_system.unpack_archive(@local_dir_for_package, asset_name)
+    end
+
+    @definition_file_lines <<
+      asset_statement.class.new(nil, nil, asset_name).unparse('')
+
+    return
   end
 
   def add_unparsed_text()
