@@ -100,6 +100,16 @@ class Fig::Command
     return Fig::Command::Action::EXIT_FAILURE
   end
 
+  def add_publish_listener(listener)
+    @publish_listeners << listener
+
+    return
+  end
+
+  def initialize()
+    @publish_listeners = []
+  end
+
   private
 
   ExecutionContext =
@@ -121,7 +131,7 @@ class Fig::Command
   def check_include_statements_versions?()
     return false if @options.suppress_warning_include_statement_missing_version?
 
-    suppressed_warnings = @configuration['suppress warnings']
+    suppressed_warnings = @application_configuration['suppress warnings']
     return true if not suppressed_warnings
 
     return ! suppressed_warnings.include?('include statement missing version')
@@ -132,7 +142,7 @@ class Fig::Command
     set_up_application_configuration()
 
     Fig::Logging.initialize_post_configuration(
-      @options.log_config() || @configuration['log configuration'],
+      @options.log_config() || @application_configuration['log configuration'],
       @options.log_level()
     )
 
@@ -158,7 +168,7 @@ class Fig::Command
   end
 
   def set_up_application_configuration()
-    @configuration = Fig::FigRC.find(
+    @application_configuration = Fig::FigRC.find(
       @options.figrc(),
       derive_remote_url(),
       @options.login?,
@@ -173,7 +183,8 @@ class Fig::Command
     @repository = Fig::Repository.new(
       @operating_system,
       @options.home(),
-      @configuration,
+      @application_configuration,
+      @publish_listeners,
       nil, # remote_user
       check_include_statements_versions?
     )
@@ -251,7 +262,7 @@ class Fig::Command
 
   def new_package_loader()
     return Fig::Command::PackageLoader.new(
-      @configuration,
+      @application_configuration,
       @descriptor,
       @options.package_definition_file,
       base_config(),

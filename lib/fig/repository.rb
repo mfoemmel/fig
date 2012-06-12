@@ -35,12 +35,14 @@ class Fig::Repository
     os,
     local_repository_directory,
     application_config,
+    publish_listeners,
     remote_repository_user,
     check_include_versions
   )
     @operating_system             = os
     @local_repository_directory   = local_repository_directory
     @application_config           = application_config
+    @publish_listeners            = publish_listeners
     @remote_repository_user       = remote_repository_user
 
     @parser = Fig::Parser.new(application_config, check_include_versions)
@@ -154,6 +156,12 @@ class Fig::Repository
     @operating_system.copy(
       fig_file, local_fig_file_for_package(descriptor)
     )
+
+    @publish_listeners.each do
+      |listener|
+
+      listener.published(descriptor)
+    end
 
     FileUtils.rm_rf(temp_dir)
 
