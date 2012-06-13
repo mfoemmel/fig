@@ -232,7 +232,11 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_unparsed_text()
-    if @source_package && @source_package.unparsed_text
+    if \
+         @source_package \
+      && @source_package.statements == @package_statements \
+      && @source_package.unparsed_text
+
       @definition_file_lines << ''
       @definition_file_lines << '# Original, unparsed package text:'
       @definition_file_lines << '# '
