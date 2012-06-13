@@ -3,9 +3,6 @@ require 'fig/package_descriptor'
 
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
-REPOSITORY_TEST_URL = 'http://example.com'
-WHITELIST_TEST_URL = 'http://foo.com'
-
 describe 'Command (in-process, instead of external program)' do
   before(:each) do
     clean_up_test_environment
