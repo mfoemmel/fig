@@ -123,7 +123,7 @@ class Fig::Repository
   end
 
   def publish_package(
-    package_statements, descriptor, local_only, source_package
+    package_statements, descriptor, local_only, source_package, was_forced
   )
     check_local_repository_format()
     if not local_only
@@ -136,6 +136,7 @@ class Fig::Repository
     publisher.package_statements     = package_statements
     publisher.descriptor             = descriptor
     publisher.source_package         = source_package
+    publisher.was_forced             = was_forced
     publisher.base_temp_dir          = base_temp_dir
     publisher.local_dir_for_package  = local_dir_for_package(descriptor)
     publisher.remote_dir_for_package = remote_dir_for_package(descriptor)

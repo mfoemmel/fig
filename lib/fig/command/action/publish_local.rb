@@ -24,7 +24,8 @@ class Fig::Command::Action::PublishLocal
       @publish_statements,
       @descriptor,
       :publish_local,
-      @execution_context.base_package
+      @execution_context.base_package,
+      false
     )
 
     return EXIT_SUCCESS

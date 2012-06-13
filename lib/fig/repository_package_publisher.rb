@@ -24,6 +24,7 @@ class Fig::RepositoryPackagePublisher
   attr_accessor :package_statements
   attr_accessor :descriptor
   attr_accessor :source_package
+  attr_accessor :was_forced
   attr_accessor :base_temp_dir
   attr_accessor :local_dir_for_package
   attr_accessor :remote_dir_for_package
@@ -247,9 +248,14 @@ class Fig::RepositoryPackagePublisher
     publish_information[:time]                = @publish_time
     publish_information[:login]               = @publish_login
     publish_information[:host]                = @publish_host
+
+    # Ensure that we've really got booleans and not merely true or false
+    # values.
+    publish_information[:was_forced]          = @was_forced ? true : false,
+    publish_information[:local_only]          = @local_only ? true : false,
+
     publish_information[:local_destination]   = @local_dir_for_package
     publish_information[:remote_destination]  = @remote_dir_for_package
-    publish_information[:local_only]          = @local_only
 
     @publish_listeners.each do
       |listener|
