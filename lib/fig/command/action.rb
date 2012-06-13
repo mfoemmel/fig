@@ -1,6 +1,13 @@
 module Fig; end
 class Fig::Command; end
 
+# One of the main activities Fig should do as part of the current run.
+#
+# This exists because the code used to have complicated logic about whether a
+# package.fig should be read, whether the Package object should be loaded,
+# should a config be applied, when should some activity happen, etc.  Now, we
+# let the Action object say what it wants in terms of setup and then tell it to
+# do whatever it needs to.
 module Fig::Command::Action
   EXIT_SUCCESS = 0
   EXIT_FAILURE = 1
