@@ -1,3 +1,4 @@
+require 'fig/command/package_loader'
 require 'fig/package'
 require 'fig/statement/configuration'
 require 'fig/user_input_error'
@@ -59,20 +60,8 @@ module Fig::Command::Action::Role::Publish
       )
     end
 
-    # TODO: fail on environment statements && --file because the --file will
-    # get ignored as far as statements are concerned.
-    publish_statements = nil
     if not @environment_statements.empty?
-      @publish_statements =
-        @package_contents_statements +
-        [
-          Fig::Statement::Configuration.new(
-            nil,
-            nil,
-            Fig::Package::DEFAULT_CONFIG,
-            @environment_statements
-          )
-        ]
+      derive_publish_statements_from_environment_statements
     elsif not @package_contents_statements.empty?
       raise Fig::UserInputError.new(
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
@@ -84,6 +73,38 @@ module Fig::Command::Action::Role::Publish
         raise Fig::UserInputError.new('Nothing to publish.')
       end
     end
+
+    return
+  end
+
+  def derive_publish_statements_from_environment_statements
+    if @execution_context.package_source_description
+      message = 'Cannot publish based upon both a package definition file ('
+      message << @execution_context.package_source_description
+      message << ') and --set/--append options.'
+
+      if @execution_context.package_source_description ==
+        Fig::Command::PackageLoader::DEFAULT_FIG_FILE
+
+        message << "\n\n"
+        message << 'You can avoid loading '
+        message << Fig::Command::PackageLoader::DEFAULT_FIG_FILE
+        message << ' by using the --no-file option.'
+      end
+
+      raise Fig::UserInputError.new(message)
+    end
+
+    @publish_statements =
+      @package_contents_statements +
+      [
+        Fig::Statement::Configuration.new(
+          nil,
+          nil,
+          Fig::Package::DEFAULT_CONFIG,
+          @environment_statements
+        )
+      ]
 
     return
   end

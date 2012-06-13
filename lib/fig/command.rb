@@ -69,7 +69,8 @@ class Fig::Command
       base_config(),
       @environment,
       @repository,
-      @operating_system
+      @operating_system,
+      @package_source_description
     )
 
     actions.each do
@@ -114,7 +115,12 @@ class Fig::Command
 
   ExecutionContext =
     Struct.new(
-      :base_package, :base_config, :environment, :repository, :operating_system
+      :base_package,
+      :base_config,
+      :environment,
+      :repository,
+      :operating_system,
+      :package_source_description
     )
 
   def derive_remote_url()
@@ -237,8 +243,9 @@ class Fig::Command
     else
       @base_package = package_loader.load_package_object_from_file()
     end
+    @package_source_description = package_loader.package_source_description()
 
-    applier = new_package_applier(package_loader.package_source_description())
+    applier = new_package_applier()
 
     if retrieves_should_happen
       applier.activate_retrieves()
@@ -269,14 +276,14 @@ class Fig::Command
     )
   end
 
-  def new_package_applier(package_source_description)
+  def new_package_applier()
     return Fig::Command::PackageApplier.new(
       @base_package,
       @environment,
       @options,
       @descriptor,
       base_config(),
-      package_source_description
+      @package_source_description
     )
   end
 

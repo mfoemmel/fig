@@ -1,5 +1,28 @@
 v0.1.68.???
 
+  Backwards incompatibilities:
+
+  - While publishing, you cannot simultaneously have a package definition file
+    (e.g. "package.fig") and use environment variable options (--set/--append).
+    Previous to now, any package definition file would simply be ignored and
+    the publish would happen based upon the environment variable options.
+
+    - Easier to understand, yet unlikely to already exist case:
+
+        fig package/1.2.3 --publish --set VARIABLE=VALUE --file non-default.fig
+
+      Is this supposed to mean publish based upon the --set option or the
+      --file option?  Again, it was the former, but that was non-obvious.
+
+    - More likely existing case:
+
+        fig package/1.2.3 --publish --set VARIABLE=VALUE
+
+      while there is a "package.fig" file in the current directory.
+      Workaround: use the "--no-file" option:
+
+        fig package/1.2.3 --publish --set VARIABLE=VALUE --no-file
+
   Bug fixes:
 
   - Specifying --update with FIG_REMOTE_URL using FTP should be fast as it used

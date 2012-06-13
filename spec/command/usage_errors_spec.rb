@@ -27,13 +27,13 @@ describe 'Fig' do
     end
 
     it %q<prints message when there's nothing to do and there's a package.fig file> do
-      File.open "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}", 'w' do
-        |handle|
-        handle.print <<-END
+      write_file(
+        "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+        <<-END_PACKAGE_DOT_FIG
           config default
           end
-        END
-      end
+        END_PACKAGE_DOT_FIG
+      )
 
       (out, err, exitstatus) = fig('', :no_raise_on_error => true)
       exitstatus.should == 1

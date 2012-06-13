@@ -1,5 +1,6 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
+require 'fig/command/package_loader'
 require 'fig/operating_system'
 require 'fig/repository'
 
@@ -241,15 +242,59 @@ describe 'Fig' do
             set FOO=CHEESE
           end
         END
-        (out, err, exitstatus) = fig(
+        out, err, exit_status = fig(
           '--publish foo/1.2.3', input, :no_raise_on_error => true
         )
-        exitstatus.should == 1
+        exit_status.should == 1
         fig('--update --include foo/1.2.3 --get FOO')[0].should == 'SHEEP'
 
-        (out, err, exitstatus) = fig('--publish foo/1.2.3 --force', input)
-        exitstatus.should == 0
+        out, err, exit_status = fig('--publish foo/1.2.3 --force', input)
+        exit_status.should == 0
         fig('--update --include foo/1.2.3 --get FOO')[0].should == 'CHEESE'
+      end
+
+      it 'refuses to publish with --file and an environment variable option' do
+        write_file("#{FIG_SPEC_BASE_DIRECTORY}/example.fig", '')
+
+        out, err, exit_status =
+          fig(
+            'foo/1.2.3 --publish --file example.fig --set VARIABLE=VALUE',
+            :no_raise_on_error => true
+          )
+
+        exit_status.should_not == 0
+        err.should =~
+          /cannot publish based upon\s+(?=.*option)(?=.*package\s+definition)/i
+        out.should == ''
+      end
+
+      describe 'with both a package.fig file in the current directory and an environment variable option' do
+        before(:each) do
+          write_file(
+            "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+            <<-END_PACKAGE_DOT_FIG
+              config default
+              end
+            END_PACKAGE_DOT_FIG
+          )
+        end
+
+        it 'refuses to publish without --no-file' do
+          out, err, exit_status =
+            fig(
+              'foo/1.2.3 --publish --set VARIABLE=VALUE',
+              :no_raise_on_error => true
+            )
+
+          exit_status.should_not == 0
+          err.should =~
+            /cannot publish based upon\s+(?=.*option)(?=.*package\s+definition)/i
+          out.should == ''
+        end
+
+        it 'publishes with --no-file' do
+          fig('foo/1.2.3 --publish --set VARIABLE=VALUE --no-file')
+        end
       end
     end
 
