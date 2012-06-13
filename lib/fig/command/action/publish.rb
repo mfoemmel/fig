@@ -34,7 +34,7 @@ class Fig::Command::Action::Publish
       Fig::Logging.info "#{@descriptor.to_string()} has already been published."
 
       if not @force
-        raise UserInputError.new(
+        raise Fig::UserInputError.new(
           'Use the --force option if you really want to overwrite.'
         )
       else

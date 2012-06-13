@@ -45,14 +45,14 @@ module Fig::Logging
           when / [.] ya?ml \z /x
             Log4r::YamlConfigurator.load_yaml_file(config_file)
           else
-            raise ConfigFileError, %Q<Don't know what format #{config_file} is in.>, config_file
+            raise Fig::ConfigFileError, %Q<Don't know what format #{config_file} is in.>, config_file
         end
 
         if Log4r::Logger['fig'].nil?
           $stderr.puts %q<A value was provided for --log-config but no "fig" logger was defined.>
         end
       rescue Log4r::ConfigError, ArgumentError => exception
-        raise Log4rConfigError.new(config_file, exception)
+        raise Fig::Log4rConfigError.new(config_file, exception)
       end
     end
 
