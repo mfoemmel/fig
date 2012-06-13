@@ -251,8 +251,8 @@ class Fig::RepositoryPackagePublisher
 
     # Ensure that we've really got booleans and not merely true or false
     # values.
-    publish_information[:was_forced]          = @was_forced ? true : false,
-    publish_information[:local_only]          = @local_only ? true : false,
+    publish_information[:was_forced]          = @was_forced ? true : false
+    publish_information[:local_only]          = @local_only ? true : false
 
     publish_information[:local_destination]   = @local_dir_for_package
     publish_information[:remote_destination]  = @remote_dir_for_package
