@@ -54,7 +54,8 @@ v0.1.68.beta.1
         done
 
     If Fig defaulted to waiting, the above scenario would silently cause three
-    out of the four servers to block until the other one was shut down.
+    out of the four servers to block until the other one's updates were
+    finished.
 
 v0.1.67
 
