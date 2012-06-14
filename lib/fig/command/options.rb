@@ -35,27 +35,6 @@ class Fig::Command; end
 
 # Command-line processing.
 class Fig::Command::Options
-  # Public version of #strip_shell_command() here so that it can be kept in
-  # sync.
-  def self.strip_shell_command(argv)
-    argv.each_with_index do |arg, i|
-      found_command_line_end = false
-
-      case arg
-        when '--'
-          found_command_line_end = true
-        when '--command-extra-args'
-          found_command_line_end = true
-      end
-
-      if found_command_line_end
-        return argv.slice(i..-1)
-      end
-    end
-
-    return argv
-  end
-
   attr_reader   :command_extra_argv
   attr_reader   :config
   attr_reader   :descriptor

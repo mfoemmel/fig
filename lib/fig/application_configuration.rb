@@ -33,10 +33,6 @@ class Fig::ApplicationConfiguration
     @data.push(dataset)
   end
 
-  def unshift_dataset(dataset)
-    @data.unshift(dataset)
-  end
-
   # after push_dataset or unshift_dataset, call clear_cached, and lazy
   # initialize as far as the list of things to exclude
   def clear_cached_data()
