@@ -1,3 +1,9 @@
+v0.1.xxx
+
+  Bug fixes:
+
+  - Warns on ignored --archive/--resource statements.
+
 v0.1.68.beta.2
 
   Backwards incompatibilities:

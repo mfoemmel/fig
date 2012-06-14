@@ -37,6 +37,10 @@ module Fig::Command::Action
     return false
   end
 
+  def cares_about_package_content_options?()
+    return false
+  end
+
   def load_base_package?()
     raise NotImplementedError
   end

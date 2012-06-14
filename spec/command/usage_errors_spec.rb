@@ -235,6 +235,16 @@ describe 'Fig' do
       out.should == ''
     end
 
+    %w< --archive --resource >.each do
+      |option|
+
+      it %Q<warns about #{option} when not publishing> do
+        out, err = fig("--get some_variable #{option} some-asset")
+        err.should =~ /#{option}/
+        err.should =~ /\bsome-asset\b/
+      end
+    end
+
     it %q<prints error when FIG_REMOTE_URL is not defined> do
       begin
         ENV.delete('FIG_REMOTE_URL')

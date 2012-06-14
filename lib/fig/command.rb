@@ -60,6 +60,7 @@ class Fig::Command
     if actions.any? {|action| not action.allow_both_descriptor_and_file? }
       ensure_descriptor_and_file_were_not_both_specified()
     end
+    check_package_content_options()
 
     configure()
     set_up_base_package()
@@ -344,6 +345,24 @@ class Fig::Command
           )
         end
       end
+    end
+
+    return
+  end
+
+  def check_package_content_options()
+    statements = @options.package_contents_statements
+    return if statements.empty?
+
+    return if @options.actions.any? \
+      {|action| action.cares_about_package_content_options?}
+
+    statements.each do
+      |statement|
+
+      Fig::Logging.warn(
+        "Ignored #{statement.source_description} for #{statement.url}."
+      )
     end
 
     return

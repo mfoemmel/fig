@@ -19,6 +19,10 @@ module Fig::Command::Action::Role::Publish
     return true
   end
 
+  def cares_about_package_content_options?()
+    return true
+  end
+
   def load_base_package?()
     return true
   end
