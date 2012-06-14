@@ -9,6 +9,19 @@ describe 'Command (in-process, instead of external program)' do
     set_up_test_environment
   end
 
+  it 'accepts post set-up action and ensures that it is invoked' do
+    command = Fig::Command.new
+
+    action = mock('post set-up action')
+    action.should_receive(:set_up_finished)
+
+    command.add_post_set_up_action(action)
+
+    command.run_fig(
+      %w<--log-level off --set VARIABLE=VALUE --get VARIABLE>
+    )
+  end
+
   it 'accepts publish listener and ensures that it is invoked' do
     command = Fig::Command.new
 

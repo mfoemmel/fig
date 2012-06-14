@@ -63,6 +63,7 @@ class Fig::Command
 
     configure()
     set_up_base_package()
+    invoke_post_set_up_actions()
 
     context = ExecutionContext.new(
       @base_package,
@@ -101,6 +102,13 @@ class Fig::Command
     return Fig::Command::Action::EXIT_FAILURE
   end
 
+  # Extension mechanism for customizing Fig.
+  def add_post_set_up_action(action)
+    @post_set_up_actions << action
+
+    return
+  end
+
   def add_publish_listener(listener)
     @publish_listeners << listener
 
@@ -108,6 +116,7 @@ class Fig::Command
   end
 
   def initialize()
+    @post_set_up_actions = []
     @publish_listeners = []
   end
 
@@ -255,6 +264,16 @@ class Fig::Command
     end
     if apply_config
       applier.apply_config_to_environment(! apply_base_config)
+    end
+
+    return
+  end
+
+  def invoke_post_set_up_actions()
+    @post_set_up_actions.each do
+      |action|
+
+      action.set_up_finished(@application_configuration)
     end
 
     return
