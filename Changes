@@ -1,4 +1,4 @@
-v0.1.68.???
+v0.1.68.beta.2
 
   Backwards incompatibilities:
 
@@ -22,6 +22,10 @@ v0.1.68.???
       Workaround: use the "--no-file" option:
 
         fig package/1.2.3 --publish --set VARIABLE=VALUE --no-file
+
+    Just to be clear, it's perfectly fine (and useful) to have combined a
+    package definition file and environment variable options when not
+    publishing.
 
   Bug fixes:
 
