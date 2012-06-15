@@ -96,7 +96,7 @@ describe 'FigRC' do
     tempfile = create_override_file_with_repository_url
     create_remote_config('loaded from repository')
 
-    configuration = Fig::FigRC.find(tempfile, nil, true, FIG_HOME, true)
+    configuration = Fig::FigRC.find(tempfile.path, nil, true, FIG_HOME, true)
     configuration['foo'].should == 'loaded from repository'
   end
 end
