@@ -6,9 +6,17 @@ require 'fig/package_parse_error'
 require 'fig/parser'
 
 describe 'Parser' do
+  def new_configuration
+    application_configuration = Fig::ApplicationConfiguration.new
+
+    application_configuration.base_whitelisted_url = 'http://example/'
+    application_configuration.remote_repository_url = 'http://example/'
+
+    return application_configuration
+  end
+
   def test_no_parse_exception(fig_input)
-    application_configuration =
-      Fig::ApplicationConfiguration.new('http://example/')
+    application_configuration = new_configuration
     Fig::Parser.new(application_configuration, false).parse_package(
       Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
       'foo_directory',
@@ -21,8 +29,7 @@ describe 'Parser' do
   end
 
   def test_user_input_error(fig_input)
-    application_configuration =
-      Fig::ApplicationConfiguration.new('http://example/')
+    application_configuration = new_configuration
 
     expect {
       Fig::Parser.new(application_configuration, false).parse_package(
@@ -44,7 +51,7 @@ describe 'Parser' do
         this is invalid syntax
       END
 
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+      application_configuration = new_configuration
 
       expect {
         Fig::Parser.new(application_configuration, false).parse_package(
@@ -78,7 +85,7 @@ describe 'Parser' do
                   end
       FIG_PACKAGE
 
-      application_configuration = Fig::ApplicationConfiguration.new(nil)
+      application_configuration = new_configuration
       package = Fig::Parser.new(application_configuration, false).parse_package(
         Fig::PackageDescriptor.new('package_name', 'version', nil),
         'foo_directory',
@@ -117,7 +124,7 @@ describe 'Parser' do
 
         archive http://svpsvn/my/repo/is/cool.jar
       FIG_PACKAGE
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+      application_configuration = new_configuration
       application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
       package = Fig::Parser.new(application_configuration, false).parse_package(
@@ -135,7 +142,7 @@ describe 'Parser' do
 
         archive http://evil_repo/my/repo/is/bad.jar
       FIG_PACKAGE
-      application_configuration = Fig::ApplicationConfiguration.new('http://example/')
+      application_configuration = new_configuration
       application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
       exception = nil

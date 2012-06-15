@@ -18,7 +18,7 @@ describe 'Command (in-process, instead of external program)' do
     command.add_post_set_up_action(action)
 
     command.run_fig(
-      %w<--log-level off --set VARIABLE=VALUE --get VARIABLE>
+      %w<--log-level off --set VARIABLE=VALUE --get UNDEFINED_VARIABLE>
     )
   end
 

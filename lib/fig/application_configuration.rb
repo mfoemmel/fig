@@ -2,11 +2,11 @@ module Fig; end
 
 # Configuration for the Fig program, as opposed to a config in a package.
 class Fig::ApplicationConfiguration
-  attr_reader :remote_repository_url
+  attr_accessor :base_whitelisted_url
+  attr_accessor :remote_repository_url
 
-  def initialize(remote_repository_url)
+  def initialize()
     @data = []
-    @remote_repository_url = remote_repository_url
     clear_cached_data
   end
 
@@ -15,8 +15,12 @@ class Fig::ApplicationConfiguration
     whitelist = self['url whitelist']
     if whitelist.nil?
       @whitelist = []
+    elsif @base_whitelisted_url
+      @whitelist = [@base_whitelisted_url, whitelist].flatten
+    elsif whitelist.is_a? Array
+      @whitelist = whitelist
     else
-      @whitelist = [@remote_repository_url, whitelist].flatten
+      @whitelist = [whitelist]
     end
   end
 
@@ -33,8 +37,8 @@ class Fig::ApplicationConfiguration
     @data.push(dataset)
   end
 
-  # after push_dataset or unshift_dataset, call clear_cached, and lazy
-  # initialize as far as the list of things to exclude
+  # After push_dataset, call clear_cached, and lazy initialize as far as the
+  # list of things to exclude
   def clear_cached_data()
     @whitelist = nil
   end

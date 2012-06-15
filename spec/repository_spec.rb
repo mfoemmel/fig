@@ -10,7 +10,9 @@ require 'fig/statement/configuration'
 require 'fig/statement/path'
 
 def create_local_repository()
-  application_config = Fig::ApplicationConfiguration.new(FIG_REMOTE_URL)
+  application_config = Fig::ApplicationConfiguration.new()
+  application_config.base_whitelisted_url = FIG_REMOTE_URL
+  application_config.remote_repository_url = FIG_REMOTE_URL
 
   repository = Fig::Repository.new(
     Fig::OperatingSystem.new(nil),

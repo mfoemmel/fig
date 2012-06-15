@@ -133,17 +133,6 @@ class Fig::Command
       :package_source_description
     )
 
-  def derive_remote_url()
-    if remote_operation_necessary?()
-      if ENV['FIG_REMOTE_URL'].nil?
-        raise Fig::UserInputError.new('Please define the FIG_REMOTE_URL environment variable.')
-      end
-      return ENV['FIG_REMOTE_URL']
-    end
-
-    return nil
-  end
-
   def check_include_statements_versions?()
     return false if @options.suppress_warning_include_statement_missing_version?
 
@@ -186,11 +175,20 @@ class Fig::Command
   def set_up_application_configuration()
     @application_configuration = Fig::FigRC.find(
       @options.figrc(),
-      derive_remote_url(),
+      ENV['FIG_REMOTE_URL'],
       @options.login?,
       @options.home(),
       @options.no_figrc?
     )
+
+    if \
+          remote_operation_necessary? \
+      &&  @application_configuration.remote_repository_url.nil?
+
+      raise Fig::UserInputError.new(
+        'Please define the FIG_REMOTE_URL environment variable.'
+      )
+    end
 
     return
   end

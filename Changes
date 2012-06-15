@@ -1,5 +1,13 @@
 v0.1.xxx
 
+  New features:
+
+  - Can specify the location of the remote repository via ~/.figrc or the value
+    of the --figrc parameter by specifying a value for "default
+    FIG_REMOTE_URL", e.g.
+
+      { "default FIG_REMOTE_URL" : "file:///some/path" }
+
   Bug fixes:
 
   - Warns on ignored --archive/--resource statements.

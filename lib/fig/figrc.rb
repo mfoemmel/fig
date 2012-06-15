@@ -14,12 +14,23 @@ class Fig::FigRC
       "#{Fig::Repository::METADATA_SUBDIRECTORY}/figrc"
 
   def self.find(
-    override_path, repository_url, login, fig_home, disable_figrc = false
+    override_path,
+    specified_repository_url,
+    login,
+    fig_home,
+    disable_figrc = false
   )
-    configuration = Fig::ApplicationConfiguration.new(repository_url)
+    configuration = Fig::ApplicationConfiguration.new()
 
     handle_override_configuration(configuration, override_path)
     handle_figrc(configuration) if not disable_figrc
+
+    repository_url =
+      derive_repository_url(specified_repository_url, configuration)
+
+    configuration.base_whitelisted_url = repository_url
+    configuration.remote_repository_url = repository_url
+
     handle_repository_configuration(
       configuration, repository_url, login, fig_home
     )
@@ -58,6 +69,12 @@ class Fig::FigRC
     return
   end
 
+  def self.derive_repository_url(specified_repository_url, configuration)
+    return specified_repository_url if specified_repository_url
+
+    return configuration['default FIG_REMOTE_URL']
+  end
+
   def self.handle_repository_configuration(
     configuration, repository_url, login, fig_home
   )
@@ -77,7 +94,7 @@ class Fig::FigRC
       repo_config_exists = false
     end
 
-    return configuration if not repo_config_exists
+    return if not repo_config_exists
 
     begin
       configuration.push_dataset(
