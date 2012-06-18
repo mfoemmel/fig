@@ -141,14 +141,14 @@ module Fig
       #    @      - To allow for package substitution
       #    "<>|   - Characters not allowed in filenames on Windows
       #    \s     - Necessary for the "ws" token to work
-      (value:[^@"<>|\s]+ ws)
+      (url:[^@"<>|\s]+ ws)
 
       # Quoted, anything but:
       #    @        - To allow for package substitution
       #    "<>|     - Characters not allowed in filenames on Windows
       #    *?\[\]{} - Characters significant to Dir.glob()
       #    \s       - We just don't want these. :]  (May need to allow space.)
-      / ('"' value:[^@"<>|*?\[\]{}\s]+ '"' ws)
+      / ('"' url:[^@"<>|*?\[\]{}\s]+ '"' ws)
     end
 
     rule ws

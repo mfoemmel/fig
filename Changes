@@ -1,5 +1,11 @@
 v0.1.xxx
 
+  Backwards incompatibilities:
+
+  - Packages, resources, archives, and configs cannot have names that are
+    keywords (other than "config") in order to have more clear parse error
+    messages and allow for future expandability.
+
   New features:
 
   - Can specify the location of the remote repository via ~/.figrc or the value
@@ -10,7 +16,7 @@ v0.1.xxx
 
   Bug fixes:
 
-  - Warns on ignored --archive/--resource statements.
+  - Warns on ignored --archive/--resource options.
 
 v0.1.68.beta.2
 

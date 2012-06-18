@@ -56,8 +56,17 @@ class Fig::ParserPackageBuildState
   end
 
   def new_asset_statement(statement_class, keyword_node, url_node)
+    url = url_node.url.text_value
+
+    # "config" is a reasonable asset name, so we let that pass.
+    if Fig::Parser.strict_keyword? url
+      raise_invalid_value_parse_error(
+        keyword_node, url_node.url, 'URL/path', 'is a keyword.'
+      )
+    end
+
     return statement_class.new(
-      node_location(keyword_node), source_description, url_node.value.text_value
+      node_location(keyword_node), source_description, url
     )
   end
 
@@ -71,6 +80,12 @@ class Fig::ParserPackageBuildState
   end
 
   def new_configuration_statement(keyword_node, name_node, statements)
+    if Fig::Parser.strict_keyword? name_node.text_value
+      raise_invalid_value_parse_error(
+        keyword_node, name_node, 'name', 'is a keyword.'
+      )
+    end
+
     return Fig::Statement::Configuration.new(
       node_location(keyword_node),
       source_description,
@@ -121,6 +136,7 @@ class Fig::ParserPackageBuildState
       raise_invalid_value_parse_error(
         keyword_node,
         value_node,
+        'value',
         statement_class.const_get(:ARGUMENT_DESCRIPTION)
       )
     }
@@ -137,9 +153,11 @@ class Fig::ParserPackageBuildState
     )
   end
 
-  def raise_invalid_value_parse_error(keyword_node, value_node, description)
+  def raise_invalid_value_parse_error(
+    keyword_node, value_node, value_name, description
+  )
     raise Fig::PackageParseError.new(
-      %Q<Invalid value for #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
+      %Q<Invalid #{value_name} for #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
     )
   end
 end

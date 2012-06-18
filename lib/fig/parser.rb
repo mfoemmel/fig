@@ -1,3 +1,4 @@
+require 'set'
 require 'treetop'
 
 require 'fig/grammar' # this is grammar.treetop, not grammar.rb.
@@ -14,6 +15,19 @@ module Fig; end
 # Parses .fig files (wrapping the Treetop-generated parser object) and deals
 # with a few restrictions on them.
 class Fig::Parser
+  # Keywords that we really want to lock down.
+  def self.strict_keyword?(string)
+    # "config" is considered too useful for users, so we allow that where we
+    # restrict other keywords.
+    return false if string == 'config'
+
+    return keyword? string
+  end
+
+  def self.keyword?(string)
+    return KEYWORDS.include? string
+  end
+
   def initialize(application_config, check_include_versions)
     # Fig::FigParser class is synthesized by Treetop.
     @treetop_parser         = Fig::FigParser.new
@@ -50,6 +64,21 @@ class Fig::Parser
   end
 
   private
+
+  KEYWORDS = Set.new
+  KEYWORDS << 'archive'
+  KEYWORDS << 'resource'
+  KEYWORDS << 'retrieve'
+  KEYWORDS << 'config'
+  KEYWORDS << 'end'
+  KEYWORDS << 'include'
+  KEYWORDS << 'override'
+  KEYWORDS << 'add'
+  KEYWORDS << 'append'
+  KEYWORDS << 'path'
+  KEYWORDS << 'set'
+  KEYWORDS << 'command'
+
 
   def extend_source_description(directory, original_description)
     if original_description

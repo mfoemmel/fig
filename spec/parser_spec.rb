@@ -223,7 +223,6 @@ describe 'Parser' do
 
   describe 'resource statements' do
     it 'handles resources with plus signs in the path (e.g. for C++ libraries)' do
-      # http://tickets/issues/29116
       test_no_parse_exception(<<-END_PACKAGE)
         resource testlib++/*.so
         config default
