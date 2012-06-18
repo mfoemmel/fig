@@ -66,18 +66,18 @@ class Fig::Parser
   private
 
   KEYWORDS = Set.new
+  KEYWORDS << 'add'
+  KEYWORDS << 'append'
   KEYWORDS << 'archive'
-  KEYWORDS << 'resource'
-  KEYWORDS << 'retrieve'
+  KEYWORDS << 'command'
   KEYWORDS << 'config'
   KEYWORDS << 'end'
   KEYWORDS << 'include'
   KEYWORDS << 'override'
-  KEYWORDS << 'add'
-  KEYWORDS << 'append'
   KEYWORDS << 'path'
+  KEYWORDS << 'resource'
+  KEYWORDS << 'retrieve'
   KEYWORDS << 'set'
-  KEYWORDS << 'command'
 
 
   def extend_source_description(directory, original_description)

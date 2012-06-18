@@ -74,6 +74,10 @@ describe 'Fig' do
         fig('--publish foo/1.2.3', input)
       end
 
+      it 'publishes a package named "config"' do
+        fig('--publish config/1.2.3 --set VARIABLE=VALUE')
+      end
+
       it %q<--publish complains if local repository isn't in the expected format version> do
         input = <<-END
           config default
