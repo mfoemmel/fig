@@ -219,6 +219,32 @@ describe 'Fig' do
         end
       end
 
+      describe %q<a package containing a config named the keyword> do
+        %w<
+          add      append    archive  command   end
+          include  override  path     resource  retrieve  set
+        >.each do
+          |name|
+
+          it %Q<"#{name}"> do
+            input = <<-END
+              config #{name}
+                set FOO=BAR
+              end
+            END
+
+            out, err, exit_status =
+              fig(
+                '--publish package/version', input, :no_raise_on_error => true
+              )
+            err.should =~ %r< \b #{name} \b >x
+            err.should =~ %r< \b keyword \b >x
+            exit_status.should_not == 0
+            out.should == ''
+          end
+        end
+      end
+
       it %q<a package named "_meta"> do
         out, err, exit_status =
           fig(
