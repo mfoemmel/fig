@@ -198,11 +198,14 @@ describe 'Fig' do
     end
 
     describe %q<refuses to publish> do
-      describe %q<a package named the keyword> do
+      TEST_KEYWORDS =
         %w<
           add      append    archive  command   end
           include  override  path     resource  retrieve  set
-        >.each do
+        >
+
+      describe %q<a package named the keyword> do
+        TEST_KEYWORDS.each do
           |name|
 
           it %Q<"#{name}"> do
@@ -212,7 +215,8 @@ describe 'Fig' do
                 :no_raise_on_error => true
               )
             err.should =~ %r< \b #{name} \b >x
-            err.should =~ %r< \b keyword \b >x
+            err.should =~ %r< \b keyword \b >ix
+            err.should =~ %r< \b package \b >ix
             exit_status.should_not == 0
             out.should == ''
           end
@@ -220,10 +224,7 @@ describe 'Fig' do
       end
 
       describe %q<a package containing a config named the keyword> do
-        %w<
-          add      append    archive  command   end
-          include  override  path     resource  retrieve  set
-        >.each do
+        TEST_KEYWORDS.each do
           |name|
 
           it %Q<"#{name}"> do
@@ -238,9 +239,39 @@ describe 'Fig' do
                 '--publish package/version', input, :no_raise_on_error => true
               )
             err.should =~ %r< \b #{name} \b >x
-            err.should =~ %r< \b keyword \b >x
+            err.should =~ %r< \b keyword \b >ix
+            err.should =~ %r< \b config \b >ix
             exit_status.should_not == 0
             out.should == ''
+          end
+        end
+      end
+
+      %w< archive resource >.each do
+        |asset_type|
+
+        describe %Q<a package containing a #{asset_type} named the keyword> do
+          TEST_KEYWORDS.each do
+            |name|
+
+            it %Q<"#{name}"> do
+              input = <<-END
+                #{asset_type} #{name}
+                config default
+                  set FOO=BAR
+                end
+              END
+
+              out, err, exit_status =
+                fig(
+                  '--publish package/version', input, :no_raise_on_error => true
+                )
+              err.should =~ %r< \b #{name} \b >x
+              err.should =~ %r< \b keyword \b >ix
+              err.should =~ %r< \b #{asset_type} \b >ix
+              exit_status.should_not == 0
+              out.should == ''
+            end
           end
         end
       end
