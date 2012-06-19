@@ -433,7 +433,11 @@ class Fig::RuntimeEnvironment
   def raise_repository_error(message, backtrace, package)
     string_handle = StringIO.new
     backtrace.dump(string_handle) if backtrace
-    package.backtrace.dump(string_handle) if package && package.backtrace
+
+    if package && package.backtrace && package.backtrace != backtrace
+      package.backtrace.dump(string_handle)
+    end
+
     stacktrace = string_handle.string
 
     raise Fig::RepositoryError.new(
