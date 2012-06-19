@@ -130,7 +130,7 @@ Environment variables:
     return
   end
 
-  def raise_invalid_argument(option, value)
+  def raise_invalid_argument(option, value, description = nil)
     # *sigh* OptionParser does not raise MissingArgument for the case of an
     # option with a required value being followed by another option.  It
     # assigns the next option as the value instead.  E.g. for
@@ -142,7 +142,7 @@ Environment variables:
       raise_missing_argument(option)
     end
 
-    description = @argument_description[option]
+    description ||= @argument_description[option]
     if description.nil?
       description = ''
     else

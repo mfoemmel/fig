@@ -58,12 +58,13 @@ class Fig::ParserPackageBuildState
   def new_asset_statement(statement_class, keyword_node, url_node)
     url = url_node.url.text_value
 
-    # "config" is a reasonable asset name, so we let that pass.
-    if Fig::Parser.strict_keyword? url
+    statement_class.validate_url(url) {
+      |error_description|
+
       raise_invalid_value_parse_error(
-        keyword_node, url_node.url, 'URL/path', 'is a keyword.'
+        keyword_node, url_node.url, 'URL/path', error_description
       )
-    end
+    }
 
     return statement_class.new(
       node_location(keyword_node), source_description, url

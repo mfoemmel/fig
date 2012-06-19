@@ -11,7 +11,7 @@ class Fig::Statement::Path < Fig::Statement
 
   # Yields on error.
   def self.parse_name_value(combined)
-    variable, value = combined.split("=")
+    variable, value = combined.split('=')
 
     if variable !~ ENVIRONMENT_VARIABLE_NAME_REGEX
       yield

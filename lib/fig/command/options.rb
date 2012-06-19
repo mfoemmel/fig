@@ -397,7 +397,7 @@ class Fig::Command::Options
       'include PATH archive in package (when using --publish)'
     ) do |path|
       @package_contents_statements <<
-        Fig::Statement::Archive.new(nil, '--archive option', path)
+        new_content_statement('--archive', path, Fig::Statement::Archive)
     end
 
     @parser.on(
@@ -406,7 +406,7 @@ class Fig::Command::Options
       'include PATH resource in package (when using --publish)'
     ) do |path|
       @package_contents_statements <<
-        Fig::Statement::Resource.new(nil, '--resource option', path)
+        new_content_statement('--resource', path, Fig::Statement::Resource)
     end
 
     return
@@ -540,6 +540,16 @@ class Fig::Command::Options
     }
 
     return statement_class.new(nil, "#{option} option", variable, value)
+  end
+
+  def new_content_statement(option, path, statement_class)
+    statement_class.validate_url(path) {
+      |error_description|
+
+      @parser.raise_invalid_argument(option, path, error_description)
+    }
+
+    return statement_class.new(nil, "#{option} option", path)
   end
 
   def set_up_sub_actions()

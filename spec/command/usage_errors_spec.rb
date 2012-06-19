@@ -5,7 +5,7 @@ require 'English'
 require 'fig/command/package_loader'
 
 describe 'Fig' do
-  describe 'usage errors' do
+  describe 'usage errors: fig' do
     before(:each) do
       clean_up_test_environment
       set_up_test_environment
@@ -254,23 +254,38 @@ describe 'Fig' do
           TEST_KEYWORDS.each do
             |name|
 
-            it %Q<"#{name}"> do
-              input = <<-END
-                #{asset_type} #{name}
-                config default
-                  set FOO=BAR
-                end
-              END
+            describe %Q<"#{name}"> do
+              it 'in a statement in a package definition file' do
+                input = <<-END
+                  #{asset_type} #{name}
+                  config default
+                    set FOO=BAR
+                  end
+                END
 
-              out, err, exit_status =
-                fig(
-                  '--publish package/version', input, :no_raise_on_error => true
-                )
-              err.should =~ %r< \b #{name} \b >x
-              err.should =~ %r< \b keyword \b >ix
-              err.should =~ %r< \b #{asset_type} \b >ix
-              exit_status.should_not == 0
-              out.should == ''
+                out, err, exit_status =
+                  fig(
+                    '--publish package/version', input, :no_raise_on_error => true
+                  )
+                err.should =~ %r< \b #{name} \b >x
+                err.should =~ %r< \b keyword \b >ix
+                err.should =~ %r< \b #{asset_type} \b >ix
+                exit_status.should_not == 0
+                out.should == ''
+              end
+
+              it 'as a command-line option' do
+                out, err, exit_status =
+                  fig(
+                    "--publish package/version --#{asset_type} #{name}",
+                    :no_raise_on_error => true
+                  )
+                err.should =~ %r< \b #{name} \b >x
+                err.should =~ %r< \b keyword \b >ix
+                err.should =~ %r< \b #{asset_type} \b >ix
+                exit_status.should_not == 0
+                out.should == ''
+              end
             end
           end
         end
