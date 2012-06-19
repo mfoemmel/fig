@@ -92,6 +92,10 @@ describe 'Command::Options' do
       new_options(%w< --set whatever= >)
       # no exception
     end
+
+    it 'complains about a variable value containing a space character' do
+      expect_invalid_value_error('set', 'variable= stuff')
+    end
   end
 
   describe '--append' do
