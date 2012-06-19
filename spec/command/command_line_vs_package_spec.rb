@@ -7,7 +7,7 @@ describe 'Fig' do
   end
 
   describe 'command-line options vs package files' do
-    it %q<gives a "set" statement priority over a "--set" option> do
+    it %q<gives a "--set" option priority over a "set" statement> do
       input = <<-END
         config default
           set TEST=package.fig
@@ -16,7 +16,7 @@ describe 'Fig' do
       fig('--set TEST=command-line --get TEST', input)[0].should == 'command-line'
     end
 
-    it %q<gives an "add" statement priority over a "--append" option> do
+    it %q<gives an "--add" option priority over an "append" statement> do
       input = <<-END
         config default
           add TEST_PATH=package.fig
