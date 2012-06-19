@@ -126,14 +126,6 @@ module Fig
       [\S]+
     end
 
-    rule package_name
-      [a-zA-Z0-9_.-]+
-    end
-
-    rule version_name
-      [a-zA-Z0-9_.-]+
-    end
-
     rule resource_url
       # Unquoted allows globbing for files, quoted does not.
       #
