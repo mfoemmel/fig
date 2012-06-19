@@ -1,7 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 describe 'Fig' do
-  describe '--list-package-definition-text' do
+  describe '--dump-package-definition-text' do
     before(:each) do
       clean_up_test_environment
       set_up_test_environment
@@ -16,7 +16,7 @@ describe 'Fig' do
       fig('--publish foo/1.2.3', input)
 
       (out, err, exit_status) =
-        fig('foo/1.2.3 --list-package-definition-text')
+        fig('foo/1.2.3 --dump-package-definition-text')
 
       # Content from the input.
       out.should =~ /set FOO=BAR/
@@ -34,7 +34,7 @@ describe 'Fig' do
         end
       END
       (out, err, exit_status) =
-        fig('--list-package-definition-text', input)
+        fig('--dump-package-definition-text', input)
 
       out.should == input.strip
       err.should == ''
@@ -42,7 +42,7 @@ describe 'Fig' do
 
     it %q<fails if there is no text> do
       (out, err, exit_status) =
-        fig('--list-package-definition-text', :no_raise_on_error => true)
+        fig('--dump-package-definition-text', :no_raise_on_error => true)
       err.should =~ /no text/
       out.should == ''
       exit_status.should_not == 0

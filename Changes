@@ -14,7 +14,7 @@ v0.1.xxx
 
       { "default FIG_REMOTE_URL" : "file:///some/path" }
 
-  - New --list-package-definition-text option, which, surprise, gives you the
+  - New --dump-package-definition-text option, which, surprise, gives you the
     text of the base package.  Useful for looking at published packages.
 
   Bug fixes:
