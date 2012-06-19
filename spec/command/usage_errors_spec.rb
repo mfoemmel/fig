@@ -19,14 +19,14 @@ describe 'Fig' do
       out.should == ''
     end
 
-    it %q<prints message when there's nothing to do and there's no package.fig file> do
+    it %q<prints message when there's nothing to do and there isn't a package.fig file> do
       out, err, exit_status = fig('', :no_raise_on_error => true)
       exit_status.should == 1
       err.should =~ /nothing to do/i
       out.should == ''
     end
 
-    it %q<prints message when there's nothing to do and there's a package.fig file> do
+    it %q<prints message when there's nothing to do and there is a package.fig file> do
       write_file(
         "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
         <<-END_PACKAGE_DOT_FIG
