@@ -487,14 +487,14 @@ class Fig::Command::Options
       @log_level = log_level
     end
 
-    @update_lock_response = :fail
-    update_lock_responses = [:fail, :wait, :ignore]
+    @update_lock_response = nil # Nil means wait, but warn.
+    update_lock_responses = [:wait, :fail, :ignore]
     response_list = update_lock_responses.join(', ')
     @parser.on(
       '--update-lock-response TYPE',
       update_lock_responses,
       'what to do when update lock already exists',
-      "  (#{response_list}, default is fail)"
+      "  (#{response_list}, default is wait)"
     ) do |response|
       @update_lock_response = response
     end

@@ -20,6 +20,35 @@ class Fig::UpdateLock
   private
 
   def set_up_lock(lock_directory, response)
+    set_up_lock_file(lock_directory)
+
+    should_warn = response ? false : true
+    response ||= :wait
+
+    if response == :wait
+      if should_warn
+        if ! @lock.flock(File::LOCK_EX | File::LOCK_NB)
+          # Purposely ignoring standard logging setup so that this cannot be
+          # turned off by "--log-level error".
+          $stderr.puts(
+            %Q<It looks like another instance of Fig is attempting to update #{lock_directory}. Will wait until it is done. (To suppress this warning in the future, explicitly specify "--update-lock-response wait".)>
+          )
+
+          @lock.flock(File::LOCK_EX)
+        end
+      else
+        @lock.flock(File::LOCK_EX)
+      end
+    else
+      if ! @lock.flock(File::LOCK_EX | File::LOCK_NB)
+        raise_lock_usage_error(lock_directory)
+      end
+    end
+
+    return
+  end
+
+  def set_up_lock_file(lock_directory)
     FileUtils.mkdir_p(lock_directory)
 
     # Tried using the directory itself as the lock, but Windows is
@@ -39,14 +68,6 @@ class Fig::UpdateLock
     # if we can as a better attempt at safety.
     if @lock.respond_to? :close_on_exec=
       @lock.close_on_exec = true
-    end
-
-    if response == :wait
-      @lock.flock(File::LOCK_EX)
-    else
-      if ! @lock.flock(File::LOCK_EX | File::LOCK_NB)
-        raise_lock_usage_error(lock_directory)
-      end
     end
 
     return

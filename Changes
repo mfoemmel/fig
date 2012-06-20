@@ -8,6 +8,11 @@ v0.1.xxx
 
   New features:
 
+  - Default for --update-lock-response is now "wait" instead of "fail".
+    However, if a pre-existing lock is encountered and you haven't explicitly
+    specified "--update-lock-response wait", you'll get a warning about the
+    wait.  Note that this warning is not influenced by --log-level.
+
   - Can specify the location of the remote repository via ~/.figrc or the value
     of the --figrc parameter by specifying a value for "default
     FIG_REMOTE_URL", e.g.
