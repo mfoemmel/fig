@@ -159,13 +159,12 @@ class Fig::RuntimeEnvironment
 
     # Check to see if this include has been overridden.
     if backtrace
-      override = backtrace.get_override(
-        descriptor.name || base_package.name
-      )
+      override_package_name = descriptor.name || base_package.name
+      override = backtrace.get_override(override_package_name)
       if override
         resolved_descriptor =
           Fig::PackageDescriptor.new(
-            descriptor.name, override, descriptor.config
+            override_package_name, override, descriptor.config
           )
       end
     end

@@ -24,6 +24,11 @@ v0.1.xxx
 
   - Warns on ignored --archive/--resource options.
 
+  Bug fixes:
+
+  - Loading an overridden package version that had one config include another
+    config of the same package could cause problems in some circumstances.
+
 v0.1.69
 
   Backwards incompatibilities:
