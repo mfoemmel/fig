@@ -21,7 +21,7 @@ v0.1.xxx
 
   - Warns on ignored --archive/--resource options.
 
-v0.1.68.beta.2
+v0.1.69
 
   Backwards incompatibilities:
 
@@ -50,16 +50,6 @@ v0.1.68.beta.2
     package definition file and environment variable options when not
     publishing.
 
-  Bug fixes:
-
-  - Specifying --update with FIG_REMOTE_URL using FTP should be fast as it used
-    to be.
-
-  - Skips retrieving directories and files to themselves.  (Tragic accident of
-    retrieving "." onto itself resulted in a corrupted git repo.)
-
-v0.1.68.beta.1
-
   New feature (and backwards incompatibility):
 
   - Locks FIG_HOME when updating.  (Or attempts to.  If FIG_HOME is on NFS, all
@@ -79,6 +69,19 @@ v0.1.68.beta.1
     If Fig defaulted to waiting, the above scenario would silently cause three
     out of the four servers to block until the other one's updates were
     finished.
+
+  Bug fixes:
+
+  - Specifying --update with FIG_REMOTE_URL using FTP should be fast as it used
+    to be.
+
+  - Skips retrieving directories and files to themselves.  (Tragic accident of
+    retrieving "." onto itself resulted in a corrupted git repo.)
+
+v0.1.68.beta.2
+v0.1.68.beta.1
+
+  - Test releases
 
 v0.1.67
 
