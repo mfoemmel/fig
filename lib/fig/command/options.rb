@@ -167,12 +167,12 @@ class Fig::Command::Options
   end
 
   def set_up_parser
+    set_up_package_configuration_source()
+    set_up_remote_repository_access()
     set_up_queries()
     set_up_commands()
-    set_up_package_configuration_source()
     set_up_environment_statements()
     set_up_package_contents_statements()
-    set_up_remote_repository_access()
     set_up_program_configuration()
 
     return
@@ -202,10 +202,10 @@ class Fig::Command::Options
     set_up_listings()
 
     @parser.on(
-      '--dump-package-definition-text',
-      'emit the unparsed definition of the base package, if there is one'
+      '--dump-package-definition-parsed',
+      'emit the parsed definition of the base package'
     ) do
-      set_base_action(Fig::Command::Action::DumpPackageDefinitionText)
+      set_base_action(Fig::Command::Action::DumpPackageDefinitionParsed)
     end
 
     return
@@ -282,6 +282,14 @@ class Fig::Command::Options
       '--publish-local', 'install package only in $FIG_HOME'
     ) do |publish_local|
       set_base_action(Fig::Command::Action::PublishLocal)
+    end
+
+    @force = nil
+    @parser.on(
+      '--force',
+      'force-overwrite existing version of a package to the remote repo'
+    ) do |force|
+      @force = force
     end
 
     return
@@ -441,14 +449,6 @@ class Fig::Command::Options
       '-l', '--login', 'login to remote repo as a non-anonymous user'
     ) do
       @login = true
-    end
-
-    @force = nil
-    @parser.on(
-      '--force',
-      'force-overwrite existing version of a package to the remote repo'
-    ) do |force|
-      @force = force
     end
 
     return
