@@ -19,8 +19,13 @@ v0.1.xxx
 
       { "default FIG_REMOTE_URL" : "file:///some/path" }
 
-  - New --dump-package-definition-text option, which, surprise, gives you the
-    text of the base package.  Useful for looking at published packages.
+  - New --dump-package-definition-text option, which gives you the text of the
+    base package.  Useful for looking at published packages.
+
+  - New --dump-package-definition-parsed option, which, surprise, gives you the
+    the base package after Fig has digested it.  Note that you won't see the
+    result of --set/--append/--archive/--resource options in this because those
+    get stored outside of the base package.
 
   - Warns on ignored --archive/--resource options.
 

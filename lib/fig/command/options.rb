@@ -1,5 +1,6 @@
 require 'fig/command/action/clean'
 require 'fig/command/action/dump_package_definition_text'
+require 'fig/command/action/dump_package_definition_parsed'
 require 'fig/command/action/get'
 require 'fig/command/action/help'
 require 'fig/command/action/list_configs'
@@ -201,6 +202,12 @@ class Fig::Command::Options
 
     set_up_listings()
 
+    @parser.on(
+      '--dump-package-definition-text',
+      'emit the unparsed definition of the base package, if there is one'
+    ) do
+      set_base_action(Fig::Command::Action::DumpPackageDefinitionText)
+    end
     @parser.on(
       '--dump-package-definition-parsed',
       'emit the parsed definition of the base package'

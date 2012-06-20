@@ -44,7 +44,10 @@ class Fig::Statement::Configuration < Fig::Statement
   def unparse_statements(indent, prefix, statements, suffix)
     body =
       @statements.map {|statement| statement.unparse(indent + '  ') }.join("\n")
+    if body.length > 0
+      body << "\n"
+    end
 
-    return ["\n#{indent}#{prefix}", body, "#{indent}#{suffix}"].join("\n")
+    return "\n#{indent}#{prefix}\n#{body}#{indent}#{suffix}"
   end
 end
