@@ -1,6 +1,8 @@
 # Used for bundler.  Not used to produce the actual gem; that's done in the
 # Rakefile.
 
+source 'http://rubygems.org'
+
 # All environments
 gem 'colorize',          '>= 0.5.8'
 gem 'highline',          '>= 1.6.2'
