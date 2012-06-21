@@ -8,7 +8,95 @@ require 'rspec/core/rake_task'
 require 'rubygems'
 require 'rubygems/package_task'
 
+require './Rakefile_utilities.rb'
+
 include FileUtils
+
+
+def main()
+  task :default => :rspec
+
+  fig_gemspec = Gem::Specification.new do |gemspec|
+    gemspec.name        = 'fig'
+    gemspec.email       = 'git@foemmel.com'
+    gemspec.homepage    = 'http://github.com/mfoemmel/fig'
+    gemspec.authors     = ['Matthew Foemmel']
+    gemspec.platform    = Gem::Platform::RUBY
+    gemspec.version     = get_version
+    gemspec.summary     =
+      'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
+    gemspec.description =
+      "Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected."
+
+    add_dependencies(gemspec) # From Rakefile_utilities above.
+
+    gemspec.files = FileList[
+      'Changes',
+      'bin/*',
+      'lib/**/*',
+      'README.md'
+    ].to_a
+
+    gemspec.executables = ['fig', 'fig-download']
+  end
+
+  Gem::PackageTask.new(fig_gemspec).define
+
+  desc 'Alias for the gem task.'
+  task :build => :gem
+
+
+  desc 'Run RSpec tests.'
+  RSpec::Core::RakeTask.new(:rspec) do |spec|
+    # Order is randomized so that we find inter-test dependencies.
+    spec.rspec_opts = []
+    spec.rspec_opts << '--order rand'
+  end
+  task :rspec do
+    clean_up_after_testing()
+  end
+
+  desc 'Run RSpec tests with SimpleCov.'
+  task :simplecov do
+    ENV['FIG_COVERAGE'] = 'true'
+  end
+  RSpec::Core::RakeTask.new(:simplecov) do |spec|
+    # Don't use '--order rand' like the standard "spec" task so that generated
+    # SimpleCov command-names are consistent between runs.
+  end
+  task :simplecov do
+    clean_up_after_testing()
+  end
+
+
+  desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
+  task :publish do
+    if local_repo_is_updated?
+      version = get_version
+      if push_to_rubygems(version)
+        tag_and_push_to_git(version)
+      end
+    end
+  end
+
+
+  RDoc::Task.new do |rdoc|
+    rdoc.rdoc_dir = 'rdoc'
+    rdoc.title = "fig #{get_version}"
+    rdoc.rdoc_files.include('README*')
+    rdoc.rdoc_files.include('lib/**/*.rb')
+  end
+
+
+  desc 'Remove build products and temporary files.'
+  task :clean do
+    %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >.each do
+      |path|
+      rm_rf "./#{path}"
+    end
+  end
+end
+
 
 def get_version
   require './lib/fig.rb'
@@ -108,94 +196,5 @@ def clean_up_after_testing()
   rm_rf './.fig'
 end
 
-fig_gemspec = Gem::Specification.new do |gemspec|
-  gemspec.name = 'fig'
-  gemspec.summary = 'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
-  gemspec.description = "Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected."
-  gemspec.email = 'git@foemmel.com'
-  gemspec.homepage = 'http://github.com/mfoemmel/fig'
-  gemspec.authors = ['Matthew Foemmel']
-  gemspec.platform = Gem::Platform::RUBY
-  gemspec.version = get_version
 
-  gemspec.add_dependency              'colorize',          '>= 0.5.8'
-  gemspec.add_dependency              'highline',          '>= 1.6.2'
-  gemspec.add_dependency              'json',              '>= 1.6.5'
-  gemspec.add_dependency              'libarchive-static', '>= 1.0.0'
-  gemspec.add_dependency              'log4r',             '>= 1.1.5'
-  gemspec.add_dependency              'net-netrc',         '>= 0.2.2'
-  gemspec.add_dependency              'net-sftp',          '>= 2.0.4'
-  gemspec.add_dependency              'net-ssh',           '>= 2.0.15'
-  gemspec.add_dependency              'polyglot',          '>= 0.2.9'
-  gemspec.add_dependency              'rdoc',              '>= 3.12'
-  gemspec.add_dependency              'sys-admin',         '>= 1.5.6'
-  gemspec.add_dependency              'treetop',           '>= 1.4.2'
-
-  gemspec.files = FileList[
-    "Changes",
-    "bin/*",
-    "lib/**/*",
-  ].to_a
-
-  gemspec.executables = ['fig', 'fig-download']
-end
-
-desc 'Run RSpec tests.'
-RSpec::Core::RakeTask.new(:spec) do |spec|
-  # Order is randomized so that we find inter-test dependencies.
-  spec.rspec_opts = []
-  spec.rspec_opts << '--order rand'
-end
-task :spec do
-  clean_up_after_testing()
-end
-
-desc 'Run RSpec tests with SimpleCov.'
-task :simplecov do
-  ENV['FIG_COVERAGE'] = 'true'
-end
-RSpec::Core::RakeTask.new(:simplecov) do |spec|
-  # Don't use '--order rand' like the standard "spec" task so that generated
-  # SimpleCov command-names are consistent between runs.
-end
-task :simplecov do
-  clean_up_after_testing()
-end
-
-Gem::PackageTask.new(fig_gemspec).define
-
-desc 'Alias for the gem task.'
-task :build => :gem
-
-desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
-task :publish do
-  if local_repo_is_updated?
-    version = get_version
-    if push_to_rubygems(version)
-      tag_and_push_to_git(version)
-    end
-  end
-end
-
-task :default => :spec
-
-RDoc::Task.new do |rdoc|
-  rdoc.rdoc_dir = 'rdoc'
-  rdoc.title = "fig #{get_version}"
-  rdoc.rdoc_files.include('README*')
-  rdoc.rdoc_files.include('lib/**/*.rb')
-end
-
-desc 'Remove build products and temporary files.'
-task :clean do
-  %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >.each do
-    |path|
-    rm_rf "./#{path}"
-  end
-end
-
-desc 'Build and install the Fig gem for local testing.'
-task :p do
-  sh 'rake build'
-  sh 'sudo gem install pkg/*.gem'
-end
+main()
