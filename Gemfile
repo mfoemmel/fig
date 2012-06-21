@@ -1,5 +1,5 @@
-source 'http://gems'
-source 'http://gems-mirror'
+# Used for bundler.  Not used to produce the actual gem; that's done in the
+# Rakefile.
 
 # All environments
 gem 'colorize',          '>= 0.5.8'
@@ -16,10 +16,7 @@ gem 'sys-admin',         '>= 1.5.6'
 gem 'treetop',           '>= 1.4.2'
 
 group :development do
-  platforms :ruby do
-    gem 'open4', '>= 1.0.1'
-  end
-
+  gem 'open4',              '>= 1.0.1'
   gem 'bundler',            '>= 1.0.15'
   gem 'rake',               '>= 0.8.7'
   gem 'rspec',              '~> 2'
