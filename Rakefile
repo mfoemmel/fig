@@ -8,7 +8,7 @@ require 'rspec/core/rake_task'
 require 'rubygems'
 require 'rubygems/package_task'
 
-require './Rakefile_utilities.rb'
+require File.join(File.dirname(__FILE__), 'Rakefile_utilities.rb')
 
 include FileUtils
 
@@ -99,7 +99,8 @@ end
 
 
 def get_version
-  require './lib/fig.rb'
+  require File.join(File.dirname(__FILE__), 'lib', 'fig.rb')
+
   return Fig::VERSION
 end
 
