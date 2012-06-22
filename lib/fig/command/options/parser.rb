@@ -13,8 +13,22 @@ class Fig::Command::Options::Parser
   USAGE = <<-EOF
 Usage:
 
+Running under Fig:
+
   fig [...] [DESCRIPTOR] [--update | --update-if-missing] [-- COMMAND]
   fig [...] [DESCRIPTOR] [--update | --update-if-missing] [--command-extra-args VALUES]
+
+Querying:
+
+  fig --get VARIABLE                                         [DESCRIPTOR] [...]
+  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
+  fig --list-configs                                         [DESCRIPTOR] [...]
+  fig --dump-package-definition-text                         [DESCRIPTOR] [...]
+  fig --dump-package-definition-parse                        [DESCRIPTOR] [...]
+  fig {--list-local | --list-remote}                                      [...]
+
+Publishing packages:
 
   fig {--publish | --publish-local} DESCRIPTOR
       [--resource PATH]
@@ -24,15 +38,9 @@ Usage:
       [--force]
       [...]
 
+Local repo maintenance:
+
   fig --clean DESCRIPTOR [...]
-
-  fig --get VARIABLE                                         [DESCRIPTOR] [...]
-  fig --list-configs                                         [DESCRIPTOR] [...]
-  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
-  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
-  fig {--list-local | --list-remote}                                      [...]
-
-  fig {--version | --help}
 
 
 A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",
