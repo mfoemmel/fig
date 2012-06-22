@@ -5,12 +5,12 @@ module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
 
-class Fig::Command::Action::Help
+class Fig::Command::Action::HelpLong
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
   def options()
-    return %w<--help>
+    return %w<--help-long>
   end
 
   def execute_immediately_after_command_line_parse?
@@ -18,7 +18,7 @@ class Fig::Command::Action::Help
   end
 
   def configure(options)
-    @help_message = options.short_help_message
+    @help_message = options.full_help_message
   end
 
   def execute()

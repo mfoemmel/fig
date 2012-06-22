@@ -3,6 +3,7 @@ require 'fig/command/action/dump_package_definition_parsed'
 require 'fig/command/action/dump_package_definition_text'
 require 'fig/command/action/get'
 require 'fig/command/action/help'
+require 'fig/command/action/help_long'
 require 'fig/command/action/list_configs'
 require 'fig/command/action/list_dependencies'
 require 'fig/command/action/list_dependencies/all_configs'
@@ -109,8 +110,12 @@ class Fig::Command::Options
     return @force
   end
 
-  def help_message()
-    return @parser.help + EXTRA_OPTIONS_DESCRIPTION
+  def short_help_message()
+    return @parser.short_help
+  end
+
+  def full_help_message()
+    return @parser.full_help + EXTRA_OPTIONS_DESCRIPTION
   end
 
   def options_message()
@@ -187,12 +192,17 @@ class Fig::Command::Options
 
   def set_up_queries()
     @parser.on_tail(
-      '-?', '-h', '--help','display this help text'
+      '-?', '-h', '--help', 'display short usage summary'
     ) do
       set_base_action(Fig::Command::Action::Help)
     end
     @parser.on_tail(
-      '--options','list options'
+      '--help-long', 'display full usage'
+    ) do
+      set_base_action(Fig::Command::Action::HelpLong)
+    end
+    @parser.on_tail(
+      '--options', 'just list Fig options'
     ) do
       set_base_action(Fig::Command::Action::Options)
     end

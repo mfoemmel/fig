@@ -70,26 +70,47 @@ describe 'Fig' do
     end
   end
 
-  it 'emits help' do
-    %w/-? -h --help/.each do |option|
-      (out, err, exitstatus) = fig(option)
-      exitstatus.should == 0
-      err.should == ''
-      out.should =~ / Usage: /x
-      out.should =~ / \b fig \b /x
-      out.should =~ / --help \b /x
-      out.should =~ / --force \b /x
-      out.should =~ / --update \b /x
-      out.should =~ / --set \b /x
+  describe 'emits help summary for' do
+    %w/-? -h --help/.each do
+      |option|
+
+      it option do
+        (out, err, exitstatus) = fig(option)
+        exitstatus.should == 0
+        err.should == ''
+        out.should =~ / \b summary \b   /xi
+        out.should =~ / \b fig \b       /x
+        out.should =~ / --update \b     /x
+        out.should =~ / --set \b        /x
+        out.should =~ / --publish \b    /x
+        out.should =~ / --options \b    /x
+        out.should =~ / --help-long \b  /x
+      end
     end
   end
 
-  it 'emits options' do
+  it 'emits full help with --help-long' do
+    (out, err, exitstatus) = fig('--help-long')
+    exitstatus.should == 0
+    err.should == ''
+    out.should =~ / \b fig \b             /x
+    out.should =~ / --update \b           /x
+    out.should =~ / --set \b              /x
+    out.should =~ / --publish \b          /x
+    out.should =~ / --force \b            /x
+    out.should =~ / --help \b             /x
+    out.should =~ / --help-long \b        /x
+    out.should =~ / --options \b          /x
+    out.should =~ / \b FIG_REMOTE_URL \b  /x
+    out.should =~ / \b FIG_HOME \b        /x
+  end
+
+  it 'emits option list with --options' do
     (out, err, exitstatus) = fig('--options')
     exitstatus.should == 0
     err.should == ''
-    out.should =~ / options: /ix
-    out.should =~ / --help \b /x
-    out.should =~ / --options \b /x
+    out.should =~ / options:      /ix
+    out.should =~ / --help \b     /x
+    out.should =~ / --options \b  /x
   end
 end
