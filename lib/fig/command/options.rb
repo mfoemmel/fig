@@ -1,6 +1,6 @@
 require 'fig/command/action/clean'
-require 'fig/command/action/dump_package_definition_text'
 require 'fig/command/action/dump_package_definition_parsed'
+require 'fig/command/action/dump_package_definition_text'
 require 'fig/command/action/get'
 require 'fig/command/action/help'
 require 'fig/command/action/list_configs'
@@ -16,6 +16,7 @@ require 'fig/command/action/list_variables/all_configs'
 require 'fig/command/action/list_variables/default'
 require 'fig/command/action/list_variables/tree'
 require 'fig/command/action/list_variables/tree_all_configs'
+require 'fig/command/action/options'
 require 'fig/command/action/publish'
 require 'fig/command/action/publish_local'
 require 'fig/command/action/run_command_line'
@@ -65,7 +66,6 @@ class Fig::Command::Options
     strip_shell_command(argv)
 
     set_up_parser()
-    @help_message = @parser.help
 
     @parser.parse!(argv)
 
@@ -110,12 +110,11 @@ class Fig::Command::Options
   end
 
   def help_message()
-    return @help_message + <<-'END_MESSAGE'
-        --                           end of Fig options; anything after this is used as a command to run
-        --command-extra-args         end of Fig options; anything after this is appended to the end of a
-                                     "command" statement in a "config" block.
+    return @parser.help + EXTRA_OPTIONS_DESCRIPTION
+  end
 
-    END_MESSAGE
+  def options_message()
+    return @parser.options_message + EXTRA_OPTIONS_DESCRIPTION
   end
 
   def login?()
@@ -132,7 +131,14 @@ class Fig::Command::Options
 
   private
 
-  # Note that OptionParser insist that the regex match the entire value, not
+  EXTRA_OPTIONS_DESCRIPTION = <<-'END_DESCRIPTION'
+        --                           end of Fig options; anything after this is used as a command to run
+        --command-extra-args         end of Fig options; anything after this is appended to the end of a
+                                     "command" statement in a "config" block.
+
+  END_DESCRIPTION
+
+  # Note that OptionParser insists that the regex match the entire value, not
   # just matches the regex in general.  In effect, OptionParser is wrapping the
   # regex with "\A" and "\z".
   STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >x
@@ -181,9 +187,14 @@ class Fig::Command::Options
 
   def set_up_queries()
     @parser.on_tail(
-      '-?', '-h','--help','display this help text'
+      '-?', '-h', '--help','display this help text'
     ) do
       set_base_action(Fig::Command::Action::Help)
+    end
+    @parser.on_tail(
+      '--options','list options'
+    ) do
+      set_base_action(Fig::Command::Action::Options)
     end
 
     @parser.on_tail('-v', '--version', 'print Fig version') do

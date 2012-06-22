@@ -83,4 +83,13 @@ describe 'Fig' do
       out.should =~ / --set \b /x
     end
   end
+
+  it 'emits options' do
+    (out, err, exitstatus) = fig('--options')
+    exitstatus.should == 0
+    err.should == ''
+    out.should =~ / options: /ix
+    out.should =~ / --help \b /x
+    out.should =~ / --options \b /x
+  end
 end

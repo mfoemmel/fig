@@ -10,7 +10,7 @@ class Fig::Command::Options; end
 class Fig::Command::Options::Parser
   # This class knows way too much about how OptionParser works.
 
-  USAGE = <<-EOF
+  USAGE = <<-'END_USAGE'
 Usage:
 
 Running under Fig:
@@ -62,14 +62,14 @@ Environment variables:
 
   FIG_REMOTE_URL (required),
   FIG_HOME (path to local repository cache, defaults to $HOME/.fighome).
-  EOF
+  END_USAGE
 
   def initialize()
     @switches             = {}
     @argument_description = {}
     @parser               = OptionParser.new
 
-    @parser.banner = "#{USAGE}\n"
+    @parser.banner = "#{USAGE}\nAll options:\n\n"
   end
 
   def add_argument_description(options, description)
@@ -118,6 +118,10 @@ Environment variables:
 
   def help()
     return @parser.help
+  end
+
+  def options_message()
+    return @parser.summarize('')
   end
 
   def parse!(argv)
