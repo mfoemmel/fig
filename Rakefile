@@ -34,6 +34,7 @@ def main()
       'Changes',
       'bin/*',
       'lib/**/*',
+      'LICENSE',
       'README.md'
     ].to_a
 
