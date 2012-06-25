@@ -17,6 +17,10 @@ class Fig::Command::Action::Clean
     return :required
   end
 
+  def modifies_repository?()
+    return true
+  end
+
   def load_base_package?()
     return false
   end

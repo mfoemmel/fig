@@ -53,7 +53,6 @@ class Fig::Command::Options
   attr_reader   :parser
   attr_reader   :shell_command
   attr_reader   :update_lock_response
-  attr_reader   :update_packages
   attr_reader   :variable_to_get
   attr_accessor :version_message
 
@@ -462,7 +461,7 @@ class Fig::Command::Options
       '--update',
       'check remote repo for updates and download to $FIG_HOME as necessary'
     ) do
-      set_update_action(Fig::Command::Action::Update, :unconditionally)
+      set_update_action(Fig::Command::Action::Update)
     end
 
     @parser.on(
@@ -470,7 +469,7 @@ class Fig::Command::Options
       '--update-if-missing',
       'check remote repo for updates only if package missing from $FIG_HOME'
     ) do
-      set_update_action(Fig::Command::Action::UpdateIfMissing, :if_missing)
+      set_update_action(Fig::Command::Action::UpdateIfMissing)
     end
 
     @parser.on(
@@ -558,7 +557,7 @@ class Fig::Command::Options
     return
   end
 
-  def set_update_action(update_action_class, update_packages)
+  def set_update_action(update_action_class)
     update_action = update_action_class.new
     if @update_action
       raise Fig::Command::OptionError.new(
@@ -567,7 +566,6 @@ class Fig::Command::Options
     end
 
     @update_action = update_action
-    @update_packages = update_packages
   end
 
   def new_variable_statement(option, name_value, statement_class)

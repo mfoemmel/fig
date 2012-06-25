@@ -37,8 +37,18 @@ module Fig::Command::Action
     return false
   end
 
+  # Does the action care about command-line options that affect package
+  # contents, i.e. --resource/--archive?
   def cares_about_package_content_options?()
     return false
+  end
+
+  def modifies_repository?()
+    return NotImplementedError
+  end
+
+  def prepare_repository(repository)
+    return # Nothing by default.
   end
 
   def load_base_package?()

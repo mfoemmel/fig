@@ -17,6 +17,10 @@ class Fig::Command::Action::ListLocal
     return :warn
   end
 
+  def modifies_repository?()
+    return false
+  end
+
   def load_base_package?()
     return nil # Don't care.
   end

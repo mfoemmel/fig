@@ -21,6 +21,11 @@ module Fig::Command::Action::Role::HasSubAction
     return sub_action.descriptor_requirement()
   end
 
+  def modifies_repository?()
+    check_sub_action_presence()
+    return sub_action.modifies_repository?
+  end
+
   def load_base_package?()
     check_sub_action_presence()
     return sub_action.load_base_package?
