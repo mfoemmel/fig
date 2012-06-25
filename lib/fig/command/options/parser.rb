@@ -70,6 +70,7 @@ Local repository maintenance:
 Standard options (represented as "[...]" above):
 
       [-u | --update | -m | --update-if-missing]
+      --update-lock-response TYPE
 
       [{-s | --set}    VARIABLE=VALUE]
       [{-p | --append} VARIABLE=VALUE]
