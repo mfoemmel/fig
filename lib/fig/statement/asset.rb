@@ -32,7 +32,8 @@ module Fig::Statement::Asset
   private
 
   def set_up_url(url)
-    if url[0] == '"'
+    # Damn you Ruby 1.8!!!!
+    if url[0..0] == '"'
       @url = url[1..-2]
       @glob = true
     else
@@ -45,12 +46,14 @@ module Fig::Statement::Asset
 
   module ClassMethods
     def validate_url(url)
-      if url[0] == '"' && url[-1] != '"' || url[0] != '"' && url[-1] == '"'
+      # Damn you Ruby 1.8!!!!
+      if  url[0..0] == '"' && url[-1..-1] != '"' ||
+          url[0..0] != '"' && url[-1..-1] == '"'
         yield 'has unbalanced quotes.'
         return
       end
 
-      if url[0] == '"'
+      if url[0..0] == '"'
         if url.length < 3
           yield 'is empty'
           return
