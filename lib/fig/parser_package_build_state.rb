@@ -56,13 +56,13 @@ class Fig::ParserPackageBuildState
   end
 
   def new_asset_statement(statement_class, keyword_node, url_node)
-    url = url_node.url.text_value
+    url = url_node.text_value
 
     statement_class.validate_url(url) {
       |error_description|
 
       raise_invalid_value_parse_error(
-        keyword_node, url_node.url, 'URL/path', error_description
+        keyword_node, url_node, 'URL/path', error_description
       )
     }
 

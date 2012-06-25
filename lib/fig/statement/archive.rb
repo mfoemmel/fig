@@ -14,7 +14,7 @@ class Fig::Statement::Archive < Fig::Statement
   def initialize(line_column, source_description, url)
     super(line_column, source_description)
 
-    @url = url
+    set_up_url(url)
   end
 
   def asset_name()
