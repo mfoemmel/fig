@@ -117,4 +117,26 @@ describe 'Command::Options' do
       expect_invalid_value_error('append', 'variable= stuff')
     end
   end
+
+  %w< archive resource >.each do
+    |asset_type|
+
+    describe "--#{asset_type}" do
+      it 'complains if there is no value' do
+        expect_invalid_value_error(asset_type, '')
+      end
+
+      %w[ @ " < > | ].each do
+        |character|
+
+        it %Q<complains about a value containing "#{character}"> do
+          expect_invalid_value_error(asset_type, character)
+        end
+      end
+
+      it 'complains about a value containing a space character' do
+        expect_invalid_value_error(asset_type, ' ')
+      end
+    end
+  end
 end

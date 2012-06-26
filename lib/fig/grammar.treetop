@@ -1,5 +1,13 @@
 # Treetop (http://treetop.rubyforge.org/) grammar for package definitions.
 
+# Some aspects of this grammar are significantly dumber than they could be
+# because:
+#
+#   * We want to treat statements as identically as possible to their
+#     command-line equivalents.
+#   * Treetop parse errors are pretty inscrutable at times and we can make
+#     error messages clearer by validating a lot of the terminals ourselves.
+
 module Fig
   grammar Fig
     rule package
@@ -14,26 +22,28 @@ module Fig
       archive / resource / retrieve / config
     end
 
-    # Note that these are being parsed like they allow globbing despite
-    # globbing not being performed.
     rule archive
-      statement_start:"archive" ws resource_url:[\S]+ ws {
+      statement_start:"archive" ws url:asset_url ws {
         def to_package_statement(build_state)
           return build_state.new_asset_statement(
-            Statement::Archive, statement_start, resource_url
+            Statement::Archive, statement_start, url
           )
         end
       }
     end
 
     rule resource
-      statement_start:"resource" ws resource_url:[\S]+ ws {
+      statement_start:"resource" ws url:asset_url ws {
         def to_package_statement(build_state)
           return build_state.new_asset_statement(
-            Statement::Resource, statement_start, resource_url
+            Statement::Resource, statement_start, url
           )
         end
       }
+    end
+
+    rule asset_url
+      [\S]+
     end
 
     rule retrieve

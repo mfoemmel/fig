@@ -28,7 +28,7 @@ describe 'Parser' do
     return
   end
 
-  def test_user_input_error(fig_input)
+  def test_user_input_error(fig_input, message_pattern)
     application_configuration = new_configuration
 
     expect {
@@ -39,7 +39,7 @@ describe 'Parser' do
         fig_input
       )
     }.to raise_error(
-      Fig::UserInputError
+      Fig::UserInputError, message_pattern
     )
 
     return
@@ -163,16 +163,21 @@ describe 'Parser' do
   end
 
   describe 'command statements' do
-    it 'rejects multiple commands in config file' do
-      test_user_input_error(<<-END)
+    it 'reject multiple commands in config file' do
+      input = <<-'END_PACKAGE'
         config default
           command "echo foo"
           command "echo bar"
         end
-      END
+      END_PACKAGE
+
+      test_user_input_error(
+        input,
+        /found a second "command" statement within a "config" block/i
+      )
     end
 
-    it 'accepts multiple configs, each with a single command' do
+    it 'accept multiple configs, each with a single command' do
       test_no_parse_exception(<<-END_PACKAGE)
         config default
           command "echo foo"
@@ -183,8 +188,8 @@ describe 'Parser' do
       END_PACKAGE
     end
 
-    it 'rejects multiple configs where one has multiple commands' do
-      test_user_input_error(<<-END)
+    it 'reject multiple configs where one has multiple commands' do
+      input = <<-'END_PACKAGE'
         config default
           command "echo foo"
         end
@@ -192,7 +197,12 @@ describe 'Parser' do
           command "echo bar"
           command "echo baz"
         end
-      END
+      END_PACKAGE
+
+      test_user_input_error(
+        input,
+        /found a second "command" statement within a "config" block/i
+      )
     end
   end
 
@@ -211,43 +221,55 @@ describe 'Parser' do
     }.each do
       |display, character|
 
-      it %Q<rejects "#{display}" in a PATH component> do
-        test_user_input_error(<<-"END_PACKAGE")
+      it %Q<reject "#{display}" in a PATH component> do
+        input = <<-"END_PACKAGE"
           config default
             append PATH_VARIABLE=#{character}
           end
         END_PACKAGE
+
+        test_user_input_error(
+          input, /(?i:invalid value for append).*\bPATH_VARIABLE\b/
+        )
       end
     end
   end
 
-  describe 'resource statements' do
-    it 'handles resources with plus signs in the path (e.g. for C++ libraries)' do
-      test_no_parse_exception(<<-END_PACKAGE)
-        resource testlib++/*.so
-        config default
-          append LIBPATH=@/testlib++
+  it 'handles resources with plus signs in the path (e.g. for C++ libraries)' do
+    test_no_parse_exception(<<-END_PACKAGE)
+      resource testlib++/*.so
+      config default
+        append LIBPATH=@/testlib++
+      end
+    END_PACKAGE
+  end
+
+  it 'handles archives with plus signs in the path (e.g. for C++ libraries)' do
+    test_no_parse_exception(<<-END_PACKAGE)
+      archive testlib++.tar.gz
+      config default
+        append LIBPATH=@/testlib++
+      end
+    END_PACKAGE
+  end
+
+  %w< archive resource >.each do
+    |asset_type|
+
+    describe "#{asset_type} statements" do
+      %w< @ " < > | >.each do
+        |character|
+
+        it %Q<reject "#{character}" in a URL> do
+          input = <<-"END_PACKAGE"
+            #{asset_type} #{character}
+          END_PACKAGE
+
+          test_user_input_error(
+            input,
+            %r<invalid url/path for #{asset_type} statement: "#{character}">i
+          )
         end
-      END_PACKAGE
-    end
-
-    {
-      '@'  => '@',
-      '"'  => '"',
-      '<'  => '<',
-      '>'  => '>',
-      '|'  => '|',
-      ' '  => ' ',
-      '\t' => "\t",
-      '\r' => "\r",
-      '\n' => "\n"
-    }.each do
-      |display, character|
-
-      it %Q<rejects "#{display}" in a URL> do
-        test_user_input_error(<<-"END_PACKAGE")
-          resource #{character}
-        END_PACKAGE
       end
     end
   end
