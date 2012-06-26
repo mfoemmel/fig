@@ -20,6 +20,7 @@ require 'fig/repository'
 
 FIG_SPEC_BASE_DIRECTORY =
   File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
+USER_HOME      = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/userhome')
 FIG_HOME       = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/fighome')
 FIG_REMOTE_DIR = File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/remote')
 FIG_REMOTE_URL = %Q<file://#{FIG_REMOTE_DIR}>
@@ -44,7 +45,8 @@ BASE_FIG_COMMAND_LINE =
     FIG_PROGRAM                    :
     "#{RUBY_EXE} #{FIG_PROGRAM}"
 
-ENV['FIG_HOME'] = FIG_HOME
+ENV['HOME']           = USER_HOME
+ENV['FIG_HOME']       = FIG_HOME
 ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
 ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
   File.expand_path(File.dirname(__FILE__) + '/..')
@@ -154,9 +156,8 @@ end
 
 def set_up_test_environment()
   FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
-
+  FileUtils.mkdir_p(USER_HOME)
   FileUtils.mkdir_p(FIG_HOME)
-
   FileUtils.mkdir_p(FIG_REMOTE_DIR)
 
   FileUtils.touch(FIG_FILE_GUARANTEED_TO_EXIST)
