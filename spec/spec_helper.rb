@@ -135,6 +135,7 @@ def fig(args, first_extra = nil, rest_extra = nil)
     # Throwing an exception that RSpec will catch will correctly integrate the
     # fig output with the rest of the RSpec output.
     fig_failure = "External fig process failed:\n"
+    fig_failure << "command: #{BASE_FIG_COMMAND_LINE} #{args}\n"
     fig_failure << "result: #{result.nil? ? '<nil>' : result}\n"
     fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
     fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
