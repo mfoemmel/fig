@@ -103,6 +103,12 @@ def fig(args, first_extra = nil, rest_extra = nil)
       args = "--no-figrc #{args}"
     end
 
+    # Grrr.  Windows file locking is so busted.  Other than the specific
+    # locking tests, we turn off locking.
+    if Fig::OperatingSystem.windows? && args !~ /--update-lock-response/
+      args = "--update-lock-response ignore #{args}"
+    end
+
     out = nil
     err = nil
 
