@@ -14,7 +14,7 @@ class Fig::Command::Action::RunCommandStatement
   end
 
   def descriptor_requirement()
-    return nil
+    return :required
   end
 
   def modifies_repository?()

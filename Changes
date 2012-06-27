@@ -5,6 +5,8 @@ v0.1.xxx
   - FIG_HOME locking didn't cover all the situations that it should have, e.g.
     the --clean option.
 
+  - Crash when --command-extra-args was specified without a package descriptor.
+
 v0.1.71
 
   Backwards incompatibilities:

@@ -19,26 +19,58 @@ describe 'Fig' do
       out.should == ''
     end
 
-    it %q<prints message when there's nothing to do and there isn't a package.fig file> do
-      out, err, exit_status = fig('', :no_raise_on_error => true)
-      exit_status.should == 1
-      err.should =~ /nothing to do/i
-      out.should == ''
-    end
+    describe %q<prints message when no descriptor is specified and> do
+      describe %q<there's nothing to do and> do
+        it %q<there isn't a package.fig file> do
+          out, err, exit_status = fig('', :no_raise_on_error => true)
+          exit_status.should == 1
+          err.should =~ /nothing to do/i
+          out.should == ''
+        end
 
-    it %q<prints message when there's nothing to do and there is a package.fig file> do
-      write_file(
-        "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
-        <<-END_PACKAGE_DOT_FIG
-          config default
+        describe %q<there is a package.fig file> do
+          it %q<with no command statement> do
+            write_file(
+              "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+              <<-END_PACKAGE_DOT_FIG
+                config default
+                end
+              END_PACKAGE_DOT_FIG
+            )
+
+            out, err, exit_status = fig('', :no_raise_on_error => true)
+            exit_status.should == 1
+            err.should =~ /nothing to do/i
+            out.should == ''
           end
-        END_PACKAGE_DOT_FIG
-      )
 
-      out, err, exit_status = fig('', :no_raise_on_error => true)
-      exit_status.should == 1
-      err.should =~ /nothing to do/i
-      out.should == ''
+          it %q<with a command statement> do
+            write_file(
+              "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+              <<-END_PACKAGE_DOT_FIG
+                config default
+                  command "echo foo"
+                end
+              END_PACKAGE_DOT_FIG
+            )
+
+            out, err, exit_status = fig('', :no_raise_on_error => true)
+            exit_status.should == 1
+            err.should =~ /nothing to do/i
+            out.should == ''
+          end
+        end
+      end
+
+      it %q<--command-extra-args was specified> do
+        out, err, exit_status = fig(
+          '--command-extra-args whatever',
+          :no_raise_on_error => true
+        )
+        exit_status.should == 1
+        err.should =~ /need to specify a descriptor/i
+        out.should == ''
+      end
     end
 
     it %q<prints error when extra parameters are given with a package descriptor> do
