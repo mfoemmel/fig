@@ -160,9 +160,16 @@ class Fig::Command
   def set_up_update_lock()
     return if @options.actions.none? {|action| action.modifies_repository?}
 
-
     update_lock_response = @options.update_lock_response
     return if update_lock_response == :ignore
+
+    if Fig::OperatingSystem.windows?
+      if ! update_lock_response.nil?
+        Fig::Logging.warn('At present, locking is not supported on Windows.')
+      end
+
+      return
+    end
 
     @update_lock = Fig::UpdateLock.new(@options.home, update_lock_response)
 
