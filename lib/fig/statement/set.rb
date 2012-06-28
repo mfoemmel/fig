@@ -4,7 +4,9 @@ module Fig; end
 
 # A statement that sets the value of an environment variable.
 class Fig::Statement::Set < Fig::Statement
-  VALUE_REGEX          = %r< \A \S* \z >x
+  # We block quotes right now in order to allow for using them for
+  # quoting later.
+  VALUE_REGEX          = %r< \A [^\s\\'"]* \z >x
   ARGUMENT_DESCRIPTION =
     %q<The value must look like "NAME=VALUE"; VALUE cannot contain whitespace though it can be empty.>
 
