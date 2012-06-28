@@ -58,7 +58,7 @@ class Fig::ParserPackageBuildState
   def new_asset_statement(statement_class, keyword_node, url_node)
     url = url_node.text_value
 
-    statement_class.validate_url(url) {
+    need_to_glob = statement_class.validate_url(url) {
       |error_description|
 
       raise_invalid_value_parse_error(
@@ -67,7 +67,7 @@ class Fig::ParserPackageBuildState
     }
 
     return statement_class.new(
-      node_location(keyword_node), source_description, url
+      node_location(keyword_node), source_description, url, need_to_glob
     )
   end
 

@@ -187,7 +187,7 @@ class Fig::RepositoryPackagePublisher
       Fig::AtExit.add { File.delete(file) }
 
       @statements_to_publish.unshift(
-        Fig::Statement::Archive.new(nil, nil, file)
+        Fig::Statement::Archive.new(nil, nil, file, false)
       )
     end
 
@@ -226,7 +226,7 @@ class Fig::RepositoryPackagePublisher
     end
 
     @definition_file_lines <<
-      asset_statement.class.new(nil, nil, asset_name).unparse('')
+      asset_statement.class.new(nil, nil, asset_name, false).unparse('')
 
     return
   end

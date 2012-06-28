@@ -133,10 +133,6 @@ describe 'Command::Options' do
           expect_invalid_value_error(asset_type, character)
         end
       end
-
-      it 'complains about a value containing a space character' do
-        expect_invalid_value_error(asset_type, ' ')
-      end
     end
   end
 end

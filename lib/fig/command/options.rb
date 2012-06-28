@@ -577,13 +577,13 @@ class Fig::Command::Options
   end
 
   def new_content_statement(option, path, statement_class)
-    statement_class.validate_url(path) {
+    need_to_glob = statement_class.validate_url(path) {
       |error_description|
 
       @parser.raise_invalid_argument(option, path, error_description)
     }
 
-    return statement_class.new(nil, "#{option} option", path)
+    return statement_class.new(nil, "#{option} option", path, need_to_glob)
   end
 
   def set_up_sub_actions()

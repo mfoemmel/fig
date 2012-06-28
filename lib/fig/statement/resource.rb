@@ -10,12 +10,11 @@ module Fig; end
 class Fig::Statement::Resource < Fig::Statement
   include Fig::Statement::Asset
 
-  attr_reader :url
-
-  def initialize(line_column, source_description, url)
+  def initialize(line_column, source_description, url, glob)
     super(line_column, source_description)
 
-    set_up_url(url)
+    @url  = url
+    @glob = glob
   end
 
   def asset_name()
@@ -29,6 +28,9 @@ class Fig::Statement::Resource < Fig::Statement
   end
 
   def unparse(indent)
-    "#{indent}resource #{url}"
+    quote = glob? ? %q<"> : %q<'>
+
+    # TODO: fix backslash escape bug.
+    %Q<#{indent}resource #{quote}#{url}#{quote}>
   end
 end

@@ -11,10 +11,11 @@ class Fig::Statement::Archive < Fig::Statement
 
   attr_reader :url
 
-  def initialize(line_column, source_description, url)
+  def initialize(line_column, source_description, url, glob)
     super(line_column, source_description)
 
-    set_up_url(url)
+    @url  = url
+    @glob = glob
   end
 
   def asset_name()
@@ -22,6 +23,9 @@ class Fig::Statement::Archive < Fig::Statement
   end
 
   def unparse(indent)
-    %Q<#{indent}archive "#{url}">
+    quote = glob? ? %q<"> : %q<'>
+
+    # TODO: fix backslash escape bug.
+    %Q<#{indent}archive #{quote}#{url}#{quote}>
   end
 end

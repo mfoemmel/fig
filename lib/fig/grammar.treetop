@@ -43,6 +43,8 @@ module Fig
     end
 
     rule asset_url
+      '"' [^"]* '"' /
+      "'" [^']* "'" /
       [\S]+
     end
 
@@ -129,7 +131,7 @@ module Fig
     end
 
     rule string
-      '"' value:(!'"' . )* '"' ws
+      '"' value:[^"]* '"' ws
     end
 
     rule descriptor_string

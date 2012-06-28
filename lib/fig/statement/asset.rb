@@ -5,6 +5,8 @@ class Fig::Statement; end
 
 # Some sort of file to be included in a package.
 module Fig::Statement::Asset
+  attr_reader :url
+
   def self.included(class_included_into)
     class_included_into.extend(ClassMethods)
 
@@ -31,35 +33,20 @@ module Fig::Statement::Asset
 
   private
 
-  def set_up_url(url)
-    # Damn you Ruby 1.8!!!!
-    if url[0..0] == '"'
-      @url = url[1..-2]
-      @glob = true
-    else
-      @url = url
-      @glob = false
-    end
-
-    return
-  end
-
   module ClassMethods
-    def validate_url(url)
-      # Damn you Ruby 1.8!!!!
-      if  url[0..0] == '"' && url[-1..-1] != '"' ||
-          url[0..0] != '"' && url[-1..-1] == '"'
-        yield 'has unbalanced quotes.'
-        return
-      end
-
-      if url[0..0] == '"'
-        if url.length < 3
-          yield 'is empty'
-          return
-        end
-
-        url = url[1..-2]
+    # Modifies the parameter to deal with quoting, escaping.
+    #
+    # Unquoted:      globbing, but no escapes
+    # Double quoted: globbing, with potential future escapes other than \\
+    # Single quoted: no globbing, no escapes
+    def validate_url(url, &block)
+      need_to_glob = true
+      replaced_quotes = validate_url_double_quotes(url, &block)
+      return if replaced_quotes.nil?
+      if ! replaced_quotes
+        replaced_quotes = validate_url_single_quotes(url, &block)
+        return if replaced_quotes.nil?
+        need_to_glob = ! replaced_quotes
       end
 
       if url.include? '@'
@@ -72,19 +59,56 @@ module Fig::Statement::Asset
         return
       end
 
-      if url =~ / \s /x
-        # We may need to allow a space character in the future, but this will
-        # require a change to the grammar.
-        yield %q<contains whitespace.>
-        return
-      end
-
       # "config" is a reasonable asset name, so we let that pass.
       if Fig::Parser.strict_keyword?(url)
         yield 'is a keyword.'
       end
 
-      return
+      return need_to_glob
+    end
+
+    private
+
+    def validate_url_double_quotes(url)
+      # Damn you Ruby 1.8 for returning an integer from string[number]!!!!
+      return false if url[0..0] != %q<"> && url[-1..-1] != %q<">
+
+      if url.length < 2 || url[0..0] != %q<"> || url[-1..-1] != %q<">
+        yield 'has unbalanced double quotes.'
+        return
+      end
+
+      # Is there a simpler way to do strip the quotes?
+      url.sub!(/\A " (.*) " \z/xs, '\1')
+
+      if url =~ %r<
+        (?: ^ | [^\\])      # Start of line or non backslash
+        (?: \\{2})*         # Even number of backslashes (including 0)
+        (
+          \\                # One more blackslash
+          (?: [^\\] | \z )  # A non-backslash or end of string
+        )
+      >xs
+        yield "contains a bad escape sequence (#{$1})."
+        return
+      end
+
+      url.gsub!(%r< \A \\ ([\\]) >xs, '\1')
+
+      return true
+    end
+
+    def validate_url_single_quotes(url)
+      return false if url[0..0] != %q<'> && url[-1..-1] != %q<'>
+
+      if url.length < 2 || url[0..0] != %q<'> || url[-1..-1] != %q<'>
+        yield 'has unbalanced single quotes.'
+        return
+      end
+
+      url.sub!(/\A ' (.*) ' \z/xs, '\1')
+
+      return true
     end
   end
 end
