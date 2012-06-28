@@ -5,7 +5,9 @@ module Fig; end
 # A statement that specifies or modifies a path environment variable, e.g.
 # "append", "path", "add" (though those are all synonyms).
 class Fig::Statement::Path < Fig::Statement
-  VALUE_REGEX          = %r< \A [^;:"<>|\s]+ \z >x
+  # We block single-quotes right now in order to allow for using them for
+  # quoting later.
+  VALUE_REGEX          = %r< \A [^;:'"<>|\s]+ \z >x
   ARGUMENT_DESCRIPTION =
     %q[The value must look like "NAME=VALUE". VALUE cannot contain any of ";:<>|", double quotes, or whitespace.]
 
