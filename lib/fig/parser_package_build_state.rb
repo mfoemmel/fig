@@ -4,6 +4,7 @@ require 'fig/statement'
 require 'fig/statement/archive'
 require 'fig/statement/command'
 require 'fig/statement/configuration'
+require 'fig/statement/grammar_version'
 require 'fig/statement/include'
 require 'fig/statement/override'
 require 'fig/statement/path'
@@ -43,15 +44,37 @@ class Fig::ParserPackageBuildState
     )
   end
 
-  def new_package_statement(directory, statements)
+  def new_package_statement(directory, grammar_version, statements)
+    statement_objects = []
+    if grammar_version && ! grammar_version.empty?
+      statement_objects << grammar_version.to_package_statement(self)
+    end
+
+    statements.elements.each do
+      |child_statements|
+
+      # package_statement rule is a proper statement followed by whitespace.
+      if child_statements.elements.size != 2
+        raise %Q<Bug in code. Grammar does not agree with what is expected elsewhere in the code.  Expected there to be two child nodes of "#{child_statements.text_value}"#{node_location_description(child_statements)}>
+      end
+
+      statement_objects <<
+        child_statements.elements[0].to_package_statement(self)
+    end
+
     return Fig::Package.new(
       descriptor.name,
       descriptor.version,
       directory,
-      statements.elements.map do
-        |statement|
-        statement.to_package_statement(self)
-      end
+      statement_objects
+    )
+  end
+
+  def new_grammar_version_statement(keyword_node, version_node)
+    return Fig::Statement::GrammarVersion.new(
+      node_location(keyword_node),
+      source_description,
+      version_node.text_value.to_i
     )
   end
 
@@ -87,14 +110,24 @@ class Fig::ParserPackageBuildState
       )
     end
 
+    statement_objects = []
+    statements.elements.each do
+      |child_statements|
+
+      # config_statement rule is a proper statement followed by whitespace.
+      if child_statements.elements.size != 2
+        raise %Q<Bug in code. Grammar does not agree with what is expected elsewhere in the code.  Expected there to be two child nodes of "#{child_statements.text_value}"#{node_location_description(child_statements)}>
+      end
+
+      statement_objects <<
+        child_statements.elements[0].to_config_statement(self)
+    end
+
     return Fig::Statement::Configuration.new(
       node_location(keyword_node),
       source_description,
       name_node.text_value,
-      statements.elements.map do
-        |statement|
-        statement.to_config_statement(self)
-      end
+      statement_objects
     )
   end
 
