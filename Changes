@@ -1,5 +1,11 @@
 v0.1.xxx
 
+  Backwards incompatibilities:
+
+  - --update-lock-response is, for the time being, no longer supported on
+    Windows.  Dealing with file locking on Windows is hard and we don't have
+    the time to figure it right now.
+
   Bug fixes:
 
   - FIG_HOME locking didn't cover all the situations that it should have, e.g.
