@@ -73,11 +73,11 @@ describe 'Fig' do
     end
 
     it 'retrieves resource that is a directory' do
-      write_file("#{lib_directory}/a-library", 'some library')
+      write_file("#{lib_directory}/a library", 'some library')
       # To copy the contents of a directory, instead of the directory itself,
       # use '/.' as a suffix to the directory name in 'append'.
       input = <<-END
-        resource lib/a-library
+        resource 'lib/a library'
         config default
           append FOOPATH=@/lib/.
         end
@@ -94,7 +94,7 @@ describe 'Fig' do
         end
       END
       fig('--update-if-missing', input)
-      File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+      File.read("#{retrieve_directory}/prerequisite/a library").should ==
         'some library'
     end
 

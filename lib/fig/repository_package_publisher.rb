@@ -178,11 +178,10 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_asset_to_statements_to_publish(asset_statement)
-    if (
-      asset_statement.glob_if_not_url?                  &&
-      ! Fig::Repository.is_url?(asset_statement.url)
-    )
-      if asset_statement.is_a? Fig::Statement::Archive
+    if Fig::Repository.is_url? asset_statement.url
+      @statements_to_publish << asset_statement
+    elsif asset_statement.is_a? Fig::Statement::Archive
+      if asset_statement.glob_if_not_url?
         expand_globs_from( [asset_statement.url] ).each do
           |file|
 
@@ -190,10 +189,12 @@ class Fig::RepositoryPackagePublisher
             Fig::Statement::Archive.new(nil, nil, file, false)
         end
       else
-        @resource_paths << asset_statement.url
+        @statements_to_publish << asset_statement
       end
+    elsif asset_statement.glob_if_not_url?
+      @resource_paths.concat expand_globs_from( [asset_statement.url] )
     else
-      @statements_to_publish << asset_statement
+      @resource_paths << asset_statement.url
     end
 
     return
@@ -201,11 +202,10 @@ class Fig::RepositoryPackagePublisher
 
   def create_resource_archive()
     if @resource_paths.size > 0
-      asset_paths = expand_globs_from(@resource_paths)
-      check_asset_paths(asset_paths)
+      check_asset_paths(@resource_paths)
 
       file = Fig::Repository::RESOURCES_FILE
-      @operating_system.create_archive(file, asset_paths)
+      @operating_system.create_archive(file, @resource_paths)
       Fig::AtExit.add { File.delete(file) }
 
       @statements_to_publish.unshift(
