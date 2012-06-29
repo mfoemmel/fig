@@ -8,7 +8,7 @@ require 'rspec/core/rake_task'
 require 'rubygems'
 require 'rubygems/package_task'
 
-require File.join(File.dirname(__FILE__), 'Rakefile_utilities.rb')
+require File.join(File.dirname(__FILE__), 'inc', 'build_utilities.rb')
 
 include FileUtils
 
@@ -28,7 +28,7 @@ def main()
     gemspec.description =
       "Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected."
 
-    add_dependencies(gemspec) # From Rakefile_utilities above.
+    add_dependencies(gemspec) # From inc/build_utilities above.
 
     gemspec.files = FileList[
       'Changes',
