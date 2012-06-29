@@ -39,7 +39,7 @@ module Fig::Statement::Asset
     # Unquoted:      globbing, but no escapes
     # Double quoted: globbing, with potential future escapes other than \\
     # Single quoted: no globbing, no escapes
-    def validate_url(url, &block)
+    def validate_and_process_escapes_in_url(url, &block)
       need_to_glob = true
       replaced_quotes = validate_url_double_quotes(url, &block)
       return if replaced_quotes.nil?
