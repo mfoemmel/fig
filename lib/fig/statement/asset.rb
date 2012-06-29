@@ -13,8 +13,8 @@ module Fig::Statement::Asset
     return
   end
 
-  def glob?()
-    return @glob
+  def glob_if_not_url?()
+    return @glob_if_not_url
   end
 
   def urls()
@@ -32,6 +32,13 @@ module Fig::Statement::Asset
   end
 
   private
+
+  def unparse_asset(indent, keyword)
+    quote = glob_if_not_url? ? %q<"> : %q<'>
+
+    # TODO: fix backslash escape bug.
+    return %Q<#{indent}#{keyword} #{quote}#{url}#{quote}>
+  end
 
   module ClassMethods
     # Modifies the parameter to deal with quoting, escaping.

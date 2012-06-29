@@ -162,16 +162,38 @@ class Fig::RepositoryPackagePublisher
   def initialize_statements_to_publish()
     @resource_paths = []
 
-    @statements_to_publish = @package_statements.reject do |statement|
-      if (
-        statement.is_a?(Fig::Statement::Resource) &&
-        ! Fig::Repository.is_url?(statement.url)
-      )
-        @resource_paths << statement.url
-        true
+    @statements_to_publish = []
+
+    @package_statements.each do
+      |statement|
+
+      if statement.is_asset?
+        add_asset_to_statements_to_publish(statement)
       else
-        false
+        @statements_to_publish << statement
       end
+    end
+
+    return
+  end
+
+  def add_asset_to_statements_to_publish(asset_statement)
+    if (
+      asset_statement.glob_if_not_url?                  &&
+      ! Fig::Repository.is_url?(asset_statement.url)
+    )
+      if asset_statement.is_a? Fig::Statement::Archive
+        expand_globs_from( [asset_statement.url] ).each do
+          |file|
+
+          @statements_to_publish <<
+            Fig::Statement::Archive.new(nil, nil, file, false)
+        end
+      else
+        @resource_paths << asset_statement.url
+      end
+    else
+      @statements_to_publish << asset_statement
     end
 
     return
@@ -213,9 +235,7 @@ class Fig::RepositoryPackagePublisher
     end
 
     if not @local_only
-      @operating_system.upload(
-        asset_local, asset_remote
-      )
+      @operating_system.upload(asset_local, asset_remote)
     end
 
     @operating_system.copy(
@@ -297,12 +317,12 @@ class Fig::RepositoryPackagePublisher
     return
   end
 
-  # 'resources' is an Array of fileglob patterns: ['tmp/foo/file1',
+  # 'paths' is an Array of fileglob patterns: ['tmp/foo/file1',
   # 'tmp/foo/*.jar']
-  def expand_globs_from(resources)
+  def expand_globs_from(paths)
     expanded_files = []
 
-    resources.each do
+    paths.each do
       |path|
 
       globbed_files = Dir.glob(path)
