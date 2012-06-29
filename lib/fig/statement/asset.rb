@@ -59,6 +59,11 @@ module Fig::Statement::Asset
         return
       end
 
+      if url =~ / ( ' ) /x
+        yield %Q<contains a "#{$1}", which isn't permitted to allow for future grammar expansion.>
+        return
+      end
+
       # "config" is a reasonable asset name, so we let that pass.
       if Fig::Parser.strict_keyword?(url)
         yield 'is a keyword.'
@@ -93,7 +98,7 @@ module Fig::Statement::Asset
         return
       end
 
-      url.gsub!(%r< \A \\ ([\\]) >xs, '\1')
+      url.gsub!(%r< \\{2} >xs, '\\')
 
       return true
     end
