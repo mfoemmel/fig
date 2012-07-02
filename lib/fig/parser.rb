@@ -101,6 +101,8 @@ class Fig::Parser
   end
 
   def check_for_bad_urls(package, descriptor)
+    return if not @application_config
+
     bad_urls = []
     package.walk_statements do |statement|
       statement.urls.each do |url|
