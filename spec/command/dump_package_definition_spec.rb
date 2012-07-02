@@ -14,10 +14,10 @@ describe 'Fig' do
             set FOO=BAR
           end
         END
-        fig('--publish foo/1.2.3', input)
+        fig(%w<--publish foo/1.2.3>, input)
 
         (out, err, exit_status) =
-          fig('foo/1.2.3 --dump-package-definition-text')
+          fig(%w<foo/1.2.3 --dump-package-definition-text>)
 
         # Content from the input.
         out.should =~ /set FOO=BAR/
@@ -35,7 +35,7 @@ describe 'Fig' do
           end
         END
         (out, err, exit_status) =
-          fig('--dump-package-definition-text', input)
+          fig(%w<--dump-package-definition-text>, input)
 
         out.should == input.strip
         err.should == ''
@@ -43,7 +43,7 @@ describe 'Fig' do
 
       it %q<fails if there is no text> do
         (out, err, exit_status) =
-          fig('--dump-package-definition-text', :no_raise_on_error => true)
+          fig(%w<--dump-package-definition-text>, :no_raise_on_error => true)
         err.should =~ /no text/
         out.should == ''
         exit_status.should_not == 0
@@ -57,10 +57,10 @@ describe 'Fig' do
             set FOO=BAR
           end
         END
-        fig('--publish foo/1.2.3', input)
+        fig(%w<--publish foo/1.2.3>, input)
 
         (out, err, exit_status) =
-          fig('foo/1.2.3 --dump-package-definition-parsed')
+          fig(%w<foo/1.2.3 --dump-package-definition-parsed>)
 
         # Content from the input.
         out.should =~ /set FOO=BAR/
@@ -75,7 +75,7 @@ describe 'Fig' do
           end
         END
         (out, err, exit_status) =
-          fig('--dump-package-definition-parsed', input)
+          fig(%w<--dump-package-definition-parsed>, input)
 
         [input, out].each do
           |string|
@@ -90,7 +90,7 @@ describe 'Fig' do
       end
 
       it %q<emits the synthetic package if there is no text> do
-        (out, err, exit_status) = fig('--dump-package-definition-parsed')
+        (out, err, exit_status) = fig(%w<--dump-package-definition-parsed>)
         out.should =~ / \A \s* config \s+ default \s+ end \s* \z /x
         err.should == ''
       end

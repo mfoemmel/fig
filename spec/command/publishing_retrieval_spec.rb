@@ -23,13 +23,12 @@ describe 'Fig' do
 
         fig(
           [
-            '--publish',
-            'prerequisite/1.2.3',
-            '--resource lib/a-library',
-            "--resource #{url}",
-            '--append FOOPATH=@/lib/a-library',
-            '--append FOOPATH=@/another-library'
-          ].join(' '),
+            '--publish',  'prerequisite/1.2.3',
+            '--resource', 'lib/a-library',
+            '--resource', url,
+            '--append',   'FOOPATH=@/lib/a-library',
+            '--append',   'FOOPATH=@/another-library'
+          ].flatten,
           :current_directory => publish_from_directory
         )
       end
@@ -42,7 +41,7 @@ describe 'Fig' do
             include prerequisite/1.2.3
           end
         END
-        out, err, exit_code = fig('--update-if-missing', input)
+        out, err, exit_code = fig(%w<--update-if-missing>, input)
         exit_code.should == 0
         File.read("#{retrieve_directory}/prerequisite/a-library").should ==
           'some library'
@@ -64,7 +63,7 @@ describe 'Fig' do
             append FOOPATH=@/does/not/exist
           end
         END
-        fig('--update-if-missing', input)
+        fig(%w<--update-if-missing>, input)
         File.read("#{retrieve_directory}/prerequisite/a-library").should ==
           'some library'
         File.read("#{retrieve_directory}/prerequisite/another-library").should ==
@@ -83,7 +82,7 @@ describe 'Fig' do
         end
       END
       fig(
-        '--publish prerequisite/1.2.3',
+        %w<--publish prerequisite/1.2.3>,
         input,
         :current_directory => publish_from_directory
       )
@@ -93,7 +92,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig('--update-if-missing', input)
+      fig(%w<--update-if-missing>, input)
       File.read("#{retrieve_directory}/prerequisite/a library").should ==
         'some library'
     end
@@ -101,7 +100,11 @@ describe 'Fig' do
     it 'reports error for missing file in a package' do
       write_file("#{lib_directory}/a-library", 'some library')
       fig(
-        '--publish prerequisite/1.2.3 --resource lib/a-library --append FOOPATH=@/lib/a-library',
+        %w<
+          --publish  prerequisite/1.2.3
+          --resource lib/a-library
+          --append   FOOPATH=@/lib/a-library
+        >,
         :current_directory => publish_from_directory
       )
       FileUtils.rm("#{FIG_HOME}/repos/prerequisite/1.2.3/lib/a-library")
@@ -113,7 +116,7 @@ describe 'Fig' do
         end
       END
       out, err, exit_code = fig(
-        '--update-if-missing', input, :no_raise_on_error => true
+        %w<--update-if-missing>, input, :no_raise_on_error => true
       )
       exit_code.should_not == 0
       err.should =~
@@ -121,7 +124,7 @@ describe 'Fig' do
     end
 
     it 'reports error for retrieve of source and destination being the same path' do
-      fig('--publish prerequisite/1.2.3 --set SOME_PATH=.')
+      fig(%w<--publish prerequisite/1.2.3 --set SOME_PATH=.>)
 
       input = <<-END
         retrieve SOME_PATH->.
@@ -129,7 +132,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      out, err, exit_code = fig('--update-if-missing', input)
+      out, err, exit_code = fig(%w<--update-if-missing>, input)
 
       err.should =~ %r<skipping copying>i
       err.should =~ %r<" [.] ">x
@@ -151,7 +154,7 @@ describe 'Fig' do
         end
       END
       fig(
-        '--publish prerequisite/1.2.3',
+        %w<--publish prerequisite/1.2.3>,
         input,
         :current_directory => publish_from_directory
       )
@@ -162,7 +165,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig('--update', input)
+      fig(%w<--update>, input)
 
       File.read(
         "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello.h"
@@ -186,7 +189,7 @@ describe 'Fig' do
         end
       END
       fig(
-        '--publish prerequisite/1.2.3',
+        %w<--publish prerequisite/1.2.3>,
         input,
         :current_directory => publish_from_directory
       )
@@ -199,7 +202,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig('-u', input)
+      fig(%w<-u>, input)
 
       File.read(
         "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello.h"
@@ -221,7 +224,7 @@ describe 'Fig' do
         end
       END
       fig(
-        '--publish prerequisite/1.2.3',
+        %w<--publish prerequisite/1.2.3>,
         input,
         :current_directory => publish_from_directory
       )
@@ -231,7 +234,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig('-m', input)
+      fig(%w<-m>, input)
       File.read("#{retrieve_directory}/prerequisite/a-library").should ==
         'some library'
       File.read("#{retrieve_directory}/prerequisite/a-library2").should ==
@@ -248,7 +251,7 @@ describe 'Fig' do
         end
       END
       fig(
-        '--publish prerequisite/1.2.3',
+        %w<--publish prerequisite/1.2.3>,
         input,
         :current_directory => publish_from_directory
       )
@@ -258,7 +261,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig('--update-if-missing', input)
+      fig(%w<--update-if-missing>, input)
       File.read("#{retrieve_directory}/prerequisite/foo.jar").should ==
         'some library'
     end
@@ -278,7 +281,7 @@ describe 'Fig' do
           end
         END
         fig(
-          '--publish dependency/1.2.3',
+          %w<--publish dependency/1.2.3>,
           input,
           :current_directory => publish_from_directory
         )
@@ -293,7 +296,7 @@ describe 'Fig' do
           end
         END
         fig(
-          '--publish dependent/1.2.3',
+          %w<--publish dependent/1.2.3>,
           input,
           :current_directory => publish_from_directory
         )
@@ -303,7 +306,7 @@ describe 'Fig' do
         File.exist?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") and
           fail 'Symlink should not exist prior to using package.'
 
-        fig('--update dependent/1.2.3 -- echo')
+        fig(%w<--update dependent/1.2.3 -- echo>)
         File.symlink?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") or
           fail 'Symlink should exist after using package.'
       end
@@ -327,7 +330,7 @@ describe 'Fig' do
           end
         END
         fig(
-          '--publish dependency/1.2.3',
+          %w<--publish dependency/1.2.3>,
           input,
           :current_directory => publish_from_directory
         )
@@ -342,28 +345,34 @@ describe 'Fig' do
           end
         END
         fig(
-          '--publish alpha/1.2.3',
+          %w<--publish alpha/1.2.3>,
           input,
           :current_directory => publish_from_directory
         )
-        fig('--publish beta/1.2.3 --no-file --set set_something=so-we-have-some-content')
+        fig(
+          %w<
+            --publish beta/1.2.3
+            --no-file
+            --set set_something=so-we-have-some-content
+          >
+        )
 
         File.exist?(cleanup_dependency_file) and
           fail 'File should not exist prior to using alpha.'
 
-        fig('--update alpha/1.2.3 -- echo')
+        fig(%w<--update alpha/1.2.3 -- echo>)
         File.exist?(cleanup_dependency_file) or
           fail 'File should exist after using alpha.'
       end
 
       it 'happens with --update' do
-        fig('--update beta/1.2.3 -- echo')
+        fig(%w<--update beta/1.2.3 -- echo>)
         File.exist?(cleanup_dependency_file) and
           fail 'File should not exist after using beta.'
       end
 
       it 'does not happen without --update' do
-        fig('beta/1.2.3 -- echo')
+        fig(%w<beta/1.2.3 -- echo>)
         File.exist?(cleanup_dependency_file) or
           fail 'File should exist after using beta.'
       end
@@ -378,7 +387,7 @@ describe 'Fig' do
           set WHATEVER=SOMETHING
         end
       END
-      out, err, exit_code = fig('--update-if-missing', input)
+      out, err, exit_code = fig(%w<--update-if-missing>, input)
 
       err.should =~ /UNREFERENCED_VARIABLE.*was never referenced.*retrieve UNREFERENCED_VARIABLE->somewhere.*was ignored/
     end

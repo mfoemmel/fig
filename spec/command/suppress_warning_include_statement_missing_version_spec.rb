@@ -12,7 +12,7 @@ describe 'Fig' do
         end
       END
 
-      (out, err, exit_code) = fig('--publish bar/1.2.3', input)
+      (out, err, exit_code) = fig(%w<--publish bar/1.2.3>, input)
       exit_code.should == 0
 
       input = <<-END
@@ -25,7 +25,7 @@ describe 'Fig' do
         end
       END
 
-      (out, err, exit_code) = fig('--publish foo/1.2.3', input)
+      (out, err, exit_code) = fig(%w<--publish foo/1.2.3>, input)
       exit_code.should == 0
     end
 
@@ -37,7 +37,7 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-configs', input)
+        (out, err, exit_code) = fig(%w<--list-configs>, input)
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
         exit_code.should == 0
@@ -50,7 +50,7 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-dependencies', input)
+        (out, err, exit_code) = fig(%w<--list-dependencies>, input)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should =~ %r<No version in the package descriptor of "bar" in an include statement in the \.fig file for "foo/1\.2\.3:default" \(line>
         exit_code.should == 0
@@ -65,7 +65,14 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-configs --suppress-warning-include-statement-missing-version', input)
+        (out, err, exit_code) =
+          fig(
+            %w<
+              --list-configs
+              --suppress-warning-include-statement-missing-version
+            >,
+            input
+          )
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
         exit_code.should == 0
@@ -84,7 +91,7 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-configs', input)
+        (out, err, exit_code) = fig(%w<--list-configs>, input)
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
         exit_code.should == 0
@@ -99,7 +106,13 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig('--list-dependencies --suppress-warning-include-statement-missing-version', input)
+        (out, err, exit_code) = fig(
+          %w<
+            --list-dependencies
+            --suppress-warning-include-statement-missing-version
+          >,
+          input
+        )
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
         exit_code.should == 0
@@ -119,7 +132,7 @@ describe 'Fig' do
         END
 
         (out, err, exit_code) =
-          fig('--list-dependencies', input, :figrc => figrc)
+          fig(%w<--list-dependencies>, input, :figrc => figrc)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
         exit_code.should == 0

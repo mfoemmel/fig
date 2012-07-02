@@ -13,7 +13,8 @@ describe 'Fig' do
           set TEST=package.fig
         end
       END
-      fig('--set TEST=command-line --get TEST', input)[0].should == 'command-line'
+      fig(%w<--set TEST=command-line --get TEST>, input)[0].should ==
+        'command-line'
     end
 
     it %q<gives an "--add" option priority over an "append" statement> do
@@ -22,7 +23,7 @@ describe 'Fig' do
           add TEST_PATH=package.fig
         end
       END
-      fig('--append TEST_PATH=command-line --get TEST_PATH', input)[0].should ==
+      fig(%w<--append TEST_PATH=command-line --get TEST_PATH>, input)[0].should ==
         "command-line#{File::PATH_SEPARATOR}package.fig"
     end
   end

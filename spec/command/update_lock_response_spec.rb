@@ -23,7 +23,7 @@ describe 'Fig' do
 
       it %q<doesn't wait when set to "ignore"> do
         out, err, exit_code =
-          fig('--update --update-lock-response ignore --set FOO=BAR --get FOO')
+          fig(%w<--update --update-lock-response ignore --set FOO=BAR --get FOO>)
 
         out.should == 'BAR'
         exit_code.should == 0
@@ -32,7 +32,7 @@ describe 'Fig' do
       it %q<results in an error when set to "fail"> do
         out, err, exit_code =
           fig(
-            '--update --update-lock-response fail --set FOO=BAR --get FOO',
+            %w<--update --update-lock-response fail --set FOO=BAR --get FOO>,
             :no_raise_on_error => true
           )
 

@@ -23,7 +23,7 @@ describe 'Fig' do
         END
 
         out, err, exit_code =
-            fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
+            fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
 
         err.should =~ /multiple archives/
         err.should =~ /duplicate-archive\.tar\.gz/
@@ -40,7 +40,7 @@ describe 'Fig' do
           END
 
           out, err, exit_code =
-              fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
+              fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
 
           err.should =~
             /cannot have an asset with the name "#{Regexp.escape(Fig::Repository::RESOURCES_FILE)}"/
@@ -54,7 +54,11 @@ describe 'Fig' do
         it "complains when #{asset_type}s refer to non-existent local paths" do
           out, err, exit_code =
             fig(
-              "--publish foo/1.2.3 --#{asset_type} does-not-exist --set VARIABLE=VALUE",
+              [
+                %w<--publish foo/1.2.3>,
+                "--#{asset_type}",
+                %w<does-not-exist --set VARIABLE=VALUE>
+              ].flatten,
               :no_raise_on_error => true
             )
 
@@ -71,11 +75,11 @@ describe 'Fig' do
           end
         END
 
-        fig('--publish foo/1.2.3', input)
+        fig(%w<--publish foo/1.2.3>, input)
       end
 
       it 'publishes a package named "config"' do
-        fig('--publish config/1.2.3 --set VARIABLE=VALUE')
+        fig(%w<--publish config/1.2.3 --set VARIABLE=VALUE>)
       end
 
       it 'publishes a package with a "config" config' do
@@ -85,7 +89,7 @@ describe 'Fig' do
           end
         END
 
-        fig('--publish foo/1.2.3', input)
+        fig(%w<--publish foo/1.2.3>, input)
       end
 
       it %q<--publish complains if local repository isn't in the expected format version> do
@@ -97,7 +101,7 @@ describe 'Fig' do
 
         set_local_repository_format_to_future_version()
         out, err, exit_code =
-            fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
+            fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
         err.should =~
           /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
         exit_code.should_not == 0
@@ -111,8 +115,11 @@ describe 'Fig' do
         END
 
         set_local_repository_format_to_future_version()
-        out, err, exit_code =
-            fig('--publish-local foo/1.2.3', input, :no_raise_on_error => true)
+        out, err, exit_code = fig(
+          %w<--publish-local foo/1.2.3>,
+          input,
+          :no_raise_on_error => true
+        )
         err.should =~
           /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
         exit_code.should_not == 0
@@ -127,7 +134,7 @@ describe 'Fig' do
 
         set_remote_repository_format_to_future_version()
         out, err, exit_code =
-            fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
+            fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
         err.should =~
           /Remote repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
         exit_code.should_not == 0
@@ -136,11 +143,25 @@ describe 'Fig' do
       describe 'overrides' do
         before(:each) do
           [3, 4, 5, 'command-line'].each do |point_ver|
-            fig("--publish foo/1.2.#{point_ver} --set FOO=foo-v1.2.#{point_ver}")
+            fig(
+              [
+                '--publish',
+                "foo/1.2.#{point_ver}",
+                '--set',
+                "FOO=foo-v1.2.#{point_ver}"
+              ].flatten
+            )
           end
 
           [0,1].each do |point_ver|
-            fig("--publish blah/2.0.#{point_ver} --set BLAH=bla20#{point_ver}")
+            fig(
+              [
+                '--publish',
+                "blah/2.0.#{point_ver}",
+                '--set',
+                "BLAH=bla20#{point_ver}"
+              ].flatten
+            )
           end
 
           input = <<-END
@@ -152,7 +173,7 @@ describe 'Fig' do
               include blah/2.0.0
             end
           END
-          fig('--publish bar/4.5.6', input)
+          fig(%w<--publish bar/4.5.6>, input)
 
           input = <<-END
             # Multiple overrides will work for 'default', even if
@@ -165,14 +186,14 @@ describe 'Fig' do
               include blah/2.0.1
             end
           END
-          fig('--publish baz/7.8.9', input)
+          fig(%w<--publish baz/7.8.9>, input)
 
           input = <<-END
             config default
               include foo/1.2.5
             end
           END
-          fig('--publish cat/10.11.12', input)
+          fig(%w<--publish cat/10.11.12>, input)
 
           input = <<-END
             config default
@@ -191,25 +212,36 @@ describe 'Fig' do
               include cat/10.11.12 override foo/1.2.3
             end
           END
-          fig('--publish top/1', input)
+          fig(%w<--publish top/1>, input)
         end
 
         it 'work from a published .fig file' do
-          fig('--update --include top/1 --get FOO')[0].should == 'foo-v1.2.3'
+          fig(%w<--update --include top/1 --get FOO>)[0].should == 'foo-v1.2.3'
         end
 
         it 'work from a package published based upon a command-line' do
           fig(
-            'command-line/some-version --no-file --publish --include top/1 --override foo/1.2.command-line'
+            %w<
+              command-line/some-version
+              --no-file
+              --publish
+              --include top/1
+              --override foo/1.2.command-line
+            >
           )
           fig(
-            '--no-file --include command-line/some-version --get FOO'
+            %w<--no-file --include command-line/some-version --get FOO>
           )[0].should == 'foo-v1.2.command-line'
         end
 
         it 'work from the command-line' do
           fig(
-            '--update --include top/1 --override foo/1.2.command-line --get FOO'
+            %w<
+              --update
+              --include top/1
+              --override foo/1.2.command-line
+              --get FOO
+            >
           )[0].should ==
             'foo-v1.2.command-line'
         end
@@ -217,9 +249,14 @@ describe 'Fig' do
         it 'fail with conflicting versions' do
           out, err, exit_code =
             fig(
-              'package/version --no-file --publish --include top/1' +
-              ' --override some-package/1.2.3'                               +
-              ' --override some-package/1.2.4',
+              %w<
+                package/version
+                --no-file
+                --publish
+                --include  top/1
+                --override some-package/1.2.3
+                --override some-package/1.2.4
+              >,
               :no_raise_on_error => true
             )
           err.should =~ /version conflict/i
@@ -229,13 +266,13 @@ describe 'Fig' do
       end
 
       it 'complains if you publish without a package descriptor' do
-        out, err, exit_code = fig('--publish', :no_raise_on_error => true)
+        out, err, exit_code = fig(%w<--publish>, :no_raise_on_error => true)
         err.should =~ /need to specify a descriptor/i
         exit_code.should_not == 0
       end
 
       it 'complains if you publish without a package version' do
-        out, err, exit_code = fig('--publish foo', :no_raise_on_error => true)
+        out, err, exit_code = fig(%w<--publish foo>, :no_raise_on_error => true)
         err.should =~ /version required/i
         exit_code.should_not == 0
       end
@@ -246,10 +283,10 @@ describe 'Fig' do
             set FOO=SHEEP
           end
         END
-        fig('--publish foo/1.2.3', input)
+        fig(%w<--publish foo/1.2.3>, input)
         fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update --include foo/1.2.3 --get FOO')[0].should == 'SHEEP'
+        fig(%w<--update --include foo/1.2.3 --get FOO>)[0].should == 'SHEEP'
 
         input = <<-END
           config default
@@ -257,14 +294,14 @@ describe 'Fig' do
           end
         END
         out, err, exit_status = fig(
-          '--publish foo/1.2.3', input, :no_raise_on_error => true
+          %w<--publish foo/1.2.3>, input, :no_raise_on_error => true
         )
         exit_status.should == 1
-        fig('--update --include foo/1.2.3 --get FOO')[0].should == 'SHEEP'
+        fig(%w<--update --include foo/1.2.3 --get FOO>)[0].should == 'SHEEP'
 
-        out, err, exit_status = fig('--publish foo/1.2.3 --force', input)
+        out, err, exit_status = fig(%w<--publish foo/1.2.3 --force>, input)
         exit_status.should == 0
-        fig('--update --include foo/1.2.3 --get FOO')[0].should == 'CHEESE'
+        fig(%w<--update --include foo/1.2.3 --get FOO>)[0].should == 'CHEESE'
       end
 
       it 'refuses to publish with --file and an environment variable option' do
@@ -272,7 +309,7 @@ describe 'Fig' do
 
         out, err, exit_status =
           fig(
-            'foo/1.2.3 --publish --file example.fig --set VARIABLE=VALUE',
+            %w<foo/1.2.3 --publish --file example.fig --set VARIABLE=VALUE>,
             :no_raise_on_error => true
           )
 
@@ -296,7 +333,7 @@ describe 'Fig' do
         it 'refuses to publish without --no-file' do
           out, err, exit_status =
             fig(
-              'foo/1.2.3 --publish --set VARIABLE=VALUE',
+              %w<foo/1.2.3 --publish --set VARIABLE=VALUE>,
               :no_raise_on_error => true
             )
 
@@ -307,7 +344,7 @@ describe 'Fig' do
         end
 
         it 'publishes with --no-file' do
-          fig('foo/1.2.3 --publish --set VARIABLE=VALUE --no-file')
+          fig(%w<foo/1.2.3 --publish --set VARIABLE=VALUE --no-file>)
         end
       end
     end
@@ -329,10 +366,10 @@ describe 'Fig' do
             append PATH=@/bin
           end
         END
-        fig('--publish foo/1.2.3', input)
+        fig(%w<--publish foo/1.2.3>, input)
         fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
+        fig(%w<--update --include foo/1.2.3 -- hello.bat>)[0].should == 'bar'
       end
 
       it 'publishes resource to remote repository using command line' do
@@ -341,10 +378,10 @@ describe 'Fig' do
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
-        fig("--publish foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin")
+        fig(%w<--publish foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin>)
         fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
+        fig(%w<--update --include foo/1.2.3 -- hello.bat>)[0].should == 'bar'
       end
 
       it 'publishes only to the local repo when told to' do
@@ -356,9 +393,17 @@ describe 'Fig' do
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
-        fig("--publish-local foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin")
+        fig(
+          %w<
+            --publish-local foo/1.2.3
+            --resource bin/hello.bat
+            --append PATH=@/bin
+          >
+        )
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'bar'
+        fig(
+          %w<--update-if-missing --include foo/1.2.3 -- hello.bat>
+        )[0].should == 'bar'
       end
 
       it 'publishes a file containing an include statement without a version' do
@@ -371,7 +416,7 @@ describe 'Fig' do
         END_INPUT
 
         out, err, exit_code =
-          fig('--publish foo/1.2.3', input, :no_raise_on_error => true)
+          fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
 
         out.should == ''
         err.should =~
@@ -385,17 +430,38 @@ describe 'Fig' do
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
-        fig('--publish-local foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin')
+        fig(
+          %w<
+            --publish-local foo/1.2.3
+            --resource bin/hello.bat
+            --append PATH=@/bin
+          >
+        )
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'sheep'
+        fig(
+          %w<
+            --update-if-missing
+            --include foo/1.2.3
+            -- hello.bat
+          >
+        )[0].should == 'sheep'
 
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} cheese" }
+        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') {
+          |f| f << "#{ECHO_COMMAND} cheese"
+        }
         if Fig::OperatingSystem.unix?
           fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
         end
-        fig('--publish-local foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin')
+        fig(
+          %w<
+            --publish-local foo/1.2.3
+            --resource bin/hello.bat
+            --append PATH=@/bin
+          >
+        )
         fail if File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
-        fig('--update-if-missing --include foo/1.2.3 -- hello.bat')[0].should == 'cheese'
+        fig(%w<--update-if-missing --include foo/1.2.3 -- hello.bat>)[0].should ==
+          'cheese'
       end
     end
   end

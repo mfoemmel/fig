@@ -12,11 +12,11 @@ describe 'Fig' do
     end
 
     it 'sets variable from command line' do
-      fig('--set FOO=BAR --get FOO')[0].should == 'BAR'
+      fig(%w<--set FOO=BAR --get FOO>)[0].should == 'BAR'
 
-      fig('--set NO_VALUE_WITH_EQUALS= --list-variables')[0].should ==
+      fig(%w<--set NO_VALUE_WITH_EQUALS= --list-variables>)[0].should ==
         'NO_VALUE_WITH_EQUALS='
-      fig('--set NO_VALUE_WITHOUT_EQUALS --list-variables')[0].should ==
+      fig(%w<--set NO_VALUE_WITHOUT_EQUALS --list-variables>)[0].should ==
         'NO_VALUE_WITHOUT_EQUALS='
     end
 
@@ -26,11 +26,12 @@ describe 'Fig' do
           set FOO=BAR
         end
       END
-      fig('--get FOO', input)[0].should == 'BAR'
+      fig(%w<--get FOO>, input)[0].should == 'BAR'
     end
 
     it 'appends variable from command line' do
-      fig('--append PATH=foo --get PATH').should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
+      fig(%w<--append PATH=foo --get PATH>).should ==
+        ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
     end
 
     it 'appends variable from fig file' do
@@ -39,15 +40,16 @@ describe 'Fig' do
           add PATH=foo
         end
       END
-      fig('--get PATH', input).should == ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
+      fig(%w<--get PATH>, input).should ==
+        ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
     end
 
     it 'appends empty variable' do
-      fig('--append XYZZY=foo --get XYZZY').should == ['foo', '', 0]
+      fig(%w<--append XYZZY=foo --get XYZZY>).should == ['foo', '', 0]
     end
 
     it %q<doesn't expand variables without packages> do
-      fig('--set FOO=@bar --get FOO')[0].should == '@bar'
+      fig(%w<--set FOO=@bar --get FOO>)[0].should == '@bar'
     end
   end
 end

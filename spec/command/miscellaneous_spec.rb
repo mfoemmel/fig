@@ -15,7 +15,7 @@ describe 'Fig' do
         set FOO=BAR # Another comment
       end
     END
-    fig('--get FOO', input)[0].should == 'BAR'
+    fig(%w<--get FOO>, input)[0].should == 'BAR'
   end
 
   describe '--file' do
@@ -26,12 +26,12 @@ describe 'Fig' do
           set FOO=BAR
         end
       END
-      fig("--file #{dot_fig_file} --get FOO")[0].should == 'BAR'
+      fig(['--file', dot_fig_file, '--get', 'FOO'])[0].should == 'BAR'
     end
 
     it 'complains about the value not existing' do
       out, err, exit_code =
-        fig("--file does-not-exist --get FOO", :no_raise_on_error => true)
+        fig(%w<--file does-not-exist --get FOO>, :no_raise_on_error => true)
       out.should == ''
       err.should =~ /does-not-exist/
       exit_code.should_not == 0
@@ -46,15 +46,15 @@ describe 'Fig' do
         set FOO=BAR
       end
     END
-    fig('--no-file --get FOO')[0].should == ''
+    fig(%w<--no-file --get FOO>)[0].should == ''
   end
 
   it 'complains about conflicting package versions' do
-    fig('--publish foo/1.2.3 --set VARIABLE=VALUE')
-    fig('--publish foo/4.5.6 --set VARIABLE=VALUE')
+    fig(%w<--publish foo/1.2.3 --set VARIABLE=VALUE>)
+    fig(%w<--publish foo/4.5.6 --set VARIABLE=VALUE>)
 
     out, err, exit_code = fig(
-      '--update --include foo/1.2.3 --include foo/4.5.6',
+      %w<--update --include foo/1.2.3 --include foo/4.5.6>,
       :no_raise_on_error => true
     )
     exit_code.should_not == 0
@@ -63,7 +63,7 @@ describe 'Fig' do
 
   it 'prints the version number' do
     %w/-v --version/.each do |option|
-      (out, err, exitstatus) = fig(option)
+      (out, err, exitstatus) = fig([option])
       exitstatus.should == 0
       err.should == ''
       out.should =~ / \d+ \. \d+ \. \d+ /x
@@ -75,7 +75,7 @@ describe 'Fig' do
       |option|
 
       it option do
-        (out, err, exitstatus) = fig(option)
+        (out, err, exitstatus) = fig([option])
         exitstatus.should == 0
         err.should == ''
         out.should =~ / \b summary \b   /xi
@@ -90,7 +90,7 @@ describe 'Fig' do
   end
 
   it 'emits full help with --help-long' do
-    (out, err, exitstatus) = fig('--help-long')
+    (out, err, exitstatus) = fig(['--help-long'])
     exitstatus.should == 0
     err.should == ''
     out.should =~ / \b fig \b             /x
@@ -106,7 +106,7 @@ describe 'Fig' do
   end
 
   it 'emits option list with --options' do
-    (out, err, exitstatus) = fig('--options')
+    (out, err, exitstatus) = fig(['--options'])
     exitstatus.should == 0
     err.should == ''
     out.should =~ / options:      /ix

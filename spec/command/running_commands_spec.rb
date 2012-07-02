@@ -13,9 +13,9 @@ describe 'Fig' do
           command "echo foo"
         end
       END
-      fig('--publish foo/1.2.3', input)
+      fig(%w<--publish foo/1.2.3>, input)
 
-      (out, err, exitstatus) = fig('foo/1.2.3')
+      (out, err, exitstatus) = fig(%w<foo/1.2.3>)
       exitstatus.should == 0
       out.should == 'foo'
       err.should == ''
@@ -27,10 +27,10 @@ describe 'Fig' do
           command "echo Hi"
         end
       END
-      fig('--publish foo/1.2.3', input)
+      fig(%w<--publish foo/1.2.3>, input)
 
       (out, err, exitstatus) =
-        fig('foo/1.2.3 --command-extra-args there')
+        fig(%w<foo/1.2.3 --command-extra-args there>)
       exitstatus.should == 0
       out.should == 'Hi there'
       err.should == ''
@@ -41,10 +41,10 @@ describe 'Fig' do
         config default
         end
       END
-      fig('--publish foo/1.2.3', input)
+      fig(%w<--publish foo/1.2.3>, input)
 
       (out, err, exitstatus) =
-        fig('foo/1.2.3 --command-extra-args yadda', :no_raise_on_error => true)
+        fig(%w<foo/1.2.3 --command-extra-args yadda>, :no_raise_on_error => true)
       exitstatus.should_not == 0
       out.should == ''
       err.should =~ /does not contain a command/
@@ -58,7 +58,7 @@ describe 'Fig' do
         end
       END
       out, err, exit_code =
-        fig('--publish foo/1.2.3.4', input, :no_raise_on_error => true)
+        fig(%w<--publish foo/1.2.3.4>, input, :no_raise_on_error => true)
       err.should =~
         %r<Found a second "command" statement within a "config" block \(line>
     end

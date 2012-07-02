@@ -42,8 +42,8 @@ RUBY_EXE =
 
 BASE_FIG_COMMAND_LINE =
   ENV['FIG_PROGRAM_PATH_OVERRIDE'] ?
-    FIG_PROGRAM                    :
-    "#{RUBY_EXE} #{FIG_PROGRAM}"
+    [FIG_PROGRAM]                  :
+    [RUBY_EXE, FIG_PROGRAM]
 
 ENV['HOME']           = USER_HOME
 ENV['FIG_HOME']       = FIG_HOME
@@ -57,6 +57,7 @@ class Popen
   def self.setup_open3
     require 'open3'
     def self.popen(*cmd)
+File.open('/dev/tty', 'w') { |h| h.puts "HERE! #{__FILE__}:#{__LINE__}" }
       exit_code = nil
 
       Open3.popen3(*cmd) { |stdin, stdout, stderr, wait_thread|
@@ -85,7 +86,7 @@ end
 
 $fig_run_count = 0 # Nasty, nasty global.
 
-def fig(args, first_extra = nil, rest_extra = nil)
+def fig(command_line, first_extra = nil, rest_extra = nil)
   input, options = _fig_input_options(first_extra, rest_extra)
 
   $fig_run_count += 1
@@ -93,26 +94,30 @@ def fig(args, first_extra = nil, rest_extra = nil)
 
   current_directory = options[:current_directory] || FIG_SPEC_BASE_DIRECTORY
   Dir.chdir current_directory do
-    args = "--log-level warn #{args}"
-    args = "--file - #{args}" if input
+    standard_options = []
+    standard_options.concat %w< --log-level warn >
+    standard_options.concat %w< --file - > if input
 
     figrc = options[:figrc]
     if figrc
-      args = "--figrc #{figrc} #{args}"
+      standard_options << '--figrc' << figrc
     else
-      args = "--no-figrc #{args}"
+      standard_options << '--no-figrc'
     end
 
     # Grrr.  Windows file locking is so busted.  Other than the specific
     # locking tests, we turn off locking.
-    if Fig::OperatingSystem.windows? && args !~ /--update-lock-response/
-      args = "--update-lock-response ignore #{args}"
+    if \
+        Fig::OperatingSystem.windows? &&
+        ! command_line.include?('--update-lock-response')
+      standard_options.concat %w< --update-lock-response ignore >
     end
 
     out = nil
     err = nil
 
-    result = Popen.popen(*("#{BASE_FIG_COMMAND_LINE} #{args}".split)) do
+    command = [BASE_FIG_COMMAND_LINE, standard_options, command_line].flatten
+    result = Popen.popen(*command) do
       |stdin, stdout, stderr|
 
       if input
@@ -135,7 +140,7 @@ def fig(args, first_extra = nil, rest_extra = nil)
     # Throwing an exception that RSpec will catch will correctly integrate the
     # fig output with the rest of the RSpec output.
     fig_failure = "External fig process failed:\n"
-    fig_failure << "command: #{BASE_FIG_COMMAND_LINE} #{args}\n"
+    fig_failure << "command: #{command.join(' ')}\n"
     fig_failure << "result: #{result.nil? ? '<nil>' : result}\n"
     fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
     fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
@@ -147,10 +152,10 @@ end
 # A bit of ruby magic to make invoking fig() nicer; this takes advantage of the
 # hash assignment syntax so you can call it like any of
 #
-#     fig('arguments')
-#     fig('arguments', input)
-#     fig('arguments', input, :no_raise_on_error => true)
-#     fig('arguments', :no_raise_on_error => true)
+#     fig([arguments])
+#     fig([arguments], input)
+#     fig([arguments], input, :no_raise_on_error => true)
+#     fig([arguments], :no_raise_on_error => true)
 def _fig_input_options(first_extra, rest_extra)
   return nil, rest_extra || {} if first_extra.nil?
 
