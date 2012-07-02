@@ -6,6 +6,60 @@ v0.1.xxx
     Windows.  Dealing with file locking on Windows is hard and we don't have
     the time to figure it right now.
 
+  - Unquoted archive statements now have their values globbed if they don't
+    look like URLs.  If you happen to have a statement like
+
+      archive some/path/foo?bar*.tar.gz
+
+    then this will match files that it did not previously find.  Workaround:
+    surround the path with single quotes, i.e.
+
+      archive 'some/path/foo?bar*.tar.gz'
+
+    Previously, archive statements were parsed identically to resource
+    statements, but globbing wasn't done on them.
+
+  New features:
+
+  - Asset statements now behave identically, with the exception of the
+    extraction of archive statements and the path preservation of resource
+    statements.  Also, globbing is done inside double quotes; this is not a
+    backwards incompatibility because glob characters were previously not
+    allowed inside double quotes.  Globbing can be prevented by using single
+    quotes.  Regardless of quoting, if the path looks like a URL, no globbing
+    is done.  Whitespace can be included in paths using either quoting
+    mechanism.  To allow for future expansion, backslashes have to be escaped
+    inside double quotes, but an attempt to escape anything else is an error.
+
+    To summarize:
+
+      * Unquoted: globbing, no escaping, no whitespace
+      * Double quotes: globbing, escape backslash, whitespace
+      * Single quotes: no globbing, no escaping, whitespace
+
+    Examples:
+
+      # Good statements
+      archive  whereever/*.tar.gz  # You can now pick up multiple archives in
+                                   # one go and not have to list them
+                                   # individually.
+      resource some\path           # Escapes not processed outside of quotes.
+      archive  'some\path.zip'     # Escapes not processed in single quotes.
+      resource "some\\path"        # Have to escape backslashes inside double
+                                   # quotes.
+
+      resource http://example.com/whatever* # No globbing, it's a URL.
+
+      resource "some path/files with whitespace *.txt" # Globbing with
+                                                       # whitespace.
+      archive  'would you like them on a boat?.tgz'    # No globbing.
+
+      # Bad, bad, bad, won't work
+      archive  blah'blah"blah      # Can't have quotes in the middle.
+      resource "not'even'here"     # Can't do it inside quotes either.
+      archive  "whatever\whatever" # Can't escape anything other than backslash.
+      resource archive             # "archive" is a keyword; "config" is allowed
+
   Bug fixes:
 
   - FIG_HOME locking didn't cover all the situations that it should have, e.g.
