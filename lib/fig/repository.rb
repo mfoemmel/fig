@@ -26,7 +26,7 @@ class Fig::Repository
   VERSION_SUPPORTED     = 1
 
   def self.is_url?(url)
-    not (/ftp:\/\/|http:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
+    not (/ftp:\/\/|https?:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
   end
 
   def initialize(
