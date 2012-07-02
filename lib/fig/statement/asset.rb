@@ -34,10 +34,15 @@ module Fig::Statement::Asset
   private
 
   def unparse_asset(indent, keyword)
-    quote = glob_if_not_url? ? %q<"> : %q<'>
+    quote       = %q<'>
+    escaped_url = url
 
-    # TODO: fix backslash escape bug.
-    return %Q<#{indent}#{keyword} #{quote}#{url}#{quote}>
+    if glob_if_not_url?
+      quote = %q<">
+      escaped_url = url.gsub(/\\/, '\\\\')
+    end
+
+    return %Q<#{indent}#{keyword} #{quote}#{escaped_url}#{quote}>
   end
 
   module ClassMethods
