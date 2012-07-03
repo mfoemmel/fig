@@ -1,7 +1,6 @@
 # coding: utf-8
 
 require 'set'
-require 'unicode_utils'
 
 module Fig; end
 
@@ -67,11 +66,11 @@ class Fig::Statement
     return true
   end
 
-  ALLOWED_ESCAPED_GRAPHEMES = Set.new
-  ALLOWED_ESCAPED_GRAPHEMES << '\\'
-  ALLOWED_ESCAPED_GRAPHEMES << %q<'>
-  ALLOWED_ESCAPED_GRAPHEMES << %q<">
-  ALLOWED_ESCAPED_GRAPHEMES << '@' # Backwards compatibility.
+  ALLOWED_ESCAPED_CHARACTERS = Set.new
+  ALLOWED_ESCAPED_CHARACTERS << '\\'
+  ALLOWED_ESCAPED_CHARACTERS << %q<'>
+  ALLOWED_ESCAPED_CHARACTERS << %q<">
+  ALLOWED_ESCAPED_CHARACTERS << '@' # Environment variable package replacement
 
   def self.process_escapes_and_strip_double_quotes!(string)
     if string[0..0] == %q<"> && (string.length == 1 || string[-1..-1] != %q<">)
@@ -81,45 +80,45 @@ class Fig::Statement
 
     new_string = ''
 
-    graphemes = UnicodeUtils.each_grapheme(string)
-    initial_grapheme   = graphemes.next
-    last_grapheme      = nil
-    had_starting_quote = initial_grapheme == %q<">
-    in_escape          = initial_grapheme == '\\'
+    characters = string.each_char
+    initial_character   = characters.next
+    last_character      = nil
+    had_starting_quote  = initial_character == %q<">
+    in_escape           = initial_character == '\\'
     if ! had_starting_quote && ! in_escape
-      new_string << initial_grapheme
+      new_string << initial_character
     end
 
     last_was_escaped = nil
     loop do
-      last_grapheme = grapheme = graphemes.next
+      last_character = character = characters.next
       if in_escape
-        if ! ALLOWED_ESCAPED_GRAPHEMES.include? grapheme
-          yield "contains a bad escape sequence (\\#{grapheme})."
+        if ! ALLOWED_ESCAPED_CHARACTERS.include? character
+          yield "contains a bad escape sequence (\\#{character})."
           return
         end
 
-        new_string << grapheme
+        new_string << character
         in_escape = false
         last_was_escaped = true
-      elsif grapheme == %q<">
+      elsif character == %q<">
         begin
-          graphemes.next
+          characters.next
           yield 'has an unescaped double quote in the middle.'
           return
         rescue StopIteration
           # We're good.
         end
-      elsif grapheme == %q<'>
+      elsif character == %q<'>
         yield 'has an unescaped single quote in the middle.'
         return
-      elsif grapheme == '\\'
+      elsif character == '\\'
         in_escape = true
       # TODO: need an
-      #   «elsif grapheme == '@'»
+      #   «elsif character == '@'»
       # here to deal with package substitution in variable statements
       else
-        new_string << grapheme
+        new_string << character
         last_was_escaped = false
       end
     end
@@ -128,14 +127,14 @@ class Fig::Statement
       yield 'ends in an incomplete escape sequence.'
       return
     elsif had_starting_quote
-      if last_grapheme.nil? || last_grapheme != %q<">
+      if last_character.nil? || last_character != %q<">
         yield 'has unbalanced double quotes.'
         return
       elsif last_was_escaped
         yield 'has unbalanced double quotes (last quote was escaped).'
         return
       end
-    elsif ! last_was_escaped && ! had_starting_quote && last_grapheme == %q<">
+    elsif ! last_was_escaped && ! had_starting_quote && last_character == %q<">
       yield 'has unbalanced double quotes.'
       return
     end

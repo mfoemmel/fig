@@ -15,7 +15,6 @@ def add_dependencies(gemspec)
   gemspec.add_dependency 'rdoc',              '>= 3.12'
   gemspec.add_dependency 'sys-admin',         '>= 1.5.6'
   gemspec.add_dependency 'treetop',           '>= 1.4.2'
-  gemspec.add_dependency 'unicode_utils',     '>= 1.0'
 
   return
 end

@@ -16,7 +16,6 @@ gem 'polyglot',          '>= 0.2.9'
 gem 'rdoc',              '>= 3.12'
 gem 'sys-admin',         '>= 1.5.6'
 gem 'treetop',           '>= 1.4.2'
-gem 'unicode_utils',     '>= 1.0'
 
 group :development do
   gem 'open4',              '>= 1.0.1'
