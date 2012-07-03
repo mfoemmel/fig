@@ -16,12 +16,12 @@ require 'fig/statement/resource'
       >.freeze
     TEST_KEYWORDS.each {|keyword| keyword.freeze}
 
-    describe '.validate_and_process_escapes_in_url()' do
+    describe '.validate_and_process_escapes_in_url!()' do
       def test_should_equal_and_should_glob(statement_type, original_url, url)
         block_message = nil
 
         should_be_globbed =
-          statement_type.validate_and_process_escapes_in_url(url) do
+          statement_type.validate_and_process_escapes_in_url!(url) do
             |message| block_message = message
           end
 
@@ -36,7 +36,7 @@ require 'fig/statement/resource'
         block_message = nil
 
         should_be_globbed =
-          statement_type.validate_and_process_escapes_in_url(url) do
+          statement_type.validate_and_process_escapes_in_url!(url) do
             |message| block_message = message
           end
 
@@ -70,30 +70,31 @@ require 'fig/statement/resource'
         end
       end
 
-      it %q<does not modify «foo\bar» (no escaping in unquoted values) and says that it should be globbed> do
-        test_should_equal_and_should_glob(
-          statement_type, 'foo\bar', 'foo\bar'
-        )
-      end
-      it %q<strips quotes from «foo\bar» (no escaping in single quoted values) and says that it should not be globbed> do
+      it %q<strips quotes from «'foo\bar'» (no escaping in single quoted values) and says that it should not be globbed> do
         test_should_equal_and_should_not_glob(
           statement_type, 'foo\bar', %q<'foo\bar'>
         )
       end
 
-      def test_shouldnt_be_permitted(statement_type, url)
+      def test_got_error_message(statement_type, url, error_regex)
         block_message = nil
 
-        statement_type.validate_and_process_escapes_in_url(url) do
+        statement_type.validate_and_process_escapes_in_url!(url.dup) do
           |message| block_message = message
         end
 
-        block_message.should =~ /isn't permitted/i
+        block_message.should =~ error_regex
 
         return
       end
 
-      %w< @ ' " < > | >.each do
+      def test_shouldnt_be_permitted(statement_type, url)
+        test_got_error_message(statement_type, url, /isn't permitted/i)
+
+        return
+      end
+
+      %w< @ \\' \\" < > | >.each do
         |character|
 
         it %Q<says «foo #{character} bar» isn't allowed> do
@@ -108,13 +109,7 @@ require 'fig/statement/resource'
       end
 
       def test_is_a_keyword(statement_type, url)
-        block_message = nil
-
-        statement_type.validate_and_process_escapes_in_url(url) do
-          |message| block_message = message
-        end
-
-        block_message.should =~ /is a keyword/i
+        test_got_error_message(statement_type, url, /is a keyword/i)
 
         return
       end
@@ -133,60 +128,66 @@ require 'fig/statement/resource'
         end
       end
 
-      %w< " "xxx xxx" \" "\\ >.each do
-        |original_url|
+      %w< " "xxx xxx" "\" "\\ >.each do
+        |url|
 
-        it %Q<says «#{original_url}» has unbalanced quotes> do
-          block_message = nil
-
-          statement_type.validate_and_process_escapes_in_url(original_url) do
-            |message| block_message = message
-          end
-
-          block_message.should =~ /has unbalanced double quotes/i
-        end
-      end
-
-      %w< "\" "\\\\\" "\"" "\n" >.each do
-        |original_url|
-
-        it %Q<says «#{original_url}» has bad escape> do
-          block_message = nil
-
-          statement_type.validate_and_process_escapes_in_url(original_url) do
-            |message| block_message = message
-          end
-
-          block_message.should =~ /bad escape/i
+        it %Q<says «#{url}» has unbalanced quotes> do
+          test_got_error_message(
+            statement_type, url, /has unbalanced double quotes/i
+          )
         end
       end
 
       %w< ' 'xxx xxx' >.each do
-        |original_url|
+        |url|
 
-        it %Q<says «#{original_url}» has unbalanced quotes> do
-          block_message = nil
-
-          statement_type.validate_and_process_escapes_in_url(original_url) do
-            |message| block_message = message
-          end
-
-          block_message.should =~ /has unbalanced single quotes/i
+        it %Q<says «#{url}» has unbalanced quotes> do
+          test_got_error_message(
+            statement_type, url, /has unbalanced single quotes/i
+          )
         end
       end
 
-      it %q<collapses the backslashes in «"foo\\\\\\\\bar\\\\baz"»> do
-        url           = %q<"foo\\\\\\\\bar\\\\baz">
-        block_message = nil
+      %w< xxx'xxx xxx"xxx >.each do
+        |url|
 
-        should_be_globbed =
-          statement_type.validate_and_process_escapes_in_url(url) do
-            |message| block_message = message
-          end
+        it %Q<says «#{url}» has unescaped quote> do
+          test_got_error_message(statement_type, url, /unescaped .* quote/i)
+        end
+      end
 
-        url.should                == 'foo\\\\bar\\baz'
-        should_be_globbed.should  be_true
-        block_message.should      be_nil
+      %w< \\ xxx\\ >.each do
+        |url|
+
+        it %Q<says «#{url}» has incomplete escape> do
+          test_got_error_message(statement_type, url, /incomplete escape/i)
+        end
+      end
+
+      %w< \\n "\\n" >.each do
+        |url|
+
+        it %Q<says «#{url}» has bad escape> do
+          test_got_error_message(statement_type, url, /bad escape/i)
+        end
+      end
+
+      %w< foo\\\\\\\\bar\\\\baz "foo\\\\\\\\bar\\\\baz" >.each do
+        |original_url|
+
+        it %Q<collapses the backslashes in «#{original_url}»> do
+          url           = original_url.clone
+          block_message = nil
+
+          should_be_globbed =
+            statement_type.validate_and_process_escapes_in_url!(url) do
+              |message| block_message = message
+            end
+
+          url.should                == 'foo\\\\bar\\baz'
+          should_be_globbed.should  be_true
+          block_message.should      be_nil
+        end
       end
     end
   end

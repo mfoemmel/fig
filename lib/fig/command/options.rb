@@ -577,7 +577,7 @@ class Fig::Command::Options
   end
 
   def new_content_statement(option, path, statement_class)
-    need_to_glob = statement_class.validate_and_process_escapes_in_url(path) {
+    need_to_glob = statement_class.validate_and_process_escapes_in_url!(path) {
       |error_description|
 
       @parser.raise_invalid_argument(option, path, error_description)
