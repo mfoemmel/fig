@@ -125,10 +125,7 @@ class Fig::Statement
       yield 'ends in an incomplete escape sequence.'
       return
     elsif had_starting_quote
-      if last_character.nil? || last_character != %q<">
-        yield 'has unbalanced double quotes.'
-        return
-      elsif last_was_escaped
+      if last_was_escaped
         yield 'has unbalanced double quotes (last quote was escaped).'
         return
       end
