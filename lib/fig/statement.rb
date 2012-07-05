@@ -1,5 +1,3 @@
-# coding: utf-8
-
 require 'set'
 
 module Fig; end
@@ -31,7 +29,7 @@ class Fig::Statement
   # Takes a block that is invoked when there is an error.  Block receives a
   # single parameter of an error message that is the end of a statement
   # describing the problem, with no leading space character.  For example,
-  # given «'foo», the block will receive a message like 'has unbalanced single
+  # given ['foo], the block will receive a message like 'has unbalanced single
   # quotes.'.
   #
   # Returns whether parameter was single-quoted; if there was a parse error,
@@ -115,7 +113,7 @@ class Fig::Statement
       elsif character == '\\'
         in_escape = true
       # TODO: need an
-      #   «elsif character == '@'»
+      #   [elsif character == '@']
       # here to deal with package substitution in variable statements
       else
         new_string << character
@@ -180,5 +178,3 @@ class Fig::Statement
     )
   end
 end
-
-# vim: set fileencoding=utf8 :
