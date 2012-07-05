@@ -21,32 +21,45 @@ v0.1.xxx
 
   New features:
 
-  - Asset statements now behave identically, with the exception of the
-    extraction of archive statements and the path preservation of resource
-    statements.  Also, globbing is done inside double quotes; this is not a
-    backwards incompatibility because glob characters were previously not
-    allowed inside double quotes.  Globbing can be prevented by using single
-    quotes.  Regardless of quoting, if the path looks like a URL, no globbing
-    is done.  Whitespace can be included in paths using either quoting
-    mechanism.  To allow for future expansion, backslashes have to be escaped
-    inside double quotes, but an attempt to escape anything else is an error.
+  - Big asset statement overhaul.
+
+    * Asset statements now behave identically, with the exception of the
+      extraction of archive statements and the path preservation of resource
+      statements.  Previously, archives weren't globbed.
+
+    * Single quotes can be used as well as double quotes with asset statements.
+
+    * Quoted asset statements can now include whitespace.
+
+    * Asset statements glob inside double quotes; this is not a backwards
+      incompatibility because glob characters were previously not allowed
+      inside double quotes.  Globbing can be prevented by using single quotes.
+      Regardless of quoting, if the path looks like a URL, no globbing is done.
+
+    * Support for character escapes in unquoted and double quoted values has
+      been added, primarily for future use by environment variable statements,
+      but since this is going through the same path that those will be using
+      (they don't yet), asset statements get this now.  Current valid escapes
+      are of backslash, single and double quotes, and the at sign; escapes of
+      other characters are not allowed.  Note, however, that quotes and the at
+      sign are still not allowed in asset paths.
 
     To summarize:
 
-      * Unquoted: globbing, no escaping, no whitespace
-      * Double quotes: globbing, escape backslash, whitespace
+      * Unquoted:      globbing, escaping, no whitespace
+      * Double quotes: globbing, escaping, whitespace
       * Single quotes: no globbing, no escaping, whitespace
 
     Examples:
 
       # Good statements
-      archive  whereever/*.tar.gz  # You can now pick up multiple archives in
-                                   # one go and not have to list them
-                                   # individually.
-      resource some\path           # Escapes not processed outside of quotes.
-      archive  'some\path.zip'     # Escapes not processed in single quotes.
-      resource "some\\path"        # Have to escape backslashes inside double
-                                   # quotes.
+      archive  whereever/**/*.tar.gz # You can now pick up multiple archives in
+                                     # one go and not have to list them
+                                     # individually.
+      resource "some\\path"          # Have to escape backslashes inside double
+                                     # quotes.
+      resource some\\path            # Escapes processed outside of quotes.
+      archive  'some\path.zip'       # Escapes not processed in single quotes.
 
       resource http://example.com/whatever* # No globbing, it's a URL.
 
@@ -57,8 +70,30 @@ v0.1.xxx
       # Bad, bad, bad, won't work
       archive  blah'blah"blah      # Can't have quotes in the middle.
       resource "not'even'here"     # Can't do it inside quotes either.
-      archive  "whatever\whatever" # Can't escape anything other than backslash.
+      archive  "whatever\whatever" # Syntactically invalid.
+      archive  "whatever\@hatever" # Syntactically valid, but @ not allowed in
+                                   # paths.
       resource archive             # "archive" is a keyword; "config" is allowed
+
+  - New grammar statement to allow for future expansion.  Syntax:
+
+      grammar v<number>
+
+    This statement is only valid as the first statement in a package
+    definition.  In other words
+
+      grammar v1
+      config default
+      end
+
+    is valid, but
+
+      config default
+      end
+      grammar v1
+
+    is not.  The only valid version right now is 1, but this means that we can
+    change the syntax in the future without breaking any existing packages.
 
   Bug fixes:
 
