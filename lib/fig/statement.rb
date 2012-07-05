@@ -102,13 +102,11 @@ class Fig::Statement
         in_escape = false
         last_was_escaped = true
       elsif character == %q<">
-        begin
-          characters.next
-          yield 'has an unescaped double quote in the middle.'
-          return
-        rescue StopIteration
-          # We're good.
-        end
+        # If we're at the end of the string, we'll get bounced out of the loop
+        # by a StopIteration exception.
+        characters.next
+        yield 'has an unescaped double quote in the middle.'
+        return
       elsif character == %q<'>
         yield 'has an unescaped single quote in the middle.'
         return
