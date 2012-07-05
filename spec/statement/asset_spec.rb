@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'fig/statement/archive'
@@ -50,25 +52,25 @@ require 'fig/statement/resource'
       [%q<foo * bar>, 'config'].each do
         |original_url|
 
-        it %Q<does not modify [#{original_url}] and says that it should be globbed> do
+        it %Q<does not modify «#{original_url}» and says that it should be globbed> do
           test_should_equal_and_should_glob(
             statement_type, original_url, original_url.clone
           )
         end
-        it %Q<strips quotes from ["#{original_url}"] and says that it should be globbed> do
+        it %Q<strips quotes from «"#{original_url}"» and says that it should be globbed> do
           test_should_equal_and_should_glob(
             statement_type, original_url, %Q<"#{original_url}">
           )
         end
 
-        it %Q<strips quotes from ['#{original_url}'] and says that it should not be globbed> do
+        it %Q<strips quotes from «'#{original_url}'» and says that it should not be globbed> do
           test_should_equal_and_should_not_glob(
             statement_type, original_url, %Q<'#{original_url}'>
           )
         end
       end
 
-      it %q<strips quotes from ['foo\bar'] (no escaping in single quoted values) and says that it should not be globbed> do
+      it %q<strips quotes from «'foo\bar'» (no escaping in single quoted values) and says that it should not be globbed> do
         test_should_equal_and_should_not_glob(
           statement_type, 'foo\bar', %q<'foo\bar'>
         )
@@ -95,13 +97,13 @@ require 'fig/statement/resource'
       %w< @ \\' \\" < > | >.each do
         |character|
 
-        it %Q<says [foo #{character} bar] isn't allowed> do
+        it %Q<says «foo #{character} bar» isn't allowed> do
           test_shouldnt_be_permitted(statement_type, %Q<foo #{character} bar>)
         end
-        it %Q<says ["foo #{character} bar"] isn't allowed> do
+        it %Q<says «"foo #{character} bar"» isn't allowed> do
           test_shouldnt_be_permitted(statement_type, %Q<"foo #{character} bar">)
         end
-        it %Q<says ['foo #{character} bar'] isn't allowed> do
+        it %Q<says «'foo #{character} bar'» isn't allowed> do
           test_shouldnt_be_permitted(statement_type, %Q<'foo #{character} bar'>)
         end
       end
@@ -115,13 +117,13 @@ require 'fig/statement/resource'
       TEST_KEYWORDS.each do
         |keyword|
 
-        it %Q<says [#{keyword}] is a keyword> do
+        it %Q<says «#{keyword}» is a keyword> do
           test_is_a_keyword(statement_type, keyword)
         end
-        it %Q<says ["#{keyword}"] is a keyword> do
+        it %Q<says «"#{keyword}"» is a keyword> do
           test_is_a_keyword(statement_type, %Q<"#{keyword}">)
         end
-        it %Q<says ['#{keyword}'] is a keyword> do
+        it %Q<says «'#{keyword}'» is a keyword> do
           test_is_a_keyword(statement_type, %Q<'#{keyword}'>)
         end
       end
@@ -129,7 +131,7 @@ require 'fig/statement/resource'
       %w< " "xxx xxx" "\" "\\ >.each do
         |url|
 
-        it %Q<says [#{url}] has unbalanced quotes> do
+        it %Q<says «#{url}» has unbalanced quotes> do
           test_got_error_message(
             statement_type, url, /has unbalanced double quotes/i
           )
@@ -139,7 +141,7 @@ require 'fig/statement/resource'
       %w< ' 'xxx xxx' >.each do
         |url|
 
-        it %Q<says [#{url}] has unbalanced quotes> do
+        it %Q<says «#{url}» has unbalanced quotes> do
           test_got_error_message(
             statement_type, url, /has unbalanced single quotes/i
           )
@@ -149,7 +151,7 @@ require 'fig/statement/resource'
       %w< xxx'xxx xxx"xxx >.each do
         |url|
 
-        it %Q<says [#{url}] has unescaped quote> do
+        it %Q<says «#{url}» has unescaped quote> do
           test_got_error_message(statement_type, url, /unescaped .* quote/i)
         end
       end
@@ -157,7 +159,7 @@ require 'fig/statement/resource'
       %w< \\ xxx\\ >.each do
         |url|
 
-        it %Q<says [#{url}] has incomplete escape> do
+        it %Q<says «#{url}» has incomplete escape> do
           test_got_error_message(statement_type, url, /incomplete escape/i)
         end
       end
@@ -165,7 +167,7 @@ require 'fig/statement/resource'
       %w< \\n "\\n" >.each do
         |url|
 
-        it %Q<says [#{url}] has bad escape> do
+        it %Q<says «#{url}» has bad escape> do
           test_got_error_message(statement_type, url, /bad escape/i)
         end
       end
@@ -173,7 +175,7 @@ require 'fig/statement/resource'
       %w< foo\\\\\\\\bar\\\\baz "foo\\\\\\\\bar\\\\baz" >.each do
         |original_url|
 
-        it %Q<collapses the backslashes in [#{original_url}]> do
+        it %Q<collapses the backslashes in «#{original_url}»> do
           url           = original_url.clone
           block_message = nil
 
@@ -190,3 +192,5 @@ require 'fig/statement/resource'
     end
   end
 end
+
+# vim: set fileencoding=utf8 :
