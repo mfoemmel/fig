@@ -39,9 +39,7 @@ class Fig::Command
 
     actions = @options.actions()
     if actions.empty?
-      $stderr.puts "Nothing to do.\n\n"
-      $stderr.puts %q<Run "fig --help" for a full list of commands.>
-      return Fig::Command::Action::EXIT_FAILURE
+      return handle_nothing_to_do
     end
 
     actions.each do
@@ -132,6 +130,25 @@ class Fig::Command
       :operating_system,
       :package_source_description
     )
+
+  def handle_nothing_to_do()
+    $stderr.puts "Nothing to do.\n\n"
+
+    if ! @descriptor && @options.package_definition_file != :none
+      load_base_package()
+      config = base_config
+      command_statement = @base_package[config].command_statement
+
+      if command_statement
+        $stderr.puts \
+          %Q<You have a command statement in the "#{config}" config.  If you want to run it, use the "--run-command-statement" option.\n\n>
+      end
+    end
+
+    $stderr.puts %q<Run "fig --help" for a full list of commands.>
+
+    return Fig::Command::Action::EXIT_FAILURE
+  end
 
   def check_include_statements_versions?()
     return false if @options.suppress_warning_include_statement_missing_version?
@@ -248,13 +265,7 @@ class Fig::Command
     apply_config            = apply_config?
     apply_base_config       = apply_config ? apply_base_config? : nil
 
-    package_loader = new_package_loader()
-    if @options.actions.all? {|action| action.base_package_can_come_from_descriptor?}
-      @base_package = package_loader.load_package_object()
-    else
-      @base_package = package_loader.load_package_object_from_file()
-    end
-    @package_source_description = package_loader.package_source_description()
+    load_base_package()
 
     applier = new_package_applier()
 
@@ -267,6 +278,18 @@ class Fig::Command
     if apply_config
       applier.apply_config_to_environment(! apply_base_config)
     end
+
+    return
+  end
+
+  def load_base_package()
+    package_loader = new_package_loader()
+    if @options.actions.all? {|action| action.base_package_can_come_from_descriptor?}
+      @base_package = package_loader.load_package_object()
+    else
+      @base_package = package_loader.load_package_object_from_file()
+    end
+    @package_source_description = package_loader.package_source_description()
 
     return
   end

@@ -23,7 +23,7 @@ describe 'Fig' do
       describe %q<there's nothing to do and> do
         it %q<there isn't a package.fig file> do
           out, err, exit_status = fig([], :no_raise_on_error => true)
-          exit_status.should == 1
+          exit_status.should_not == 0
           err.should =~ /nothing to do/i
           out.should == ''
         end
@@ -39,7 +39,7 @@ describe 'Fig' do
             )
 
             out, err, exit_status = fig([], :no_raise_on_error => true)
-            exit_status.should == 1
+            exit_status.should_not == 0
             err.should =~ /nothing to do/i
             out.should == ''
           end
@@ -55,7 +55,7 @@ describe 'Fig' do
             )
 
             out, err, exit_status = fig([], :no_raise_on_error => true)
-            exit_status.should == 1
+            exit_status.should_not == 0
             err.should =~ /nothing to do/i
             out.should == ''
           end

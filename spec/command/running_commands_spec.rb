@@ -152,7 +152,9 @@ describe 'Fig' do
 
       out, err, exit_status = fig([], input, :no_raise_on_error => true)
       exit_status.should_not == 0
-      err.should =~ /nothing to do/i
+      err.should =~ /\bnothing to do\b/i
+      err.should =~ /\byou have a command statement\b/i
+      err.should =~ /--run-command-statement\b/i
       out.should == ''
     end
   end
