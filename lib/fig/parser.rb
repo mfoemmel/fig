@@ -29,7 +29,7 @@ class Fig::Parser
 
   def initialize(application_config, check_include_versions)
     # Fig::V1Parser class is synthesized by Treetop.
-    @treetop_parser         = Fig::V1Parser.new
+    @treetop_parser         = Fig::Grammar::V1Parser.new
     @application_config     = application_config
     @check_include_versions = check_include_versions
   end

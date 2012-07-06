@@ -11,153 +11,155 @@
 require 'treetop'
 
 module Fig
-  grammar V1
-    rule package
-      optional_ws grammar_version:grammar_version? statements:(package_statement*) optional_ws {
-        def to_package(directory, build_state)
-          return build_state.new_package_statement(
-            directory, grammar_version, statements
-          )
-        end
-      }
-    end
+  module Grammar
+    grammar V1
+      rule package
+        optional_ws grammar_version:grammar_version? statements:(package_statement*) optional_ws {
+          def to_package(directory, build_state)
+            return build_state.new_package_statement(
+              directory, grammar_version, statements
+            )
+          end
+        }
+      end
 
-    rule grammar_version
-      statement_start:'grammar' ws 'v' version:[\d]+ ws {
-        def to_package_statement(build_state)
-          return build_state.new_grammar_version_statement(
-            statement_start, version
-          )
-        end
-      }
-    end
+      rule grammar_version
+        statement_start:'grammar' ws 'v' version:[\d]+ ws {
+          def to_package_statement(build_state)
+            return build_state.new_grammar_version_statement(
+              statement_start, version
+            )
+          end
+        }
+      end
 
-    rule package_statement
-      ( archive / resource / retrieve / config ) ws
-    end
+      rule package_statement
+        ( archive / resource / retrieve / config ) ws
+      end
 
-    rule archive
-      statement_start:'archive' ws url:asset_url {
-        def to_package_statement(build_state)
-          return build_state.new_asset_statement(
-            Statement::Archive, statement_start, url
-          )
-        end
-      }
-    end
+      rule archive
+        statement_start:'archive' ws url:asset_url {
+          def to_package_statement(build_state)
+            return build_state.new_asset_statement(
+              Statement::Archive, statement_start, url
+            )
+          end
+        }
+      end
 
-    rule resource
-      statement_start:'resource' ws url:asset_url {
-        def to_package_statement(build_state)
-          return build_state.new_asset_statement(
-            Statement::Resource, statement_start, url
-          )
-        end
-      }
-    end
+      rule resource
+        statement_start:'resource' ws url:asset_url {
+          def to_package_statement(build_state)
+            return build_state.new_asset_statement(
+              Statement::Resource, statement_start, url
+            )
+          end
+        }
+      end
 
-    rule asset_url
-      '"' [^"]* '"' /
-      "'" [^']* "'" /
-      [\S]+
-    end
+      rule asset_url
+        '"' [^"]* '"' /
+        "'" [^']* "'" /
+        [\S]+
+      end
 
-    rule retrieve
-      statement_start:'retrieve' ws var:environment_variable_name '->' path:retrieve_path {
-        def to_package_statement(build_state)
-          return build_state.new_retrieve_statement(statement_start, var, path)
-        end
-      }
-    end
+      rule retrieve
+        statement_start:'retrieve' ws var:environment_variable_name '->' path:retrieve_path {
+          def to_package_statement(build_state)
+            return build_state.new_retrieve_statement(statement_start, var, path)
+          end
+        }
+      end
 
-    rule retrieve_path
-      [a-zA-Z0-9_/.\[\]-]+
-    end
+      rule retrieve_path
+        [a-zA-Z0-9_/.\[\]-]+
+      end
 
-    rule config
-      statement_start:'config' ws config_name ws statements:config_statement* 'end' {
-        def to_package_statement(build_state)
-          return build_state.new_configuration_statement(
-            statement_start, config_name, statements
-          )
-        end
-      }
-    end
+      rule config
+        statement_start:'config' ws config_name ws statements:config_statement* 'end' {
+          def to_package_statement(build_state)
+            return build_state.new_configuration_statement(
+              statement_start, config_name, statements
+            )
+          end
+        }
+      end
 
-    rule config_name
-      [a-zA-Z0-9_.-]+
-    end
+      rule config_name
+        [a-zA-Z0-9_.-]+
+      end
 
-    rule config_statement
-      ( override / include / command / path / set ) ws
-    end
+      rule config_statement
+        ( override / include / command / path / set ) ws
+      end
 
-    rule include
-      statement_start:'include' ws descriptor_string {
-        def to_config_statement(build_state)
-          return build_state.new_include_statement(
-            statement_start, descriptor_string
-          )
-        end
-      }
-    end
+      rule include
+        statement_start:'include' ws descriptor_string {
+          def to_config_statement(build_state)
+            return build_state.new_include_statement(
+              statement_start, descriptor_string
+            )
+          end
+        }
+      end
 
-    rule override
-      statement_start:'override' ws descriptor_string {
-        def to_config_statement(build_state)
-          return build_state.new_override_statement(
-            statement_start, descriptor_string
-          )
-        end
-      }
-    end
+      rule override
+        statement_start:'override' ws descriptor_string {
+          def to_config_statement(build_state)
+            return build_state.new_override_statement(
+              statement_start, descriptor_string
+            )
+          end
+        }
+      end
 
-    rule path
-      statement_start:('add' / 'append' / 'path') ws name_value:[\S]+ {
-        def to_config_statement(build_state)
-          return build_state.new_environment_variable_statement(
-            Statement::Path, statement_start, name_value
-          )
-        end
-      }
-    end
+      rule path
+        statement_start:('add' / 'append' / 'path') ws name_value:[\S]+ {
+          def to_config_statement(build_state)
+            return build_state.new_environment_variable_statement(
+              Statement::Path, statement_start, name_value
+            )
+          end
+        }
+      end
 
-    rule environment_variable_name
-      [a-zA-Z0-9_]+
-    end
+      rule environment_variable_name
+        [a-zA-Z0-9_]+
+      end
 
-    rule set
-      statement_start:'set' ws name_value:[\S]+ {
-        def to_config_statement(build_state)
-          return build_state.new_environment_variable_statement(
-            Statement::Set, statement_start, name_value
-          )
-        end
-      }
-    end
+      rule set
+        statement_start:'set' ws name_value:[\S]+ {
+          def to_config_statement(build_state)
+            return build_state.new_environment_variable_statement(
+              Statement::Set, statement_start, name_value
+            )
+          end
+        }
+      end
 
-    rule command
-      statement_start:'command' ws string {
-        def to_config_statement(build_state)
-          return build_state.new_command_statement(statement_start, string)
-        end
-      }
-    end
+      rule command
+        statement_start:'command' ws string {
+          def to_config_statement(build_state)
+            return build_state.new_command_statement(statement_start, string)
+          end
+        }
+      end
 
-    rule string
-      '"' value:[^"]* '"'
-    end
+      rule string
+        '"' value:[^"]* '"'
+      end
 
-    rule descriptor_string
-      [\S]+
-    end
+      rule descriptor_string
+        [\S]+
+      end
 
-    rule ws
-      [ \n\r\t]+
-    end
+      rule ws
+        [ \n\r\t]+
+      end
 
-    rule optional_ws
-      [ \n\r\t]*
+      rule optional_ws
+        [ \n\r\t]*
+      end
     end
   end
 end
