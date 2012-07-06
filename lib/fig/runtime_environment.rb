@@ -106,19 +106,25 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def execute_config(base_package, descriptor, args, &block)
+  def execute_config(base_package, base_config, descriptor, args, &block)
     config_name =
-      descriptor.config || find_config_name_in_package(descriptor.name)
+      determine_config_to_executed(base_package, base_config, descriptor)
 
-    name = descriptor.name || base_package.name
-    package = lookup_package(
-      name,
-      descriptor.version,
-      Fig::IncludeBacktrace.new(
-        nil,
-        Fig::PackageDescriptor.new(name, descriptor.version, config_name)
+    package = nil
+
+    if descriptor
+      name    = descriptor.name || base_package.name
+      package = lookup_package(
+        name,
+        descriptor.version,
+        Fig::IncludeBacktrace.new(
+          nil,
+          Fig::PackageDescriptor.new(name, descriptor.version, config_name)
+        )
       )
-    )
+    else
+      package = base_package
+    end
 
     command_statement = package[config_name].command_statement
     if command_statement
@@ -264,12 +270,29 @@ class Fig::RuntimeEnvironment
     return package
   end
 
-  def find_config_name_in_package(name)
+  def determine_config_to_executed(base_package, base_config, descriptor)
+    return base_config if base_config
+
+    if descriptor
+      return descriptor.config if descriptor.config
+
+      config_name = find_config_name_in_package_named(descriptor.name)
+      return config_name if config_name
+    end
+
+    return find_config_name_in_package(base_package)
+  end
+
+  def find_config_name_in_package_named(name)
     package = get_package(name)
     if not package
       return Fig::Package::DEFAULT_CONFIG
     end
 
+    return find_config_name_in_package(package)
+  end
+
+  def find_config_name_in_package(package)
     return package.primary_config_name || Fig::Package::DEFAULT_CONFIG
   end
 

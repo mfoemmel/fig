@@ -16,6 +16,7 @@ Short usage summary (use --help-long for everything):
 Running under Fig:
   fig [...] [DESCRIPTOR] [-- COMMAND]
   fig [...] [DESCRIPTOR] --command-extra-args VALUES
+  fig [...] [DESCRIPTOR] --run-command-statement
 
 Querying:
   fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
@@ -42,6 +43,7 @@ Running under Fig:
 
   fig [...] [DESCRIPTOR] [-- COMMAND]
   fig [...] [DESCRIPTOR] --command-extra-args VALUES
+  fig [...] [DESCRIPTOR] --run-command-statement
 
 Querying:
 

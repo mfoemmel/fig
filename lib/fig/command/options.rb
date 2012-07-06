@@ -300,6 +300,12 @@ class Fig::Command::Options
     end
 
     @parser.on(
+      '--run-command-statement', 'run the command in even in local file'
+    ) do
+      set_base_action(Fig::Command::Action::RunCommandStatement)
+    end
+
+    @parser.on(
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
       set_base_action(Fig::Command::Action::Publish)
@@ -544,7 +550,10 @@ class Fig::Command::Options
       return
     end
 
-    return if @base_action && @base_action == Fig::Command::Action::Help
+    if @base_action
+      return if @base_action.class == Fig::Command::Action::Help
+      return if @base_action.class == action_class
+    end
 
     if @base_action
       raise Fig::Command::OptionError.new(

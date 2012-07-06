@@ -14,7 +14,7 @@ class Fig::Command::Action::RunCommandStatement
   end
 
   def descriptor_requirement()
-    return :required
+    return nil
   end
 
   def modifies_repository?()
@@ -47,9 +47,10 @@ class Fig::Command::Action::RunCommandStatement
   def execute()
     environment   = @execution_context.environment
     base_package  = @execution_context.base_package
+    base_config   = @execution_context.base_config
 
     environment.execute_config(
-      base_package, @descriptor, @extra_argv || []
+      base_package, base_config, @descriptor, @extra_argv || []
     ) { |command| @execution_context.operating_system.shell_exec command }
 
     return EXIT_SUCCESS

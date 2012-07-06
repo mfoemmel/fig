@@ -61,16 +61,6 @@ describe 'Fig' do
           end
         end
       end
-
-      it %q<--command-extra-args was specified> do
-        out, err, exit_status = fig(
-          %w<--command-extra-args whatever>,
-          :no_raise_on_error => true
-        )
-        exit_status.should == 1
-        err.should =~ /need to specify a descriptor/i
-        out.should == ''
-      end
     end
 
     it %q<prints error when extra parameters are given with a package descriptor> do

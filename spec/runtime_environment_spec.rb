@@ -267,7 +267,7 @@ describe 'RuntimeEnvironment' do
       environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       expect {
         environment.execute_config(
-          nil, Fig::PackageDescriptor.new('one', nil, nil), nil
+          nil, nil, Fig::PackageDescriptor.new('one', nil, nil), nil
         )
       }.to raise_error(Fig::UserInputError)
     end
@@ -276,7 +276,7 @@ describe 'RuntimeEnvironment' do
       environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       received_command = nil
       environment.execute_config(
-        nil, Fig::PackageDescriptor.new('has_command', nil, nil), []
+        nil, nil, Fig::PackageDescriptor.new('has_command', nil, nil), []
       ) { |command| received_command = command }
       received_command.should == %w<echo foo>
     end
