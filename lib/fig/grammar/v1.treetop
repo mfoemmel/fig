@@ -8,6 +8,8 @@
 #   * Treetop parse errors are pretty inscrutable at times and we can make
 #     error messages clearer by validating a lot of the terminals ourselves.
 
+require 'treetop'
+
 module Fig
   grammar V1
     rule package

@@ -7,6 +7,7 @@ require 'rdoc/task'
 require 'rspec/core/rake_task'
 require 'rubygems'
 require 'rubygems/package_task'
+require 'treetop'
 
 require File.join(File.dirname(__FILE__), 'inc', 'build_utilities.rb')
 
@@ -45,6 +46,22 @@ def main()
 
   desc 'Alias for the gem task.'
   task :build => :gem
+
+
+  treetop_grammars = FileList['lib/fig/**/*.treetop']
+  compiled_grammars = treetop_grammars.ext('rb')
+
+  rule '.rb' => '.treetop' do
+    |task|
+
+    puts "#{task.source} => #{task.name}"
+    Treetop::Compiler::GrammarCompiler.new.compile(task.source, task.name)
+  end
+
+  desc 'Compile Treetop grammars'
+  task :treetop => compiled_grammars
+  task :gem     => [:treetop]
+  task :rspec   => [:treetop]
 
 
   desc 'Run RSpec tests.'
@@ -91,7 +108,10 @@ def main()
 
   desc 'Remove build products and temporary files.'
   task :clean do
-    %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >.each do
+    [
+      %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >,
+      compiled_grammars
+    ].flatten.each do
       |path|
       rm_rf "./#{path}"
     end

@@ -1,7 +1,6 @@
 require 'set'
-require 'treetop'
 
-require 'fig/grammar/v1' # this is grammar/v1.treetop, not grammar_v1.rb.
+require 'fig/grammar/v1'
 require 'fig/logging'
 require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
