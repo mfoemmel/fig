@@ -39,11 +39,15 @@ class Fig::Command::Action::RunCommandLine
 
   def configure(options)
     @command_line = options.shell_command
+
+    return
   end
 
   def execute()
     @execution_context.environment.execute_shell(@command_line) do
       |command| @execution_context.operating_system.shell_exec command
     end
+
+    return EXIT_SUCCESS
   end
 end
