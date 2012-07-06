@@ -1,7 +1,7 @@
 require 'set'
 require 'treetop'
 
-require 'fig/grammar' # this is grammar.treetop, not grammar.rb.
+require 'fig/grammar/v1' # this is grammar/v1.treetop, not grammar_v1.rb.
 require 'fig/logging'
 require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
@@ -29,8 +29,8 @@ class Fig::Parser
   end
 
   def initialize(application_config, check_include_versions)
-    # Fig::FigParser class is synthesized by Treetop.
-    @treetop_parser         = Fig::FigParser.new
+    # Fig::V1Parser class is synthesized by Treetop.
+    @treetop_parser         = Fig::V1Parser.new
     @application_config     = application_config
     @check_include_versions = check_include_versions
   end

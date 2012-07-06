@@ -9,7 +9,7 @@
 #     error messages clearer by validating a lot of the terminals ourselves.
 
 module Fig
-  grammar Fig
+  grammar V1
     rule package
       optional_ws grammar_version:grammar_version? statements:(package_statement*) optional_ws {
         def to_package(directory, build_state)
