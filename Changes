@@ -4,7 +4,7 @@ v0.1.72.beta.1
 
   - --update-lock-response is, for the time being, no longer supported on
     Windows.  Dealing with file locking on Windows is hard and we don't have
-    the time to figure it right now.
+    the time to figure it out right now.
 
   - Unquoted archive statements now have their values globbed if they don't
     look like URLs.  If you happen to have a statement like
@@ -84,10 +84,10 @@ v0.1.72.beta.1
       end
 
     If you just run "fig", it will say that there's nothing to do.  It still
-    does that, but you can now get the command to run if you run "fig
-    --run-command-statement".  You can get non-default commands to run using
-    the --config option, e.g. "fig --run-command-statement --config
-    run-chrome":
+    does that, but it additionally warns you about the situation.  You can now
+    get the command to run if you run "fig --run-command-statement".  You can
+    get non-default commands to run using the --config option, e.g. "fig
+    --run-command-statement --config run-chrome":
 
       config run-chrome
         command "chrome ..."
