@@ -8,7 +8,7 @@ require 'fig/grammar/version'
 
 module Fig
   module Grammar
-    grammar Detect
+    grammar VersionIdentification
       include Fig::Grammar::Base
       include Fig::Grammar::Version
 

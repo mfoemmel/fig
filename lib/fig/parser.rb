@@ -1,6 +1,6 @@
 require 'set'
 
-require 'fig/grammar/detect'
+require 'fig/grammar/version_identification'
 require 'fig/grammar/v1'
 require 'fig/logging'
 require 'fig/package_parse_error'
@@ -63,14 +63,14 @@ class Fig::Parser
   def get_grammar_version(
     descriptor, directory, source_description, unparsed_text
   )
-    detection_parser = Fig::Grammar::DetectParser.new()
+    version_parser = Fig::Grammar::VersionIdentificationParser.new()
 
     extended_description =
       extend_source_description(directory, source_description)
 
-    result = detection_parser.parse(unparsed_text)
+    result = version_parser.parse(unparsed_text)
     if result.nil?
-      raise_parse_error(detection_parser, extended_description)
+      raise_parse_error(version_parser, extended_description)
     end
 
     statement = result.get_grammar_version(
