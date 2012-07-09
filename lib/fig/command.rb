@@ -37,6 +37,8 @@ class Fig::Command
       return @options.exit_code
     end
 
+    Fig::Logging.initialize_pre_configuration(@options.log_level())
+
     actions = @options.actions()
     if actions.empty?
       return handle_nothing_to_do
@@ -50,8 +52,6 @@ class Fig::Command
         return action.execute()
       end
     end
-
-    Fig::Logging.initialize_pre_configuration(@options.log_level())
 
     @descriptor = @options.descriptor
     check_descriptor_requirement()
@@ -132,17 +132,18 @@ class Fig::Command
     )
 
   def handle_nothing_to_do()
-    $stderr.puts "Nothing to do.\n\n"
-
+    command_statement = nil
     if ! @descriptor && @options.package_definition_file != :none
       load_base_package()
       config = base_config
       command_statement = @base_package[config].command_statement
+    end
 
-      if command_statement
-        $stderr.puts \
-          %Q<You have a command statement in the "#{config}" config.  If you want to run it, use the "--run-command-statement" option.\n\n>
-      end
+    $stderr.puts "Nothing to do.\n\n"
+
+    if command_statement
+      $stderr.puts \
+        %Q<You have a command statement in the "#{config}" config.  If you want to run it, use the "--run-command-statement" option.\n\n>
     end
 
     $stderr.puts %q<Run "fig --help" for a full list of commands.>

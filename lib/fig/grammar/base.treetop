@@ -1,0 +1,29 @@
+# Treetop (http://treetop.rubyforge.org/) grammar for common definitions.
+
+require 'treetop'
+
+module Fig
+  module Grammar
+    grammar Base
+      rule ws
+        [ \n\r\t]+
+      end
+
+      rule optional_ws
+        [ \n\r\t]*
+      end
+
+      rule comment
+        '#' [^\n]* "\n"
+      end
+
+      rule ws_or_comment
+        ws / comment
+      end
+
+      rule optional_ws_or_comment
+        ( ws / comment )?
+      end
+    end
+  end
+end

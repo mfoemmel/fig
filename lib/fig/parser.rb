@@ -1,5 +1,6 @@
 require 'set'
 
+require 'fig/grammar/detect'
 require 'fig/grammar/v1'
 require 'fig/logging'
 require 'fig/package_parse_error'
@@ -28,38 +29,18 @@ class Fig::Parser
   end
 
   def initialize(application_config, check_include_versions)
-    # Fig::V1Parser class is synthesized by Treetop.
-    @treetop_parser         = Fig::Grammar::V1Parser.new
     @application_config     = application_config
     @check_include_versions = check_include_versions
   end
 
   def parse_package(descriptor, directory, source_description, unparsed_text)
-    # Bye bye comments.
-    stripped_text = unparsed_text.gsub(/#.*$/, '')
-
-    # Extra space at the end because most of the rules in the grammar require
-    # trailing whitespace.
-    result = @treetop_parser.parse(stripped_text + ' ')
-
-    extended_description =
-      extend_source_description(directory, source_description)
-
-    if result.nil?
-      raise_parse_error(extended_description)
-    end
-
-    package = result.to_package(
-      directory,
-      Fig::ParserPackageBuildState.new(descriptor, extended_description)
+    version = get_grammar_version(
+      descriptor, directory, source_description, unparsed_text
     )
-    package.unparsed_text = unparsed_text
 
-    check_for_bad_urls(package, descriptor)
-    check_for_multiple_command_statements(package)
-    check_for_missing_versions_on_include_statements(package)
-
-    return package
+    # Don't care about the version yet because #get_grammar_version will barf
+    # if it sees anything other than v1.
+    return parse_v1(descriptor, directory, source_description, unparsed_text)
   end
 
   private
@@ -79,6 +60,69 @@ class Fig::Parser
   KEYWORDS << 'set'
 
 
+  def get_grammar_version(
+    descriptor, directory, source_description, unparsed_text
+  )
+    detection_parser = Fig::Grammar::DetectParser.new()
+
+    extended_description =
+      extend_source_description(directory, source_description)
+
+    result = detection_parser.parse(unparsed_text)
+    if result.nil?
+      raise_parse_error(detection_parser, extended_description)
+    end
+
+    statement = result.get_grammar_version(
+      Fig::ParserPackageBuildState.new(descriptor, extended_description)
+    )
+    return 1 if not statement
+
+    version = statement.version
+    if version == 0
+      raise Fig::PackageParseError.new(
+        %Q<Zero is not a valid grammar version#{statement.position_string()}.>
+      )
+    end
+    if version > 1
+      raise Fig::PackageParseError.new(
+        %Q<Don't know how to parse grammar version #{version}#{statement.position_string()}.>
+      )
+    end
+
+    return version
+  end
+
+  def parse_v1(descriptor, directory, source_description, unparsed_text)
+    v1_parser = Fig::Grammar::V1Parser.new
+
+    # Bye bye comments.
+    stripped_text = unparsed_text.gsub(/#.*$/, '')
+
+    # Extra space at the end because most of the rules in the grammar require
+    # trailing whitespace.
+    result = v1_parser.parse(stripped_text + ' ')
+
+    extended_description =
+      extend_source_description(directory, source_description)
+
+    if result.nil?
+      raise_parse_error(v1_parser, extended_description)
+    end
+
+    package = result.to_package(
+      directory,
+      Fig::ParserPackageBuildState.new(descriptor, extended_description)
+    )
+    package.unparsed_text = unparsed_text
+
+    check_for_bad_urls(package, descriptor)
+    check_for_multiple_command_statements(package)
+    check_for_missing_versions_on_include_statements(package)
+
+    return package
+  end
+
   def extend_source_description(directory, original_description)
     if original_description
       extended = original_description
@@ -92,9 +136,9 @@ class Fig::Parser
     return directory
   end
 
-  def raise_parse_error(extended_description)
+  def raise_parse_error(treetop_parser, extended_description)
     message = extended_description
-    message << ": #{@treetop_parser.failure_reason}"
+    message << ": #{treetop_parser.failure_reason}"
 
     raise Fig::PackageParseError.new(message)
   end

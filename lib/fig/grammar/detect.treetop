@@ -1,0 +1,27 @@
+# Treetop (http://treetop.rubyforge.org/) grammar for determining package
+# definition versions.
+
+require 'treetop'
+
+require 'fig/grammar/base'
+require 'fig/grammar/version'
+
+module Fig
+  module Grammar
+    grammar Detect
+      include Fig::Grammar::Base
+      include Fig::Grammar::Version
+
+      rule everything
+        ws_or_comment* grammar_version:grammar_version? .* {
+          def get_grammar_version(build_state)
+            return if not grammar_version
+            return if grammar_version.text_value.empty?
+
+            return grammar_version.to_package_statement(build_state)
+          end
+        }
+      end
+    end
+  end
+end

@@ -1,0 +1,22 @@
+# Treetop (http://treetop.rubyforge.org/) grammar for statement for declaring
+# package definition versions.
+#
+# Needs to be mixed in with Fig::Grammar::Base.
+
+require 'treetop'
+
+module Fig
+  module Grammar
+    grammar Version
+      rule grammar_version
+        statement_start:'grammar' ws 'v' version:[\d]+ ws {
+          def to_package_statement(build_state)
+            return build_state.new_grammar_version_statement(
+              statement_start, version
+            )
+          end
+        }
+      end
+    end
+  end
+end

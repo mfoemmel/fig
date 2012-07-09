@@ -9,6 +9,7 @@ describe 'Fig' do
 
     it %q<for v1 is accepted> do
       input = <<-END
+        # A comment
         grammar v1
         config default
           command "echo foo"
@@ -17,8 +18,8 @@ describe 'Fig' do
 
       (out, err, exitstatus) = fig(%w<--run-command-statement>, input)
       err.should == ''
-      exitstatus.should == 0
       out.should == 'foo'
+      exitstatus.should == 0
     end
 
     pending %q<is not accepted if it isn't the first statement> do
@@ -29,12 +30,12 @@ describe 'Fig' do
       END
 
       (out, err, exitstatus) = fig([], input, :no_raise_on_error => true)
-      err.should == /grammar statement wasn't first statement/i
-      exitstatus.should_not == 0
+      err.should =~ /grammar statement wasn't first statement/i
       out.should == ''
+      exitstatus.should_not == 0
     end
 
-    pending %q<is not accepted for future version> do
+    it %q<is not accepted for future version> do
       input = <<-END
         grammar v31415269
         config default
@@ -42,9 +43,9 @@ describe 'Fig' do
       END
 
       (out, err, exitstatus) = fig([], input, :no_raise_on_error => true)
-      err.should == /don't know how to parse grammar version/i
-      exitstatus.should_not == 0
+      err.should =~ /don't know how to parse grammar version/i
       out.should == ''
+      exitstatus.should_not == 0
     end
   end
 end

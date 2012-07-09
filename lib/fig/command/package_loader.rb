@@ -91,6 +91,7 @@ class Fig::Command::PackageLoader
     end
 
     source_description = package_source_description()
+
     @base_package =
       Fig::Parser.new(@application_configuration, :check_include_versions).parse_package(
         Fig::PackageDescriptor.new(
