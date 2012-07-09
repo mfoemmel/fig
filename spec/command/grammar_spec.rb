@@ -48,17 +48,28 @@ describe 'Fig' do
       exitstatus.should_not == 0
     end
 
-    it %q<adds the grammar version to the published package definition> do
-      input = <<-END
-        config default
-        end
-      END
-      fig(%w< --publish foo/1.2.3 >, input)
+    describe %q<adds the grammar version to the published package definition> do
+      it 'from file input' do
+        input = <<-END
+          config default
+          end
+        END
+        fig(%w< --publish foo/1.2.3 >, input)
 
-      out, err, exitstatus =
-        fig(%w< foo/1.2.3 --dump-package-definition-text >)
+        out, err, exitstatus =
+          fig(%w< foo/1.2.3 --dump-package-definition-text >)
 
-      out.should =~ /\b grammar [ ] v1 \b/x
+        out.should =~ /\b grammar [ ] v1 \b/x
+      end
+
+      it 'from command-line input' do
+        fig(%w< --publish foo/1.2.3 --set VARIABLE=VALUE >)
+
+        out, err, exitstatus =
+          fig(%w< foo/1.2.3 --dump-package-definition-text >)
+
+        out.should =~ /\b grammar [ ] v1 \b/x
+      end
     end
   end
 end

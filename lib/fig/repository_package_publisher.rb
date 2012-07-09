@@ -15,6 +15,7 @@ require 'fig/parser'
 require 'fig/repository'
 require 'fig/repository_error'
 require 'fig/statement/archive'
+require 'fig/statement/grammar_version'
 require 'fig/statement/resource'
 
 module Fig; end
@@ -181,6 +182,17 @@ class Fig::RepositoryPackagePublisher
     @resource_paths = []
 
     @statements_to_publish = []
+
+    if (
+          ! @package_statements.empty? \
+      &&  ! @package_statements[0].is_a?(Fig::Statement::GrammarVersion)
+    )
+      @statements_to_publish << Fig::Statement::GrammarVersion.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        1
+      )
+    end
 
     @package_statements.each do
       |statement|
