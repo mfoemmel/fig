@@ -235,24 +235,6 @@ describe 'Parser' do
     end
   end
 
-  it 'handles resources with plus signs in the path (e.g. for C++ libraries)' do
-    test_no_parse_exception(<<-END_PACKAGE)
-      resource testlib++/*.so
-      config default
-        append LIBPATH=@/testlib++
-      end
-    END_PACKAGE
-  end
-
-  it 'handles archives with plus signs in the path (e.g. for C++ libraries)' do
-    test_no_parse_exception(<<-END_PACKAGE)
-      archive testlib++.tar.gz
-      config default
-        append LIBPATH=@/testlib++
-      end
-    END_PACKAGE
-  end
-
   %w< archive resource >.each do
     |asset_type|
 
@@ -270,6 +252,24 @@ describe 'Parser' do
             %r<invalid url/path for #{asset_type} statement: "#{character}">i
           )
         end
+      end
+
+      it %q<handles octothorpes in the URL> do
+        test_no_parse_exception(<<-"END_PACKAGE")
+          #{asset_type} 'foo#bar'
+
+          config default
+          end
+        END_PACKAGE
+      end
+
+      it %Q<handles plus signs in the path (e.g. for C++ libraries)> do
+        test_no_parse_exception(<<-"END_PACKAGE")
+          #{asset_type} testlib++.whatever
+          config default
+            append LIBPATH=@/testlib++
+          end
+        END_PACKAGE
       end
     end
   end

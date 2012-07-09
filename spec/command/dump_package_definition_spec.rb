@@ -85,7 +85,7 @@ describe 'Fig' do
           string.strip!
         end
 
-        out.should == input
+        out.should be_include input
         err.should == ''
       end
 

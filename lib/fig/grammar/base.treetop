@@ -22,7 +22,7 @@ module Fig
       end
 
       rule optional_ws_or_comment
-        ( ws / comment )?
+        ws_or_comment*
       end
     end
   end

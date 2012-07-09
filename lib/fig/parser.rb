@@ -96,12 +96,9 @@ class Fig::Parser
   def parse_v1(descriptor, directory, source_description, unparsed_text)
     v1_parser = Fig::Grammar::V1Parser.new
 
-    # Bye bye comments.
-    stripped_text = unparsed_text.gsub(/#.*$/, '')
-
     # Extra space at the end because most of the rules in the grammar require
     # trailing whitespace.
-    result = v1_parser.parse(stripped_text + ' ')
+    result = v1_parser.parse(unparsed_text + ' ')
 
     extended_description =
       extend_source_description(directory, source_description)
