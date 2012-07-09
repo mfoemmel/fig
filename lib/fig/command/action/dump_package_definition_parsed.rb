@@ -40,7 +40,7 @@ class Fig::Command::Action::DumpPackageDefinitionParsed
       statement.unparse('')
     end
 
-    print lines.join("\n").strip
+    print lines.join("\n").gsub(/\n{3,}/, "\n\n").strip
 
     return EXIT_SUCCESS
   end

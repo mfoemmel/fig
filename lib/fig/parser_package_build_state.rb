@@ -48,6 +48,12 @@ class Fig::ParserPackageBuildState
     statement_objects = []
     if grammar_version && ! grammar_version.empty?
       statement_objects << grammar_version.to_package_statement(self)
+    else
+      statement_objects << Fig::Statement::GrammarVersion.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        1
+      )
     end
 
     statements.elements.each do

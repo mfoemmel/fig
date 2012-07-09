@@ -10,24 +10,20 @@
 
 require 'treetop'
 
+require 'fig/grammar/base'
+require 'fig/grammar/version'
+
 module Fig
   module Grammar
     grammar V1
+      include Fig::Grammar::Base
+      include Fig::Grammar::Version
+
       rule package
         optional_ws grammar_version:grammar_version? statements:(package_statement*) optional_ws {
           def to_package(directory, build_state)
             return build_state.new_package_statement(
               directory, grammar_version, statements
-            )
-          end
-        }
-      end
-
-      rule grammar_version
-        statement_start:'grammar' ws 'v' version:[\d]+ ws {
-          def to_package_statement(build_state)
-            return build_state.new_grammar_version_statement(
-              statement_start, version
             )
           end
         }
@@ -151,14 +147,6 @@ module Fig
 
       rule descriptor_string
         [\S]+
-      end
-
-      rule ws
-        [ \n\r\t]+
-      end
-
-      rule optional_ws
-        [ \n\r\t]*
       end
     end
   end
