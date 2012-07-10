@@ -266,8 +266,9 @@ class Fig::RepositoryPackagePublisher
 
       @definition_file_lines << ''
       @definition_file_lines << '# Original, unparsed package text:'
-      @definition_file_lines << '# '
-      @definition_file_lines << @source_package.unparsed_text.gsub(/^/, '# ')
+      @definition_file_lines << '#'
+      @definition_file_lines <<
+        @source_package.unparsed_text.gsub(/^(?=[^\n]+$)/, '# ').gsub(/^$/, '#')
     end
 
     return
