@@ -40,17 +40,18 @@ class Fig::Command::Action::RunCommandStatement
   def configure(options)
     @extra_argv = options.command_extra_argv
     @descriptor = options.descriptor
+
+    return
   end
 
   def execute()
     environment   = @execution_context.environment
     base_package  = @execution_context.base_package
 
-    # TODO: Elliot's current theory is that this is pointless as long as
-    # we've applied the config.
-    environment.include_config(base_package, @descriptor, nil)
     environment.execute_config(
       base_package, @descriptor, @extra_argv || []
     ) { |command| @execution_context.operating_system.shell_exec command }
+
+    return EXIT_SUCCESS
   end
 end
