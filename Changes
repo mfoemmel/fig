@@ -1,3 +1,26 @@
+v0.1.72.beta.2
+
+  Note about differences from v0.1.72.beta.1:
+
+  Testing of the prior beta revealed unexpected errors when older versions
+  encountered a package published by the beta.  This beta thus doesn't contain
+  the sort of changes that caused this situation.  The stuff in beta 1 will
+  eventually be released, but here's the changes since v0.1.71 that can be
+  released in the interim.
+
+  Backwards incompatibilities:
+
+  - --update-lock-response is, for the time being, no longer supported on
+    Windows.  Dealing with file locking on Windows is hard and we don't have
+    the time to figure it right now.
+
+  Bug fixes:
+
+  - FIG_HOME locking didn't cover all the situations that it should have, e.g.
+    the --clean option.
+
+  - Crash when --command-extra-args was specified without a package descriptor.
+
 v0.1.72.beta.1
 
   Backwards incompatibilities:
