@@ -1,10 +1,142 @@
-v0.1.xxx
+v0.1.72.beta.2
+
+  Note about differences from v0.1.72.beta.1:
+
+  Testing of the prior beta revealed unexpected errors when older versions
+  encountered a package published by the beta.  This beta thus doesn't contain
+  the sort of changes that caused this situation.  The stuff in beta 1 will
+  eventually be released, but here's the changes since v0.1.71 that can be
+  released in the interim.
 
   Backwards incompatibilities:
 
   - --update-lock-response is, for the time being, no longer supported on
     Windows.  Dealing with file locking on Windows is hard and we don't have
     the time to figure it right now.
+
+  Bug fixes:
+
+  - FIG_HOME locking didn't cover all the situations that it should have, e.g.
+    the --clean option.
+
+  - Crash when --command-extra-args was specified without a package descriptor.
+
+v0.1.72.beta.1
+
+  Backwards incompatibilities:
+
+  - --update-lock-response is, for the time being, no longer supported on
+    Windows.  Dealing with file locking on Windows is hard and we don't have
+    the time to figure it out right now.
+
+  - Unquoted archive statements now have their values globbed if they don't
+    look like URLs.  If you happen to have a statement like
+
+      archive some/path/foo?bar*.tar.gz
+
+    then this will match files that it did not previously find.  Workaround:
+    surround the path with single quotes, i.e.
+
+      archive 'some/path/foo?bar*.tar.gz'
+
+    Previously, archive statements were parsed identically to resource
+    statements, but globbing wasn't done on them.
+
+  New features:
+
+  - Big asset statement overhaul.
+
+    * Asset statements now behave identically, with the exception of the
+      extraction of archive statements and the path preservation of resource
+      statements.  Previously, archives weren't globbed.
+
+    * Single quotes can be used as well as double quotes with asset statements.
+
+    * Quoted asset statements can now include whitespace.
+
+    * Asset statements glob inside double quotes; this is not a backwards
+      incompatibility because glob characters were previously not allowed
+      inside double quotes.  Globbing can be prevented by using single quotes.
+      Regardless of quoting, if the path looks like a URL, no globbing is done.
+
+    * Support for character escapes in unquoted and double quoted values has
+      been added, primarily for future use by environment variable statements,
+      but since this is going through the same path that those will be using
+      (they don't yet), asset statements get this now.  Current valid escapes
+      are of backslash, single and double quotes, and the at sign; escapes of
+      other characters are not allowed.  Note, however, that quotes and the at
+      sign are still not allowed in asset paths.
+
+    To summarize:
+
+      * Unquoted:      globbing, escaping, no whitespace
+      * Double quotes: globbing, escaping, whitespace
+      * Single quotes: no globbing, no escaping, whitespace
+
+    Examples:
+
+      # Good statements
+      archive  whereever/**/*.tar.gz # You can now pick up multiple archives in
+                                     # one go and not have to list them
+                                     # individually.
+      resource "some\\path"          # Have to escape backslashes inside double
+                                     # quotes.
+      resource some\\path            # Escapes processed outside of quotes.
+      archive  'some\path.zip'       # Escapes not processed in single quotes.
+
+      resource http://example.com/whatever* # No globbing, it's a URL.
+
+      resource "would you like them with a goat?.txt" # Globbing with
+                                                      # whitespace.
+      archive  'would you like them on a boat?.tgz'   # No globbing.
+
+      # Bad, bad, bad, won't work
+      archive  blah'blah"blah      # Can't have quotes in the middle.
+      resource "not'even'here"     # Can't do it inside quotes either.
+      archive  "whatever\whatever" # Syntactically invalid.
+      archive  "whatever\@hatever" # Syntactically valid, but @ not allowed in
+                                   # paths.
+      resource archive             # "archive" is a keyword; "config" is allowed
+
+  - New --run-command-statement option that allows you to run command
+    statements in unpublished packages.  Say you have a package.fig file in the
+    current directory that looks like
+
+      config default
+        command "echo hello!"
+      end
+
+    If you just run "fig", it will say that there's nothing to do.  It still
+    does that, but it additionally warns you about the situation.  You can now
+    get the command to run if you run "fig --run-command-statement".  You can
+    get non-default commands to run using the --config option, e.g. "fig
+    --run-command-statement --config run-chrome":
+
+      config run-chrome
+        command "chrome ..."
+      end
+
+  - New grammar statement to allow for future expansion.  Syntax:
+
+      grammar v<number>
+
+    This statement is only valid as the first statement in a package
+    definition.  In other words
+
+      grammar v1
+      config default
+      end
+
+    is valid, but
+
+      config default
+      end
+      grammar v1
+
+    is not.  The only valid version right now is 1, but this means that we can
+    change the syntax in the future without breaking any existing packages.
+    Actually, you shouldn't start using this statement yet because older
+    versions of fig will choke upon encountering that.
 
   Bug fixes:
 
