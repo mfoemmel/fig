@@ -16,6 +16,10 @@ class Fig::Command::Action::ListVariables::Default
     return nil
   end
 
+  def modifies_repository?()
+    return false
+  end
+
   def load_base_package?()
     return true
   end

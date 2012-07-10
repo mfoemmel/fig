@@ -9,6 +9,10 @@ module  Fig::Command::Action; end
 module  Fig::Command::Action::Role; end
 
 module Fig::Command::Action::Role::ListWalkingDependencyTree
+  def modifies_repository?()
+    return false
+  end
+
   def walk_dependency_tree(base_package, config_names, backtrace, depth, &block)
     config_names.each do
       |config_name|

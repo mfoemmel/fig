@@ -158,7 +158,8 @@ class Fig::Command
   end
 
   def set_up_update_lock()
-    return if not @options.update_packages
+    return if @options.actions.none? {|action| action.modifies_repository?}
+
 
     update_lock_response = @options.update_lock_response
     return if update_lock_response == :ignore
@@ -202,12 +203,7 @@ class Fig::Command
       check_include_statements_versions?
     )
 
-    case @options.update_packages
-    when :unconditionally
-      @repository.update_unconditionally
-    when :if_missing
-      @repository.update_if_missing
-    end
+    @options.actions.each {|action| action.prepare_repository(@repository)}
 
     return
   end

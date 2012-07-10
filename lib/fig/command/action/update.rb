@@ -14,4 +14,10 @@ class Fig::Command::Action::Update
   def options()
     return %w<--update>
   end
+
+  def prepare_repository(repository)
+    repository.update_unconditionally
+
+    return
+  end
 end

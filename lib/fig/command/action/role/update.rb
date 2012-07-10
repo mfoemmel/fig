@@ -15,6 +15,10 @@ module Fig::Command::Action::Role::Update
     return true
   end
 
+  def modifies_repository?()
+    return true
+  end
+
   def load_base_package?()
     return true
   end

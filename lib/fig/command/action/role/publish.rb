@@ -23,6 +23,10 @@ module Fig::Command::Action::Role::Publish
     return true
   end
 
+  def modifies_repository?()
+    return true
+  end
+
   def load_base_package?()
     return true
   end

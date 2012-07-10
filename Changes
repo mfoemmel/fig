@@ -1,3 +1,10 @@
+v0.1.xxx
+
+  Bug fixes:
+
+  - FIG_HOME locking didn't cover all the situations that it should have, e.g.
+    the --clean option.
+
 v0.1.71
 
   Backwards incompatibilities:

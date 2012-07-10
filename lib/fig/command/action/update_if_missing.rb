@@ -14,4 +14,10 @@ class Fig::Command::Action::UpdateIfMissing
   def options()
     return %w<--update-if-missing>
   end
+
+  def prepare_repository(repository)
+    repository.update_if_missing
+
+    return
+  end
 end
