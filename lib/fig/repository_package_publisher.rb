@@ -10,6 +10,7 @@ require 'fig/logging'
 require 'fig/not_found_error'
 require 'fig/package_cache'
 require 'fig/package_descriptor'
+require 'fig/package_parse_error'
 require 'fig/parser'
 require 'fig/repository'
 require 'fig/repository_error'
@@ -41,9 +42,10 @@ class Fig::RepositoryPackagePublisher
     @operating_system.delete_and_recreate_directory(@local_dir_for_package)
 
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
-    content = publish_package_content_and_derive_definition_file()
+    content = derive_definition_file
     @operating_system.write(fig_file, content)
 
+    publish_package_contents
     if not @local_only
       @operating_system.upload(fig_file, remote_fig_file_for_package())
     end
@@ -91,18 +93,33 @@ class Fig::RepositoryPackagePublisher
     return
   end
 
-  def publish_package_content_and_derive_definition_file()
+  def derive_definition_file()
     @definition_file_lines = []
 
     add_package_metadata_comments()
-    publish_package_content()
+    add_statements_to_publish_and_create_resource_archive()
     add_unparsed_text()
 
     @definition_file_lines.flatten!
     file_content = @definition_file_lines.join("\n")
     file_content.gsub!(/\n{3,}/, "\n\n")
+    file_content.strip!
+    file_content << "\n"
 
-    return file_content.strip() + "\n"
+    begin
+      Fig::Parser.new(nil, false).parse_package(
+        @descriptor,
+        'the directory should not matter for a consistency check',
+        '<package to be published>',
+        file_content
+      )
+    rescue Fig::PackageParseError => error
+      raise \
+        "Bug in code! Could not parse package definition to be published.\n" +
+        "#{error}\n\nGenerated contents:\n#{file_content}"
+    end
+
+    return file_content
   end
 
   def add_package_metadata_comments()
@@ -142,7 +159,7 @@ class Fig::RepositoryPackagePublisher
   # files (those where the statement references a URL as opposed to a local
   # file) and then copies all files into the local repository and the remote
   # repository (if not a local-only publish).
-  def publish_package_content()
+  def add_statements_to_publish_and_create_resource_archive()
     initialize_statements_to_publish()
     create_resource_archive()
 
@@ -150,7 +167,8 @@ class Fig::RepositoryPackagePublisher
       |statement|
 
       if statement.is_asset?
-        publish_asset(statement)
+        @definition_file_lines <<
+          statement.class.new(nil, nil, statement.asset_name).unparse('')
       else
         @definition_file_lines << statement.unparse('')
       end
@@ -189,6 +207,18 @@ class Fig::RepositoryPackagePublisher
       @statements_to_publish.unshift(
         Fig::Statement::Archive.new(nil, nil, file)
       )
+    end
+
+    return
+  end
+
+  def publish_package_contents()
+    @statements_to_publish.each do
+      |statement|
+
+      if statement.is_asset?
+        publish_asset(statement)
+      end
     end
 
     return
