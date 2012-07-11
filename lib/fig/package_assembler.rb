@@ -4,46 +4,82 @@ module Fig; end
 
 # Used for building packages for publishing.
 class Fig::PackageAssembler
-  include Enumerable
   include Fig::StatementContainer
 
-  attr_reader :statements
+  attr_reader :input_statements
+  attr_reader :output_statements
 
   def initialize()
-    @statements = []
-    @text       = []
+    @input_statements   = []
+    @output_statements  = []
+    @header_text        = []
+    @footer_text        = []
 
     return
   end
 
   # Argument can either be a single Statement or an array of them.
-  def <<(statements)
-    @statements << statements
-    @statements.flatten!
+  def add_input(statements)
+    @input_statements << statements
+    @input_statements.flatten!
 
     return
   end
 
-  # Iterate over the Statements (which means you can enumerate them in any way
-  # as well).
-  def each(&block)
-    return @statements.each(&block)
+  # Argument can either be a single Statement or an array of them.
+  def add_output(statements)
+    @output_statements << statements
+    @output_statements.flatten!
+
+    return
+  end
+
+  def asset_input_statements()
+    return @input_statements.select { |statement| statement.is_asset? }
   end
 
   # Argument can be a single string or an array of strings
-  def add_text(text)
-    @text << text
-    @text.flatten!
+  def add_header(text)
+    @header_text << text
+
+    return
+  end
+
+  # Argument can be a single string or an array of strings
+  def add_footer(text)
+    @footer_text << text
 
     return
   end
 
   def assemble_package_definition()
-    definition = @text.join("\n")
+    definition =
+      [@header_text, unparse_statements(), @footer_text].flatten.join("\n")
     definition.gsub!(/\n{3,}/, "\n\n")
     definition.strip!
     definition << "\n"
 
     return definition
+  end
+
+  private
+
+  def unparse_statements()
+    statement_text = []
+
+    output_statements.each do
+      |statement|
+
+      if statement.is_asset?
+        # TODO: Dump this synthetic statement crap and get the
+        # statement.asset_name call into the unparsing itself.
+        statement_text <<
+          statement.class.new(nil, nil, statement.asset_name, false).unparse('')
+      else
+        statement_text << statement.unparse('')
+      end
+    end
+
+    return statement_text
   end
 end

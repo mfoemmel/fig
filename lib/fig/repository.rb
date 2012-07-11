@@ -13,6 +13,7 @@ require 'fig/package_descriptor'
 require 'fig/parser'
 require 'fig/repository_error'
 require 'fig/repository_package_publisher'
+require 'fig/url'
 
 module Fig; end
 
@@ -24,10 +25,6 @@ class Fig::Repository
   RESOURCES_FILE        = 'resources.tar.gz'
   VERSION_FILE_NAME     = 'repository-format-version'
   VERSION_SUPPORTED     = 1
-
-  def self.is_url?(url)
-    not (/ftp:\/\/|https?:\/\/|file:\/\/|ssh:\/\// =~ url).nil?
-  end
 
   def initialize(
     os,
@@ -303,13 +300,13 @@ class Fig::Repository
     package = read_package_from_directory(temp_dir, descriptor)
 
     package.archive_urls.each do |archive_url|
-      if not Fig::Repository.is_url?(archive_url)
+      if not Fig::URL.is_url?(archive_url)
         archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
       end
       @operating_system.download_and_unpack_archive(archive_url, temp_dir)
     end
     package.resource_urls.each do |resource_url|
-      if not Fig::Repository.is_url?(resource_url)
+      if not Fig::URL.is_url?(resource_url)
         resource_url =
           remote_dir_for_package(descriptor) + '/' + resource_url
       end

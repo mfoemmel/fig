@@ -18,23 +18,33 @@ require 'fig/repository_error'
 require 'fig/statement/archive'
 require 'fig/statement/grammar_version'
 require 'fig/statement/resource'
+require 'fig/url'
 
 module Fig; end
 
 # Handles package publishing for the Repository.
 class Fig::RepositoryPackagePublisher
-  attr_accessor :operating_system
-  attr_accessor :publish_listeners
-  attr_accessor :package_statements
-  attr_accessor :descriptor
-  attr_accessor :source_package
-  attr_accessor :was_forced
-  attr_accessor :base_temp_dir
-  attr_accessor :local_dir_for_package
-  attr_accessor :remote_dir_for_package
-  attr_accessor :local_fig_file_for_package
-  attr_accessor :remote_fig_file_for_package
-  attr_accessor :local_only
+  attr_writer :operating_system
+  attr_writer :publish_listeners
+  attr_writer :descriptor
+  attr_writer :source_package
+  attr_writer :was_forced
+  attr_writer :base_temp_dir
+  attr_writer :local_dir_for_package
+  attr_writer :remote_dir_for_package
+  attr_writer :local_fig_file_for_package
+  attr_writer :remote_fig_file_for_package
+  attr_writer :local_only
+
+  def initialize()
+    @package_assembler = Fig::PackageAssembler.new
+
+    return
+  end
+
+  def package_statements=(statements)
+    @package_assembler.add_input(statements)
+  end
 
   def publish_package()
     derive_publish_metadata()
@@ -50,9 +60,9 @@ class Fig::RepositoryPackagePublisher
 
     publish_package_contents
     if not @local_only
-      @operating_system.upload(fig_file, remote_fig_file_for_package())
+      @operating_system.upload(fig_file, @remote_fig_file_for_package)
     end
-    @operating_system.copy(fig_file, local_fig_file_for_package())
+    @operating_system.copy(fig_file, @local_fig_file_for_package)
 
     notify_listeners
 
@@ -72,7 +82,7 @@ class Fig::RepositoryPackagePublisher
   end
 
   def validate_asset_names()
-    asset_statements = @package_statements.select { |s| s.is_asset? }
+    asset_statements = @package_assembler.asset_input_statements
 
     asset_names = Set.new()
     asset_statements.each do
@@ -97,10 +107,8 @@ class Fig::RepositoryPackagePublisher
   end
 
   def derive_definition_file()
-    @package_assembler = Fig::PackageAssembler.new
-
     add_package_metadata_comments()
-    add_statements_to_publish_and_create_resource_archive()
+    add_output_statements_and_create_resource_archive()
     add_unparsed_text()
 
     file_content = @package_assembler.assemble_package_definition()
@@ -121,37 +129,20 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_package_metadata_comments()
-    @package_assembler.add_text(
+    @package_assembler.add_header(
       %Q<# Publishing information for #{@descriptor.to_string()}:>
     )
-    @package_assembler.add_text(%q<#>)
+    @package_assembler.add_header %q<#>
 
-    @package_assembler.add_text(
+    @package_assembler.add_header(
       %Q<#     Time: #{@publish_time} (epoch: #{@publish_time.to_i()})>
     )
 
-    @package_assembler.add_text(%Q<#     User: #{@publish_login}>)
-    @package_assembler.add_text(%Q<#     Host: #{@publish_host}>)
-    @package_assembler.add_text(%Q<#     Args: "#{ARGV.join %q[", "]}">)
-    @package_assembler.add_text(%Q<#     Fig:  v#{Fig::VERSION}>)
-    @package_assembler.add_text(%q<#>)
-
-    asset_statements =
-      @package_statements.select { |statement| statement.is_asset? }
-    asset_strings =
-      asset_statements.collect { |statement| statement.unparse('#    ') }
-
-    if asset_strings.empty?
-      @package_assembler.add_text(
-        %q<# There were no asset statements in the unpublished package definition.>
-      )
-    else
-      @package_assembler.add_text(%q<# Original asset statements: >)
-      @package_assembler.add_text(%q<#>)
-      @package_assembler.add_text(asset_strings)
-    end
-
-    @package_assembler.add_text(%Q<\n>)
+    @package_assembler.add_header %Q<#     User: #{@publish_login}>
+    @package_assembler.add_header %Q<#     Host: #{@publish_host}>
+    @package_assembler.add_header %Q<#     Args: "#{ARGV.join %q[", "]}">
+    @package_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
+    @package_assembler.add_header %Q<\n>
 
     return
   end
@@ -160,67 +151,61 @@ class Fig::RepositoryPackagePublisher
   # files (those where the statement references a URL as opposed to a local
   # file) and then copies all files into the local repository and the remote
   # repository (if not a local-only publish).
-  def add_statements_to_publish_and_create_resource_archive()
-    initialize_statements_to_publish()
+  def add_output_statements_and_create_resource_archive()
+    assemble_output_statements()
     create_resource_archive()
-
-    @package_assembler.each do
-      |statement|
-
-      if statement.is_asset?
-        @package_assembler.add_text(
-          statement.class.new(nil, nil, statement.asset_name, false).unparse('')
-        )
-      else
-        @package_assembler.add_text(statement.unparse(''))
-      end
-    end
 
     return
   end
 
-  def initialize_statements_to_publish()
+  def assemble_output_statements()
     @resource_paths = []
 
     if (
-          ! @package_statements.empty? \
-      &&  ! @package_statements[0].is_a?(Fig::Statement::GrammarVersion)
+          @package_assembler.input_statements.empty? \
+      ||  ! @package_assembler.input_statements[0].is_a?(Fig::Statement::GrammarVersion)
     )
-      @package_assembler << Fig::Statement::GrammarVersion.new(
+      @package_assembler.add_output Fig::Statement::GrammarVersion.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         0 # Grammar version
       )
     end
 
-    @package_statements.each do
+    @package_assembler.input_statements.each do
       |statement|
 
       if statement.is_asset?
-        add_asset_to_statements_to_publish(statement)
+        add_asset_to_output_statements(statement)
       else
-        @package_assembler << statement
+        @package_assembler.add_output statement
       end
     end
 
     return
   end
 
-  def add_asset_to_statements_to_publish(asset_statement)
-    if Fig::Repository.is_url? asset_statement.url
-      @package_assembler << asset_statement
+  def add_asset_to_output_statements(asset_statement)
+    if Fig::URL.is_url? asset_statement.url
+      @package_assembler.add_output asset_statement
     elsif asset_statement.is_a? Fig::Statement::Archive
-      if asset_statement.glob_if_not_url?
+      if asset_statement.requires_globbing?
         expand_globs_from( [asset_statement.url] ).each do
           |file|
 
-          @package_assembler <<
-            Fig::Statement::Archive.new(nil, nil, file, false)
+          @package_assembler.add_output(
+            Fig::Statement::Archive.new(
+              nil,
+              %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+              file,
+              false # No globbing
+            )
+          )
         end
       else
-        @package_assembler << asset_statement
+        @package_assembler.add_output asset_statement
       end
-    elsif asset_statement.glob_if_not_url?
+    elsif asset_statement.requires_globbing?
       @resource_paths.concat expand_globs_from( [asset_statement.url] )
     else
       @resource_paths << asset_statement.url
@@ -237,15 +222,21 @@ class Fig::RepositoryPackagePublisher
       @operating_system.create_archive(file, @resource_paths)
       Fig::AtExit.add { File.delete(file) }
 
-      @package_assembler <<
-        Fig::Statement::Archive.new(nil, nil, file, false)
+      @package_assembler.add_output(
+        Fig::Statement::Archive.new(
+          nil,
+          %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+          file,
+          false # No globbing
+        )
+      )
     end
 
     return
   end
 
   def publish_package_contents()
-    @package_assembler.each do
+    @package_assembler.output_statements.each do
       |statement|
 
       if statement.is_asset?
@@ -258,9 +249,9 @@ class Fig::RepositoryPackagePublisher
 
   def publish_asset(asset_statement)
     asset_name = asset_statement.asset_name()
-    asset_remote = "#{remote_dir_for_package()}/#{asset_name}"
+    asset_remote = "#{@remote_dir_for_package}/#{asset_name}"
 
-    if Fig::Repository.is_url?(asset_statement.url)
+    if Fig::URL.is_url? asset_statement.url
       asset_local = File.join(publish_temp_dir(), asset_name)
 
       begin
@@ -290,10 +281,10 @@ class Fig::RepositoryPackagePublisher
 
   def add_unparsed_text()
     if @source_package && @source_package.unparsed_text
-      @package_assembler.add_text('')
-      @package_assembler.add_text('# Original, unparsed package text:')
-      @package_assembler.add_text('#')
-      @package_assembler.add_text(
+      @package_assembler.add_footer ''
+      @package_assembler.add_footer '# Original, unparsed package text:'
+      @package_assembler.add_footer '#'
+      @package_assembler.add_footer(
         @source_package.unparsed_text.gsub(/^(?=[^\n]+$)/, '# ').gsub(/^$/, '#')
       )
     end
@@ -326,7 +317,7 @@ class Fig::RepositoryPackagePublisher
   end
 
   def publish_temp_dir()
-    File.join(base_temp_dir(), 'publish')
+    File.join(@base_temp_dir, 'publish')
   end
 
   def check_asset_path(asset_path)

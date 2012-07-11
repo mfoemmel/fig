@@ -6,8 +6,8 @@ require 'fig/grammar/v1'
 require 'fig/logging'
 require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
-require 'fig/repository'
 require 'fig/statement'
+require 'fig/url'
 require 'fig/url_access_error'
 require 'fig/user_input_error'
 
@@ -191,7 +191,7 @@ class Fig::Parser
     package.walk_statements do |statement|
       statement.urls.each do |url|
         # collect all bad urls in bad_urls
-        next if not Fig::Repository.is_url?(url)
+        next if not Fig::URL.is_url?(url)
         bad_urls << url if not @application_config.url_access_allowed?(url)
       end
     end

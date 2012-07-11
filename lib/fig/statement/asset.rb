@@ -1,5 +1,6 @@
 require 'fig/parser'
 require 'fig/statement'
+require 'fig/url'
 
 module Fig; end
 class Fig::Statement; end
@@ -24,6 +25,10 @@ module Fig::Statement::Asset
 
   def is_asset?()
     return true
+  end
+
+  def requires_globbing?()
+    return glob_if_not_url? && ! Fig::URL.is_url?(url())
   end
 
   def standard_asset_name()

@@ -1,8 +1,9 @@
-require 'fig/repository'
 require 'fig/statement'
 require 'fig/statement/asset'
+require 'fig/url'
 
 module Fig; end
+class  Fig::Statement; end
 
 # Specifies a file (possibly via a URL) that is part of the current package.
 #
@@ -18,7 +19,7 @@ class Fig::Statement::Resource < Fig::Statement
   end
 
   def asset_name()
-    if Fig::Repository.is_url?(url())
+    if Fig::URL.is_url?(url())
       return standard_asset_name()
     end
 

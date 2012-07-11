@@ -2,6 +2,7 @@ require 'fig/statement'
 require 'fig/statement/asset'
 
 module Fig; end
+class  Fig::Statement; end
 
 # Specifies an archive file (possibly via a URL) that is part of a package.
 #
