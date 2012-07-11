@@ -44,7 +44,7 @@ module Fig::Command::Action
   end
 
   def modifies_repository?()
-    return NotImplementedError
+    raise NotImplementedError
   end
 
   def prepare_repository(repository)
