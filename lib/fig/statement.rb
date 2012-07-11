@@ -156,6 +156,10 @@ class Fig::Statement
     return
   end
 
+  def unparse(indent)
+    raise NotImplementedError
+  end
+
   def urls()
     return []
   end
