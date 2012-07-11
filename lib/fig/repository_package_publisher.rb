@@ -8,8 +8,8 @@ require 'fig'
 require 'fig/at_exit'
 require 'fig/logging'
 require 'fig/not_found_error'
-require 'fig/package_assembler'
 require 'fig/package_cache'
+require 'fig/package_definition_text_assembler'
 require 'fig/package_descriptor'
 require 'fig/package_parse_error'
 require 'fig/parser'
@@ -37,13 +37,13 @@ class Fig::RepositoryPackagePublisher
   attr_writer :local_only
 
   def initialize()
-    @package_assembler = Fig::PackageAssembler.new
+    @text_assembler = Fig::PackageDefinitionTextAssembler.new
 
     return
   end
 
   def package_statements=(statements)
-    @package_assembler.add_input(statements)
+    @text_assembler.add_input(statements)
   end
 
   def publish_package()
@@ -82,7 +82,7 @@ class Fig::RepositoryPackagePublisher
   end
 
   def validate_asset_names()
-    asset_statements = @package_assembler.asset_input_statements
+    asset_statements = @text_assembler.asset_input_statements
 
     asset_names = Set.new()
     asset_statements.each do
@@ -111,7 +111,7 @@ class Fig::RepositoryPackagePublisher
     add_output_statements_and_create_resource_archive()
     add_unparsed_text()
 
-    file_content = @package_assembler.assemble_package_definition()
+    file_content = @text_assembler.assemble_package_definition()
     begin
       Fig::Parser.new(nil, false).parse_package(
         @descriptor,
@@ -129,20 +129,20 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_package_metadata_comments()
-    @package_assembler.add_header(
+    @text_assembler.add_header(
       %Q<# Publishing information for #{@descriptor.to_string()}:>
     )
-    @package_assembler.add_header %q<#>
+    @text_assembler.add_header %q<#>
 
-    @package_assembler.add_header(
+    @text_assembler.add_header(
       %Q<#     Time: #{@publish_time} (epoch: #{@publish_time.to_i()})>
     )
 
-    @package_assembler.add_header %Q<#     User: #{@publish_login}>
-    @package_assembler.add_header %Q<#     Host: #{@publish_host}>
-    @package_assembler.add_header %Q<#     Args: "#{ARGV.join %q[", "]}">
-    @package_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
-    @package_assembler.add_header %Q<\n>
+    @text_assembler.add_header %Q<#     User: #{@publish_login}>
+    @text_assembler.add_header %Q<#     Host: #{@publish_host}>
+    @text_assembler.add_header %Q<#     Args: "#{ARGV.join %q[", "]}">
+    @text_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
+    @text_assembler.add_header %Q<\n>
 
     return
   end
@@ -162,23 +162,23 @@ class Fig::RepositoryPackagePublisher
     @resource_paths = []
 
     if (
-          @package_assembler.input_statements.empty? \
-      ||  ! @package_assembler.input_statements[0].is_a?(Fig::Statement::GrammarVersion)
+          @text_assembler.input_statements.empty? \
+      ||  ! @text_assembler.input_statements[0].is_a?(Fig::Statement::GrammarVersion)
     )
-      @package_assembler.add_output Fig::Statement::GrammarVersion.new(
+      @text_assembler.add_output Fig::Statement::GrammarVersion.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         0 # Grammar version
       )
     end
 
-    @package_assembler.input_statements.each do
+    @text_assembler.input_statements.each do
       |statement|
 
       if statement.is_asset?
         add_asset_to_output_statements(statement)
       else
-        @package_assembler.add_output statement
+        @text_assembler.add_output statement
       end
     end
 
@@ -187,13 +187,13 @@ class Fig::RepositoryPackagePublisher
 
   def add_asset_to_output_statements(asset_statement)
     if Fig::URL.is_url? asset_statement.url
-      @package_assembler.add_output asset_statement
+      @text_assembler.add_output asset_statement
     elsif asset_statement.is_a? Fig::Statement::Archive
       if asset_statement.requires_globbing?
         expand_globs_from( [asset_statement.url] ).each do
           |file|
 
-          @package_assembler.add_output(
+          @text_assembler.add_output(
             Fig::Statement::Archive.new(
               nil,
               %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
@@ -203,7 +203,7 @@ class Fig::RepositoryPackagePublisher
           )
         end
       else
-        @package_assembler.add_output asset_statement
+        @text_assembler.add_output asset_statement
       end
     elsif asset_statement.requires_globbing?
       @resource_paths.concat expand_globs_from( [asset_statement.url] )
@@ -222,7 +222,7 @@ class Fig::RepositoryPackagePublisher
       @operating_system.create_archive(file, @resource_paths)
       Fig::AtExit.add { File.delete(file) }
 
-      @package_assembler.add_output(
+      @text_assembler.add_output(
         Fig::Statement::Archive.new(
           nil,
           %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
@@ -236,7 +236,7 @@ class Fig::RepositoryPackagePublisher
   end
 
   def publish_package_contents()
-    @package_assembler.output_statements.each do
+    @text_assembler.output_statements.each do
       |statement|
 
       if statement.is_asset?
@@ -281,10 +281,10 @@ class Fig::RepositoryPackagePublisher
 
   def add_unparsed_text()
     if @source_package && @source_package.unparsed_text
-      @package_assembler.add_footer ''
-      @package_assembler.add_footer '# Original, unparsed package text:'
-      @package_assembler.add_footer '#'
-      @package_assembler.add_footer(
+      @text_assembler.add_footer ''
+      @text_assembler.add_footer '# Original, unparsed package text:'
+      @text_assembler.add_footer '#'
+      @text_assembler.add_footer(
         @source_package.unparsed_text.gsub(/^(?=[^\n]+$)/, '# ').gsub(/^$/, '#')
       )
     end

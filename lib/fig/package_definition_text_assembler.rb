@@ -3,7 +3,7 @@ require 'fig/statement_container'
 module Fig; end
 
 # Used for building packages for publishing.
-class Fig::PackageAssembler
+class Fig::PackageDefinitionTextAssembler
   include Fig::StatementContainer
 
   attr_reader :input_statements
