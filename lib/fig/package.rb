@@ -1,6 +1,7 @@
 require 'fig/logging'
 require 'fig/no_such_package_config_error'
 require 'fig/package_descriptor'
+require 'fig/statement_container'
 require 'fig/statement/archive'
 require 'fig/statement/configuration'
 require 'fig/statement/resource'
@@ -15,8 +16,8 @@ module Fig; end
 # the same package will be a separate instance of this class.
 class Fig::Package
   include Comparable
+  include Fig::StatementContainer
 
-  UNPUBLISHED     = '<unpublished>'
   DEFAULT_CONFIG  = 'default'
 
   attr_reader   :name, :version, :directory, :statements
@@ -105,16 +106,6 @@ class Fig::Package
     return descriptors
   end
 
-  # Block will receive a Statement.
-  def walk_statements(&block)
-    @statements.each do |statement|
-      yield statement
-      statement.walk_statements &block
-    end
-
-    return
-  end
-
   def ==(other)
     return false if other.nil?
 
@@ -150,6 +141,8 @@ class Fig::Package
   end
 
   private
+
+  UNPUBLISHED     = '<unpublished>'
 
   def compare_components(mine, others)
     if mine.nil?

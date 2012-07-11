@@ -8,6 +8,7 @@ require 'fig'
 require 'fig/at_exit'
 require 'fig/logging'
 require 'fig/not_found_error'
+require 'fig/package_assembler'
 require 'fig/package_cache'
 require 'fig/package_descriptor'
 require 'fig/package_parse_error'
@@ -20,6 +21,7 @@ require 'fig/statement/resource'
 
 module Fig; end
 
+# Handles package publishing for the Repository.
 class Fig::RepositoryPackagePublisher
   attr_accessor :operating_system
   attr_accessor :publish_listeners
@@ -61,6 +63,14 @@ class Fig::RepositoryPackagePublisher
 
   private
 
+  def derive_publish_metadata()
+    @publish_time  = Time.now()
+    @publish_login = Sys::Admin.get_login()
+    @publish_host  = Socket.gethostname()
+
+    return
+  end
+
   def validate_asset_names()
     asset_statements = @package_statements.select { |s| s.is_asset? }
 
@@ -86,27 +96,14 @@ class Fig::RepositoryPackagePublisher
     end
   end
 
-  def derive_publish_metadata()
-    @publish_time  = Time.now()
-    @publish_login = Sys::Admin.get_login()
-    @publish_host  = Socket.gethostname()
-
-    return
-  end
-
   def derive_definition_file()
-    @definition_file_lines = []
+    @package_assembler = Fig::PackageAssembler.new
 
     add_package_metadata_comments()
     add_statements_to_publish_and_create_resource_archive()
     add_unparsed_text()
 
-    @definition_file_lines.flatten!
-    file_content = @definition_file_lines.join("\n")
-    file_content.gsub!(/\n{3,}/, "\n\n")
-    file_content.strip!
-    file_content << "\n"
-
+    file_content = @package_assembler.assemble_package_definition()
     begin
       Fig::Parser.new(nil, false).parse_package(
         @descriptor,
@@ -124,18 +121,20 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_package_metadata_comments()
-    @definition_file_lines <<
+    @package_assembler.add_text(
       %Q<# Publishing information for #{@descriptor.to_string()}:>
-    @definition_file_lines << %q<#>
+    )
+    @package_assembler.add_text(%q<#>)
 
-    @definition_file_lines <<
+    @package_assembler.add_text(
       %Q<#     Time: #{@publish_time} (epoch: #{@publish_time.to_i()})>
+    )
 
-    @definition_file_lines << %Q<#     User: #{@publish_login}>
-    @definition_file_lines << %Q<#     Host: #{@publish_host}>
-    @definition_file_lines << %Q<#     Args: "#{ARGV.join %q[", "]}">
-    @definition_file_lines << %Q<#     Fig:  v#{Fig::VERSION}>
-    @definition_file_lines << %q<#>
+    @package_assembler.add_text(%Q<#     User: #{@publish_login}>)
+    @package_assembler.add_text(%Q<#     Host: #{@publish_host}>)
+    @package_assembler.add_text(%Q<#     Args: "#{ARGV.join %q[", "]}">)
+    @package_assembler.add_text(%Q<#     Fig:  v#{Fig::VERSION}>)
+    @package_assembler.add_text(%q<#>)
 
     asset_statements =
       @package_statements.select { |statement| statement.is_asset? }
@@ -143,15 +142,16 @@ class Fig::RepositoryPackagePublisher
       asset_statements.collect { |statement| statement.unparse('#    ') }
 
     if asset_strings.empty?
-      @definition_file_lines <<
+      @package_assembler.add_text(
         %q<# There were no asset statements in the unpublished package definition.>
+      )
     else
-      @definition_file_lines << %q<# Original asset statements: >
-      @definition_file_lines << %q<#>
-      @definition_file_lines << asset_strings
+      @package_assembler.add_text(%q<# Original asset statements: >)
+      @package_assembler.add_text(%q<#>)
+      @package_assembler.add_text(asset_strings)
     end
 
-    @definition_file_lines << %Q<\n>
+    @package_assembler.add_text(%Q<\n>)
 
     return
   end
@@ -164,14 +164,15 @@ class Fig::RepositoryPackagePublisher
     initialize_statements_to_publish()
     create_resource_archive()
 
-    @statements_to_publish.each do
+    @package_assembler.each do
       |statement|
 
       if statement.is_asset?
-        @definition_file_lines <<
+        @package_assembler.add_text(
           statement.class.new(nil, nil, statement.asset_name, false).unparse('')
+        )
       else
-        @definition_file_lines << statement.unparse('')
+        @package_assembler.add_text(statement.unparse(''))
       end
     end
 
@@ -181,13 +182,11 @@ class Fig::RepositoryPackagePublisher
   def initialize_statements_to_publish()
     @resource_paths = []
 
-    @statements_to_publish = []
-
     if (
           ! @package_statements.empty? \
       &&  ! @package_statements[0].is_a?(Fig::Statement::GrammarVersion)
     )
-      @statements_to_publish << Fig::Statement::GrammarVersion.new(
+      @package_assembler << Fig::Statement::GrammarVersion.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         0 # Grammar version
@@ -200,7 +199,7 @@ class Fig::RepositoryPackagePublisher
       if statement.is_asset?
         add_asset_to_statements_to_publish(statement)
       else
-        @statements_to_publish << statement
+        @package_assembler << statement
       end
     end
 
@@ -209,17 +208,17 @@ class Fig::RepositoryPackagePublisher
 
   def add_asset_to_statements_to_publish(asset_statement)
     if Fig::Repository.is_url? asset_statement.url
-      @statements_to_publish << asset_statement
+      @package_assembler << asset_statement
     elsif asset_statement.is_a? Fig::Statement::Archive
       if asset_statement.glob_if_not_url?
         expand_globs_from( [asset_statement.url] ).each do
           |file|
 
-          @statements_to_publish <<
+          @package_assembler <<
             Fig::Statement::Archive.new(nil, nil, file, false)
         end
       else
-        @statements_to_publish << asset_statement
+        @package_assembler << asset_statement
       end
     elsif asset_statement.glob_if_not_url?
       @resource_paths.concat expand_globs_from( [asset_statement.url] )
@@ -238,7 +237,7 @@ class Fig::RepositoryPackagePublisher
       @operating_system.create_archive(file, @resource_paths)
       Fig::AtExit.add { File.delete(file) }
 
-      @statements_to_publish <<
+      @package_assembler <<
         Fig::Statement::Archive.new(nil, nil, file, false)
     end
 
@@ -246,7 +245,7 @@ class Fig::RepositoryPackagePublisher
   end
 
   def publish_package_contents()
-    @statements_to_publish.each do
+    @package_assembler.each do
       |statement|
 
       if statement.is_asset?
@@ -291,12 +290,12 @@ class Fig::RepositoryPackagePublisher
 
   def add_unparsed_text()
     if @source_package && @source_package.unparsed_text
-
-      @definition_file_lines << ''
-      @definition_file_lines << '# Original, unparsed package text:'
-      @definition_file_lines << '#'
-      @definition_file_lines <<
+      @package_assembler.add_text('')
+      @package_assembler.add_text('# Original, unparsed package text:')
+      @package_assembler.add_text('#')
+      @package_assembler.add_text(
         @source_package.unparsed_text.gsub(/^(?=[^\n]+$)/, '# ').gsub(/^$/, '#')
+      )
     end
 
     return

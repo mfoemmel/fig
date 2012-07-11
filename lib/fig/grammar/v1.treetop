@@ -30,6 +30,8 @@ module Fig
         }
       end
 
+      # Shim between "package" and "package_statement" rules to allow the
+      # compiled v0 and v1 grammars to have the same interface.
       rule package_statement_with_ws
         package_statement:package_statement ws_or_comment+ {
           def to_package_statement(build_state)
@@ -94,6 +96,8 @@ module Fig
         [a-zA-Z0-9_.-]+
       end
 
+      # Shim between "config" and "config_statement" rules to allow the
+      # compiled v0 and v1 grammars to have the same interface.
       rule config_statement_with_ws
         config_statement:config_statement ws_or_comment+ {
           def to_config_statement(build_state)
