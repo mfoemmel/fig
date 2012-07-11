@@ -190,7 +190,7 @@ class Fig::RepositoryPackagePublisher
       @statements_to_publish << Fig::Statement::GrammarVersion.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-        1
+        0 # Grammar version
       )
     end
 
@@ -238,9 +238,8 @@ class Fig::RepositoryPackagePublisher
       @operating_system.create_archive(file, @resource_paths)
       Fig::AtExit.add { File.delete(file) }
 
-      @statements_to_publish.unshift(
+      @statements_to_publish <<
         Fig::Statement::Archive.new(nil, nil, file, false)
-      )
     end
 
     return

@@ -28,7 +28,7 @@ describe 'Parser' do
     return
   end
 
-  def test_user_input_error(fig_input, message_pattern)
+  def test_error(fig_input, error_class, message_pattern)
     application_configuration = new_configuration
 
     expect {
@@ -38,9 +38,21 @@ describe 'Parser' do
         'source description',
         fig_input
       )
-    }.to raise_error(
-      Fig::UserInputError, message_pattern
-    )
+    }.to raise_error(error_class, message_pattern)
+
+    return
+  end
+
+  def test_user_input_error(fig_input, message_pattern)
+    test_error(fig_input, Fig::UserInputError, message_pattern)
+
+    return
+  end
+
+  def test_package_parse_error(
+    fig_input, message_pattern = /source description/
+  )
+    test_error(fig_input, Fig::PackageParseError, message_pattern)
 
     return
   end
@@ -163,46 +175,55 @@ describe 'Parser' do
   end
 
   describe 'command statements' do
-    it 'reject multiple commands in config file' do
-      input = <<-'END_PACKAGE'
-        config default
-          command "echo foo"
-          command "echo bar"
-        end
-      END_PACKAGE
+    %w< 0 1 >.each do
+      |version|
 
-      test_user_input_error(
-        input,
-        /found a second "command" statement within a "config" block/i
-      )
-    end
+      describe %Q<in the v#{version} grammar> do
+        it 'reject multiple commands in config file' do
+          input = <<-"END_PACKAGE"
+            grammar v#{version}
+            config default
+              command "echo foo"
+              command "echo bar"
+            end
+          END_PACKAGE
 
-    it 'accept multiple configs, each with a single command' do
-      test_no_parse_exception(<<-END_PACKAGE)
-        config default
-          command "echo foo"
+          test_user_input_error(
+            input,
+            /found a second "command" statement within a "config" block/i
+          )
         end
-        config another
-          command "echo bar"
-        end
-      END_PACKAGE
-    end
 
-    it 'reject multiple configs where one has multiple commands' do
-      input = <<-'END_PACKAGE'
-        config default
-          command "echo foo"
+        it 'accept multiple configs, each with a single command' do
+          test_no_parse_exception(<<-"END_PACKAGE")
+            grammar v#{version}
+            config default
+              command "echo foo"
+            end
+            config another
+              command "echo bar"
+            end
+          END_PACKAGE
         end
-        config another
-          command "echo bar"
-          command "echo baz"
-        end
-      END_PACKAGE
 
-      test_user_input_error(
-        input,
-        /found a second "command" statement within a "config" block/i
-      )
+        it 'reject multiple configs where one has multiple commands' do
+          input = <<-"END_PACKAGE"
+            grammar v#{version}
+            config default
+              command "echo foo"
+            end
+            config another
+              command "echo bar"
+              command "echo baz"
+            end
+          END_PACKAGE
+
+          test_user_input_error(
+            input,
+            /found a second "command" statement within a "config" block/i
+          )
+        end
+      end
     end
   end
 
@@ -221,16 +242,23 @@ describe 'Parser' do
     }.each do
       |display, character|
 
-      it %Q<reject "#{display}" in a PATH component> do
-        input = <<-"END_PACKAGE"
-          config default
-            append PATH_VARIABLE=#{character}
-          end
-        END_PACKAGE
+      describe %Q<reject "#{display}" in a PATH component> do
+        %w< 0 1 >.each do
+          |version|
 
-        test_user_input_error(
-          input, /(?i:invalid value for append).*\bPATH_VARIABLE\b/
-        )
+          it %Q<in the v#{version} grammar> do
+            input = <<-"END_PACKAGE"
+              grammar v#{version}
+              config default
+                append PATH_VARIABLE=#{character}
+              end
+            END_PACKAGE
+
+            test_user_input_error(
+              input, /(?i:invalid value for append).*\bPATH_VARIABLE\b/
+            )
+          end
+        end
       end
     end
   end
@@ -242,8 +270,17 @@ describe 'Parser' do
       %w< @ " < > | >.each do
         |character|
 
-        it %Q<reject "#{character}" in a URL> do
+        it %Q<get a parse error with "#{character}" in a URL in the v0 grammar> do
           input = <<-"END_PACKAGE"
+            #{asset_type} #{character}
+          END_PACKAGE
+
+          test_package_parse_error(input)
+        end
+
+        it %Q<reject "#{character}" in a URL in the v1 grammar> do
+          input = <<-"END_PACKAGE"
+            grammar v1
             #{asset_type} #{character}
           END_PACKAGE
 
@@ -254,22 +291,29 @@ describe 'Parser' do
         end
       end
 
-      it %q<handles octothorpes in the URL> do
+      it %q<handles octothorpes in the URL in the v1 grammar> do
         test_no_parse_exception(<<-"END_PACKAGE")
+          grammar v1
           #{asset_type} 'foo#bar'
-
           config default
           end
         END_PACKAGE
       end
 
-      it %Q<handles plus signs in the path (e.g. for C++ libraries)> do
-        test_no_parse_exception(<<-"END_PACKAGE")
-          #{asset_type} testlib++.whatever
-          config default
-            append LIBPATH=@/testlib++
+      describe %Q<handles plus signs in the path (e.g. for C++ libraries)> do
+        %w< 0 1 >.each do
+          |version|
+
+          it %Q<in the v#{version} grammar> do
+            test_no_parse_exception(<<-"END_PACKAGE")
+              grammar v#{version}
+              #{asset_type} testlib++.whatever
+              config default
+                append LIBPATH=@/testlib++
+              end
+            END_PACKAGE
           end
-        END_PACKAGE
+        end
       end
     end
   end

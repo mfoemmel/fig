@@ -7,19 +7,23 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    it %q<for v1 is accepted> do
-      input = <<-END
-        # A comment
-        grammar v1
-        config default
-          command "echo foo"
-        end
-      END
+    %w< 0 1 >.each do
+      |version|
 
-      out, err, exitstatus = fig(%w<--run-command-statement>, input)
-      err.should == ''
-      out.should == 'foo'
-      exitstatus.should == 0
+      it %Q<for v#{version} is accepted> do
+        input = <<-"END"
+          # A comment
+          grammar v#{version}
+          config default
+            command "echo foo"
+          end
+        END
+
+        out, err, exitstatus = fig(%w<--run-command-statement>, input)
+        err.should == ''
+        out.should == 'foo'
+        exitstatus.should == 0
+      end
     end
 
     pending %q<is not accepted if it isn't the first statement> do
@@ -59,7 +63,7 @@ describe 'Fig' do
         out, err, exitstatus =
           fig(%w< foo/1.2.3 --dump-package-definition-text >)
 
-        out.should =~ /\b grammar [ ] v1 \b/x
+        out.should =~ /\b grammar [ ] v0 \b/x
       end
 
       it 'from command-line input' do
@@ -68,7 +72,7 @@ describe 'Fig' do
         out, err, exitstatus =
           fig(%w< foo/1.2.3 --dump-package-definition-text >)
 
-        out.should =~ /\b grammar [ ] v1 \b/x
+        out.should =~ /\b grammar [ ] v0 \b/x
       end
     end
   end

@@ -52,20 +52,14 @@ class Fig::ParserPackageBuildState
       statement_objects << Fig::Statement::GrammarVersion.new(
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-        1
+        0 # Grammar version
       )
     end
 
     statements.elements.each do
-      |child_statements|
+      |statement|
 
-      # package_statement rule is a proper statement followed by whitespace.
-      if child_statements.elements.size != 2
-        raise %Q<Bug in code. Grammar does not agree with what is expected elsewhere in the code.  Expected there to be two child nodes of "#{child_statements.text_value}"#{node_location_description(child_statements)}>
-      end
-
-      statement_objects <<
-        child_statements.elements[0].to_package_statement(self)
+      statement_objects << statement.to_package_statement(self)
     end
 
     return Fig::Package.new(
@@ -116,17 +110,10 @@ class Fig::ParserPackageBuildState
       )
     end
 
-    statement_objects = []
-    statements.elements.each do
-      |child_statements|
+    statement_objects = statements.elements.map do
+      |statement|
 
-      # config_statement rule is a proper statement followed by whitespace.
-      if child_statements.elements.size != 2
-        raise %Q<Bug in code. Grammar does not agree with what is expected elsewhere in the code.  Expected there to be two child nodes of "#{child_statements.text_value}"#{node_location_description(child_statements)}>
-      end
-
-      statement_objects <<
-        child_statements.elements[0].to_config_statement(self)
+      statement.to_config_statement(self)
     end
 
     return Fig::Statement::Configuration.new(

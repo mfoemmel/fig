@@ -1,6 +1,7 @@
 require 'set'
 
 require 'fig/grammar/version_identification'
+require 'fig/grammar/v0'
 require 'fig/grammar/v1'
 require 'fig/logging'
 require 'fig/package_parse_error'
@@ -38,8 +39,10 @@ class Fig::Parser
       descriptor, directory, source_description, unparsed_text
     )
 
-    # Don't care about the version yet because #get_grammar_version will barf
-    # if it sees anything other than v1.
+    if version == 0
+      return parse_v0(descriptor, directory, source_description, unparsed_text)
+    end
+
     return parse_v1(descriptor, directory, source_description, unparsed_text)
   end
 
@@ -70,20 +73,15 @@ class Fig::Parser
 
     result = version_parser.parse(unparsed_text)
     if result.nil?
-      raise_parse_error(version_parser, extended_description)
+      raise_parse_error(version_parser, unparsed_text, extended_description)
     end
 
     statement = result.get_grammar_version(
       Fig::ParserPackageBuildState.new(descriptor, extended_description)
     )
-    return 1 if not statement
+    return 0 if not statement
 
     version = statement.version
-    if version == 0
-      raise Fig::PackageParseError.new(
-        %Q<Zero is not a valid grammar version#{statement.position_string()}.>
-      )
-    end
     if version > 1
       raise Fig::PackageParseError.new(
         %Q<Don't know how to parse grammar version #{version}#{statement.position_string()}.>
@@ -93,18 +91,51 @@ class Fig::Parser
     return version
   end
 
+  def parse_v0(descriptor, directory, source_description, unparsed_text)
+    stripped_text = unparsed_text.gsub(/#.*$/, '') # Blech.
+
+    v0_parser = Fig::Grammar::V0Parser.new
+
+    return drive_parser(
+      v0_parser,
+      descriptor,
+      directory,
+      source_description,
+      unparsed_text,
+      stripped_text
+    )
+  end
+
   def parse_v1(descriptor, directory, source_description, unparsed_text)
     v1_parser = Fig::Grammar::V1Parser.new
 
+    return drive_parser(
+      v1_parser,
+      descriptor,
+      directory,
+      source_description,
+      unparsed_text,
+      unparsed_text
+    )
+  end
+
+  def drive_parser(
+    parser,
+    descriptor,
+    directory,
+    source_description,
+    unparsed_text, # Ugh. V0 strips comments via regex.
+    cleaned_text
+  )
     # Extra space at the end because most of the rules in the grammar require
     # trailing whitespace.
-    result = v1_parser.parse(unparsed_text + ' ')
+    result = parser.parse(cleaned_text + ' ')
 
     extended_description =
       extend_source_description(directory, source_description)
 
     if result.nil?
-      raise_parse_error(v1_parser, extended_description)
+      raise_parse_error(parser, cleaned_text, extended_description)
     end
 
     package = result.to_package(
@@ -133,9 +164,22 @@ class Fig::Parser
     return directory
   end
 
-  def raise_parse_error(treetop_parser, extended_description)
+  def raise_parse_error(treetop_parser, text, extended_description)
     message = extended_description
-    message << ": #{treetop_parser.failure_reason}"
+
+    failure_reason = treetop_parser.failure_reason
+    message << ": #{failure_reason}"
+    if message.sub!( / after\s*\z/, %q< after '>)
+      start = treetop_parser.failure_index - 20
+      if start < 0
+        start = 0
+      else
+        message << '...'
+      end
+
+      message << text[start, treetop_parser.failure_index]
+      message << %q<'>
+    end
 
     raise Fig::PackageParseError.new(message)
   end

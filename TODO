@@ -4,3 +4,4 @@ Test quoting of asset command-line options.
 Whack wiki asset descriptions.
 Test actual asset globbing/non-globbing of disk files.
 Test that having a # in a value requires v1 grammar.
+Test that v0 grammar results in unquoted "resources.tar.gz" and v1 grammar quotes it.

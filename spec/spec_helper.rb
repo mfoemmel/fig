@@ -144,6 +144,9 @@ def fig(command_line, first_extra = nil, rest_extra = nil)
     fig_failure << "result: #{result.nil? ? '<nil>' : result}\n"
     fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
     fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
+    if input
+      fig_failure << "input: #{input}\n"
+    end
 
     raise fig_failure
   end

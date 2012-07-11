@@ -9,7 +9,7 @@ module Fig
   module Grammar
     grammar Version
       rule grammar_version
-        statement_start:'grammar' ws 'v' version:[\d]+ ws {
+        statement_start:'grammar' ws_or_comment+ 'v' version:[\d]+ ws* {
           def to_package_statement(build_state)
             return build_state.new_grammar_version_statement(
               statement_start, version

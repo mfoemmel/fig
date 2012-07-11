@@ -6,7 +6,7 @@ require 'fig/statement/resource'
 
 describe Fig::Statement::Resource do
   describe 'unparses' do
-    it %q<«chocolate*pizza» with globbing> do
+    pending %q<«chocolate*pizza» with globbing> do
       statement =
         Fig::Statement::Resource.new(
           nil, nil, 'chocolate*pizza', :glob_if_not_url
@@ -15,7 +15,7 @@ describe Fig::Statement::Resource do
       statement.unparse('<indent>').should ==
         %q[<indent>resource "chocolate*pizza"]
     end
-    it %q<«chocolate*pizza» without globbing> do
+    pending %q<«chocolate*pizza» without globbing> do
       statement =
         Fig::Statement::Resource.new(nil, nil, 'chocolate*pizza', false)
 
@@ -31,7 +31,7 @@ describe Fig::Statement::Resource do
       statement.unparse('<indent>').should ==
         %q[<indent>resource "chocolate\\pizza"]
     end
-    it %q<«chocolate\pizza» without globbing> do
+    pending %q<«chocolate\pizza» without globbing> do
       statement =
         Fig::Statement::Resource.new(nil, nil, 'chocolate\pizza', false)
 

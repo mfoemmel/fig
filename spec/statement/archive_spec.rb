@@ -6,7 +6,7 @@ require 'fig/statement/archive'
 
 describe Fig::Statement::Archive do
   describe 'unparses' do
-    it %q<«chocolate*pizza» with globbing> do
+    pending %q<«chocolate*pizza» with globbing> do
       statement =
         Fig::Statement::Archive.new(
           nil, nil, 'chocolate*pizza', :glob_if_not_url
@@ -15,7 +15,7 @@ describe Fig::Statement::Archive do
       statement.unparse('<indent>').should ==
         %q[<indent>archive "chocolate*pizza"]
     end
-    it %q<«chocolate*pizza» without globbing> do
+    pending %q<«chocolate*pizza» without globbing> do
       statement =
         Fig::Statement::Archive.new(nil, nil, 'chocolate*pizza', false)
 
@@ -31,7 +31,7 @@ describe Fig::Statement::Archive do
       statement.unparse('<indent>').should ==
         %q[<indent>archive "chocolate\\pizza"]
     end
-    it %q<«chocolate\pizza» without globbing> do
+    pending %q<«chocolate\pizza» without globbing> do
       statement =
         Fig::Statement::Archive.new(nil, nil, 'chocolate\pizza', false)
 

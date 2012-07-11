@@ -76,6 +76,7 @@ describe 'Fig' do
       # To copy the contents of a directory, instead of the directory itself,
       # use '/.' as a suffix to the directory name in 'append'.
       input = <<-END
+        grammar v1
         resource 'lib/a library'
         config default
           append FOOPATH=@/lib/.
