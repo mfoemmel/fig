@@ -48,20 +48,21 @@ def main()
   task :build => :gem
 
 
-  treetop_grammars = FileList['lib/fig/**/*.treetop']
+  treetop_grammars  = FileList['lib/fig/**/*.treetop']
   compiled_grammars = treetop_grammars.ext('rb')
 
   rule '.rb' => '.treetop' do
     |task|
 
-    puts "#{task.source} => #{task.name}"
+    puts "Generating code from #{task.source} into #{task.name}."
     Treetop::Compiler::GrammarCompiler.new.compile(task.source, task.name)
   end
 
   desc 'Compile Treetop grammars'
-  task :treetop => compiled_grammars
-  task :gem     => [:treetop]
-  task :rspec   => [:treetop]
+  task :treetop   => compiled_grammars
+  task :gem       => [:treetop]
+  task :rspec     => [:treetop]
+  task :simplecov => [:treetop]
 
 
   desc 'Run RSpec tests.'
@@ -81,6 +82,11 @@ def main()
   RSpec::Core::RakeTask.new(:simplecov) do |spec|
     # Don't use '--order rand' like the standard "spec" task so that generated
     # SimpleCov command-names are consistent between runs.
+
+    # If you're attempting to test SimpleCov configuration, it helps to
+    # restrict RSpec to a subset of the tests.  Uncomment the line below and
+    # edit to the regex that you want.
+    #spec.pattern = 'spec/command/publishing_retrieval_spec.rb'
   end
   task :simplecov do
     clean_up_after_testing()

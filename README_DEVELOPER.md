@@ -1,0 +1,1 @@
+* If you're trying to figure out what classes are what, run the `simplecov` `rake` task and check out the file groupings.  Since we've got a one class per file policy, a file name maps to the class name.
