@@ -39,4 +39,10 @@ class Fig::Statement::Path < Fig::Statement
   def unparse(indent)
     "#{indent}append #{name}=#{value}"
   end
+
+  def minimum_grammar_version_required()
+    # TODO: fix this once going through
+    # Statement.strip_quotes_and_process_escapes()
+    return 0
+  end
 end

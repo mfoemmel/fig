@@ -37,6 +37,18 @@ module Fig::Statement::Asset
     return url().split('/').last()
   end
 
+  def minimum_grammar_version_required()
+    return 1 if url =~ /\s/
+
+    # Can't have octothorpes anywhere in v0 due to comment stripping via regex.
+    return 1 if url =~ /#/
+
+    # If we shouldn't glob, but we've got glob characters...
+    return 1 if ! glob_if_not_url? && url =~ /[*?\[\]{}]/
+
+    return 0
+  end
+
   private
 
   def unparse_asset(indent, keyword)

@@ -13,3 +13,5 @@
 * Document repository locking.
 * Repository class coverage doesn't seem to be hitting resources with URLs.
 * Get all the tests' `$PWD` out of `spec/runtime-work` and into `spec/runtime-work/userhome` so that we're properly testing paths to things.  Too many of the tests are counting on files being in `$HOME`.
+* Rename not_found_error to something like url_not_found_error
+* Clarify "URLs" that are either file-or-URL or proper URLs.

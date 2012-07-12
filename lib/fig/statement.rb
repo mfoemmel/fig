@@ -160,6 +160,10 @@ class Fig::Statement
     raise NotImplementedError
   end
 
+  def minimum_grammar_version_required()
+    raise NotImplementedError
+  end
+
   def urls()
     return []
   end

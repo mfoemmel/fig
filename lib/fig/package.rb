@@ -20,8 +20,12 @@ class Fig::Package
 
   DEFAULT_CONFIG  = 'default'
 
-  attr_reader   :name, :version, :directory, :statements
-  attr_accessor :backtrace, :unparsed_text
+  attr_reader   :name
+  attr_reader   :version
+  attr_reader   :directory
+  attr_reader   :statements
+  attr_accessor :backtrace
+  attr_accessor :unparsed_text
 
   def initialize(name, version, directory, statements)
     @name                 = name

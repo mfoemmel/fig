@@ -71,6 +71,10 @@ class Fig::Statement::Include < Fig::Statement
     return "#{indent}include #{text}"
   end
 
+  def minimum_grammar_version_required()
+    return 0
+  end
+
   private
 
   def referenced_package_name(containing_package)

@@ -46,4 +46,8 @@ class Fig::Statement::Retrieve < Fig::Statement
   def unparse(indent)
     "#{indent}retrieve #{var}->#{path}"
   end
+
+  def minimum_grammar_version_required()
+    return 0
+  end
 end

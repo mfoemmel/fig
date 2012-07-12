@@ -37,4 +37,8 @@ class Fig::Statement::Override < Fig::Statement
     return "#{indent}override " +
       Fig::PackageDescriptor.format(@package_name, @version, nil)
   end
+
+  def minimum_grammar_version_required()
+    return 0
+  end
 end

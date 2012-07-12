@@ -16,4 +16,8 @@ class Fig::Statement::Command < Fig::Statement
   def unparse(indent)
     %Q<#{indent}command "#{@command}">
   end
+
+  def minimum_grammar_version_required()
+    return 0
+  end
 end

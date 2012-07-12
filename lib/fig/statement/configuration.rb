@@ -39,6 +39,10 @@ class Fig::Statement::Configuration < Fig::Statement
     unparse_statements(indent, "config #{@name}", @statements, 'end')
   end
 
+  def minimum_grammar_version_required()
+    return 0
+  end
+
   private
 
   def unparse_statements(indent, prefix, statements, suffix)
