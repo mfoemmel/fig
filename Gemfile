@@ -1,6 +1,8 @@
 # Used for bundler.  Not used to produce the actual gem; that's done in the
 # Rakefile.
 
+require 'rbconfig'
+
 source 'http://rubygems.org'
 
 # All environments
@@ -24,4 +26,9 @@ group :development do
   gem 'rspec-core',         '>= 2.7.1'
   gem 'rspec-expectations', '>= 2.7.0'
   gem 'rspec-mocks',        '>= 2.7.0'
+
+  if 1.9 <= RbConfig::CONFIG['ruby_version'].to_f
+    gem 'simplecov',        '>= 0.6.2'
+    gem 'simplecov-html',   '>= 0.5.3'
+  end
 end
