@@ -94,8 +94,8 @@ def main()
   end
 
   desc 'Create zip file of SimpleCov output.'
-  task :simplecov_archived => [:simplecov]
-  task :simplecov_archived do
+  task :simplecov_archive => [:simplecov]
+  task :simplecov_archive do
     Dir.chdir('coverage') do
       create_zip(
         '../coverage.zip', Dir.entries('.') - %w< . .. .resultset.json >
