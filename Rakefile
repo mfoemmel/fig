@@ -2,6 +2,7 @@
 # It is not possible to do from the rake file anymore.
 
 require 'fileutils'
+require 'libarchive_ruby'
 require 'rake'
 require 'rdoc/task'
 require 'rspec/core/rake_task'
@@ -86,10 +87,20 @@ def main()
     # If you're attempting to test SimpleCov configuration, it helps to
     # restrict RSpec to a subset of the tests.  Uncomment the line below and
     # edit to the regex that you want.
-    #spec.pattern = 'spec/command/publishing_retrieval_spec.rb'
+    #spec.pattern = 'spec/figrc_spec.rb'
   end
   task :simplecov do
     clean_up_after_testing()
+  end
+
+  desc 'Create zip file of SimpleCov output.'
+  task :simplecov_archived => [:simplecov]
+  task :simplecov_archived do
+    Dir.chdir('coverage') do
+      create_zip(
+        '../coverage.zip', Dir.entries('.') - %w< . .. .resultset.json >
+      )
+    end
   end
 
 
@@ -115,7 +126,7 @@ def main()
   desc 'Remove build products and temporary files.'
   task :clean do
     [
-      %w< coverage pkg rdoc resources.tar.gz spec/runtime-work >,
+      %w< coverage coverage.zip pkg rdoc resources.tar.gz spec/runtime-work >,
       compiled_grammars
     ].flatten.each do
       |path|
@@ -218,6 +229,37 @@ def push_to_rubygems(version)
 
     return false
   end
+end
+
+def create_zip(path, file_names)
+  rm_rf path
+  system 'zip', '-r', '-9', '-q', path, *file_names
+
+  # libarchivestatic doesn't support zip files currently
+  # Archive.write_open_filename(
+  #   path, Archive::COMPRESSION_COMPRESS, Archive::FORMAT_ZIP
+  # ) do
+  #   |writer|
+
+  #   file_names.each do
+  #     |file_name|
+
+  #     writer.new_entry do
+  #       |entry|
+
+  #       entry.pathname = file_name
+  #       writer.write_header(entry)
+
+  #       if entry.regular?
+  #         writer.write_data(
+  #           open(file_name) { |reader| reader.binmode; reader.read }
+  #         )
+  #       end
+  #     end
+  #   end
+  # end
+
+  return
 end
 
 def clean_up_after_testing()
