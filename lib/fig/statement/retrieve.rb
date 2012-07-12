@@ -1,4 +1,5 @@
 require 'fig/logging'
+require 'fig/operating_system'
 require 'fig/statement'
 
 module Fig; end
@@ -16,7 +17,10 @@ class Fig::Statement::Retrieve < Fig::Statement
 
     # Yeah, it's not cross-platform, but File doesn't have an #absolute? method
     # and this is better than nothing.
-    if path =~ %r< ^ / >x
+    if (
+          path =~ %r< ^ [\\/] >x \
+      ||  Fig::OperatingSystem.windows? && path =~ %r< ^ [a-z] : >xi
+    )
       Fig::Logging.warn(
         %Q<The retrieve path "#{path}"#{position_string()} looks like it is intended to be absolute; retrieve paths are always treated as relative.>
       )
