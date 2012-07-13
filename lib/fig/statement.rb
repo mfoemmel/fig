@@ -151,8 +151,8 @@ class Fig::Statement
     @source_description = source_description
   end
 
-  # Block will receive a Statement.
-  def walk_statements(&block)
+  # Block will receive a Statement and the current statement containment level.
+  def walk_statements(current_containment_level = 0, &block)
     return
   end
 
