@@ -27,13 +27,11 @@ class Fig::Statement::Configuration < Fig::Statement
     end
   end
 
-  # Block will receive a Statement and the current statement containment level.
-  def walk_statements(current_containment_level = 0, &block)
-    containment_level = current_containment_level + 1
-
+  # Block will receive a Statement.
+  def walk_statements(&block)
     @statements.each do |statement|
-      yield statement, containment_level
-      statement.walk_statements containment_level, &block
+      yield statement
+      statement.walk_statements &block
     end
   end
 
