@@ -1,5 +1,6 @@
 require 'fig/command/action'
 require 'fig/command/action/role/has_no_sub_action'
+require 'fig/unparser/v0'
 
 module  Fig; end
 class   Fig::Command; end
@@ -34,13 +35,10 @@ class Fig::Command::Action::DumpPackageDefinitionParsed
   end
 
   def execute()
-    lines = @execution_context.base_package.statements.map do
-      |statement|
+    unparser = Fig::Unparser::V0.new :emit_as_to_be_published
+    text = unparser.unparse(@execution_context.base_package.statements)
 
-      statement.unparse('')
-    end
-
-    print lines.join("\n").gsub(/\n{3,}/, "\n\n").strip
+    print text.gsub(/\n{3,}/, "\n\n").strip
 
     return EXIT_SUCCESS
   end

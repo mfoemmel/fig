@@ -9,6 +9,7 @@ require 'fig/statement/include'
 require 'fig/statement/path'
 require 'fig/statement/set'
 require 'fig/user_input_error'
+require 'fig/unparser/v0'
 
 module Fig; end
 
@@ -154,7 +155,9 @@ class Fig::RuntimeEnvironment
     when Fig::Statement::Command
       # Skip - has no effect on environment.
     else
-      raise "Unexpected statement in a config block: #{statement.unparse('')}"
+      unparser = Fig::Unparser::V0.new :emit_as_to_be_published
+      text = unparser.unparse([statement]).strip
+      raise "Unexpected statement in a config block: #{text}"
     end
 
     return
@@ -197,8 +200,10 @@ class Fig::RuntimeEnvironment
 
       statement = @retrieves[name]
       if statement.loaded_but_not_referenced?
+        unparser = Fig::Unparser::V0.new :emit_as_to_be_published
+        text = unparser.unparse([statement]).strip
         Fig::Logging.warn \
-          %Q<The #{name} variable was never referenced or didn't need expansion, so "#{statement.unparse('')}"#{statement.position_string} was ignored.>
+          %Q<The #{name} variable was never referenced or didn't need expansion, so "#{text}"#{statement.position_string} was ignored.>
       end
     end
   end

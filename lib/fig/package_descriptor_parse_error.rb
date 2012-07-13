@@ -3,7 +3,7 @@ require 'fig/user_input_error'
 module Fig
   # Could not turn a string into a PackageDescriptor.
   class PackageDescriptorParseError < UserInputError
-    attr_accessor :original_string
+    attr_reader :original_string
 
     def initialize(message, original_string)
       super(message)

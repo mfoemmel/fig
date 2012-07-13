@@ -37,23 +37,11 @@ class Fig::Statement::Configuration < Fig::Statement
     end
   end
 
-  def unparse(indent)
-    unparse_statements(indent, "config #{@name}", @statements, 'end')
+  def unparse_as_version(unparser)
+    return unparser.configuration(self)
   end
 
   def minimum_grammar_version_required()
     return 0
-  end
-
-  private
-
-  def unparse_statements(indent, prefix, statements, suffix)
-    body =
-      @statements.map {|statement| statement.unparse(indent + '  ') }.join("\n")
-    if body.length > 0
-      body << "\n"
-    end
-
-    return "\n#{indent}#{prefix}\n#{body}#{indent}#{suffix}"
   end
 end

@@ -35,8 +35,12 @@ class Fig::Statement::Set < Fig::Statement
     @value = value
   end
 
-  def unparse(indent)
-    "#{indent}set #{name}=#{value}"
+  def is_environment_variable?()
+    return true
+  end
+
+  def unparse_as_version(unparser)
+    return unparser.set(self)
   end
 
   def minimum_grammar_version_required()

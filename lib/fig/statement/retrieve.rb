@@ -47,8 +47,8 @@ class Fig::Statement::Retrieve < Fig::Statement
     @referenced = yea_or_nay
   end
 
-  def unparse(indent)
-    "#{indent}retrieve #{var}->#{path}"
+  def unparse_as_version(unparser)
+    return unparser.retrieve(self)
   end
 
   def minimum_grammar_version_required()

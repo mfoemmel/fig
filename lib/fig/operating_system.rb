@@ -177,10 +177,10 @@ class Fig::OperatingSystem
         end
       rescue Net::FTPPermError => error
         Fig::Logging.debug error.message
-        raise Fig::NotFoundError.new
+        raise Fig::NotFoundError.new error.message, url
       rescue SocketError => error
         Fig::Logging.debug error.message
-        raise Fig::NotFoundError.new
+        raise Fig::NotFoundError.new error.message, url
       end
     when 'http'
       log_download(url, path)
@@ -191,10 +191,10 @@ class Fig::OperatingSystem
           download_via_http_get(url, file)
         rescue SystemCallError => error
           Fig::Logging.debug error.message
-          raise Fig::NotFoundError.new
+          raise Fig::NotFoundError.new error.message, url
         rescue SocketError => error
           Fig::Logging.debug error.message
-          raise Fig::NotFoundError.new
+          raise Fig::NotFoundError.new error.message, url
         end
       end
     when 'ssh'
@@ -208,8 +208,8 @@ class Fig::OperatingSystem
       begin
         FileUtils.cp(uri.path, path)
         return true
-      rescue Errno::ENOENT
-        raise Fig::NotFoundError.new
+      rescue Errno::ENOENT => error
+        raise Fig::NotFoundError.new error.message, url
       end
     else
       Fig::Logging.fatal "Unknown protocol: #{url}"
@@ -429,7 +429,7 @@ class Fig::OperatingSystem
       return false
     when NOT_FOUND
       tempfile.delete
-      raise Fig::NotFoundError.new
+      raise Fig::NotFoundError.new 'Remote path not found', path
     when SUCCESS
       FileUtils.mv(tempfile.path, path)
       return true
@@ -454,7 +454,7 @@ class Fig::OperatingSystem
   def download_via_http_get(uri_string, file, redirection_limit = 10)
     if redirection_limit < 1
       Fig::Logging.debug 'Too many HTTP redirects.'
-      raise Fig::NotFoundError.new
+      raise Fig::NotFoundError.new 'Too many HTTP redirects.', uri_string
     end
 
     response = Net::HTTP.get_response(URI(uri_string))
@@ -468,7 +468,9 @@ class Fig::OperatingSystem
       download_via_http_get(location, file, limit - 1)
     else
       Fig::Logging.debug "Download failed: #{response.code} #{response.message}."
-      raise Fig::NotFoundError.new
+      raise Fig::NotFoundError.new(
+        "Download failed: #{response.code} #{response.message}.", uri_string
+      )
     end
 
     return

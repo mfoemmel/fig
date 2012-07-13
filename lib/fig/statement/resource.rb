@@ -28,7 +28,7 @@ class Fig::Statement::Resource < Fig::Statement
     return nil
   end
 
-  def unparse(indent)
-    return unparse_asset(indent, 'resource')
+  def unparse_as_version(unparser)
+    return unparser.resource(self)
   end
 end

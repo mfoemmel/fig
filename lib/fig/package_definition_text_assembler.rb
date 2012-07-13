@@ -1,11 +1,9 @@
-require 'fig/statement_container'
+require 'fig/unparser/v0'
 
 module Fig; end
 
 # Used for building packages for publishing.
 class Fig::PackageDefinitionTextAssembler
-  include Fig::StatementContainer
-
   attr_reader :input_statements
   attr_reader :output_statements
 
@@ -65,21 +63,8 @@ class Fig::PackageDefinitionTextAssembler
   private
 
   def unparse_statements()
-    statement_text = []
+    unparser = Fig::Unparser::V0.new :emit_as_to_be_published
 
-    output_statements.each do
-      |statement|
-
-      if statement.is_asset?
-        # TODO: Dump this synthetic statement crap and get the
-        # statement.asset_name call into the unparsing itself.
-        statement_text <<
-          statement.class.new(nil, nil, statement.asset_name, false).unparse('')
-      else
-        statement_text << statement.unparse('')
-      end
-    end
-
-    return statement_text
+    return unparser.unparse(@output_statements)
   end
 end

@@ -265,9 +265,9 @@ class Fig::Repository
     temp_dir = package_download_temp_dir(descriptor)
     begin
       install_package(descriptor, temp_dir)
-    rescue Fig::NotFoundError
+    rescue Fig::NotFoundError => error
       Fig::Logging.fatal \
-        "Package not found in remote repository: #{descriptor.to_string()}"
+        "Package #{descriptor.to_string()} not found in remote repository. (Was looking for #{error.path}.)"
 
       delete_local_package(descriptor)
 

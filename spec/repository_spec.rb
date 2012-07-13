@@ -66,11 +66,11 @@ describe 'Repository' do
       repository = create_local_repository
 
       repository.stub(:install_package) do
-        raise Fig::NotFoundError.new('test NotFoundError')
+        raise Fig::NotFoundError.new('test NotFoundError', 'fake path')
       end
 
       Fig::Logging.should_receive(:fatal).with(
-        /package not found.*package-name/i
+        /package.*package-name.*not found/i
       )
 
       descriptor = Fig::PackageDescriptor.new(

@@ -36,8 +36,12 @@ class Fig::Statement::Path < Fig::Statement
     @value = value
   end
 
-  def unparse(indent)
-    "#{indent}append #{name}=#{value}"
+  def is_environment_variable?()
+    return true
+  end
+
+  def unparse_as_version(unparser)
+    return unparser.path(self)
   end
 
   def minimum_grammar_version_required()

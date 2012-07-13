@@ -3,5 +3,12 @@ module Fig
   # may not actually be a problem; i.e. this may be the result of an existence
   # test.
   class NotFoundError < StandardError
+    attr_reader :path
+
+    def initialize(message, path)
+      super(message)
+
+      @path = path
+    end
   end
 end

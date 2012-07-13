@@ -12,9 +12,8 @@ class Fig::Statement::GrammarVersion < Fig::Statement
     @version = version
   end
 
-  def unparse(indent)
-    # Comment out if v0 so that older clients don't have issues.
-    return "#{indent}#{version == 0 ? '# ' : ''}grammar v#{version}\n"
+  def unparse_as_version(unparser)
+    return unparser.grammar_version(self)
   end
 
   def minimum_grammar_version_required()

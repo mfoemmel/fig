@@ -62,13 +62,8 @@ class Fig::Statement::Include < Fig::Statement
     )
   end
 
-  def unparse(indent)
-    text = ''
-    text += package_name() if package_name()
-    text += "/#{version()}" if version()
-    text += ":#{config_name()}" if config_name()
-
-    return "#{indent}include #{text}"
+  def unparse_as_version(unparser)
+    return unparser.include(self)
   end
 
   def minimum_grammar_version_required()

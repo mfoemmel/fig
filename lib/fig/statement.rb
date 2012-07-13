@@ -156,7 +156,7 @@ class Fig::Statement
     return
   end
 
-  def unparse(indent)
+  def unparse_as_version(unparser)
     raise NotImplementedError
   end
 
@@ -169,6 +169,10 @@ class Fig::Statement
   end
 
   def is_asset?()
+    return false
+  end
+
+  def is_environment_variable?()
     return false
   end
 

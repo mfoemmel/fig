@@ -33,9 +33,8 @@ class Fig::Statement::Override < Fig::Statement
     @version = version
   end
 
-  def unparse(indent)
-    return "#{indent}override " +
-      Fig::PackageDescriptor.format(@package_name, @version, nil)
+  def unparse_as_version(unparser)
+    return unparser.override(self)
   end
 
   def minimum_grammar_version_required()

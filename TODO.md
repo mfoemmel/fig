@@ -1,5 +1,4 @@
 * Put spaces into filenames in all the tests.
-* Fix DRW Rakefile to use inc/.
 * Test quoting of asset command-line options.
 * Whack wiki asset descriptions.
 * Test actual asset globbing/non-globbing of disk files.
@@ -15,3 +14,5 @@
 * Get all the tests' `$PWD` out of `spec/runtime-work` and into `spec/runtime-work/userhome` so that we're properly testing paths to things.  Too many of the tests are counting on files being in `$HOME`.
 * Rename not_found_error to something like url_not_found_error
 * Clarify "URLs" that are either file-or-URL or proper URLs.
+* Make use of Statement#is_environment_variable?.
+* Retrieve statements should validate its path the same way that path statements do.

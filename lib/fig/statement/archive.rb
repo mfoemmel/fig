@@ -23,7 +23,7 @@ class Fig::Statement::Archive < Fig::Statement
     return standard_asset_name()
   end
 
-  def unparse(indent)
-    return unparse_asset(indent, 'archive')
+  def unparse_as_version(unparser)
+    return unparser.archive(self)
   end
 end
