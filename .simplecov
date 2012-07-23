@@ -22,7 +22,7 @@ SimpleCov.add_group 'Package runtime environment',
   '(?x) lib/fig/ (?: environment_variables | include_backtrace | runtime_environment | working_directory )'
 
 SimpleCov.add_group 'Package management',
-  '(?x) lib/fig/ (?: repository | package_cache | package_definition | [^/]* parse [^/]* $ )'
+  '(?x) lib/fig/ (?: repository | package_cache | package_definition | [^/]* parse [^/]* $ | unparser/ )'
 
 SimpleCov.add_group 'Fig environment/config',
   '(?x) lib/fig/ (?: application_configuration | config_file| figrc | url_access_error )'
