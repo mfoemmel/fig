@@ -51,21 +51,6 @@ module Fig::Statement::Asset
 
   private
 
-  def unparse_asset(indent, keyword)
-    quote       = %q<'>
-    escaped_url = url
-
-    if escaped_url !~ /\s/
-      # TODO: ugly hack to get an immediate-term set of passing tests.
-      quote = escaped_url =~ /[*?\[\]{}]/ ? '' : %q<">
-    elsif glob_if_not_url?
-      quote = %q<">
-      escaped_url = url.gsub(/\\/, '\\\\')
-    end
-
-    return %Q<#{indent}#{keyword} #{quote}#{escaped_url}#{quote}>
-  end
-
   module ClassMethods
     # Modifies the parameter to deal with quoting, escaping.
     def validate_and_process_escapes_in_url!(url, &block)

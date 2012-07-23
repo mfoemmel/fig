@@ -11,4 +11,44 @@ class Fig::Unparser::V1
 
     return
   end
+
+  def command(statement)
+    add_indent
+
+    @text << %q<command ">
+    @text << statement.command
+    @text << %Q<"\n>
+
+    return
+  end
+
+  def grammar_version(statement)
+    add_indent
+
+    @text << "grammar v1\n"
+
+    return
+  end
+
+  private
+
+  def asset(keyword, statement)
+    quote = %q<'>
+    path  = asset_path statement
+
+    if statement.glob_if_not_url?
+      quote = %q<">
+      path.gsub!(/\\/, '\\\\')
+    end
+
+    add_indent
+    @text << keyword
+    @text << ' '
+    @text << quote
+    @text << path
+    @text << quote
+    @text << "\n"
+
+    return
+  end
 end
