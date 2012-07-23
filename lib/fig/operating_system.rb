@@ -32,10 +32,12 @@ class Fig::OperatingSystem
   end
 
   def get_username()
+    # #ask() comes from highline
     @username ||= ask('Username: ') { |q| q.echo = true }
   end
 
   def get_password()
+    # #ask() comes from highline
     @password ||= ask('Password: ') { |q| q.echo = false }
   end
 
