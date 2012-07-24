@@ -1,9 +1,6 @@
 module Fig; end
 
 module Fig::Unparser
-  attr_reader :indent_string
-  attr_reader :initial_indent_level
-
   def unparse(statements)
     @text         = ''
     @indent_level = @initial_indent_level

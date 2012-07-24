@@ -46,7 +46,7 @@ class Fig::Unparser::V1
 
     if statement.glob_if_not_url?
       quote = %q<">
-      path.gsub!(/\\/, '\\\\')
+      path = path.gsub(/\\/, ('\\' * 4))
     end
 
     add_indent
