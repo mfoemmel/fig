@@ -17,7 +17,7 @@ describe 'Parser' do
 
   def test_no_parse_exception(fig_input)
     application_configuration = new_configuration
-    Fig::Parser.new(application_configuration, false).parse_package(
+    package = Fig::Parser.new(application_configuration, false).parse_package(
       Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
       'foo_directory',
       'source description',
@@ -25,7 +25,7 @@ describe 'Parser' do
     )
     # Got no exception.
 
-    return
+    return package
   end
 
   def test_error(fig_input, error_class, message_pattern)
@@ -292,12 +292,15 @@ describe 'Parser' do
       end
 
       it %q<handles octothorpes in the URL in the v1 grammar> do
-        test_no_parse_exception(<<-"END_PACKAGE")
+        package = test_no_parse_exception(<<-"END_PACKAGE")
           grammar v1
           #{asset_type} 'foo#bar'
           config default
           end
         END_PACKAGE
+
+        url = [package.archive_urls, package.resource_urls].flatten[0]
+        url.should == 'foo#bar'
       end
 
       describe %Q<handles plus signs in the path (e.g. for C++ libraries)> do
