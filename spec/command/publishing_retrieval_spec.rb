@@ -71,7 +71,7 @@ describe 'Fig' do
       end
     end
 
-    it 'retrieves resource that is a directory' do
+    pending 'retrieves resource that is a directory' do
       write_file("#{lib_directory}/a library", 'some library')
       # To copy the contents of a directory, instead of the directory itself,
       # use '/.' as a suffix to the directory name in 'append'.

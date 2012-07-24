@@ -1,4 +1,5 @@
 require 'fig/unparser/v0'
+require 'fig/unparser/v1'
 
 module Fig; end
 
@@ -63,7 +64,17 @@ class Fig::PackageDefinitionTextAssembler
   private
 
   def unparse_statements()
-    unparser = Fig::Unparser::V0.new :emit_as_to_be_published
+    versions = @output_statements.map {|s| s.minimum_grammar_version_required}
+    version = versions.max || 0
+
+    unparser_class = nil
+    if version == 1
+      unparser_class = Fig::Unparser::V1
+    else
+      unparser_class = Fig::Unparser::V0
+    end
+
+    unparser = unparser_class.new :emit_as_to_be_published
 
     return unparser.unparse(@output_statements)
   end
