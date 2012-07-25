@@ -80,7 +80,9 @@ module Fig::Unparser
   end
 
   def path(statement)
-    raise NotImplementedError
+    environment_variable(statement, 'append')
+
+    return
   end
 
   def resource(statement)
@@ -94,7 +96,9 @@ module Fig::Unparser
   end
 
   def set(statement)
-    raise NotImplementedError
+    environment_variable(statement, 'set')
+
+    return
   end
 
   private
@@ -109,6 +113,10 @@ module Fig::Unparser
     end
 
     return statement.asset_name
+  end
+
+  def environment_variable(statement, keyword)
+    raise NotImplementedError
   end
 
   def add_indent()

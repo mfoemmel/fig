@@ -40,12 +40,6 @@ class Fig::Unparser::V0
     return
   end
 
-  def path(statement)
-    environment_variable(statement, 'append')
-
-    return
-  end
-
   def retrieve(statement)
     add_indent
 
@@ -54,12 +48,6 @@ class Fig::Unparser::V0
     @text << '->'
     @text << statement.path
     @text << "\n"
-
-    return
-  end
-
-  def set(statement)
-    environment_variable(statement, 'set')
 
     return
   end
