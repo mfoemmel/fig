@@ -54,19 +54,6 @@ class Fig::Unparser::V0
 
   private
 
-  def environment_variable(statement, keyword)
-    add_indent
-
-    @text << keyword
-    @text << ' '
-    @text << statement.name
-    @text << '='
-    @text << statement.value
-    @text << "\n"
-
-    return
-  end
-
   def asset(keyword, statement)
     path  = asset_path statement
     quote = path =~ /[*?\[\]{}]/ ? '' : %q<">
@@ -77,6 +64,19 @@ class Fig::Unparser::V0
     @text << quote
     @text << path
     @text << quote
+    @text << "\n"
+
+    return
+  end
+
+  def environment_variable(statement, keyword)
+    add_indent
+
+    @text << keyword
+    @text << ' '
+    @text << statement.name
+    @text << '='
+    @text << statement.value
     @text << "\n"
 
     return

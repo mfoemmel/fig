@@ -59,4 +59,19 @@ class Fig::Unparser::V1
 
     return
   end
+
+  def environment_variable(statement, keyword)
+    # TODO: temporarily hack v0 grammar in here so we can test asset
+    # statements; proper implementation once asset statements are done.
+    add_indent
+
+    @text << keyword
+    @text << ' '
+    @text << statement.name
+    @text << '='
+    @text << statement.value
+    @text << "\n"
+
+    return
+  end
 end
