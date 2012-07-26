@@ -26,17 +26,19 @@ describe 'Fig' do
       end
     end
 
-    pending %q<is not accepted if it isn't the first statement> do
-      input = <<-END
-        config default
-        end
-        grammar v1
-      END
+    it %q<is not accepted if it isn't the first statement> do
+      pending 'not implemented yet' do
+        input = <<-END
+          config default
+          end
+          grammar v1
+        END
 
-      out, err, exitstatus = fig([], input, :no_raise_on_error => true)
-      err.should =~ /grammar statement wasn't first statement/i
-      out.should == ''
-      exitstatus.should_not == 0
+        out, err, exitstatus = fig([], input, :no_raise_on_error => true)
+        err.should =~ /grammar statement wasn't first statement/i
+        out.should == ''
+        exitstatus.should_not == 0
+      end
     end
 
     it %q<is not accepted for future version> do

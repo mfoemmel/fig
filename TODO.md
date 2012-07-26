@@ -1,6 +1,5 @@
 # Code changes
 
-* URL decoding of assets, e.g. `archive http://example.com/hi%20there`.
 * Make use of Statement#is_environment_variable?().
 * Rename not_found_error to something like url_not_found_error
 * Retrieve statements should validate their paths the same way that path statements do.
@@ -10,12 +9,14 @@
 
 Whitespace/quoting stuff in order to have a working command line.  It is currently possible to publish packages using `--set`/`--append`/`--resource`/`--archive` that can't be parsed.
 
+* **Big yak in need of a trim**: URL en/de-coding of assets, e.g. `archive http://example.com/hi%20there`.
 * Asset statements
     * In package definition
     * On command-line
 * Environment variable statements
     * In package definition
     * On command-line
+* Fix all "pending" tests.
 * Quoting of retrieves: post 1.0? Although... this really should work along with environment variable statements.  Need to figure out escaping of "[package]".
 
 # Tests
