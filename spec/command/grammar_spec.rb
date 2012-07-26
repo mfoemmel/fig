@@ -7,7 +7,9 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    %w< 0 1 >.each do
+    # TODO: Restore v1 acceptance.
+    # %w< 0 1 >.each do
+    %w< 0 >.each do
       |version|
 
       it %Q<for v#{version} is accepted> do
@@ -39,6 +41,19 @@ describe 'Fig' do
         out.should == ''
         exitstatus.should_not == 0
       end
+    end
+
+    it %q<for v1 is not accepted currently (TODO: delete this test)> do
+      input = <<-END
+        grammar v1
+        config default
+        end
+      END
+
+      out, err, exitstatus = fig([], input, :no_raise_on_error => true)
+      err.should =~ /don't know how to parse grammar version/i
+      out.should == ''
+      exitstatus.should_not == 0
     end
 
     it %q<is not accepted for future version> do

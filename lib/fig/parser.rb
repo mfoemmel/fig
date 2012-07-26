@@ -82,7 +82,9 @@ class Fig::Parser
     return 0 if not statement
 
     version = statement.version
-    if version > 1
+    # TODO: restore v1 grammar.
+    # if version > 1
+    if version > 0
       raise Fig::PackageParseError.new(
         %Q<Don't know how to parse grammar version #{version}#{statement.position_string()}.>
       )
