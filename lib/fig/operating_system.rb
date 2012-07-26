@@ -219,29 +219,36 @@ class Fig::OperatingSystem
     end
   end
 
-  def download_resource(url, dir)
-    FileUtils.mkdir_p(dir)
-    download(url, File.join(dir, URI.parse(url).path.split('/').last))
+  # Returns the basename and full path to the download.
+  def download_resource(url, download_directory)
+    FileUtils.mkdir_p(download_directory)
+
+    basename = URI.parse(url).path.split('/').last
+    path     = File.join(download_directory, basename)
+
+    download(url, path)
+
+    return basename, path
   end
 
-  def download_and_unpack_archive(url, dir)
-    FileUtils.mkdir_p(dir)
-    basename = URI.parse(url).path.split('/').last
-    path = File.join(dir, basename)
-    download(url, path)
+  def download_and_unpack_archive(url, download_directory)
+    basename, path = download_resource(url, download_directory)
+
     case basename
     when /\.tar\.gz$/
-      unpack_archive(dir, path)
+      unpack_archive(download_directory, path)
     when /\.tgz$/
-      unpack_archive(dir, path)
+      unpack_archive(download_directory, path)
     when /\.tar\.bz2$/
-      unpack_archive(dir, path)
+      unpack_archive(download_directory, path)
     when /\.zip$/
-      unpack_archive(dir, path)
+      unpack_archive(download_directory, path)
     else
       Fig::Logging.fatal "Unknown archive type: #{basename}"
       raise Fig::NetworkError.new("Unknown archive type: #{basename}")
     end
+
+    return
   end
 
   def upload(local_file, remote_file)
