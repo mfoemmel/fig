@@ -463,6 +463,47 @@ describe 'Fig' do
         fig(%w<--update-if-missing --include foo/1.2.3 -- hello.bat>)[0].should ==
           'cheese'
       end
+
+      describe 'publishes using the correct grammar version' do
+        let(:example_file_without_spaces) { "#{USER_HOME}/example-without-spaces" }
+        let(:example_file_with_spaces)    { "#{USER_HOME}/example with spaces" }
+
+        before(:each) do
+          FileUtils.mkdir_p USER_HOME
+          write_file example_file_without_spaces, ''
+          write_file example_file_with_spaces, ''
+        end
+
+        it 'using the --archive option with a path without spaces' do
+          fig(
+            [
+              %w<--publish foo/1.2.3 --set x=y --archive>,
+              example_file_without_spaces
+            ],
+            :current_directory => USER_HOME
+          )
+
+          out, err = fig(%w<foo/1.2.3 --dump-package-definition-text>)
+
+          out.should =~ /\n \s* \# \s* grammar \s+ v0 \b/x
+          err.should == ''
+        end
+
+        pending 'using the --archive option with a path with spaces' do
+          fig(
+            [
+              %w<--publish foo/1.2.3 --set x=y --archive>,
+              example_file_with_spaces
+            ],
+            :current_directory => USER_HOME
+          )
+
+          out, err = fig(%w<foo/1.2.3 --dump-package-definition-text>)
+
+          out.should =~ /\n \s* grammar \s+ v1 \b/x
+          err.should == ''
+        end
+      end
     end
   end
 end
