@@ -75,7 +75,14 @@ class Fig::PackageDefinitionTextAssembler
     end
 
     unparser = unparser_class.new :emit_as_to_be_published
+    text = unparser.unparse(@output_statements)
 
-    return unparser.unparse(@output_statements)
+    # TODO: Until v1 grammar handling is done, ensure we don't emit anything
+    # old fig versions cannot handle.
+    if version != 0
+      raise "Reached a point where something could not be represented by the current grammar. Bailing out.\n\nWould have attempted:\n#{text}"
+    end
+
+    return text
   end
 end
