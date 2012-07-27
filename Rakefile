@@ -81,7 +81,7 @@ def main()
     ENV['FIG_COVERAGE'] = 'true'
   end
   RSpec::Core::RakeTask.new(:simplecov) do |spec|
-    # Don't use '--order rand' like the standard "spec" task so that generated
+    # Don't use '--order rand' like the standard "rspec" task so that generated
     # SimpleCov command-names are consistent between runs.
 
     # If you're attempting to test SimpleCov configuration, it helps to
@@ -106,7 +106,7 @@ def main()
 
   desc 'Tag the release, push the tag to the "origin" remote repository, and publish the rubygem to rubygems.org.'
   task :publish do
-    if local_repo_is_updated?
+    if local_repo_up_to_date?
       version = get_version
       if push_to_rubygems(version)
         tag_and_push_to_git(version)
@@ -133,6 +133,8 @@ def main()
       rm_rf "./#{path}"
     end
   end
+
+  return
 end
 
 
@@ -142,11 +144,11 @@ def get_version
   return Fig::VERSION
 end
 
-def clean_git_working_directory?
+def git_working_directory_clean?
   return %x<git ls-files --deleted --modified --others --exclude-standard> == ''
 end
 
-def tag_exists_in_local_repo(new_tag)
+def tag_exists_in_local_repo?(new_tag)
   tag_exists = false
   tag_list = %x<git tag>
   tags = tag_list.split("\n")
@@ -162,7 +164,7 @@ end
 def create_git_tag(version)
   new_tag = "v#{version}"
   print "Checking for an existing #{new_tag} git tag... "
-  if not tag_exists_in_local_repo(new_tag)
+  if not tag_exists_in_local_repo?(new_tag)
     puts 'Tag does not already exist.'
     puts "Creating #{new_tag} tag."
     %x<git tag #{new_tag}>
@@ -171,7 +173,7 @@ def create_git_tag(version)
     return nil
   end
 
-  if not tag_exists_in_local_repo(new_tag)
+  if not tag_exists_in_local_repo?(new_tag)
     puts "The tag was not successfully created. Aborting!"
     return nil
   end
@@ -190,7 +192,7 @@ end
 
 def tag_and_push_to_git(version)
   new_tag = nil
-  if clean_git_working_directory?
+  if git_working_directory_clean?
     new_tag = create_git_tag(version)
     push_to_remote_repo(new_tag)
   else
@@ -202,7 +204,7 @@ def tag_and_push_to_git(version)
   return new_tag != nil
 end
 
-def local_repo_is_updated?
+def local_repo_up_to_date?
   pull_results = %x{git pull 2>&1}
   if pull_results.chomp != "Already up-to-date."
     puts 'The local repository was not up-to-date:'
@@ -229,6 +231,8 @@ def push_to_rubygems(version)
 
     return false
   end
+
+  return
 end
 
 def create_zip(path, file_names)
@@ -264,6 +268,8 @@ end
 
 def clean_up_after_testing()
   rm_rf './.fig'
+
+  return
 end
 
 
