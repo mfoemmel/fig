@@ -18,37 +18,6 @@ include FileUtils
 def main()
   task :default => :rspec
 
-  fig_gemspec = Gem::Specification.new do |gemspec|
-    gemspec.name        = 'fig'
-    gemspec.email       = 'git@foemmel.com'
-    gemspec.homepage    = 'http://github.com/mfoemmel/fig'
-    gemspec.authors     = ['Matthew Foemmel']
-    gemspec.platform    = Gem::Platform::RUBY
-    gemspec.version     = get_version
-    gemspec.summary     =
-      'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
-    gemspec.description =
-      "Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected."
-
-    add_dependencies(gemspec) # From inc/build_utilities above.
-
-    gemspec.files = FileList[
-      'Changes',
-      'bin/*',
-      'lib/**/*',
-      'LICENSE',
-      'README.md'
-    ].to_a
-
-    gemspec.executables = ['fig', 'fig-download']
-  end
-
-  Gem::PackageTask.new(fig_gemspec).define
-
-  desc 'Alias for the gem task.'
-  task :build => :gem
-
-
   treetop_grammars  = FileList['lib/fig/**/*.treetop']
   compiled_grammars = treetop_grammars.ext('rb')
 
@@ -64,6 +33,39 @@ def main()
   task :gem       => [:treetop]
   task :rspec     => [:treetop]
   task :simplecov => [:treetop]
+
+
+  fig_gemspec = Gem::Specification.new do |gemspec|
+    gemspec.name        = 'fig'
+    gemspec.email       = 'git@foemmel.com'
+    gemspec.homepage    = 'http://github.com/mfoemmel/fig'
+    gemspec.authors     = ['Matthew Foemmel']
+    gemspec.platform    = Gem::Platform::RUBY
+    gemspec.version     = get_version
+    gemspec.summary     =
+      'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
+    gemspec.description =
+      "Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected."
+
+    add_dependencies(gemspec) # From inc/build_utilities above.
+
+    gemspec.files = FileList[
+      * %w<
+        Changes
+        bin/*
+        lib/**/*
+        LICENSE
+        README.md
+      >
+    ].to_a + compiled_grammars
+
+    gemspec.executables = ['fig', 'fig-download']
+  end
+
+  Gem::PackageTask.new(fig_gemspec).define
+
+  desc 'Alias for the gem task.'
+  task :build => :gem
 
 
   desc 'Run RSpec tests.'
