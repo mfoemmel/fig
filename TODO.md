@@ -1,9 +1,10 @@
 # Code changes
 
 * Make use of Statement#is_environment_variable?().
-* Rename not_found_error to something like url_not_found_error
+* Rename not_found_error to something like url_not_found_error.
+* Multiple places directly instantiate Unparser::V0.  Need to have a central place to determine unparse grammar.
 * Retrieve statements should validate their paths the same way that path statements do.
-* Periodically `ack '\bTODO:'`.
+* Periodically `ack '\bTODO:'` and fix what we can.
 
 ## v1.0
 
@@ -21,7 +22,8 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 
 # Tests
 
-* Put spaces into filenames in all the tests.
+* Put spaces into filenames in all the tests.  Can't do this until environment variable statements can handle whitespace.
+* Remove use of exit_code from all tests invoking `fig()` without `:no_raise_on_error`.
 * Test quoting of asset command-line options.
 * Test actual asset globbing/non-globbing of disk files.
 * Test that having a # in a value requires v1 grammar.
