@@ -57,7 +57,6 @@ class Popen
   def self.setup_open3
     require 'open3'
     def self.popen(*cmd)
-File.open('/dev/tty', 'w') { |h| h.puts "HERE! #{__FILE__}:#{__LINE__}" }
       exit_code = nil
 
       Open3.popen3(*cmd) { |stdin, stdout, stderr, wait_thread|
