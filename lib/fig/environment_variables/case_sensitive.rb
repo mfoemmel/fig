@@ -1,7 +1,7 @@
 require 'fig/environment_variables'
 
 module Fig; end;
-module EnvironmentVariables; end
+module Fig::EnvironmentVariables; end
 
 # Manager of a set of environment variables where the variable names are
 # case-sensitive, e.g. on *nix.
