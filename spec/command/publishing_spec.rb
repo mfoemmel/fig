@@ -490,20 +490,18 @@ describe 'Fig' do
         end
 
         it 'using the --archive option with a path with spaces' do
-          pending 'URL escaping' do
-            fig(
-              [
-                %w<--publish foo/1.2.3 --set x=y --archive>,
-                example_file_with_spaces
-              ],
-              :current_directory => USER_HOME
-            )
+          fig(
+            [
+              %w<--publish foo/1.2.3 --set x=y --archive>,
+              example_file_with_spaces
+            ],
+            :current_directory => USER_HOME
+          )
 
-            out, err = fig(%w<foo/1.2.3 --dump-package-definition-text>)
+          out, err = fig(%w<foo/1.2.3 --dump-package-definition-text>)
 
-            out.should =~ /\n \s* grammar \s+ v1 \b/x
-            err.should == ''
-          end
+          out.should =~ /\n \s* grammar \s+ v1 \b/x
+          err.should == ''
         end
       end
     end

@@ -212,7 +212,9 @@ class Fig::Repository
     if @remote_repository_version.nil?
       temp_dir = base_temp_dir()
       @operating_system.delete_and_recreate_directory(temp_dir)
-      remote_version_file = "#{remote_repository_url()}/#{VERSION_FILE_NAME}"
+      remote_version_file = Fig::URL.append_path_components(
+        remote_repository_url(), [VERSION_FILE_NAME]
+      )
       local_version_file = File.join(temp_dir, "remote-#{VERSION_FILE_NAME}")
       begin
         @operating_system.download(remote_version_file, local_version_file)
@@ -299,16 +301,20 @@ class Fig::Repository
 
     package = read_package_from_directory(temp_dir, descriptor)
 
+    remote_package_directory = remote_dir_for_package(descriptor)
     package.archive_urls.each do |archive_url|
       if not Fig::URL.is_url?(archive_url)
-        archive_url = remote_dir_for_package(descriptor) + '/' + archive_url
+        archive_url = Fig::URL.append_path_components(
+          remote_package_directory, [archive_url]
+        )
       end
       @operating_system.download_and_unpack_archive(archive_url, temp_dir)
     end
     package.resource_urls.each do |resource_url|
       if not Fig::URL.is_url?(resource_url)
-        resource_url =
-          remote_dir_for_package(descriptor) + '/' + resource_url
+        resource_url = Fig::URL.append_path_components(
+          remote_package_directory, [resource_url]
+        )
       end
       @operating_system.download_resource(resource_url, temp_dir)
     end
@@ -348,10 +354,14 @@ class Fig::Repository
 
   def delete_local_package(descriptor)
     FileUtils.rm_rf(local_dir_for_package(descriptor))
+
+    return
   end
 
   def remote_fig_file_for_package(descriptor)
-    "#{remote_dir_for_package(descriptor)}/#{PACKAGE_FILE_IN_REPO}"
+    return Fig::URL.append_path_components(
+      remote_dir_for_package(descriptor), [PACKAGE_FILE_IN_REPO]
+    )
   end
 
   def local_fig_file_for_package(descriptor)
@@ -363,7 +373,9 @@ class Fig::Repository
   end
 
   def remote_dir_for_package(descriptor)
-    "#{remote_repository_url()}/#{descriptor.name}/#{descriptor.version}"
+    return Fig::URL.append_path_components(
+      remote_repository_url(), [descriptor.name, descriptor.version]
+    )
   end
 
   def local_dir_for_package(descriptor)

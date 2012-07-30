@@ -1,3 +1,5 @@
+require 'uri'
+
 require 'fig/parser'
 require 'fig/statement'
 require 'fig/url'
@@ -34,7 +36,13 @@ module Fig::Statement::Asset
   def standard_asset_name()
     # Not so hot of an idea if the URL has query parameters in it, but not
     # going to fix this now.
-    return url().split('/').last()
+    basename = url().split('/').last
+
+    if Fig::URL.is_url? url
+      return URI.decode_www_form_component basename
+    end
+
+    return basename
   end
 
   def minimum_grammar_version_required()
