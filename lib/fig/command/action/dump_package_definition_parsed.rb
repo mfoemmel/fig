@@ -35,7 +35,7 @@ class Fig::Command::Action::DumpPackageDefinitionParsed
   end
 
   def execute()
-    unparser = Fig::Unparser::V0.new :emit_as_to_be_published
+    unparser = Fig::Unparser::V0.new :emit_as_input
     text = unparser.unparse(@execution_context.base_package.statements)
 
     print text.gsub(/\n{3,}/, "\n\n").strip
