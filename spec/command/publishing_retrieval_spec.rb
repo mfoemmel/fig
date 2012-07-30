@@ -72,32 +72,30 @@ describe 'Fig' do
     end
 
     it 'retrieves resource that is a directory' do
-      pending 'Removal of block on publishing in v1 format.' do
-        write_file("#{lib_directory}/a library", 'some library')
-        # To copy the contents of a directory, instead of the directory itself,
-        # use '/.' as a suffix to the directory name in 'append'.
-        input = <<-END
-          grammar v1
-          resource 'lib/a library'
-          config default
-            append FOOPATH=@/lib/.
-          end
-        END
-        fig(
-          %w<--publish prerequisite/1.2.3>,
-          input,
-          :current_directory => publish_from_directory
-        )
-        input = <<-END
-          retrieve FOOPATH->retrieve/[package]
-          config default
-            include prerequisite/1.2.3
-          end
-        END
-        fig(%w<--update-if-missing>, input)
-        File.read("#{retrieve_directory}/prerequisite/a library").should ==
-          'some library'
-      end
+      write_file("#{lib_directory}/a library", 'some library')
+      # To copy the contents of a directory, instead of the directory itself,
+      # use '/.' as a suffix to the directory name in 'append'.
+      input = <<-END
+        grammar v1
+        resource 'lib/a library'
+        config default
+          append FOOPATH=@/lib/.
+        end
+      END
+      fig(
+        %w<--publish prerequisite/1.2.3>,
+        input,
+        :current_directory => publish_from_directory
+      )
+      input = <<-END
+        retrieve FOOPATH->retrieve/[package]
+        config default
+          include prerequisite/1.2.3
+        end
+      END
+      fig(%w<--update-if-missing>, input)
+      File.read("#{retrieve_directory}/prerequisite/a library").should ==
+        'some library'
     end
 
     it 'reports error for missing file in a package' do
