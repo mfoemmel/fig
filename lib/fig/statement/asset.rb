@@ -1,4 +1,4 @@
-require 'uri'
+require 'cgi'
 
 require 'fig/parser'
 require 'fig/statement'
@@ -39,7 +39,7 @@ module Fig::Statement::Asset
     basename = url().split('/').last
 
     if Fig::URL.is_url? url
-      return URI.decode_www_form_component basename
+      return CGI.unescape basename
     end
 
     return basename

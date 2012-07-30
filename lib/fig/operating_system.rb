@@ -1,3 +1,4 @@
+require 'cgi'
 require 'fileutils'
 require 'find'
 # Must specify absolute path of ::Archive when using
@@ -223,9 +224,7 @@ class Fig::OperatingSystem
   def download_resource(url, download_directory)
     FileUtils.mkdir_p(download_directory)
 
-    basename = URI.decode_www_form_component(
-      URI.parse(url).path.split('/').last
-    )
+    basename = CGI.unescape URI.parse(url).path.split('/').last
     path     = File.join(download_directory, basename)
 
     download(url, path)
