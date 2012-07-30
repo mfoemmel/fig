@@ -10,7 +10,7 @@
 
 Whitespace/quoting stuff in order to have a working command line.  It is currently possible to publish packages using `--set`/`--append`/`--resource`/`--archive` that can't be parsed.
 
-* **Big yak in need of a trim**: URL en/de-coding of assets, e.g. `archive http://example.com/hi%20there`.
+* **Big yak in need of a trim**: URL en/de-coding of assets, e.g. `archive http://example.com/hi%20there`.  The URI class barfs on spaces.
 * Asset statements
     * In package definition
     * On command-line
