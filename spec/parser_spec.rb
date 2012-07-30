@@ -1,3 +1,4 @@
+# coding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/application_configuration'
@@ -274,7 +275,7 @@ describe 'Parser' do
       %w< @ " < > | >.each do
         |character|
 
-        it %Q<get a parse error with "#{character}" in a URL in the v0 grammar> do
+        it %Q<get a parse error with «#{character}» in a URL in the v0 grammar> do
           input = <<-"END_PACKAGE"
             #{asset_type} #{character}
           END_PACKAGE
@@ -282,7 +283,7 @@ describe 'Parser' do
           test_package_parse_error(input)
         end
 
-        it %Q<reject "#{character}" in a URL in the v1 grammar> do
+        it %Q<reject «#{character}» in a URL in the v1 grammar> do
           pending 'removal of the block on the v1 format' do
             input = <<-"END_PACKAGE"
               grammar v1
