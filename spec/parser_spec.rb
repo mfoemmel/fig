@@ -176,9 +176,7 @@ describe 'Parser' do
   end
 
   describe 'command statements' do
-    # TODO: Restore v1 grammar.
-    # %w< 0 1 >.each do
-    %w< 0 >.each do
+    %w< 0 1 >.each do
       |version|
 
       describe %Q<in the v#{version} grammar> do
@@ -246,9 +244,7 @@ describe 'Parser' do
       |display, character|
 
       describe %Q<reject "#{display}" in a PATH component> do
-        # TODO: Restore v1 grammar.
-        # %w< 0 1 >.each do
-        %w< 0 >.each do
+        %w< 0 1 >.each do
           |version|
 
           it %Q<in the v#{version} grammar> do
@@ -284,38 +280,32 @@ describe 'Parser' do
         end
 
         it %Q<reject «#{character}» in a URL in the v1 grammar> do
-          pending 'removal of the block on the v1 format' do
-            input = <<-"END_PACKAGE"
-              grammar v1
-              #{asset_type} #{character}
-            END_PACKAGE
+          input = <<-"END_PACKAGE"
+            grammar v1
+            #{asset_type} #{character}
+          END_PACKAGE
 
-            test_user_input_error(
-              input,
-              %r<invalid url/path for #{asset_type} statement: "#{character}">i
-            )
-          end
+          test_user_input_error(
+            input,
+            %r<invalid url/path for #{asset_type} statement: "#{character}">i
+          )
         end
       end
 
       it %q<handles octothorpes in the URL in the v1 grammar> do
-        pending 'removal of the block on the v1 format' do
-          package = test_no_parse_exception(<<-"END_PACKAGE")
-            grammar v1
-            #{asset_type} 'foo#bar'
-            config default
-            end
-          END_PACKAGE
+        package = test_no_parse_exception(<<-"END_PACKAGE")
+          grammar v1
+          #{asset_type} 'foo#bar'
+          config default
+          end
+        END_PACKAGE
 
-          url = [package.archive_urls, package.resource_urls].flatten[0]
-          url.should == 'foo#bar'
-        end
+        url = [package.archive_urls, package.resource_urls].flatten[0]
+        url.should == 'foo#bar'
       end
 
       describe %Q<handles plus signs in the path (e.g. for C++ libraries)> do
-        # TODO: Restore v1 grammar.
-        # %w< 0 1 >.each do
-        %w< 0 >.each do
+        %w< 0 1 >.each do
           |version|
 
           it %Q<in the v#{version} grammar> do
