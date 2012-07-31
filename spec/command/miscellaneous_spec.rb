@@ -63,8 +63,7 @@ describe 'Fig' do
 
   it 'prints the version number' do
     %w/-v --version/.each do |option|
-      (out, err, exitstatus) = fig([option])
-      exitstatus.should == 0
+      out, err = fig([option])
       err.should == ''
       out.should =~ / \d+ \. \d+ \. \d+ /x
     end
@@ -75,8 +74,7 @@ describe 'Fig' do
       |option|
 
       it option do
-        (out, err, exitstatus) = fig([option])
-        exitstatus.should == 0
+        out, err = fig([option])
         err.should == ''
         out.should =~ / \b summary \b   /xi
         out.should =~ / \b fig \b       /x
@@ -90,8 +88,7 @@ describe 'Fig' do
   end
 
   it 'emits full help with --help-long' do
-    (out, err, exitstatus) = fig(['--help-long'])
-    exitstatus.should == 0
+    out, err = fig(['--help-long'])
     err.should == ''
     out.should =~ / \b fig \b             /x
     out.should =~ / --update \b           /x
@@ -106,8 +103,7 @@ describe 'Fig' do
   end
 
   it 'emits option list with --options' do
-    (out, err, exitstatus) = fig(['--options'])
-    exitstatus.should == 0
+    out, err = fig(['--options'])
     err.should == ''
     out.should =~ / options:      /ix
     out.should =~ / --help \b     /x

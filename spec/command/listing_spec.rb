@@ -418,8 +418,7 @@ end
 def test_list_configs(package_name)
   set_up_local_and_remote_repository
 
-  (out, err, exitstatus) = fig(['--list-configs', "#{package_name}/1.2.3"])
-  exitstatus.should == 0
+  out, err = fig(['--list-configs', "#{package_name}/1.2.3"])
   out.should == "default\nnondefault"
   err.should == ''
 
@@ -444,8 +443,7 @@ describe 'Fig' do
     end
 
     it %q<prints nothing with an empty repository> do
-      (out, err, exitstatus) = fig(%w<--list-local>)
-      exitstatus.should == 0
+      out, err = fig(%w<--list-local>)
       out.should == ''
       err.should == ''
     end
@@ -453,8 +451,7 @@ describe 'Fig' do
     it %q<prints only local packages> do
       set_up_local_and_remote_repository
 
-      (out, err, exitstatus) = fig(%w<--list-local>)
-      exitstatus.should == 0
+      out, err = fig(%w<--list-local>)
       out.should == "both/1.2.3\nlocal-only/1.2.3\nprerequisite/1.2.3"
       err.should == ''
     end
@@ -483,8 +480,7 @@ describe 'Fig' do
     end
 
     it %q<prints nothing with an empty repository> do
-      (out, err, exitstatus) = fig(%w<--list-remote>)
-      exitstatus.should == 0
+      out, err = fig(%w<--list-remote>)
       out.should == ''
       err.should == ''
     end
@@ -492,8 +488,7 @@ describe 'Fig' do
     it %q<prints only remote packages> do
       set_up_local_and_remote_repository
 
-      (out, err, exitstatus) = fig(%w<--list-remote>)
-      exitstatus.should == 0
+      out, err = fig(%w<--list-remote>)
       out.should == "both/1.2.3\nprerequisite/1.2.3\nremote-only/1.2.3"
       err.should == ''
     end
@@ -532,9 +527,9 @@ describe 'Fig' do
     it %q<prints all the configurations for remote-only> do
       set_up_local_and_remote_repository
 
-      (out, err, exitstatus) =
+      out, err, exit_code =
         fig(%w<--list-configs remote-only/1.2.3>, :no_raise_on_error => true)
-      exitstatus.should_not == 0
+      exit_code.should_not == 0
       err.should =~ /Fig file not found for package/
     end
   end
@@ -552,9 +547,7 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
 
-          (out, err, exitstatus) =
-            fig(%w<--list-dependencies prerequisite/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies prerequisite/1.2.3>)
           out.should == ''
           err.should == ''
         end
@@ -563,8 +556,7 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           create_package_dot_fig_with_single_dependency
 
-          (out, err, exitstatus) = fig(%w<--list-dependencies>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies>)
           out.should == 'prerequisite/1.2.3'
           err.should == ''
         end
@@ -581,13 +573,12 @@ describe 'Fig' do
             remote-only/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err = fig(
             %w<
               --list-dependencies
               depends-on-depends-on-everything/1.2.3:indirectly-everything
             >
           )
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -604,8 +595,7 @@ describe 'Fig' do
             remote-only/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-dependencies>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies>)
           out.should == expected
           err.should == ''
         end
@@ -620,10 +610,9 @@ describe 'Fig' do
             no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err = fig(
             %w<--list-dependencies --list-all-configs no-dependencies/1.2.3>
           )
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -636,8 +625,7 @@ describe 'Fig' do
             no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-dependencies --list-all-configs>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies --list-all-configs>)
           out.should == expected
           err.should == ''
         end
@@ -664,10 +652,9 @@ describe 'Fig' do
             web/1.2.3:lighttpd
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err = fig(
             %w<--list-dependencies --list-all-configs departments/1.2.3:legal>
           )
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -685,9 +672,7 @@ describe 'Fig' do
             remote-only/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) =
-            fig(%w<--list-dependencies --list-all-configs>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies --list-all-configs>)
           out.should == expected
           err.should == ''
         end
@@ -700,9 +685,8 @@ describe 'Fig' do
           set_up_local_and_remote_repository_with_depends_on_everything
           remove_any_package_dot_fig
 
-          (out, err, exitstatus) =
+          out, err =
             fig(%w<--list-dependencies --list-tree prerequisite/1.2.3>)
-          exitstatus.should == 0
           out.should == 'prerequisite/1.2.3'
           err.should == ''
         end
@@ -716,8 +700,7 @@ describe 'Fig' do
                 prerequisite/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-dependencies --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies --list-tree>)
           out.should == expected
           err.should == ''
         end
@@ -738,13 +721,12 @@ describe 'Fig' do
                         prerequisite/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err = fig(
             %w<
               --list-dependencies
               --list-tree depends-on-depends-on-everything/1.2.3:indirectly-everything
             >
           )
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -766,8 +748,7 @@ describe 'Fig' do
                             prerequisite/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-dependencies --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-dependencies --list-tree>)
           out.should == expected
           err.should == ''
         end
@@ -782,13 +763,12 @@ describe 'Fig' do
             no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err = fig(
             %w<
               --list-dependencies --list-tree --list-all-configs
               no-dependencies/1.2.3
             >
           )
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -802,9 +782,8 @@ describe 'Fig' do
                 no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) =
+          out, err =
             fig(%w<--list-dependencies --list-tree --list-all-configs>)
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -836,13 +815,12 @@ describe 'Fig' do
                     operatingsystem/1.2.3:windows
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err = fig(
             %w<
               --list-dependencies --list-tree --list-all-configs
               departments/1.2.3
             >
           )
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -884,9 +862,8 @@ describe 'Fig' do
                         operatingsystem/1.2.3:ubuntu
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) =
+          out, err =
             fig(%w<--list-dependencies --list-tree --list-all-configs>)
-          exitstatus.should == 0
           out.should == expected
           err.should == ''
         end
@@ -929,7 +906,7 @@ describe 'Fig' do
                 downstream/whatever:include-upstream
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(
+          out, err, exit_code = fig(
             %w<
               --list-dependencies --list-tree --list-all-configs
               downstream/whatever
@@ -938,7 +915,7 @@ describe 'Fig' do
           )
           out.should == expected
           err.should =~ /Cannot retrieve "upstream" without a version/
-          exitstatus.should_not == 0
+          exit_code.should_not == 0
         end
       end
     end
@@ -953,8 +930,7 @@ describe 'Fig' do
         D/4.5.6
       END_EXPECTED_OUTPUT
 
-      (out, err, exitstatus) = fig(%w<--list-dependencies A/1.2.3>)
-      exitstatus.should == 0
+      out, err = fig(%w<--list-dependencies A/1.2.3>)
       out.should == expected
       err.should == ''
     end
@@ -986,8 +962,7 @@ describe 'Fig' do
         prerequisite/1.2.3
       END_EXPECTED_OUTPUT
 
-      (out, err, exitstatus) = fig(%w<--list-dependencies --config nondefault>)
-      exitstatus.should == 0
+      out, err = fig(%w<--list-dependencies --config nondefault>)
       out.should == expected
       err.should =~ /No version in the package descriptor of "prerequisite" in an include statement/
     end
@@ -997,9 +972,9 @@ describe 'Fig' do
       remove_any_package_dot_fig
       set_local_repository_format_to_future_version
 
-      (out, err, exitstatus) =
+      out, err, exit_code =
         fig(%w<--list-dependencies A/1.2.3>, :no_raise_on_error => true)
-      exitstatus.should_not == 0
+      exit_code.should_not == 0
       err.should =~
         /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
     end
@@ -1015,8 +990,7 @@ describe 'Fig' do
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
           set_up_list_variables_packages
-          (out, err, exitstatus) = fig(%w<--list-variables E/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables E/1.2.3>)
           out.should == ''
           err.should == ''
         end
@@ -1024,8 +998,7 @@ describe 'Fig' do
         it %q<lists no dependency variables when none should exist with a package.fig> do
           set_up_list_variables_packages
           create_package_dot_fig('E')
-          (out, err, exitstatus) = fig(%w<--list-variables>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables>)
           out.should == ''
           err.should == ''
         end
@@ -1058,8 +1031,7 @@ describe 'Fig' do
 
           expected.gsub!(/:/,File::PATH_SEPARATOR)
 
-          (out, err, exitstatus) = fig(%w<--list-variables A/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables A/1.2.3>)
           out.should == expected
           err.should =~
             %r<No version in the package descriptor of "D" in an include statement in the \.fig file for "B/1\.2\.3" \(line>
@@ -1094,11 +1066,9 @@ describe 'Fig' do
 
           expected.gsub!(/:/,File::PATH_SEPARATOR)
 
-          (out, err, exitstatus) = fig(%w<--list-variables>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables>)
 
           out.should == expected
-
           err.should =~
             %r<No version in the package descriptor of "D" in an include statement in the \.fig file for "B/1\.2\.3" \(line>
         end
@@ -1112,8 +1082,7 @@ describe 'Fig' do
 
         it %q<lists no dependency variables when none should exist without a package.fig> do
           set_up_list_variables_packages
-          (out, err, exitstatus) = fig(%w<--list-variables --list-all-configs E/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-all-configs E/1.2.3>)
           out.should == ''
           err.should == ''
         end
@@ -1121,8 +1090,7 @@ describe 'Fig' do
         it %q<lists no dependency variables when none should exist with a package.fig> do
           set_up_list_variables_packages
           create_package_dot_fig('E')
-          (out, err, exitstatus) = fig(%w<--list-variables --list-all-configs>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-all-configs>)
           out.should == ''
           err.should == ''
         end
@@ -1157,8 +1125,7 @@ describe 'Fig' do
 
           expected.gsub!(/:/,File::PATH_SEPARATOR)
 
-          (out, err, exitstatus) = fig(%w<--list-variables --list-all-configs A/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-all-configs A/1.2.3>)
           out.should == expected
           err.should =~
             %r<No version in the package descriptor of "D" in an include statement in the \.fig file for "B/1\.2\.3:default" \(line>
@@ -1193,8 +1160,7 @@ describe 'Fig' do
 
           expected.gsub!(/:/,File::PATH_SEPARATOR)
 
-          (out, err, exitstatus) = fig(%w<--list-variables --list-all-configs>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-all-configs>)
           out.should == expected
           err.should =~
             %r<No version in the package descriptor of "D" in an include statement in the \.fig file for "B/1\.2\.3:default" \(line>
@@ -1212,8 +1178,7 @@ describe 'Fig' do
         it %q<lists no dependency variables when none should exist without a package.fig> do
           set_up_list_variables_packages
 
-          (out, err, exitstatus) = fig(%w<--list-variables --list-tree E/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-tree E/1.2.3>)
           out.should == 'E/1.2.3'
           err.should == ''
         end
@@ -1227,8 +1192,7 @@ describe 'Fig' do
             '---E/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-variables --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-tree>)
           out.should == expected
           err.should == ''
         end
@@ -1297,8 +1261,7 @@ describe 'Fig' do
                             ADDON_C = dang
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-variables A/1.2.3 --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables A/1.2.3 --list-tree>)
           out.should == expected
           err.should =~
             %r<No version in the package descriptor of "D" in an include statement in the \.fig file for "B/1\.2\.3:default" \(line>
@@ -1370,8 +1333,7 @@ describe 'Fig' do
                                 ADDON_C = dang
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) = fig(%w<--list-variables --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-tree>)
 
           out.should == expected
           err.should =~
@@ -1388,9 +1350,8 @@ describe 'Fig' do
         it %q<lists no dependency variables when none should exist without a package.fig> do
           set_up_list_variables_packages
 
-          (out, err, exitstatus) =
+          out, err =
             fig(%w<--list-variables --list-all-configs --list-tree E/1.2.3>)
-          exitstatus.should == 0
           out.should == 'E/1.2.3'
           err.should == ''
         end
@@ -1404,9 +1365,7 @@ describe 'Fig' do
             '---E/1.2.3
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) =
-            fig(%w<--list-variables --list-all-configs --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-all-configs --list-tree>)
           out.should == expected
           err.should == ''
         end
@@ -1480,9 +1439,8 @@ describe 'Fig' do
                     C_ONLY_IN_C456 = C
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) =
+          out, err =
             fig(%w<--list-variables --list-all-configs --list-tree A/1.2.3>)
-          exitstatus.should == 0
           out.should == expected
           err.should =~
             %r<No version in the package descriptor of "D" in an include statement in the \.fig file for "B/1\.2\.3:default" \(line>
@@ -1554,9 +1512,7 @@ describe 'Fig' do
                                 ADDON_C = dang
           END_EXPECTED_OUTPUT
 
-          (out, err, exitstatus) =
-            fig(%w<--list-variables --list-all-configs --list-tree>)
-          exitstatus.should == 0
+          out, err = fig(%w<--list-variables --list-all-configs --list-tree>)
 
           out.should == expected
           err.should =~
@@ -1578,8 +1534,7 @@ describe 'Fig' do
           C=4.5.6
         END_EXPECTED_OUTPUT
 
-        (out, err, exitstatus) = fig(%w<--list-variables A/1.2.3>)
-        exitstatus.should == 0
+        out, err = fig(%w<--list-variables A/1.2.3>)
         out.should == expected
         err.should == ''
       end
@@ -1594,8 +1549,7 @@ describe 'Fig' do
               '---D/4.5.6
         END_EXPECTED_OUTPUT
 
-        (out, err, exitstatus) = fig(%w<--list-variables --list-tree A/1.2.3>)
-        exitstatus.should == 0
+        out, err = fig(%w<--list-variables --list-tree A/1.2.3>)
         out.should == expected
         err.should == ''
       end
@@ -1608,9 +1562,9 @@ describe 'Fig' do
       remove_any_package_dot_fig
       set_local_repository_format_to_future_version
 
-      (out, err, exitstatus) =
+      out, err, exit_code =
         fig(%w<--list-variables A/1.2.3>, :no_raise_on_error => true)
-      exitstatus.should_not == 0
+      exit_code.should_not == 0
       err.should =~
         /Local repository is in version \d+ format. This version of fig can only deal with repositories in version \d+ format\./
     end

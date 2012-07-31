@@ -41,8 +41,7 @@ describe 'Fig' do
             include prerequisite/1.2.3
           end
         END
-        out, err, exit_code = fig(%w<--update-if-missing>, input)
-        exit_code.should == 0
+        out, err = fig(%w<--update-if-missing>, input)
         File.read("#{retrieve_directory}/prerequisite/a-library").should ==
           'some library'
         File.read("#{retrieve_directory}/prerequisite/another-library").should ==
@@ -133,12 +132,11 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      out, err, exit_code = fig(%w<--update-if-missing>, input)
+      out, err = fig(%w<--update-if-missing>, input)
 
       err.should =~ %r<skipping copying>i
       err.should =~ %r<" [.] ">x
       err.should =~ %r<to itself>i
-      exit_code.should == 0
     end
 
     it %q<preserves the path after '//' when copying files into your project directory while retrieving> do

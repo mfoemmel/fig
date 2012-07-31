@@ -10,7 +10,6 @@
 
 Whitespace/quoting stuff in order to have a working command line.  It is currently possible to publish packages using `--set`/`--append`/`--resource`/`--archive` that can't be parsed.
 
-* **Big yak in need of a trim**: URL en/de-coding of assets, e.g. `archive http://example.com/hi%20there`.  The URI class barfs on spaces.
 * Multiple places directly instantiate Unparser::V0.  Need to have a central place to determine unparse grammar.
 * Asset statements
     * In package definition
@@ -24,7 +23,6 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 # Tests
 
 * Put spaces into filenames in all the tests.  Can't do this until environment variable statements can handle whitespace.
-* Remove use of exit_code from all tests invoking `fig()` without `:no_raise_on_error`.
 * Test quoting of asset command-line options.
 * Test actual asset globbing/non-globbing of disk files.
 * Test that having a # in a value requires v1 grammar.

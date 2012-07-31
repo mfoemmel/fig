@@ -12,8 +12,8 @@ describe 'Fig' do
     end
 
     it %q<prints usage message when passed an unknown option> do
-      out, err, exit_status = fig(%w<--no-such-option>, :no_raise_on_error => true)
-      exit_status.should == 1
+      out, err, exit_code = fig(%w<--no-such-option>, :no_raise_on_error => true)
+      exit_code.should_not == 0
       err.should =~ / --no-such-option /x
       err.should =~ / usage /xi
       out.should == ''
@@ -22,8 +22,8 @@ describe 'Fig' do
     describe %q<prints message when no descriptor is specified and> do
       describe %q<there's nothing to do and> do
         it %q<there isn't a package.fig file> do
-          out, err, exit_status = fig([], :no_raise_on_error => true)
-          exit_status.should_not == 0
+          out, err, exit_code = fig([], :no_raise_on_error => true)
+          exit_code.should_not == 0
           err.should =~ /nothing to do/i
           out.should == ''
         end
@@ -38,8 +38,8 @@ describe 'Fig' do
               END_PACKAGE_DOT_FIG
             )
 
-            out, err, exit_status = fig([], :no_raise_on_error => true)
-            exit_status.should_not == 0
+            out, err, exit_code = fig([], :no_raise_on_error => true)
+            exit_code.should_not == 0
             err.should =~ /nothing to do/i
             out.should == ''
           end
@@ -54,8 +54,8 @@ describe 'Fig' do
               END_PACKAGE_DOT_FIG
             )
 
-            out, err, exit_status = fig([], :no_raise_on_error => true)
-            exit_status.should_not == 0
+            out, err, exit_code = fig([], :no_raise_on_error => true)
+            exit_code.should_not == 0
             err.should =~ /nothing to do/i
             out.should == ''
           end
@@ -64,68 +64,68 @@ describe 'Fig' do
     end
 
     it %q<prints error when extra parameters are given with a package descriptor> do
-      out, err, exit_status =
+      out, err, exit_code =
         fig(%w<package/descriptor extra bits>, :no_raise_on_error => true)
-      exit_status.should == 1
+      exit_code.should == 1
       err.should =~ / extra /xi
       err.should =~ / bits /xi
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a version> do
-      out, err, exit_status = fig(%w</version>, :no_raise_on_error => true)
-      exit_status.should == 1
+      out, err, exit_code = fig(%w</version>, :no_raise_on_error => true)
+      exit_code.should == 1
       err.should =~ /package name required/i
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a config> do
-      out, err, exit_status = fig(%w<:config>, :no_raise_on_error => true)
-      exit_status.should == 1
+      out, err, exit_code = fig(%w<:config>, :no_raise_on_error => true)
+      exit_code.should_not == 0
       err.should =~ /package name required/i
       out.should == ''
     end
 
     it %q<prints error when a package descriptor consists solely of a package> do
-      out, err, exit_status = fig(%w<package>, :no_raise_on_error => true)
-      exit_status.should == 1
+      out, err, exit_code = fig(%w<package>, :no_raise_on_error => true)
+      exit_code.should_not == 0
       err.should =~ /version required/i
       out.should == ''
     end
 
     it %q<prints error when a descriptor and --file is specified> do
-      out, err, exit_status = fig(
+      out, err, exit_code = fig(
           %w<package/version:default --file some.fig>,
           :no_raise_on_error => true
         )
-      exit_status.should == 1
+      exit_code.should_not == 0
       err.should =~ /cannot specify both a package descriptor.*and the --file option/i
       out.should == ''
     end
 
     it %q<prints error when a descriptor contains a config and --config is specified> do
-      out, err, exit_status = fig(
+      out, err, exit_code = fig(
           %w<package/version:default --config nondefault>,
           :no_raise_on_error => true
         )
-      exit_status.should == 1
+      exit_code.should_not == 0
       err.should =~ /Cannot specify both --config and a config in the descriptor/
       out.should == ''
     end
 
     it %q<prints error when extra parameters are given with a command> do
-      out, err, exit_status =
+      out, err, exit_code =
         fig(%w<extra bits -- echo foo>, :no_raise_on_error => true)
-      exit_status.should == 1
+      exit_code.should_not == 0
       err.should =~ / extra /xi
       err.should =~ / bits /xi
       out.should == ''
     end
 
     it %q<prints error when multiple --list-* options are given> do
-      out, err, exit_status =
+      out, err, exit_code =
         fig(%w<--list-remote --list-variables>, :no_raise_on_error => true)
-      exit_status.should == 1
+      exit_code.should_not == 0
       out.should == ''
 
       err.should =~ /cannot specify/i
@@ -133,30 +133,30 @@ describe 'Fig' do
 
     describe %q<prints error when unknown package is referenced> do
       it %q<without --update> do
-        out, err, exit_status = fig(
+        out, err, exit_code = fig(
           %w<no-such-package/version --get PATH>, :no_raise_on_error => true
         )
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         err.should =~ / no-such-package /x
         out.should == ''
       end
 
       it %q<with --update> do
-        out, err, exit_status = fig(
-            %w<no-such-package/version --update --get PATH>,
-            :no_raise_on_error => true
-          )
-        exit_status.should_not == 0
+        out, err, exit_code = fig(
+          %w<no-such-package/version --update --get PATH>,
+          :no_raise_on_error => true
+        )
+        exit_code.should_not == 0
         err.should =~ / no-such-package /x
         out.should == ''
       end
 
       it %q<with --update-if-missing> do
-        out, err, exit_status = fig(
+        out, err, exit_code = fig(
             %w<no-such-package/version --update-if-missing --get PATH>,
             :no_raise_on_error => true
         )
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         err.should =~ / no-such-package /x
         out.should == ''
       end
@@ -165,54 +165,54 @@ describe 'Fig' do
     describe %q<prints error when referring to non-existent configuration> do
       it %q<from the command-line as the base package> do
         fig(%w<--publish foo/1.2.3 --set FOO=BAR>)
-        out, err, exit_status = fig(
-            %w<foo/1.2.3:non-existent-config --get FOO>,
-            :no_raise_on_error => true
-          )
-        exit_status.should_not == 0
+        out, err, exit_code = fig(
+          %w<foo/1.2.3:non-existent-config --get FOO>,
+          :no_raise_on_error => true
+        )
+        exit_code.should_not == 0
         err.should =~ %r< non-existent-config >x
         out.should == ''
       end
 
       it %q<from the command-line as an included package> do
         fig(%w<--publish foo/1.2.3 --set FOO=BAR>)
-        out, err, exit_status = fig(
+        out, err, exit_code = fig(
           %w<--include foo/1.2.3:non-existent-config --get FOO>,
           :no_raise_on_error => true
         )
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         err.should =~ %r< foo/1\.2\.3:non-existent-config >x
         out.should == ''
       end
     end
 
     it %q<prints error when --include is specified without a package version> do
-      out, err, exit_status = fig(
-          %w<--include package-without-version --get FOO>,
-          :no_raise_on_error => true
-        )
-      exit_status.should_not == 0
+      out, err, exit_code = fig(
+        %w<--include package-without-version --get FOO>,
+        :no_raise_on_error => true
+      )
+      exit_code.should_not == 0
       err.should =~ %r< package-without-version >x
       err.should =~ %r<no version specified>i
       out.should == ''
     end
 
     it %q<prints error when --override is specified without a package version> do
-      out, err, exit_status = fig(
+      out, err, exit_code = fig(
         %w<--override package-without-version>, :no_raise_on_error => true
       )
-      exit_status.should_not == 0
+      exit_code.should_not == 0
       err.should =~ %r< package-without-version >x
       err.should =~ %r<version required>i
       out.should == ''
     end
 
     it %q<prints error when --override is specified with a package config> do
-      out, err, exit_status = fig(
-          %w<--override package/version:config-should-not-be-here>,
-          :no_raise_on_error => true
-        )
-      exit_status.should_not == 0
+      out, err, exit_code = fig(
+        %w<--override package/version:config-should-not-be-here>,
+        :no_raise_on_error => true
+      )
+      exit_code.should_not == 0
       err.should =~ %r< package/version:config-should-not-be-here >x
       err.should =~ %r<config forbidden>i
       out.should == ''
@@ -230,7 +230,7 @@ describe 'Fig' do
           |name|
 
           it %Q<"#{name}"> do
-            out, err, exit_status =
+            out, err, exit_code =
               fig(
                 ['--publish', "#{name}/version", '--set', 'FOO=BAR'],
                 :no_raise_on_error => true
@@ -238,7 +238,7 @@ describe 'Fig' do
             err.should =~ %r< \b #{name} \b >x
             err.should =~ %r< \b keyword \b >ix
             err.should =~ %r< \b package \b >ix
-            exit_status.should_not == 0
+            exit_code.should_not == 0
             out.should == ''
           end
         end
@@ -255,7 +255,7 @@ describe 'Fig' do
               end
             END
 
-            out, err, exit_status =
+            out, err, exit_code =
               fig(
                 %w<--publish package/version>,
                 input,
@@ -264,7 +264,7 @@ describe 'Fig' do
             err.should =~ %r< \b #{name} \b >x
             err.should =~ %r< \b keyword \b >ix
             err.should =~ %r< \b config \b >ix
-            exit_status.should_not == 0
+            exit_code.should_not == 0
             out.should == ''
           end
         end
@@ -286,7 +286,7 @@ describe 'Fig' do
                   end
                 END
 
-                out, err, exit_status =
+                out, err, exit_code =
                   fig(
                     %w<--publish package/version>,
                     input,
@@ -295,12 +295,12 @@ describe 'Fig' do
                 err.should =~ %r< \b #{name} \b >x
                 err.should =~ %r< \b keyword \b >ix
                 err.should =~ %r< \b #{asset_type} \b >ix
-                exit_status.should_not == 0
+                exit_code.should_not == 0
                 out.should == ''
               end
 
               it 'as a command-line option' do
-                out, err, exit_status =
+                out, err, exit_code =
                   fig(
                     ['--publish', 'package/version', "--#{asset_type}", name],
                     :no_raise_on_error => true
@@ -308,7 +308,7 @@ describe 'Fig' do
                 err.should =~ %r< \b #{name} \b >x
                 err.should =~ %r< \b keyword \b >ix
                 err.should =~ %r< \b #{asset_type} \b >ix
-                exit_status.should_not == 0
+                exit_code.should_not == 0
                 out.should == ''
               end
             end
@@ -317,29 +317,29 @@ describe 'Fig' do
       end
 
       it %q<a package named "_meta"> do
-        out, err, exit_status =
+        out, err, exit_code =
           fig(
             %w<--publish _meta/version --set FOO=BAR>,
             :no_raise_on_error => true
           )
         err.should =~ %r< cannot .* _meta >x
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         out.should == ''
       end
 
       it %q<without a package name> do
-        out, err, exit_status =
+        out, err, exit_code =
           fig(%w<--publish --set FOO=BAR>, :no_raise_on_error => true)
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         err.should =~ %r<specify a descriptor>i
         out.should == ''
       end
 
       it %q<without a version> do
-        out, err, exit_status = fig(
+        out, err, exit_code = fig(
           %w<--publish a-package --set FOO=BAR>, :no_raise_on_error => true
         )
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         err.should =~ %r<version required>i
         out.should == ''
       end
@@ -347,9 +347,9 @@ describe 'Fig' do
 
     it %q<complains about command-line substitution of unreferenced packages> do
       fig(%w<--publish a-package/a-version --set FOO=BAR>)
-      out, err, exit_status =
+      out, err, exit_code =
         fig(%w<-- echo @a-package>, :no_raise_on_error => true)
-      exit_status.should_not == 0
+      exit_code.should_not == 0
       err.should =~ %r<\ba-package\b.*has not been referenced>
       out.should == ''
     end
@@ -368,12 +368,12 @@ describe 'Fig' do
       begin
         ENV.delete('FIG_REMOTE_URL')
 
-        out, err, exit_status =
+        out, err, exit_code =
           fig(%w<--list-remote>, :no_raise_on_error => true)
 
         err.should =~ %r<FIG_REMOTE_URL>
         out.should == ''
-        exit_status.should_not == 0
+        exit_code.should_not == 0
       ensure
         ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
       end

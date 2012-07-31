@@ -22,11 +22,11 @@ describe 'Fig' do
       end
 
       it %q<doesn't wait when set to "ignore"> do
-        out, err, exit_code =
-          fig(%w<--update --update-lock-response ignore --set FOO=BAR --get FOO>)
+        out, err = fig(
+          %w<--update --update-lock-response ignore --set FOO=BAR --get FOO>
+        )
 
         out.should == 'BAR'
-        exit_code.should == 0
       end
 
       it %q<results in an error when set to "fail"> do

@@ -293,27 +293,26 @@ describe 'Fig' do
             set FOO=CHEESE
           end
         END
-        out, err, exit_status = fig(
+        out, err, exit_code = fig(
           %w<--publish foo/1.2.3>, input, :no_raise_on_error => true
         )
-        exit_status.should == 1
+        exit_code.should_not == 0
         fig(%w<--update --include foo/1.2.3 --get FOO>)[0].should == 'SHEEP'
 
-        out, err, exit_status = fig(%w<--publish foo/1.2.3 --force>, input)
-        exit_status.should == 0
+        fig(%w<--publish foo/1.2.3 --force>, input)
         fig(%w<--update --include foo/1.2.3 --get FOO>)[0].should == 'CHEESE'
       end
 
       it 'refuses to publish with --file and an environment variable option' do
         write_file("#{FIG_SPEC_BASE_DIRECTORY}/example.fig", '')
 
-        out, err, exit_status =
+        out, err, exit_code =
           fig(
             %w<foo/1.2.3 --publish --file example.fig --set VARIABLE=VALUE>,
             :no_raise_on_error => true
           )
 
-        exit_status.should_not == 0
+        exit_code.should_not == 0
         err.should =~
           /cannot publish based upon\s+(?=.*option)(?=.*package\s+definition)/i
         out.should == ''
@@ -331,13 +330,13 @@ describe 'Fig' do
         end
 
         it 'refuses to publish without --no-file' do
-          out, err, exit_status =
+          out, err, exit_code =
             fig(
               %w<foo/1.2.3 --publish --set VARIABLE=VALUE>,
               :no_raise_on_error => true
             )
 
-          exit_status.should_not == 0
+          exit_code.should_not == 0
           err.should =~
             /cannot publish based upon\s+(?=.*option)(?=.*package\s+definition)/i
           out.should == ''
@@ -415,13 +414,11 @@ describe 'Fig' do
           end
         END_INPUT
 
-        out, err, exit_code =
-          fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
+        out, err = fig(%w<--publish foo/1.2.3>, input)
 
         out.should == ''
         err.should =~
           /No version in the package descriptor of "foo" in an include statement \(line/
-        exit_code.should == 0
       end
 
       it 'updates local packages if they already exist' do

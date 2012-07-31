@@ -16,8 +16,7 @@ describe 'Fig' do
         END
         fig(%w<--publish foo/1.2.3>, input)
 
-        (out, err, exit_status) =
-          fig(%w<foo/1.2.3 --dump-package-definition-text>)
+        out, err = fig(%w<foo/1.2.3 --dump-package-definition-text>)
 
         # Content from the input.
         out.should =~ /set FOO=BAR/
@@ -34,19 +33,18 @@ describe 'Fig' do
             set FOO=BAR
           end
         END
-        (out, err, exit_status) =
-          fig(%w<--dump-package-definition-text>, input)
+        out, err = fig(%w<--dump-package-definition-text>, input)
 
         out.should == input.strip
         err.should == ''
       end
 
       it %q<fails if there is no text> do
-        (out, err, exit_status) =
+        out, err, exit_code =
           fig(%w<--dump-package-definition-text>, :no_raise_on_error => true)
         err.should =~ /no text/
         out.should == ''
-        exit_status.should_not == 0
+        exit_code.should_not == 0
       end
     end
 
@@ -59,8 +57,7 @@ describe 'Fig' do
         END
         fig(%w<--publish foo/1.2.3>, input)
 
-        (out, err, exit_status) =
-          fig(%w<foo/1.2.3 --dump-package-definition-parsed>)
+        out, err = fig(%w<foo/1.2.3 --dump-package-definition-parsed>)
 
         # Content from the input.
         out.should =~ /set FOO=BAR/
@@ -74,8 +71,7 @@ describe 'Fig' do
             set FOO=BAR
           end
         END
-        (out, err, exit_status) =
-          fig(%w<--dump-package-definition-parsed>, input)
+        out, err = fig(%w<--dump-package-definition-parsed>, input)
 
         [input, out].each do
           |string|
@@ -90,7 +86,7 @@ describe 'Fig' do
       end
 
       it %q<emits the synthetic package if there is no text> do
-        (out, err, exit_status) = fig(%w<--dump-package-definition-parsed>)
+        out, err = fig(%w<--dump-package-definition-parsed>)
         out.should =~ / \A \s* config \s+ default \s+ end \s* \z /x
         err.should == ''
       end

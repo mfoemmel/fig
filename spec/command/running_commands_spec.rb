@@ -17,8 +17,7 @@ describe 'Fig' do
           END
           fig(%w<--publish foo/1.2.3>, input)
 
-          (out, err, exitstatus) = fig(%w<foo/1.2.3>)
-          exitstatus.should == 0
+          out, err = fig(%w<foo/1.2.3>)
           out.should == 'foo'
           err.should == ''
         end
@@ -31,8 +30,7 @@ describe 'Fig' do
           END
           fig(%w<--publish foo/1.2.3>, input)
 
-          (out, err, exitstatus) = fig(%w<foo/1.2.3 --run-command-statement>)
-          exitstatus.should == 0
+          out, err = fig(%w<foo/1.2.3 --run-command-statement>)
           out.should == 'foo'
           err.should == ''
         end
@@ -45,8 +43,7 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exitstatus) = fig(%w<--run-command-statement>, input)
-        exitstatus.should == 0
+        out, err = fig(%w<--run-command-statement>, input)
         out.should == 'foo'
         err.should == ''
       end
@@ -62,9 +59,7 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exitstatus) =
-          fig(%w<--run-command-statement --config non-default>, input)
-        exitstatus.should == 0
+        out, err = fig(%w<--run-command-statement --config non-default>, input)
         out.should == 'non-default'
         err.should == ''
       end
@@ -79,9 +74,7 @@ describe 'Fig' do
         END
         fig(%w<--publish foo/1.2.3>, input)
 
-        (out, err, exitstatus) =
-          fig(%w<foo/1.2.3 --command-extra-args there>)
-        exitstatus.should == 0
+        out, err = fig(%w<foo/1.2.3 --command-extra-args there>)
         out.should == 'Hi there'
         err.should == ''
       end
@@ -94,8 +87,7 @@ describe 'Fig' do
             end
           END
 
-          (out, err, exitstatus) = fig(%w<--command-extra-args there>, input)
-          exitstatus.should == 0
+          out, err = fig(%w<--command-extra-args there>, input)
           out.should == 'Hi there'
           err.should == ''
         end
@@ -107,9 +99,8 @@ describe 'Fig' do
             end
           END
 
-          (out, err, exitstatus) =
+          out, err =
             fig(%w<--run-command-statement --command-extra-args there>, input)
-          exitstatus.should == 0
           out.should == 'Hi there'
           err.should == ''
         end
@@ -123,9 +114,9 @@ describe 'Fig' do
       END
       fig(%w<--publish foo/1.2.3>, input)
 
-      (out, err, exitstatus) =
+      out, err, exit_code =
         fig(%w<foo/1.2.3 --command-extra-args yadda>, :no_raise_on_error => true)
-      exitstatus.should_not == 0
+      exit_code.should_not == 0
       out.should == ''
       err.should =~ /does not contain a command/
     end
@@ -150,8 +141,8 @@ describe 'Fig' do
         end
       END
 
-      out, err, exit_status = fig([], input, :no_raise_on_error => true)
-      exit_status.should_not == 0
+      out, err, exit_code = fig([], input, :no_raise_on_error => true)
+      exit_code.should_not == 0
       err.should =~ /\bnothing to do\b/i
       err.should =~ /\byou have a command statement\b/i
       err.should =~ /--run-command-statement\b/i

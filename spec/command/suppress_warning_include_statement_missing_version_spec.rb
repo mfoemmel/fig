@@ -12,8 +12,7 @@ describe 'Fig' do
         end
       END
 
-      (out, err, exit_code) = fig(%w<--publish bar/1.2.3>, input)
-      exit_code.should == 0
+      out, err = fig(%w<--publish bar/1.2.3>, input)
 
       input = <<-END
         config default
@@ -25,8 +24,7 @@ describe 'Fig' do
         end
       END
 
-      (out, err, exit_code) = fig(%w<--publish foo/1.2.3>, input)
-      exit_code.should == 0
+      out, err = fig(%w<--publish foo/1.2.3>, input)
     end
 
     describe 'emits warnings when warnings are not suppressed' do
@@ -37,10 +35,9 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig(%w<--list-configs>, input)
+        out, err = fig(%w<--list-configs>, input)
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
-        exit_code.should == 0
       end
 
       it 'for depended upon packages' do
@@ -50,10 +47,9 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig(%w<--list-dependencies>, input)
+        out, err = fig(%w<--list-dependencies>, input)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should =~ %r<No version in the package descriptor of "bar" in an include statement in the \.fig file for "foo/1\.2\.3:default" \(line>
-        exit_code.should == 0
       end
     end
 
@@ -65,17 +61,15 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) =
-          fig(
-            %w<
-              --list-configs
-              --suppress-warning-include-statement-missing-version
-            >,
-            input
-          )
+        out, err = fig(
+          %w<
+            --list-configs
+            --suppress-warning-include-statement-missing-version
+          >,
+          input
+        )
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
-        exit_code.should == 0
       end
 
       it 'with figrc' do
@@ -91,10 +85,9 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig(%w<--list-configs>, input)
+        out, err = fig(%w<--list-configs>, input)
         out.should == 'default'
         err.should =~ /No version in the package descriptor of "foo" in an include statement \(line/
-        exit_code.should == 0
       end
     end
 
@@ -106,7 +99,7 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) = fig(
+        out, err = fig(
           %w<
             --list-dependencies
             --suppress-warning-include-statement-missing-version
@@ -115,7 +108,6 @@ describe 'Fig' do
         )
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
-        exit_code.should == 0
       end
 
       it 'with figrc' do
@@ -131,11 +123,9 @@ describe 'Fig' do
           end
         END
 
-        (out, err, exit_code) =
-          fig(%w<--list-dependencies>, input, :figrc => figrc)
+        out, err = fig(%w<--list-dependencies>, input, :figrc => figrc)
         out.should == "bar/1.2.3\nfoo/1.2.3"
         err.should_not =~ /No version in the package descriptor of "bar" in an include statement/
-        exit_code.should == 0
       end
     end
   end
