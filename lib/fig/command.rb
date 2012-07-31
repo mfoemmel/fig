@@ -90,7 +90,7 @@ class Fig::Command
   def run_with_exception_handling(argv, options = nil)
     begin
       return run_fig(argv, options)
-    rescue Fig::URLAccessError => error
+    rescue Fig::URLAccessDisallowedError => error
       urls = error.urls.join(', ')
       $stderr.puts \
         "Access to #{urls} in #{error.package}/#{error.version} not allowed."

@@ -8,7 +8,7 @@ require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
 require 'fig/statement'
 require 'fig/url'
-require 'fig/url_access_error'
+require 'fig/url_access_disallowed_error'
 require 'fig/user_input_error'
 
 module Fig; end
@@ -196,7 +196,7 @@ class Fig::Parser
       end
     end
 
-    raise Fig::URLAccessError.new(bad_urls, descriptor) if not bad_urls.empty?
+    raise Fig::URLAccessDisallowedError.new(bad_urls, descriptor) if not bad_urls.empty?
 
     return
   end

@@ -166,7 +166,7 @@ describe 'Parser' do
           'source description',
           fig_package
         )
-      rescue Fig::URLAccessError => exception
+      rescue Fig::URLAccessDisallowedError => exception
       end
       exception.should_not == nil
       exception.urls.should =~ %w<http://evil_url/is/bad.tgz http://evil_repo/my/repo/is/bad.jar>
