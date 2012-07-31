@@ -6,8 +6,8 @@ require 'tmpdir'
 
 require 'fig'
 require 'fig/at_exit'
+require 'fig/file_not_found_error'
 require 'fig/logging'
-require 'fig/not_found_error'
 require 'fig/package_cache'
 require 'fig/package_descriptor'
 require 'fig/parser'
@@ -218,7 +218,7 @@ class Fig::Repository
       local_version_file = File.join(temp_dir, "remote-#{VERSION_FILE_NAME}")
       begin
         @operating_system.download(remote_version_file, local_version_file)
-      rescue Fig::NotFoundError
+      rescue Fig::FileNotFoundError
         # The download may create an empty file, so get rid of it.
         if File.exist?(local_version_file)
           File.unlink(local_version_file)
@@ -267,7 +267,7 @@ class Fig::Repository
     temp_dir = package_download_temp_dir(descriptor)
     begin
       install_package(descriptor, temp_dir)
-    rescue Fig::NotFoundError => error
+    rescue Fig::FileNotFoundError => error
       Fig::Logging.fatal \
         "Package #{descriptor.to_string()} not found in remote repository. (Was looking for #{error.path}.)"
 

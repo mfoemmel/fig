@@ -1,8 +1,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/application_configuration'
+require 'fig/file_not_found_error'
 require 'fig/logging'
-require 'fig/not_found_error'
 require 'fig/package_descriptor'
 require 'fig/repository'
 require 'fig/repository_error'
@@ -66,7 +66,7 @@ describe 'Repository' do
       repository = create_local_repository
 
       repository.stub(:install_package) do
-        raise Fig::NotFoundError.new('test NotFoundError', 'fake path')
+        raise Fig::FileNotFoundError.new('test FileNotFoundError', 'fake path')
       end
 
       Fig::Logging.should_receive(:fatal).with(

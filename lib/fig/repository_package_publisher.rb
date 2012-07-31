@@ -6,8 +6,8 @@ require 'tmpdir'
 
 require 'fig'
 require 'fig/at_exit'
+require 'fig/file_not_found_error'
 require 'fig/logging'
-require 'fig/not_found_error'
 require 'fig/package_cache'
 require 'fig/package_definition_text_assembler'
 require 'fig/package_descriptor'
@@ -257,7 +257,7 @@ class Fig::RepositoryPackagePublisher
 
       begin
         @operating_system.download(asset_statement.url, asset_local)
-      rescue Fig::NotFoundError
+      rescue Fig::FileNotFoundError
         Fig::Logging.fatal "Could not download #{asset_statement.url}."
         raise Fig::RepositoryError.new
       end

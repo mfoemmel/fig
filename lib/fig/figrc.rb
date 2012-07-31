@@ -2,6 +2,7 @@ require 'json'
 
 require 'fig/application_configuration'
 require 'fig/config_file_error'
+require 'fig/file_not_found_error'
 require 'fig/operating_system'
 require 'fig/repository'
 
@@ -90,7 +91,7 @@ class Fig::FigRC
     begin
       os.download( figrc_url, repo_figrc_path )
       repo_config_exists = true
-    rescue Fig::NotFoundError => e
+    rescue Fig::FileNotFoundError => e
       repo_config_exists = false
     end
 

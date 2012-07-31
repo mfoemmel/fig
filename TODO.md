@@ -1,7 +1,6 @@
 # Code changes
 
 * Make use of Statement#is_environment_variable?().
-* Rename not_found_error to something like url_not_found_error.
 * Bad URLs (FIG_REMOTE_URL, asset paths) will result in ugly stack traces; need to turn these into reasonable error messages.
 * Retrieve statements should validate their paths the same way that path statements do.
 * Periodically `ack '\bTODO:'` and fix what we can.
