@@ -107,12 +107,13 @@ class Fig::OperatingSystem
       packages
     when 'file'
       packages = []
-      return packages if ! File.exist?(uri.path)
+      unescaped_path = CGI.unescape uri.path
+      return packages if ! File.exist?(unescaped_path)
 
       ls = ''
-      Find.find(uri.path) { |file| ls << file.to_s; ls << "\n" }
+      Find.find(unescaped_path) { |file| ls << file.to_s; ls << "\n" }
 
-      strip_paths_for_list(ls, packages, uri.path)
+      strip_paths_for_list(ls, packages, unescaped_path)
       return packages
     else
       Fig::Logging.fatal "Protocol not supported: #{url}"
@@ -209,7 +210,8 @@ class Fig::OperatingSystem
       ssh_download(uri.user, uri.host, path, cmd)
     when 'file'
       begin
-        FileUtils.cp(uri.path, path)
+        unescaped_path = CGI.unescape uri.path
+        FileUtils.cp(unescaped_path, path)
         return true
       rescue Errno::ENOENT => error
         raise Fig::FileNotFoundError.new error.message, url
@@ -285,8 +287,9 @@ class Fig::OperatingSystem
         ftp.putbinaryfile(local_file)
       end
     when 'file'
-      FileUtils.mkdir_p(File.dirname(uri.path))
-      FileUtils.cp(local_file, uri.path)
+      unescaped_path = CGI.unescape uri.path
+      FileUtils.mkdir_p(File.dirname(unescaped_path))
+      FileUtils.cp(local_file, unescaped_path)
     else
       Fig::Logging.fatal "Unknown protocol: #{uri}"
       raise Fig::NetworkError.new("Unknown protocol: #{uri}")

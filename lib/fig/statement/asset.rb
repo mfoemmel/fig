@@ -46,13 +46,16 @@ module Fig::Statement::Asset
   end
 
   def minimum_grammar_version_required()
-    return 1 if url =~ /\s/
+    name = asset_name
+
+    return 0 if name.nil?
+    return 1 if name =~ /\s/
 
     # Can't have octothorpes anywhere in v0 due to comment stripping via regex.
-    return 1 if url =~ /#/
+    return 1 if name =~ /#/
 
     # If we shouldn't glob, but we've got glob characters...
-    return 1 if ! glob_if_not_url? && url =~ /[*?\[\]{}]/
+    return 1 if ! glob_if_not_url? && name =~ /[*?\[\]{}]/
 
     return 0
   end
