@@ -23,11 +23,12 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 
 * Put spaces into filenames in all the tests.  Can't do this until environment variable statements can handle whitespace.
 * Test quoting of asset command-line options.
-* Test actual asset globbing/non-globbing of disk files.
+* Test actual asset globbing/non-globbing of disk files, including those with special characters.
 * Test that having a # in a value requires v1 grammar.
-* Test that v0 grammar results in unquoted "resources.tar.gz" and v1 grammar quotes it.
+* Test that v0 grammar results in double-quoted "resources.tar.gz" and v1 grammar single quotes it.
 * Get all the tests' `$PWD` out of `spec/runtime-work` and into `spec/runtime-work/userhome` so that we're properly testing paths to things.  Too many of the tests are counting on files being in `$HOME`.
-* Repository class coverage doesn't seem to be hitting resources with URLs.
+* Resource statements in published packages, particularly pointing to URLs. Resource statements containing URLs won't exist in any newly published packages, but they do in old ones.
+* Should be able to read a v1 package.fig with a resource with "#" in it and then publish using v0.
 * Serious testing of which grammar version stuff gets unparsed into.
 
 # Documentation
