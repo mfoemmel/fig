@@ -3,6 +3,32 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'cgi'
 
+# I do not understand the scoping rules for RSpec at all.  Why does this need
+# to be here and check_grammar_version() can be where it should be?
+def test_asset_with_url_with_symbol(asset_type, symbol, quote, version)
+  file_name     = "with#{symbol}symbol"
+  escaped_file  = CGI.escape file_name
+  quoted_url    =
+    "#{quote}file://#{USER_HOME}/#{escaped_file}#{quote}"
+
+  it %Q<«#{quoted_url}» (URL contains a «#{symbol}»)> do
+    write_file "#{USER_HOME}/#{file_name}", ''
+
+    fig(
+      [
+        %w< --publish foo/1.2.3 --set x=y >,
+        "--#{asset_type}",
+        quoted_url
+      ],
+      :current_directory => USER_HOME
+    )
+
+    check_grammar_version(version)
+  end
+
+  return
+end
+
 describe 'Fig' do
   describe 'grammar statement' do
     before(:each) do
@@ -98,47 +124,39 @@ describe 'Fig' do
       end
 
       %w< archive resource >.each do
-        |option|
+        |asset_type|
 
-        describe "for --#{option}" do
+        describe "for --#{asset_type}" do
           ['', %q<'>, %q<">].each do
             |quote|
 
-            value = "#{quote}nothing-special#{quote}"
+            begin
+              value = "#{quote}nothing-special#{quote}"
 
-            it %Q<«#{value}»> do
-              write_file "#{USER_HOME}/nothing-special", ''
-
-              fig(
-                [%w< --publish foo/1.2.3 --set x=y >, "--#{option}", value],
-                :current_directory => USER_HOME
-              )
-
-              check_grammar_version(0)
-            end
-
-            %w< # >.each do
-              |symbol|
-
-              file_name     = "with#{symbol}symbol"
-              escaped_file  = CGI.escape file_name
-              quoted_url    =
-                "#{quote}file://#{USER_HOME}/#{escaped_file}#{quote}"
-
-              it %Q<«#{quoted_url}»> do
-                write_file "#{USER_HOME}/#{file_name}", ''
+              it %Q<«#{value}»> do
+                write_file "#{USER_HOME}/nothing-special", ''
 
                 fig(
-                  [
-                    %w< --publish foo/1.2.3 --set x=y >,
-                    "--#{option}",
-                    quoted_url
-                  ],
+                  [%w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", value],
                   :current_directory => USER_HOME
                 )
 
-                check_grammar_version(1)
+                check_grammar_version(0)
               end
+            end
+
+            test_asset_with_url_with_symbol(asset_type, '#', quote, 1)
+          end
+
+          %w< * ? [ ] { } >.each do
+            |symbol|
+
+            test_asset_with_url_with_symbol(asset_type, symbol, %q<'>, 1)
+
+            ['', %q<">].each do
+              |quote|
+
+              test_asset_with_url_with_symbol(asset_type, symbol, quote, 0)
             end
           end
         end

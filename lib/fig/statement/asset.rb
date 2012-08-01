@@ -46,6 +46,9 @@ module Fig::Statement::Asset
   end
 
   def minimum_grammar_version_required()
+    # Because what gets written to package definition files in all current
+    # grammars is the asset name, and not the URL, we use that in the
+    # determination.
     name = asset_name
 
     return 0 if name.nil?
