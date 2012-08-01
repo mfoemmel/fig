@@ -1,12 +1,4 @@
-v0.1.74.beta.3
-
-  - Changes file fix. :[
-
-v0.1.74.beta.2
-
-  - Packaging fix.
-
-v0.1.74.beta.1
+v0.1.75
 
   Backwards incompatibilities:
 
@@ -74,6 +66,12 @@ v0.1.74.beta.1
       config default
         set variable=value
       end
+
+v0.1.74.beta.3
+v0.1.74.beta.2
+v0.1.74.beta.1
+
+  - Test releases
 
 v0.1.73
 
