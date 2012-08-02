@@ -26,6 +26,45 @@ module Fig; end
 # Does things requiring real O/S interaction, primarilly taking care of file
 # transfers and running external commands.
 class Fig::OperatingSystem
+  WINDOWS_FILE_NAME_ILLEGAL_CHARACTERS = %w[ \\ / : * ? " < > | ]
+  UNIX_FILE_NAME_ILLEGAL_CHARACTERS    = %w[ / ]
+
+  def self.windows?
+    RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+  end
+
+  def self.java?
+    RUBY_PLATFORM == 'java'
+  end
+
+  def self.unix?
+    !windows?
+  end
+
+  def self.file_name_illegal_characters()
+    if Fig::OperatingSystem.windows?
+      return WINDOWS_FILE_NAME_ILLEGAL_CHARACTERS
+    end
+
+    return UNIX_FILE_NAME_ILLEGAL_CHARACTERS
+  end
+
+  def self.wrap_variable_name_with_shell_expansion(variable_name)
+    if Fig::OperatingSystem.windows?
+      return "%#{variable_name}%"
+    else
+      return "$#{variable_name}"
+    end
+  end
+
+  def self.get_environment_variables(initial_values = nil)
+    if Fig::OperatingSystem.windows?
+      return Fig::EnvironmentVariables::CaseInsensitive.new(initial_values)
+    end
+
+    return Fig::EnvironmentVariables::CaseSensitive.new(initial_values)
+  end
+
   def initialize(login)
     @login = login
     @username = ENV['FIG_USERNAME']
@@ -67,10 +106,6 @@ class Fig::OperatingSystem
   def write(path, content)
     File.open(path, 'wb') { |f| f.binmode; f << content }
   end
-
-  SUCCESS = 0
-  NOT_MODIFIED = 3
-  NOT_FOUND = 4
 
   def strip_paths_for_list(ls_output, packages, path)
     if not ls_output.nil?
@@ -374,18 +409,6 @@ class Fig::OperatingSystem
     end
   end
 
-  def self.windows?
-    RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
-  end
-
-  def self.java?
-    RUBY_PLATFORM == 'java'
-  end
-
-  def self.unix?
-    !windows?
-  end
-
   def shell_exec(cmd)
     # Kernel#exec won't run Kernel#at_exit handlers.
     Fig::AtExit.execute()
@@ -400,23 +423,11 @@ class Fig::OperatingSystem
     end
   end
 
-  def self.wrap_variable_name_with_shell_expansion(variable_name)
-    if Fig::OperatingSystem.windows?
-      return "%#{variable_name}%"
-    else
-      return "$#{variable_name}"
-    end
-  end
-
-  def self.get_environment_variables(initial_values = nil)
-    if Fig::OperatingSystem.windows?
-      return Fig::EnvironmentVariables::CaseInsensitive.new(initial_values)
-    end
-
-    return Fig::EnvironmentVariables::CaseSensitive.new(initial_values)
-  end
-
   private
+
+  SUCCESS = 0
+  NOT_MODIFIED = 3
+  NOT_FOUND = 4
 
   # path = The local path the file should be downloaded to.
   # cmd = The command to be run on the remote host.

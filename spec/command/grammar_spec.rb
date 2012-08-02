@@ -3,6 +3,8 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'cgi'
 
+require 'fig/operating_system'
+
 # I do not understand the scoping rules for RSpec at all.  Why does this need
 # to be here and check_grammar_version() can be where it should be?
 def test_asset_with_url_with_symbol(symbol, quote, version)
@@ -58,6 +60,18 @@ def test_asset_with_file_with_symbol(symbol, quote, version)
   return
 end
 
+def full_glob_characters() return %w< * ? [ ] { } >; end
+def testable_glob_characters()
+  return full_glob_characters() -
+    Fig::OperatingSystem.file_name_illegal_characters
+end
+
+def full_special_characters() return full_glob_characters + %w< # >; end
+def testable_special_characters()
+  return full_special_characters() -
+    Fig::OperatingSystem.file_name_illegal_characters
+end
+
 describe 'Fig' do
   describe 'grammar statement' do
     before(:each) do
@@ -84,7 +98,7 @@ describe 'Fig' do
     end
 
     it %q<is not accepted if it isn't the first statement> do
-      pending 'not implemented yet' do
+      pending 'user-friendly warning message not implemented yet' do
         input = <<-END
           config default
           end
@@ -113,11 +127,6 @@ describe 'Fig' do
   end
 
   describe %q<uses the correct grammar version in the package definition created for publishing> do
-    before(:each) do
-      clean_up_test_environment
-      set_up_test_environment
-    end
-
     def check_grammar_version(version)
       out, err = fig(%w< foo/1.2.3 --dump-package-definition-text >)
 
@@ -125,6 +134,11 @@ describe 'Fig' do
       err.should == ''
 
       return
+    end
+
+    before(:each) do
+      clean_up_test_environment
+      set_up_test_environment
     end
 
     it 'from unversioned file input' do
@@ -180,7 +194,7 @@ describe 'Fig' do
         test_asset_with_url_with_symbol('#', quote, 1)
       end
 
-      %w< * ? [ ] { } >.each do
+      testable_glob_characters.each do
         |symbol|
 
         test_asset_with_url_with_symbol(symbol, %q<'>, 1)
@@ -203,7 +217,7 @@ describe 'Fig' do
       ['', %q<'>, %q<">].each do
         |quote|
 
-        %w< # * ? [ ] { } >.each do
+        testable_special_characters.each do
           |symbol|
 
           test_asset_with_file_with_symbol(symbol, quote, 1)
@@ -221,7 +235,7 @@ describe 'Fig' do
       ['', %q<'>, %q<">].each do
         |quote|
 
-        %w< # * ? [ ] { } >.each do
+        testable_special_characters.each do
           |symbol|
 
           test_asset_with_file_with_symbol(symbol, quote, 0)
