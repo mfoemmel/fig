@@ -1,3 +1,4 @@
+require 'fig/statement/grammar_version'
 require 'fig/unparser/v0'
 require 'fig/unparser/v1'
 
@@ -29,6 +30,9 @@ class Fig::PackageDefinitionTextAssembler
   def add_output(statements)
     @output_statements << statements
     @output_statements.flatten!
+
+    # Version gets determined by other statements, not by existing grammar.
+    @output_statements.reject! { |s| s.is_a? Fig::Statement::GrammarVersion }
 
     return
   end
@@ -74,8 +78,15 @@ class Fig::PackageDefinitionTextAssembler
       unparser_class = Fig::Unparser::V0
     end
 
+    grammar_statement =
+      Fig::Statement::GrammarVersion.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        0 # Grammar version
+      )
+
     unparser = unparser_class.new :emit_as_to_be_published
-    text = unparser.unparse(@output_statements)
+    text = unparser.unparse( [grammar_statement] + @output_statements )
 
     # TODO: Until v1 grammar handling is done, ensure we don't emit anything
     # old fig versions cannot handle.

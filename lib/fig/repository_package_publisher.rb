@@ -161,17 +161,6 @@ class Fig::RepositoryPackagePublisher
   def assemble_output_statements()
     @resource_paths = []
 
-    if (
-          @text_assembler.input_statements.empty? \
-      ||  ! @text_assembler.input_statements[0].is_a?(Fig::Statement::GrammarVersion)
-    )
-      @text_assembler.add_output Fig::Statement::GrammarVersion.new(
-        nil,
-        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-        0 # Grammar version
-      )
-    end
-
     @text_assembler.input_statements.each do
       |statement|
 

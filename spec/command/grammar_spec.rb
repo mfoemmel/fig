@@ -56,6 +56,28 @@ def test_command_line_asset_with_url_with_symbol(
   return
 end
 
+def test_file_asset_with_url_with_symbol(asset_type, symbol, quote, version)
+  test_asset_with_url_with_symbol(asset_type, symbol, quote, version) do
+    |quoted_url|
+
+    input = <<-"END"
+      grammar v1
+
+      #{asset_type} #{quoted_url}
+
+      config default
+      end
+    END
+    fig(
+      %w< --publish foo/1.2.3 >,
+      input,
+      :current_directory => USER_HOME
+    )
+  end
+
+  return
+end
+
 def test_asset_with_file_with_symbol(
   asset_type, symbol, quote, version
 )
@@ -81,6 +103,28 @@ def test_command_line_asset_with_file_with_symbol(
 
     fig(
       [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_name ],
+      :current_directory => USER_HOME
+    )
+  end
+
+  return
+end
+
+def test_file_asset_with_file_with_symbol(asset_type, symbol, quote, version)
+  test_asset_with_file_with_symbol(asset_type, symbol, quote, version) do
+    |quoted_url|
+
+    input = <<-"END"
+      grammar v1
+
+      #{asset_type} #{quoted_url}
+
+      config default
+      end
+    END
+    fig(
+      %w< --publish foo/1.2.3 >,
+      input,
       :current_directory => USER_HOME
     )
   end
@@ -169,7 +213,7 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    it 'from unversioned file input' do
+    it 'from unversioned file input with a "default" config' do
       input = <<-END
         config default
         end
@@ -179,7 +223,7 @@ describe 'Fig' do
       check_grammar_version(0)
     end
 
-    it 'from v1 grammar file input' do
+    it 'from v1 grammar file input with a "default" config' do
       input = <<-END
         grammar v1
         config default
@@ -187,7 +231,7 @@ describe 'Fig' do
       END
       fig(%w< --publish foo/1.2.3 >, input)
 
-      check_grammar_version(1)
+      check_grammar_version(0)
     end
 
     %w< set append >.each do
@@ -267,6 +311,88 @@ describe 'Fig' do
           |symbol|
 
           test_command_line_asset_with_file_with_symbol(
+            'resource', symbol, quote, 0
+          )
+        end
+      end
+    end
+
+    shared_examples_for 'asset statement' do
+      |asset_type|
+
+      ['', %q<'>, %q<">].each do
+        |quote|
+
+        begin
+          value = "#{quote}nothing-special#{quote}"
+
+          it %Q<with file «#{value}»> do
+            write_file "#{USER_HOME}/nothing-special", ''
+
+            input = <<-"END"
+              grammar v1
+
+              #{asset_type} #{value}
+
+              config default
+              end
+            END
+            fig(
+              %w< --publish foo/1.2.3 >,
+              input,
+              :current_directory => USER_HOME
+            )
+
+            check_grammar_version(0)
+          end
+        end
+
+        test_file_asset_with_url_with_symbol(asset_type, '#', quote, 1)
+      end
+
+      testable_glob_characters.each do
+        |symbol|
+
+        test_file_asset_with_url_with_symbol(
+          asset_type, symbol, %q<'>, 1
+        )
+
+        ['', %q<">].each do
+          |quote|
+
+          test_file_asset_with_url_with_symbol(
+            asset_type, symbol, quote, 0
+          )
+        end
+      end
+    end
+
+    describe 'for archive statement' do
+      it_behaves_like 'asset statement', 'archive'
+
+      ['', %q<'>, %q<">].each do
+        |quote|
+
+        testable_special_characters.each do
+          |symbol|
+
+          test_file_asset_with_file_with_symbol(
+            'archive', symbol, quote, 1
+          )
+        end
+      end
+    end
+
+    describe 'for resource statement' do
+      it_behaves_like 'asset statement', 'resource'
+
+      ['', %q<'>, %q<">].each do
+        |quote|
+
+        testable_special_characters.each do
+          |symbol|
+
+          test_file_asset_with_file_with_symbol(
             'resource', symbol, quote, 0
           )
         end
