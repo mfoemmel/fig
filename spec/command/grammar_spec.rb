@@ -5,9 +5,11 @@ require 'cgi'
 
 require 'fig/operating_system'
 
-# I do not understand the scoping rules for RSpec at all.  Why does this need
-# to be here and check_grammar_version() can be where it should be?
-def test_asset_with_url_with_symbol(symbol, quote, version)
+# I do not understand the scoping rules for RSpec at all.  Why do these need
+# to be here and check_grammar_version() can be where they should be?
+
+# Block is supposed to publish the package given a URL.
+def test_asset_with_url_with_symbol(asset_type, symbol, quote, version)
   file_name     = "with#{symbol}symbol"
   escaped_file  = CGI.escape file_name
   quoted_url    =
@@ -16,10 +18,7 @@ def test_asset_with_url_with_symbol(symbol, quote, version)
   it %Q<with URL «#{quoted_url}» (contains a «#{symbol}»)> do
     write_file "#{USER_HOME}/#{file_name}", ''
 
-    fig(
-      [ %w< --publish foo/1.2.3 --set x=y >, "--#{@asset_type}", quoted_url ],
-      :current_directory => USER_HOME
-    )
+    yield quoted_url
 
     check_grammar_version(version)
 
@@ -31,7 +30,7 @@ def test_asset_with_url_with_symbol(symbol, quote, version)
     # asset statement.
     out.should =~ /
       ^ \s*
-      #{@asset_type}
+      #{asset_type}
       \s+
       ['"]? # Don't worry about what the grammar does with quoting.
       #{Regexp.escape file_name}
@@ -42,19 +41,48 @@ def test_asset_with_url_with_symbol(symbol, quote, version)
   return
 end
 
-def test_asset_with_file_with_symbol(symbol, quote, version)
+def test_command_line_asset_with_url_with_symbol(
+  asset_type, symbol, quote, version
+)
+  test_asset_with_url_with_symbol(asset_type, symbol, quote, version) do
+    |quoted_url|
+
+    fig(
+      [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_url ],
+      :current_directory => USER_HOME
+    )
+  end
+
+  return
+end
+
+def test_asset_with_file_with_symbol(
+  asset_type, symbol, quote, version
+)
   file_name   = "with#{symbol}symbol"
   quoted_name = "#{quote}#{file_name}#{quote}"
 
   it %Q<with file «#{quoted_name}»> do
     write_file "#{USER_HOME}/#{file_name}", ''
 
-    fig(
-      [ %w< --publish foo/1.2.3 --set x=y >, "--#{@asset_type}", quoted_name ],
-      :current_directory => USER_HOME
-    )
+    yield quoted_name
 
     check_grammar_version(version)
+  end
+
+  return
+end
+
+def test_command_line_asset_with_file_with_symbol(
+  asset_type, symbol, quote, version
+)
+  test_asset_with_file_with_symbol(asset_type, symbol, quote, version) do
+    |quoted_name|
+
+    fig(
+      [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_name ],
+      :current_directory => USER_HOME
+    )
   end
 
   return
@@ -173,6 +201,8 @@ describe 'Fig' do
     end
 
     shared_examples_for 'asset option' do
+      |asset_type|
+
       ['', %q<'>, %q<">].each do
         |quote|
 
@@ -183,7 +213,7 @@ describe 'Fig' do
             write_file "#{USER_HOME}/nothing-special", ''
 
             fig(
-              [%w< --publish foo/1.2.3 --set x=y >, "--#{@asset_type}", value],
+              [%w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", value],
               :current_directory => USER_HOME
             )
 
@@ -191,28 +221,28 @@ describe 'Fig' do
           end
         end
 
-        test_asset_with_url_with_symbol('#', quote, 1)
+        test_command_line_asset_with_url_with_symbol(asset_type, '#', quote, 1)
       end
 
       testable_glob_characters.each do
         |symbol|
 
-        test_asset_with_url_with_symbol(symbol, %q<'>, 1)
+        test_command_line_asset_with_url_with_symbol(
+          asset_type, symbol, %q<'>, 1
+        )
 
         ['', %q<">].each do
           |quote|
 
-          test_asset_with_url_with_symbol(symbol, quote, 0)
+          test_command_line_asset_with_url_with_symbol(
+            asset_type, symbol, quote, 0
+          )
         end
       end
     end
 
     describe 'for --archive' do
-      before(:each) do
-        @asset_type = 'archive'
-      end
-
-      it_behaves_like 'asset option'
+      it_behaves_like 'asset option', 'archive'
 
       ['', %q<'>, %q<">].each do
         |quote|
@@ -220,17 +250,15 @@ describe 'Fig' do
         testable_special_characters.each do
           |symbol|
 
-          test_asset_with_file_with_symbol(symbol, quote, 1)
+          test_command_line_asset_with_file_with_symbol(
+            'archive', symbol, quote, 1
+          )
         end
       end
     end
 
     describe 'for --resource' do
-      before(:each) do
-        @asset_type = 'resource'
-      end
-
-      it_behaves_like 'asset option'
+      it_behaves_like 'asset option', 'resource'
 
       ['', %q<'>, %q<">].each do
         |quote|
@@ -238,7 +266,9 @@ describe 'Fig' do
         testable_special_characters.each do
           |symbol|
 
-          test_asset_with_file_with_symbol(symbol, quote, 0)
+          test_command_line_asset_with_file_with_symbol(
+            'resource', symbol, quote, 0
+          )
         end
       end
     end
