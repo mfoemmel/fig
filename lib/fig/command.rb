@@ -386,7 +386,7 @@ class Fig::Command
       |statement|
 
       Fig::Logging.warn(
-        "Ignored #{statement.source_description} for #{statement.url}."
+        "Ignored #{statement.source_description} for #{statement.location}."
       )
     end
 

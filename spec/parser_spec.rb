@@ -300,7 +300,7 @@ describe 'Parser' do
           end
         END_PACKAGE
 
-        url = [package.archive_urls, package.resource_urls].flatten[0]
+        url = [package.archive_locations, package.resource_locations].flatten[0]
         url.should == 'foo#bar'
       end
 

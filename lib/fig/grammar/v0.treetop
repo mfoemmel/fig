@@ -35,26 +35,26 @@ module Fig
       end
 
       rule archive
-        statement_start:'archive' ws+ url:asset_url {
+        statement_start:'archive' ws+ location:asset_location {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
-              Statement::Archive, statement_start, url.url
+              Statement::Archive, statement_start, location.location
             )
           end
         }
       end
 
       rule resource
-        statement_start:'resource' ws+ url:asset_url {
+        statement_start:'resource' ws+ location:asset_location {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
-              Statement::Resource, statement_start, url.url
+              Statement::Resource, statement_start, location.location
             )
           end
         }
       end
 
-      rule asset_url
+      rule asset_location
         # Unquoted allows globbing for files, quoted does not.
         #
         # Unquoted, anything but:
@@ -62,7 +62,7 @@ module Fig
         #    '      - Future expansion
         #    "<>|   - Characters not allowed in filenames on Windows
         #    \s     - Necessary for the "ws" token to work
-        (url:[^@'"<>|\s]+ ws)
+        (location:[^@'"<>|\s]+ ws)
 
         # Quoted, anything but:
         #    @        - To allow for package substitution
@@ -70,7 +70,7 @@ module Fig
         #    "<>|     - Characters not allowed in filenames on Windows
         #    *?\[\]{} - Characters significant to Dir.glob()
         #    \s       - We just don't want these. :]  (May need to allow space.)
-        / ('"' url:[^@'"<>|*?\[\]{}\s]+ '"' ws)
+        / ('"' location:[^@'"<>|*?\[\]{}\s]+ '"' ws)
       end
 
       rule retrieve

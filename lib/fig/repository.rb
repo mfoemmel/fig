@@ -302,21 +302,21 @@ class Fig::Repository
     package = read_package_from_directory(temp_dir, descriptor)
 
     remote_package_directory = remote_dir_for_package(descriptor)
-    package.archive_urls.each do |archive_url|
-      if not Fig::URL.is_url?(archive_url)
-        archive_url = Fig::URL.append_path_components(
-          remote_package_directory, [archive_url]
+    package.archive_locations.each do |archive_location|
+      if not Fig::URL.is_url?(archive_location)
+        archive_location = Fig::URL.append_path_components(
+          remote_package_directory, [archive_location]
         )
       end
-      @operating_system.download_and_unpack_archive(archive_url, temp_dir)
+      @operating_system.download_and_unpack_archive(archive_location, temp_dir)
     end
-    package.resource_urls.each do |resource_url|
-      if not Fig::URL.is_url?(resource_url)
-        resource_url = Fig::URL.append_path_components(
-          remote_package_directory, [resource_url]
+    package.resource_locations.each do |resource_location|
+      if not Fig::URL.is_url?(resource_location)
+        resource_location = Fig::URL.append_path_components(
+          remote_package_directory, [resource_location]
         )
       end
-      @operating_system.download_resource(resource_url, temp_dir)
+      @operating_system.download_resource(resource_location, temp_dir)
     end
 
     FileUtils.rm_rf(local_dir)

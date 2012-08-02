@@ -79,19 +79,21 @@ class Fig::ParserPackageBuildState
     )
   end
 
-  def new_asset_statement(statement_class, keyword_node, url_node)
-    url = url_node.text_value
+  def new_asset_statement(statement_class, keyword_node, location_node)
+    location = location_node.text_value
 
-    need_to_glob = statement_class.validate_and_process_escapes_in_url!(url) {
+    need_to_glob =
+      statement_class.validate_and_process_escapes_in_location!(location) do
+
       |error_description|
 
       raise_invalid_value_parse_error(
-        keyword_node, url_node, 'URL/path', error_description
+        keyword_node, location_node, 'URL/path', error_description
       )
-    }
+    end
 
     return statement_class.new(
-      node_location(keyword_node), source_description, url, need_to_glob
+      node_location(keyword_node), source_description, location, need_to_glob
     )
   end
 

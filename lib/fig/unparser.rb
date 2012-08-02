@@ -109,7 +109,7 @@ module Fig::Unparser
 
   def asset_path(statement)
     if @emit_as_input_or_to_be_published_values == :emit_as_input
-      return statement.url
+      return statement.location
     end
 
     return statement.asset_name

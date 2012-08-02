@@ -186,11 +186,11 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_asset_to_output_statements(asset_statement)
-    if Fig::URL.is_url? asset_statement.url
+    if Fig::URL.is_url? asset_statement.location
       @text_assembler.add_output asset_statement
     elsif asset_statement.is_a? Fig::Statement::Archive
       if asset_statement.requires_globbing?
-        expand_globs_from( [asset_statement.url] ).each do
+        expand_globs_from( [asset_statement.location] ).each do
           |file|
 
           @text_assembler.add_output(
@@ -206,9 +206,9 @@ class Fig::RepositoryPackagePublisher
         @text_assembler.add_output asset_statement
       end
     elsif asset_statement.requires_globbing?
-      @resource_paths.concat expand_globs_from( [asset_statement.url] )
+      @resource_paths.concat expand_globs_from( [asset_statement.location] )
     else
-      @resource_paths << asset_statement.url
+      @resource_paths << asset_statement.location
     end
 
     return
@@ -252,17 +252,17 @@ class Fig::RepositoryPackagePublisher
     asset_remote =
       Fig::URL.append_path_components @remote_dir_for_package, [asset_name]
 
-    if Fig::URL.is_url? asset_statement.url
+    if Fig::URL.is_url? asset_statement.location
       asset_local = File.join(publish_temp_dir(), asset_name)
 
       begin
-        @operating_system.download(asset_statement.url, asset_local)
+        @operating_system.download(asset_statement.location, asset_local)
       rescue Fig::FileNotFoundError
-        Fig::Logging.fatal "Could not download #{asset_statement.url}."
+        Fig::Logging.fatal "Could not download #{asset_statement.location}."
         raise Fig::RepositoryError.new
       end
     else
-      asset_local = asset_statement.url
+      asset_local = asset_statement.location
       check_asset_path(asset_local)
     end
 

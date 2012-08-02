@@ -10,12 +10,10 @@ class  Fig::Statement; end
 class Fig::Statement::Archive < Fig::Statement
   include Fig::Statement::Asset
 
-  attr_reader :url
-
-  def initialize(line_column, source_description, url, glob_if_not_url)
+  def initialize(line_column, source_description, location, glob_if_not_url)
     super(line_column, source_description)
 
-    @url             = url
+    @location        = location
     @glob_if_not_url = glob_if_not_url
   end
 

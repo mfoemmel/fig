@@ -11,15 +11,15 @@ class  Fig::Statement; end
 class Fig::Statement::Resource < Fig::Statement
   include Fig::Statement::Asset
 
-  def initialize(line_column, source_description, url, glob_if_not_url)
+  def initialize(line_column, source_description, location, glob_if_not_url)
     super(line_column, source_description)
 
-    @url             = url
+    @location        = location
     @glob_if_not_url = glob_if_not_url
   end
 
   def asset_name()
-    if Fig::URL.is_url?(url())
+    if Fig::URL.is_url?(location())
       return standard_asset_name()
     end
 

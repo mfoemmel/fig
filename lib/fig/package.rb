@@ -71,12 +71,16 @@ class Fig::Package
     return @statements.select { |statement| statement.is_a?(Fig::Statement::Retrieve) }
   end
 
-  def archive_urls
-    return @statements.select{|s| s.is_a?(Fig::Statement::Archive)}.map{|s| s.url}
+  def archive_locations
+    return @statements.
+      select{|s| s.is_a?(Fig::Statement::Archive)}.
+      map{|s| s.location}
   end
 
-  def resource_urls
-    return @statements.select{|s| s.is_a?(Fig::Statement::Resource)}.map{|s|s.url}
+  def resource_locations
+    return @statements.
+      select{|s| s.is_a?(Fig::Statement::Resource)}.
+      map{|s| s.location}
   end
 
   def applied_config_names()

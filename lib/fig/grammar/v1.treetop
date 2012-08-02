@@ -45,26 +45,26 @@ module Fig
       end
 
       rule archive
-        statement_start:'archive' ws_or_comment+ url:asset_url {
+        statement_start:'archive' ws_or_comment+ location:asset_location {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
-              Statement::Archive, statement_start, url
+              Statement::Archive, statement_start, location
             )
           end
         }
       end
 
       rule resource
-        statement_start:'resource' ws_or_comment+ url:asset_url {
+        statement_start:'resource' ws_or_comment+ location:asset_location {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
-              Statement::Resource, statement_start, url
+              Statement::Resource, statement_start, location
             )
           end
         }
       end
 
-      rule asset_url
+      rule asset_location
         '"' [^"]* '"' /
         "'" [^']* "'" /
         [\S]+
