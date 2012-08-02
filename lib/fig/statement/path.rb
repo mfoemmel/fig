@@ -44,7 +44,7 @@ class Fig::Statement::Path < Fig::Statement
     return unparser.path(self)
   end
 
-  def minimum_grammar_version_required()
+  def minimum_grammar_for_publishing()
     # TODO: fix this once going through
     # Statement.strip_quotes_and_process_escapes()
     return 0

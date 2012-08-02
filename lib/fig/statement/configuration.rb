@@ -39,7 +39,7 @@ class Fig::Statement::Configuration < Fig::Statement
     return unparser.configuration(self)
   end
 
-  def minimum_grammar_version_required()
+  def minimum_grammar_for_publishing()
     return 0
   end
 end

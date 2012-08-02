@@ -45,25 +45,28 @@ module Fig::Statement::Asset
     return basename
   end
 
-  def minimum_grammar_version_required()
-    # Because what gets written to package definition files in all current
-    # grammars is the asset name, and not the URL, we use that in the
-    # determination.
-    name = asset_name
+  def minimum_grammar_for_emitting_input()
+    return minimum_grammar_for_value location
+  end
 
-    return 0 if name.nil?
-    return 1 if name =~ /\s/
-
-    # Can't have octothorpes anywhere in v0 due to comment stripping via regex.
-    return 1 if name =~ /#/
-
-    # If we shouldn't glob, but we've got glob characters...
-    return 1 if ! glob_if_not_url? && name =~ /[*?\[\]{}]/
-
-    return 0
+  def minimum_grammar_for_publishing()
+    return minimum_grammar_for_value asset_name
   end
 
   private
+
+  def minimum_grammar_for_value(value)
+    return 0 if value.nil?
+    return 1 if value =~ /\s/
+
+    # Can't have octothorpes anywhere in v0 due to comment stripping via regex.
+    return 1 if value =~ /#/
+
+    # If we shouldn't glob, but we've got glob characters...
+    return 1 if ! glob_if_not_url? && value =~ /[*?\[\]{}]/
+
+    return 0
+  end
 
   module ClassMethods
     # Modifies the parameter to deal with quoting, escaping.

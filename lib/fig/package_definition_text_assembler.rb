@@ -64,7 +64,7 @@ class Fig::PackageDefinitionTextAssembler
   private
 
   def unparse_statements()
-    versions = @output_statements.map {|s| s.minimum_grammar_version_required}
+    versions = @output_statements.map {|s| s.minimum_grammar_for_publishing}
     version = versions.max || 0
 
     unparser_class = nil

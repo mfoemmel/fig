@@ -160,7 +160,11 @@ class Fig::Statement
     raise NotImplementedError
   end
 
-  def minimum_grammar_version_required()
+  def minimum_grammar_for_emitting_input()
+    raise NotImplementedError
+  end
+
+  def minimum_grammar_for_publishing()
     raise NotImplementedError
   end
 

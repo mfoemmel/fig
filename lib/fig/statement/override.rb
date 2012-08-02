@@ -37,7 +37,7 @@ class Fig::Statement::Override < Fig::Statement
     return unparser.override(self)
   end
 
-  def minimum_grammar_version_required()
+  def minimum_grammar_for_publishing()
     return 0
   end
 end

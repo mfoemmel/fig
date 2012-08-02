@@ -16,7 +16,7 @@ class Fig::Statement::GrammarVersion < Fig::Statement
     return unparser.grammar_version(self)
   end
 
-  def minimum_grammar_version_required()
+  def minimum_grammar_for_publishing()
     return version
   end
 end
