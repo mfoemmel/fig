@@ -87,7 +87,7 @@ class Fig::Command
     return Fig::Command::Action::EXIT_SUCCESS
   end
 
-  def run_with_exception_handling(argv, options = nil)
+  def run_fig_with_exception_handling(argv, options = nil)
     begin
       return run_fig(argv, options)
     rescue Fig::URLAccessDisallowedError => error

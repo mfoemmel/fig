@@ -234,7 +234,7 @@ def _run_command_internally(command_line, input, options)
     if ENV['FIG_SPEC_DEBUG']
       exit_code = Fig::Command.new.run_fig command_line
     else
-      exit_code = Fig::Command.new.run_with_exception_handling command_line
+      exit_code = Fig::Command.new.run_fig_with_exception_handling command_line
     end
 
     exit_string = nil

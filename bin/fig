@@ -14,4 +14,4 @@ require 'rubygems'
 
 require 'fig/command'
 
-exit Fig::Command.new.run_with_exception_handling ARGV
+exit Fig::Command.new.run_fig_with_exception_handling ARGV
