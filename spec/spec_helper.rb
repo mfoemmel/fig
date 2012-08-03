@@ -88,11 +88,29 @@ end
 
 $fig_run_count = 0 # Nasty, nasty global.
 
+# Options:
+#
+#   :current_directory  What the current directory should be when starting fig.
+#
+#   :figrc              Value of the --figrc option.  If not specified,
+#                       --no-figrc will be passed to fig.
+#
+#   :no_raise_on_error  Normally an exception is thrown if fig returns an error
+#                       code.  If this option is true, then no exception will
+#                       be raised, allowing testing of failure states/output.
+#
+#   :fork               If specified as false, don't run fig as an external
+#                       process, but in-process instead.  This will run faster,
+#                       but will screw up the test suite if fig invokes
+#                       Kernel#exec (due to a command statement) or otherwise
+#                       depends upon at-exit behavior.
 def fig(command_line, first_extra = nil, rest_extra = nil)
   input, options = _fig_input_options(first_extra, rest_extra)
 
   $fig_run_count += 1
   ENV['FIG_COVERAGE_RUN_COUNT'] = $fig_run_count.to_s
+
+  out = err = exit_code = nil
 
   current_directory = options[:current_directory] || FIG_SPEC_BASE_DIRECTORY
   Dir.chdir current_directory do
@@ -115,43 +133,11 @@ def fig(command_line, first_extra = nil, rest_extra = nil)
       standard_options.concat %w< --update-lock-response ignore >
     end
 
-    out = nil
-    err = nil
-
-    command = [BASE_FIG_COMMAND_LINE, standard_options, command_line].flatten
-    result = Popen.popen(*command) do
-      |stdin, stdout, stderr|
-
-      if input
-        stdin.puts input
-        stdin.close
-      end
-
-      err = stderr.read.strip
-      out = stdout.read.strip
-    end
-
-    if not result or result.success? or options[:no_raise_on_error]
-      return out, err, result.nil? ? 0 : result.exitstatus
-    end
-
-    # Common scenario during development is that the fig external process will
-    # fail for whatever reason, but the RSpec expectation is checking whether a
-    # file was created, etc. meaning that we don't see stdout, stderr, etc. but
-    # RSpec's failure message for the expectation, which isn't informative.
-    # Throwing an exception that RSpec will catch will correctly integrate the
-    # fig output with the rest of the RSpec output.
-    fig_failure = "External fig process failed:\n"
-    fig_failure << "command: #{command.join(' ')}\n"
-    fig_failure << "result: #{result.nil? ? '<nil>' : result}\n"
-    fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
-    fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
-    if input
-      fig_failure << "input: #{input}\n"
-    end
-
-    raise fig_failure
+    command_line = [standard_options, command_line].flatten
+    out, err, exit_code = _run_command command_line, input, options
   end
+
+  return out, err, exit_code
 end
 
 # A bit of ruby magic to make invoking fig() nicer; this takes advantage of the
@@ -169,6 +155,99 @@ def _fig_input_options(first_extra, rest_extra)
   end
 
   return first_extra, rest_extra || {}
+end
+
+def _run_command(command_line, input, options)
+  out = err = exit_code = exit_string = nil
+
+  if options.fetch(:fork, true)
+    out, err, exit_code, exit_string =
+      _run_command_externally command_line, input, options
+  else
+    out, err, exit_code, exit_string =
+      _run_command_internally command_line, input, options
+  end
+
+  if exit_string
+    # Common scenario during development is that the fig process will fail for
+    # whatever reason, but the RSpec expectation is checking whether a file was
+    # created, etc. meaning that we don't see stdout, stderr, etc. but RSpec's
+    # failure message for the expectation, which isn't informative.  Throwing
+    # an exception that RSpec will catch will correctly integrate the fig
+    # output with the rest of the RSpec output.
+    fig_failure = "Fig process failed:\n"
+    fig_failure << "command: #{command_line.join(' ')}\n"
+    fig_failure << "result: #{exit_string}\n"
+    fig_failure << "stdout: #{out.nil? ? '<nil>' : out}\n"
+    fig_failure << "stderr: #{err.nil? ? '<nil>' : err}\n"
+    if input
+      fig_failure << "input: #{input}\n"
+    end
+
+    raise fig_failure
+  end
+
+  return out.strip, err.strip, exit_code
+end
+
+def _run_command_externally(command_line, input, options)
+  out = nil
+  err = nil
+
+  full_command_line = BASE_FIG_COMMAND_LINE + command_line
+  result = Popen.popen(*full_command_line) do
+    |stdin, stdout, stderr|
+
+    if input
+      stdin.puts input
+      stdin.close
+    end
+
+    err = stderr.read
+    out = stdout.read
+  end
+
+  exit_code   = result.nil? ? 0 : result.exitstatus
+  exit_string = nil
+  if result && ! result.success? && ! options[:no_raise_on_error]
+    exit_string = result.to_s
+  end
+
+  return out, err, exit_code, exit_string
+end
+
+def _run_command_internally(command_line, input, options)
+  original_stdin  = $stdin
+  original_stdout = $stdout
+  original_stderr = $stderr
+
+  begin
+    stdin     = input ? StringIO.new(input) : StringIO.new
+    stdout    = StringIO.new
+    stderr    = StringIO.new
+    exit_code = nil
+
+    $stdin  = stdin
+    $stdout = stdout
+    $stderr = stderr
+
+    if ENV['FIG_SPEC_DEBUG']
+      exit_code = Fig::Command.new.run_fig command_line
+    else
+      exit_code = Fig::Command.new.run_with_exception_handling command_line
+    end
+
+    exit_string = nil
+    if exit_code != 0 && ! options[:no_raise_on_error]
+      exit_string = exit_code.to_s
+    end
+
+    return stdout.string, stderr.string, exit_code, exit_string
+  ensure
+    $stdin  = original_stdin
+    $stdout = original_stdout
+    $stderr = original_stderr
+  end
 end
 
 def set_up_test_environment()

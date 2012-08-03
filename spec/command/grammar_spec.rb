@@ -22,7 +22,8 @@ def test_asset_with_url_with_symbol(asset_type, symbol, quote, version)
 
     check_grammar_version(version)
 
-    out, err = fig(%w< foo/1.2.3 --dump-package-definition-text >)
+    out, err =
+      fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
 
     # Test that the statement gets rewritten without the URL.
     #
@@ -49,7 +50,8 @@ def test_command_line_asset_with_url_with_symbol(
 
     fig(
       [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_url ],
-      :current_directory => USER_HOME
+      :current_directory => USER_HOME,
+      :fork => false
     )
   end
 
@@ -71,7 +73,8 @@ def test_file_asset_with_url_with_symbol(asset_type, symbol, quote, version)
     fig(
       %w< --publish foo/1.2.3 >,
       input,
-      :current_directory => USER_HOME
+      :current_directory => USER_HOME,
+      :fork => false
     )
   end
 
@@ -103,7 +106,8 @@ def test_command_line_asset_with_file_with_symbol(
 
     fig(
       [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_name ],
-      :current_directory => USER_HOME
+      :current_directory => USER_HOME,
+      :fork => false
     )
   end
 
@@ -125,7 +129,8 @@ def test_file_asset_with_file_with_symbol(asset_type, symbol, quote, version)
     fig(
       %w< --publish foo/1.2.3 >,
       input,
-      :current_directory => USER_HOME
+      :current_directory => USER_HOME,
+      :fork => false
     )
   end
 
@@ -159,11 +164,11 @@ describe 'Fig' do
           # A comment
           grammar v#{version}
           config default
-            command "echo foo"
+            set variable=foo
           end
         END
 
-        out, err = fig(%w<--run-command-statement>, input)
+        out, err = fig(%w<--get variable>, input, :fork => false)
         err.should == ''
         out.should == 'foo'
       end
@@ -177,7 +182,8 @@ describe 'Fig' do
           grammar v1
         END
 
-        out, err, exit_code = fig([], input, :no_raise_on_error => true)
+        out, err, exit_code =
+          fig([], input, :no_raise_on_error => true, :fork => false)
         err.should =~ /grammar statement wasn't first statement/i
         out.should == ''
         exit_code.should_not == 0
@@ -191,7 +197,8 @@ describe 'Fig' do
         end
       END
 
-      out, err, exit_code = fig([], input, :no_raise_on_error => true)
+      out, err, exit_code =
+        fig([], input, :no_raise_on_error => true, :fork => false)
       err.should =~ /don't know how to parse grammar version/i
       out.should == ''
       exit_code.should_not == 0
@@ -200,7 +207,8 @@ describe 'Fig' do
 
   describe %q<uses the correct grammar version in the package definition created for publishing> do
     def check_grammar_version(version)
-      out, err = fig(%w< foo/1.2.3 --dump-package-definition-text >)
+      out, err =
+        fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
 
       out.should =~ /\b grammar [ ] v #{version} \b/x
       err.should == ''
@@ -218,7 +226,7 @@ describe 'Fig' do
         config default
         end
       END
-      fig(%w< --publish foo/1.2.3 >, input)
+      fig(%w< --publish foo/1.2.3 >, input, :fork => false)
 
       check_grammar_version(0)
     end
@@ -229,7 +237,7 @@ describe 'Fig' do
         config default
         end
       END
-      fig(%w< --publish foo/1.2.3 >, input)
+      fig(%w< --publish foo/1.2.3 >, input, :fork => false)
 
       check_grammar_version(0)
     end
@@ -238,7 +246,10 @@ describe 'Fig' do
       |option|
 
       it "for simple --#{option}" do
-        fig [%w< --publish foo/1.2.3>, "--#{option}", 'VARIABLE=VALUE']
+        fig(
+          [%w< --publish foo/1.2.3>, "--#{option}", 'VARIABLE=VALUE'],
+          :fork => false
+        )
 
         check_grammar_version(0)
       end
@@ -258,7 +269,8 @@ describe 'Fig' do
 
             fig(
               [%w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", value],
-              :current_directory => USER_HOME
+              :current_directory => USER_HOME,
+              :fork => false
             )
 
             check_grammar_version(0)
@@ -340,7 +352,8 @@ describe 'Fig' do
             fig(
               %w< --publish foo/1.2.3 >,
               input,
-              :current_directory => USER_HOME
+              :current_directory => USER_HOME,
+              :fork => false
             )
 
             check_grammar_version(0)

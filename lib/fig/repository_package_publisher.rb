@@ -209,7 +209,7 @@ class Fig::RepositoryPackagePublisher
 
       file = Fig::Repository::RESOURCES_FILE
       @operating_system.create_archive(file, @resource_paths)
-      Fig::AtExit.add { File.delete(file) }
+      Fig::AtExit.add { FileUtils.rm_f(file) }
 
       @text_assembler.add_output(
         Fig::Statement::Archive.new(
