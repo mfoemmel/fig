@@ -24,10 +24,21 @@ USER_HOME         = FIG_SPEC_BASE_DIRECTORY + '/userhome'
 FIG_HOME          = FIG_SPEC_BASE_DIRECTORY + '/fighome'
 FIG_REMOTE_DIR    = FIG_SPEC_BASE_DIRECTORY + '/remote'
 FIG_REMOTE_URL    = %Q<file://#{FIG_REMOTE_DIR}>
-FIG_DIRECTORY     ||= File.expand_path(File.dirname(__FILE__)) + '/../bin'
-FIG_COMMAND_CLASS ||= Fig::Command
-FIG_PROGRAM       ||=
-  %Q<#{FIG_DIRECTORY}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
+
+# Ruby v1.8 won't let you do "CONSTANT ||= whatever".
+self.class.const_defined? :FIG_DIRECTORY or
+  self.class.const_set(
+    :FIG_DIRECTORY, File.expand_path(File.dirname(__FILE__)) + '/../bin'
+  )
+self.class.const_defined? :FIG_COMMAND_CLASS or
+  self.class.const_set :FIG_COMMAND_CLASS, Fig::Command
+
+FIG_PROGRAM       =
+self.class.const_defined?(:FIG_PROGRAM) ||
+  self.class.const_set(
+    :FIG_PROGRAM,
+    %Q<#{FIG_DIRECTORY}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
+  )
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
@@ -42,7 +53,8 @@ RUBY_EXE =
     RbConfig::CONFIG['EXEEXT']
   ].join
 
-BASE_FIG_COMMAND_LINE ||= [RUBY_EXE, FIG_PROGRAM]
+self.class.const_defined? :BASE_FIG_COMMAND_LINE or
+  self.class.const_set :BASE_FIG_COMMAND_LINE, [RUBY_EXE, FIG_PROGRAM]
 
 ENV['HOME']           = USER_HOME
 ENV['FIG_HOME']       = FIG_HOME
