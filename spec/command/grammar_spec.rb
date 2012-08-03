@@ -298,8 +298,6 @@ describe 'Fig' do
     end
 
     describe 'for --archive' do
-      it_behaves_like 'asset option', 'archive'
-
       ['', %q<'>, %q<">].each do
         |quote|
 
@@ -311,11 +309,11 @@ describe 'Fig' do
           )
         end
       end
+
+      it_behaves_like 'asset option', 'archive'
     end
 
     describe 'for --resource' do
-      it_behaves_like 'asset option', 'resource'
-
       ['', %q<'>, %q<">].each do
         |quote|
 
@@ -327,6 +325,8 @@ describe 'Fig' do
           )
         end
       end
+
+      it_behaves_like 'asset option', 'resource'
     end
 
     shared_examples_for 'asset statement' do
@@ -363,6 +363,12 @@ describe 'Fig' do
         test_file_asset_with_url_with_symbol(asset_type, '#', quote, 1)
       end
 
+      [%q<'>, %q<">].each do
+        |quote|
+
+        test_file_asset_with_file_with_symbol(asset_type, '#', quote, 1)
+      end
+
       testable_glob_characters.each do
         |symbol|
 
@@ -381,12 +387,10 @@ describe 'Fig' do
     end
 
     describe 'for archive statement' do
-      it_behaves_like 'asset statement', 'archive'
-
       ['', %q<'>, %q<">].each do
         |quote|
 
-        testable_special_characters.each do
+        (testable_special_characters - %w<#>).each do
           |symbol|
 
           test_file_asset_with_file_with_symbol(
@@ -394,15 +398,15 @@ describe 'Fig' do
           )
         end
       end
+
+      it_behaves_like 'asset statement', 'archive'
     end
 
     describe 'for resource statement' do
-      it_behaves_like 'asset statement', 'resource'
-
       ['', %q<'>, %q<">].each do
         |quote|
 
-        testable_special_characters.each do
+        (testable_special_characters - %w<#>).each do
           |symbol|
 
           test_file_asset_with_file_with_symbol(
@@ -410,6 +414,8 @@ describe 'Fig' do
           )
         end
       end
+
+      it_behaves_like 'asset statement', 'resource'
     end
   end
 end

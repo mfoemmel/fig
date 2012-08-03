@@ -67,7 +67,7 @@ module Fig
       rule asset_location
         '"' [^"]* '"' /
         "'" [^']* "'" /
-        [\S]+
+        [^\s#]+
       end
 
       rule retrieve
@@ -131,7 +131,7 @@ module Fig
       end
 
       rule path
-        statement_start:('add' / 'append' / 'path') ws_or_comment+ name_value:[\S]+ {
+        statement_start:('add' / 'append' / 'path') ws_or_comment+ name_value:[^\s#]+ {
           def to_config_statement(build_state)
             return build_state.new_environment_variable_statement(
               Statement::Path, statement_start, name_value
@@ -145,7 +145,7 @@ module Fig
       end
 
       rule set
-        statement_start:'set' ws_or_comment+ name_value:[\S]+ {
+        statement_start:'set' ws_or_comment+ name_value:[^\s#]+ {
           def to_config_statement(build_state)
             return build_state.new_environment_variable_statement(
               Statement::Set, statement_start, name_value
@@ -167,7 +167,7 @@ module Fig
       end
 
       rule descriptor_string
-        [\S]+
+        [^\s#]+
       end
     end
   end
