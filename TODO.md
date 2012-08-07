@@ -1,6 +1,7 @@
 # Code changes
 
 * Make use of Statement#is_environment_variable?().
+* Change `URL.is_url?()` to match arbitrary RFC-compliant URLs.  Add something else that restricts it to those that we can handle.
 * Bad URLs (FIG_REMOTE_URL, asset paths) will result in ugly stack traces; need to turn these into reasonable error messages.
 * Retrieve statements should validate their paths the same way that path statements do.
 * Produce nice error messages when packages contain file names that Windows can't deal with.
