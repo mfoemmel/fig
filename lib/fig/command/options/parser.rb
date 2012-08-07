@@ -92,7 +92,7 @@ Information:
   fig --help
   fig --help-long
   fig --options
-  fig {-v | --version}
+  fig {-v | --version | --version-plain}
 
 
 A DESCRIPTOR looks like <package name>[/<version>][:<config>] e.g. "foo",

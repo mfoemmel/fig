@@ -124,8 +124,13 @@ def fig(command_line, first_extra = nil, rest_extra = nil)
         stdin.close
       end
 
-      err = stderr.read.strip
-      out = stdout.read.strip
+      err = stderr.read
+      out = stdout.read
+
+      if ! options[:dont_strip_output]
+        err.strip!
+        out.strip!
+      end
     end
 
     if not result or result.success? or options[:no_raise_on_error]

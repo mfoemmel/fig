@@ -25,6 +25,7 @@ require 'fig/command/action/run_command_statement'
 require 'fig/command/action/update'
 require 'fig/command/action/update_if_missing'
 require 'fig/command/action/version'
+require 'fig/command/action/version_plain'
 require 'fig/command/option_error'
 require 'fig/command/options/parser'
 require 'fig/package_descriptor'
@@ -55,6 +56,7 @@ class Fig::Command::Options
   attr_reader   :update_lock_response
   attr_reader   :variable_to_get
   attr_accessor :version_message
+  attr_accessor :version_plain
 
   def initialize()
     @home   = ENV['FIG_HOME'] || File.expand_path('~/.fighome')
@@ -208,6 +210,11 @@ class Fig::Command::Options
 
     @parser.on_tail('-v', '--version', 'print Fig version') do
       set_base_action(Fig::Command::Action::Version)
+    end
+    @parser.on_tail(
+      '--version-plain', 'print Fig version without embellishment (no newline)'
+    ) do
+      set_base_action(Fig::Command::Action::VersionPlain)
     end
 
     @parser.on(

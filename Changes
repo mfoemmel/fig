@@ -1,5 +1,13 @@
 v0.1.75
 
+  New features:
+
+  - New --version-plain option for getting the fig version without any nice
+    formatting (and no trailing newline in the output).  Useful for programatic
+    access to the fig version.
+
+v0.1.75
+
   Backwards incompatibilities:
 
   - Unquoted archive statements now have their values globbed if they don't
