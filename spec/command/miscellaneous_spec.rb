@@ -61,11 +61,35 @@ describe 'Fig' do
     err.should =~ /version mismatch for package foo/i
   end
 
-  it 'prints the version number' do
-    %w/-v --version/.each do |option|
-      out, err = fig([option])
+  describe 'emits the version number' do
+    %w/-v --version/.each do
+      |option|
+
+      it "descriptively with #{option}" do
+        (out, err, exitstatus) = fig([option])
+        exitstatus.should == 0
+        err.should == ''
+        out.should =~ %r<
+          \A                # Start of string
+          \w+               # Some text...
+          \s+               # ... followed by some whitespace
+          .*                # whatever (so test doesn't change as the text does)
+          \d+ \. \d+ \. \d+ # Some dotted number
+        >x
+      end
+    end
+
+    it 'plainly with --version-plain' do
+      (out, err, exitstatus) =
+        fig %w< --version-plain >, :dont_strip_output => true
+
+      exitstatus.should == 0
       err.should == ''
-      out.should =~ / \d+ \. \d+ \. \d+ /x
+      out.should =~ %r<
+        \A                # Start of string
+        \d+ \. \d+ \. \d+ # Some dotted number
+      >x
+      out.should_not =~ %r< \n \z >x
     end
   end
 

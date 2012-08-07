@@ -198,7 +198,12 @@ def _run_command(command_line, input, options)
     raise fig_failure
   end
 
-  return out.strip, err.strip, exit_code
+  if ! options[:dont_strip_output]
+    err.strip!
+    out.strip!
+  end
+
+  return out, err, exit_code
 end
 
 def _run_command_externally(command_line, input, options)
