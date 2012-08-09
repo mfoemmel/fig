@@ -9,7 +9,10 @@ class Fig::PackageDefinitionTextAssembler
   attr_reader :input_statements
   attr_reader :output_statements
 
-  def initialize()
+  def initialize(emit_as_input_or_to_be_published_values)
+    @emit_as_input_or_to_be_published_values =
+      emit_as_input_or_to_be_published_values
+
     @input_statements   = []
     @output_statements  = []
     @header_text        = []
@@ -68,7 +71,7 @@ class Fig::PackageDefinitionTextAssembler
   private
 
   def unparse_statements()
-    versions = @output_statements.map {|s| s.minimum_grammar_for_publishing}
+    versions = get_statement_minimum_versions
     version = versions.max || 0
 
     unparser_class = nil
@@ -85,7 +88,7 @@ class Fig::PackageDefinitionTextAssembler
         0 # Grammar version
       )
 
-    unparser = unparser_class.new :emit_as_to_be_published
+    unparser = unparser_class.new @emit_as_input_or_to_be_published_values
     text = unparser.unparse( [grammar_statement] + @output_statements )
 
     # TODO: Until v1 grammar handling is done, ensure we don't emit anything
@@ -95,5 +98,13 @@ class Fig::PackageDefinitionTextAssembler
     end
 
     return text
+  end
+
+  def get_statement_minimum_versions()
+    if @emit_as_input_or_to_be_published_values == :emit_as_input
+      return @output_statements.map {|s| s.minimum_grammar_for_emitting_input}
+    end
+
+    return @output_statements.map {|s| s.minimum_grammar_for_publishing}
   end
 end

@@ -6,10 +6,12 @@ require 'cgi'
 require 'fig/operating_system'
 
 # I do not understand the scoping rules for RSpec at all.  Why do these need
-# to be here and check_grammar_version() can be where they should be?
+# to be here and check_published_grammar_version() can be where they should be?
 
 # Block is supposed to publish the package given a URL.
-def test_asset_with_url_with_symbol(asset_type, symbol, quote, version)
+def test_published_asset_with_url_with_symbol(
+  asset_type, symbol, quote, version
+)
   file_name     = "with#{symbol}symbol"
   escaped_file  = CGI.escape file_name
   quoted_url    =
@@ -20,7 +22,7 @@ def test_asset_with_url_with_symbol(asset_type, symbol, quote, version)
 
     yield quoted_url
 
-    check_grammar_version(version)
+    check_published_grammar_version(version)
 
     out, err =
       fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
@@ -42,10 +44,12 @@ def test_asset_with_url_with_symbol(asset_type, symbol, quote, version)
   return
 end
 
-def test_command_line_asset_with_url_with_symbol(
+def test_published_command_line_asset_with_url_with_symbol(
   asset_type, symbol, quote, version
 )
-  test_asset_with_url_with_symbol(asset_type, symbol, quote, version) do
+  test_published_asset_with_url_with_symbol(
+    asset_type, symbol, quote, version
+  ) do
     |quoted_url|
 
     fig(
@@ -58,8 +62,12 @@ def test_command_line_asset_with_url_with_symbol(
   return
 end
 
-def test_file_asset_with_url_with_symbol(asset_type, symbol, quote, version)
-  test_asset_with_url_with_symbol(asset_type, symbol, quote, version) do
+def test_published_file_asset_with_url_with_symbol(
+  asset_type, symbol, quote, version
+)
+  test_published_asset_with_url_with_symbol(
+    asset_type, symbol, quote, version
+  ) do
     |quoted_url|
 
     input = <<-"END"
@@ -81,7 +89,7 @@ def test_file_asset_with_url_with_symbol(asset_type, symbol, quote, version)
   return
 end
 
-def test_asset_with_file_with_symbol(
+def test_published_asset_with_file_with_symbol(
   asset_type, symbol, quote, version
 )
   file_name   = "with#{symbol}symbol"
@@ -92,16 +100,18 @@ def test_asset_with_file_with_symbol(
 
     yield quoted_name
 
-    check_grammar_version(version)
+    check_published_grammar_version(version)
   end
 
   return
 end
 
-def test_command_line_asset_with_file_with_symbol(
+def test_published_command_line_asset_with_file_with_symbol(
   asset_type, symbol, quote, version
 )
-  test_asset_with_file_with_symbol(asset_type, symbol, quote, version) do
+  test_published_asset_with_file_with_symbol(
+    asset_type, symbol, quote, version
+  ) do
     |quoted_name|
 
     fig(
@@ -114,8 +124,12 @@ def test_command_line_asset_with_file_with_symbol(
   return
 end
 
-def test_file_asset_with_file_with_symbol(asset_type, symbol, quote, version)
-  test_asset_with_file_with_symbol(asset_type, symbol, quote, version) do
+def test_published_file_asset_with_file_with_symbol(
+  asset_type, symbol, quote, version
+)
+  test_published_asset_with_file_with_symbol(
+    asset_type, symbol, quote, version
+  ) do
     |quoted_url|
 
     input = <<-"END"
@@ -206,7 +220,7 @@ describe 'Fig' do
   end
 
   describe %q<uses the correct grammar version in the package definition created for publishing> do
-    def check_grammar_version(version)
+    def check_published_grammar_version(version)
       out, err =
         fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
 
@@ -228,7 +242,7 @@ describe 'Fig' do
       END
       fig(%w< --publish foo/1.2.3 >, input, :fork => false)
 
-      check_grammar_version(0)
+      check_published_grammar_version(0)
     end
 
     it 'from v1 grammar file input with a "default" config' do
@@ -239,7 +253,7 @@ describe 'Fig' do
       END
       fig(%w< --publish foo/1.2.3 >, input, :fork => false)
 
-      check_grammar_version(0)
+      check_published_grammar_version(0)
     end
 
     %w< set append >.each do
@@ -251,7 +265,7 @@ describe 'Fig' do
           :fork => false
         )
 
-        check_grammar_version(0)
+        check_published_grammar_version(0)
       end
     end
 
@@ -273,24 +287,24 @@ describe 'Fig' do
               :fork => false
             )
 
-            check_grammar_version(0)
+            check_published_grammar_version(0)
           end
         end
 
-        test_command_line_asset_with_url_with_symbol(asset_type, '#', quote, 1)
+        test_published_command_line_asset_with_url_with_symbol(asset_type, '#', quote, 1)
       end
 
       testable_glob_characters.each do
         |symbol|
 
-        test_command_line_asset_with_url_with_symbol(
+        test_published_command_line_asset_with_url_with_symbol(
           asset_type, symbol, %q<'>, 1
         )
 
         ['', %q<">].each do
           |quote|
 
-          test_command_line_asset_with_url_with_symbol(
+          test_published_command_line_asset_with_url_with_symbol(
             asset_type, symbol, quote, 0
           )
         end
@@ -304,7 +318,7 @@ describe 'Fig' do
         testable_special_characters.each do
           |symbol|
 
-          test_command_line_asset_with_file_with_symbol(
+          test_published_command_line_asset_with_file_with_symbol(
             'archive', symbol, quote, 1
           )
         end
@@ -320,7 +334,7 @@ describe 'Fig' do
         testable_special_characters.each do
           |symbol|
 
-          test_command_line_asset_with_file_with_symbol(
+          test_published_command_line_asset_with_file_with_symbol(
             'resource', symbol, quote, 0
           )
         end
@@ -356,30 +370,32 @@ describe 'Fig' do
               :fork => false
             )
 
-            check_grammar_version(0)
+            check_published_grammar_version(0)
           end
         end
 
-        test_file_asset_with_url_with_symbol(asset_type, '#', quote, 1)
+        test_published_file_asset_with_url_with_symbol(asset_type, '#', quote, 1)
       end
 
       [%q<'>, %q<">].each do
         |quote|
 
-        test_file_asset_with_file_with_symbol(asset_type, '#', quote, 1)
+        test_published_file_asset_with_file_with_symbol(
+          asset_type, '#', quote, 1
+        )
       end
 
       testable_glob_characters.each do
         |symbol|
 
-        test_file_asset_with_url_with_symbol(
+        test_published_file_asset_with_url_with_symbol(
           asset_type, symbol, %q<'>, 1
         )
 
         ['', %q<">].each do
           |quote|
 
-          test_file_asset_with_url_with_symbol(
+          test_published_file_asset_with_url_with_symbol(
             asset_type, symbol, quote, 0
           )
         end
@@ -393,7 +409,7 @@ describe 'Fig' do
         (testable_special_characters - %w<#>).each do
           |symbol|
 
-          test_file_asset_with_file_with_symbol(
+          test_published_file_asset_with_file_with_symbol(
             'archive', symbol, quote, 1
           )
         end
@@ -409,13 +425,47 @@ describe 'Fig' do
         (testable_special_characters - %w<#>).each do
           |symbol|
 
-          test_file_asset_with_file_with_symbol(
+          test_published_file_asset_with_file_with_symbol(
             'resource', symbol, quote, 0
           )
         end
       end
 
       it_behaves_like 'asset statement', 'resource'
+    end
+  end
+
+  describe %q<uses the correct grammar version in the package definition after parsing> do
+    before(:each) do
+      clean_up_test_environment
+      set_up_test_environment
+    end
+
+    %w< archive resource >.each do
+      |asset_type|
+
+      describe "#{asset_type} statement" do
+        [%q<'>, %q<">].each do
+          |quote|
+
+          value = "#{quote}contains#octothorpe#{quote}"
+          it %Q<with input containing «#{value}»> do
+            input = <<-"END"
+              grammar v1
+              #{asset_type} #{value}
+            END
+
+            out, err = fig(
+              ['--dump-package-definition-parsed'],
+              input,
+              :current_directory => USER_HOME,
+              :fork => false
+            )
+            out.should =~ /\b grammar [ ] v1 \b/x
+            err.should == ''
+          end
+        end
+      end
     end
   end
 end

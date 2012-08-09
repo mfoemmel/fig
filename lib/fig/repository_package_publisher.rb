@@ -37,7 +37,8 @@ class Fig::RepositoryPackagePublisher
   attr_writer :local_only
 
   def initialize()
-    @text_assembler = Fig::PackageDefinitionTextAssembler.new
+    @text_assembler =
+      Fig::PackageDefinitionTextAssembler.new :emit_as_to_be_published
 
     return
   end

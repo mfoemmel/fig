@@ -1,6 +1,6 @@
 require 'fig/command/action'
 require 'fig/command/action/role/has_no_sub_action'
-require 'fig/unparser/v0'
+require 'fig/package_definition_text_assembler'
 
 module  Fig; end
 class   Fig::Command; end
@@ -35,10 +35,10 @@ class Fig::Command::Action::DumpPackageDefinitionParsed
   end
 
   def execute()
-    unparser = Fig::Unparser::V0.new :emit_as_input
-    text = unparser.unparse(@execution_context.base_package.statements)
+    text_assembler = Fig::PackageDefinitionTextAssembler.new :emit_as_input
+    text_assembler.add_output @execution_context.base_package.statements
 
-    print text.gsub(/\n{3,}/, "\n\n").strip
+    print text_assembler.assemble_package_definition
 
     return EXIT_SUCCESS
   end
