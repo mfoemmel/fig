@@ -3,8 +3,8 @@ require 'fig/unparser'
 module Fig; end
 module Fig::Unparser; end
 
-# Handles serializing of statements in the v1 grammar.
-class Fig::Unparser::V1
+# Handles serializing of statements in the v2 grammar.
+class Fig::Unparser::V2
   include Fig::Unparser
 
   def initialize(
@@ -33,7 +33,7 @@ class Fig::Unparser::V1
   def grammar_version(statement)
     add_indent
 
-    @text << "grammar v1\n"
+    @text << "grammar v2\n"
 
     return
   end

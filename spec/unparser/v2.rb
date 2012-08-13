@@ -4,11 +4,11 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'fig/statement/archive'
 require 'fig/statement/resource'
-require 'fig/unparser/v1'
+require 'fig/unparser/v2'
 
-describe Fig::Unparser::V1 do
+describe Fig::Unparser::V2 do
   let(:unparser) {
-    Fig::Unparser::V1.new :emit_as_input, '<indent>', 1
+    Fig::Unparser::V2.new :emit_as_input, '<indent>', 1
   }
 
   describe 'unparses' do

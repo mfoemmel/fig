@@ -18,14 +18,14 @@ module Fig::Unparser
     end
     version = versions.max || 0
 
-    if version == 1
-      # TODO: Until v1 grammar handling is done, ensure we don't emit anything
+    if version != 0
+      # TODO: Until v2 grammar handling is done, ensure we don't emit anything
       # old fig versions cannot handle.
       if ! ENV['FIG_ALLOW_NON_V0_GRAMMAR']
         raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
       end
 
-      return Fig::Unparser::V1
+      return Fig::Unparser::V2
     end
 
     return Fig::Unparser::V0

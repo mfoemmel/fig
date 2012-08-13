@@ -1,4 +1,4 @@
-# Treetop (http://treetop.rubyforge.org/) grammar for package definitions in v1
+# Treetop (http://treetop.rubyforge.org/) grammar for package definitions in v2
 # format.
 
 # Some aspects of this grammar are significantly dumber than they could be
@@ -16,7 +16,7 @@ require 'fig/grammar/version'
 
 module Fig
   module Grammar
-    grammar V1
+    grammar V2
       include Fig::Grammar::Base
       include Fig::Grammar::Version
 
@@ -31,7 +31,7 @@ module Fig
       end
 
       # Shim between "package" and "package_statement" rules to allow the
-      # compiled v0 and v1 grammars to have the same interface.
+      # compiled v[01] and v2 grammars to have the same interface.
       rule package_statement_with_ws
         package_statement:package_statement ws_or_comment+ {
           def to_package_statement(build_state)
@@ -97,7 +97,7 @@ module Fig
       end
 
       # Shim between "config" and "config_statement" rules to allow the
-      # compiled v0 and v1 grammars to have the same interface.
+      # compiled v[01] and v2 grammars to have the same interface.
       rule config_statement_with_ws
         config_statement:config_statement ws_or_comment+ {
           def to_config_statement(build_state)

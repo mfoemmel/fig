@@ -11,7 +11,7 @@ require 'fig/statement/set'
 require 'fig/user_input_error'
 require 'fig/unparser'
 require 'fig/unparser/v0'
-require 'fig/unparser/v1'
+require 'fig/unparser/v2'
 
 module Fig; end
 

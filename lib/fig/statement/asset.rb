@@ -57,13 +57,13 @@ module Fig::Statement::Asset
 
   def minimum_grammar_for_value(value)
     return 0 if value.nil?
-    return 1 if value =~ /\s/
+    return 2 if value =~ /\s/
 
     # Can't have octothorpes anywhere in v0 due to comment stripping via regex.
-    return 1 if value =~ /#/
+    return 2 if value =~ /#/
 
     # If we shouldn't glob, but we've got glob characters...
-    return 1 if ! glob_if_not_url? && value =~ /[*?\[\]{}]/
+    return 2 if ! glob_if_not_url? && value =~ /[*?\[\]{}]/
 
     return 0
   end
