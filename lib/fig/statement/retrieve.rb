@@ -51,6 +51,10 @@ class Fig::Statement::Retrieve < Fig::Statement
     return unparser.retrieve(self)
   end
 
+  def minimum_grammar_for_emitting_input()
+    return 0
+  end
+
   def minimum_grammar_for_publishing()
     return 0
   end

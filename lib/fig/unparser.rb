@@ -1,6 +1,47 @@
 module Fig; end
 
 module Fig::Unparser
+  # Determine the class of Unparser necessary for a set of Statements; the
+  # parameter can be a single statement or multiple.
+  def self.class_for_statements(
+    statements, emit_as_input_or_to_be_published_values
+  )
+    # Note: we very specifically do not require the files containing the
+    # classes in order to avoid circular dependencies.
+    statments = [statements].flatten
+
+    versions = nil
+    if emit_as_input_or_to_be_published_values == :emit_as_input
+      versions = statements.map {|s| s.minimum_grammar_for_emitting_input}
+    else
+      versions = statements.map {|s| s.minimum_grammar_for_publishing}
+    end
+    version = versions.max || 0
+
+    if version == 1
+      # TODO: Until v1 grammar handling is done, ensure we don't emit anything
+      # old fig versions cannot handle.
+      if ! ENV['FIG_ALLOW_NON_V0_GRAMMAR']
+        raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
+      end
+
+      return Fig::Unparser::V1
+    end
+
+    return Fig::Unparser::V0
+  end
+
+  def self.determine_version_and_unparse(
+    statements, emit_as_input_or_to_be_published_values
+  )
+    unparser_class = Fig::Unparser.class_for_statements(
+      statements, emit_as_input_or_to_be_published_values
+    )
+    unparser = unparser_class.new emit_as_input_or_to_be_published_values
+
+    return unparser.unparse [statements].flatten
+  end
+
   def unparse(statements)
     @text         = ''
     @indent_level = @initial_indent_level
