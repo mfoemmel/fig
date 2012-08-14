@@ -3,7 +3,40 @@ v0.1.xxx
   Bug fixes:
 
   - Fix for the case where the value of an environment variable statement is
-    the path to a symlink when a retrieve is in effect.
+    the path to a symlink when a retrieve is in effect.  Note that retrieves of
+    symlinks will be copied as the target of the symlink and not as the
+    symlink; however, if the retrieve is of a directory which contains
+    symlinks, those symlinks will be copied as symlinks.
+
+    If we have a package.fig that looks like
+
+      retrieve SOMEPATH->somewhere
+      config default
+        include foo/57
+      end
+
+    and the contents of the "foo" package look like
+
+      config default
+        set SOMEPATH=a_symlink
+      end
+
+    then the target of "a_symlink" will be copied to "somewhere" as the type of
+    the target (i.e. a file or directory).  If, however, the contents of the
+    "foo" package look like
+
+      config default
+        set SOMEPATH=a_directory
+      end
+
+    and "a_directory" contains a symlink named "another_symlink", then
+    "another_symlink" will be copied to "somewhere" as a symlink.
+
+  - Retrieves of symlinks will not occur if the symlink was previously
+    retrieved.  Previously, if you updates the same package multiple times and
+    that package contained symlinks, the symlinks would be recreated on every
+    update, even though the regular files would not.
+
 
 v0.1.76
 
