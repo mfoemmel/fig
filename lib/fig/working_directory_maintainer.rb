@@ -200,7 +200,11 @@ class Fig::WorkingDirectoryMaintainer
 
   def should_copy_file?(source, target)
     if File.symlink?(target)
-      FileUtils.rm(target) # Punting on whether symlink values change.
+      if File.symlink?(source) && File.readlink(source) == File.readlink(target)
+        return false
+      end
+
+      FileUtils.rm(target)
       return true
     end
 
