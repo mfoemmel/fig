@@ -48,9 +48,12 @@ class Fig::WorkingDirectoryMaintainer
     # path itself is a symlink, we copy the target of the symlink, not the
     # symlink itself.
     if File.exist? resolved_source
+      # Ruby v1.8 does not have File.realdirpath().
       traversal_count = 0
       while File.symlink? resolved_source
-        resolved_source = File.readlink resolved_source
+        resolved_source = File.join(
+          File.dirname(resolved_source), File.readlink(resolved_source)
+        )
         traversal_count += 1
 
         if traversal_count > SYMLOOP_MAX
@@ -197,7 +200,7 @@ class Fig::WorkingDirectoryMaintainer
 
   def should_copy_file?(source, target)
     if File.symlink?(target)
-      FileUtils.rm(target)
+      FileUtils.rm(target) # Punting on whether symlink values change.
       return true
     end
 
