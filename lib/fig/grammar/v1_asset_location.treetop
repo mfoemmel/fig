@@ -1,0 +1,33 @@
+# The asset location stuff is broken out from the v1 grammar proper because
+# having a rule within a file makes it the root of the grammar, which causes
+# initialization issues in the generated Ruby code.  So, the v1-specific asset
+# stuff is in a separate file and the v1 grammar proper simply includes
+# everything it needs.
+
+require 'treetop'
+
+# Difference from V0AssetLocation is that it allows characters not permitted on
+# Windows.
+
+module Fig
+  module Grammar
+    grammar V1AssetLocation
+      rule asset_location
+        # Unquoted allows globbing for files, quoted does not.
+        #
+        # Unquoted, anything but:
+        #    @      - To allow for package substitution
+        #    "'     - Future expansion
+        #    \s     - Necessary for the "ws" token to work
+        (location:[^@'"\s]+ ws)
+
+        # Quoted, anything but:
+        #    @        - To allow for package substitution
+        #    "'       - Future expansion
+        #    *?\[\]{} - Characters significant to Dir.glob()
+        #    \s       - We just don't want these. :]  (May need to allow space.)
+        / ('"' location:[^@'"*?\[\]{}\s]+ '"' ws)
+      end
+    end
+  end
+end

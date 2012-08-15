@@ -268,10 +268,40 @@ describe 'Parser' do
     |asset_type|
 
     describe "#{asset_type} statements" do
-      %w< @ " < > | >.each do
+      %w< @ ' " >.each do
         |character|
 
-        it %Q<get a parse error with «#{character}» in a URL in the v0 grammar> do
+        %w< 0 1 >.each do
+          |version|
+
+          it %Q<produce a parse error with «#{character}» in a URL in the v#{version} grammar> do
+            input = <<-"END_PACKAGE"
+              grammar v#{version}
+              #{asset_type} #{character}
+            END_PACKAGE
+
+            test_package_parse_error(input)
+          end
+
+          it %Q<reject «#{character}» in a URL in the v2 grammar> do
+            input = <<-"END_PACKAGE"
+              grammar v2
+              #{asset_type} #{character}
+            END_PACKAGE
+
+            test_user_input_error(
+              input,
+              %r<invalid url/path for #{asset_type} statement: "#{character}">i
+            )
+          end
+        end
+      end
+
+      %w[ < > | ].each do
+        |character|
+
+
+        it %Q<produce a parse error with «#{character}» in a URL in the v0 grammar> do
           input = <<-"END_PACKAGE"
             #{asset_type} #{character}
           END_PACKAGE
@@ -279,20 +309,25 @@ describe 'Parser' do
           test_package_parse_error(input)
         end
 
-        it %Q<reject «#{character}» in a URL in the v2 grammar> do
-          input = <<-"END_PACKAGE"
-            grammar v2
-            #{asset_type} #{character}
-          END_PACKAGE
+        %w< 1 2 >.each do
+          |version|
 
-          test_user_input_error(
-            input,
-            %r<invalid url/path for #{asset_type} statement: "#{character}">i
-          )
+          it %Q<handles «#{character}» in a URL in the v#{version} grammar> do
+            package = test_no_parse_exception(<<-"END_PACKAGE")
+              grammar v#{version}
+              #{asset_type} foo#{character}bar
+              config default
+              end
+            END_PACKAGE
+
+            url =
+              [package.archive_locations, package.resource_locations].flatten[0]
+            url.should == "foo#{character}bar"
+          end
         end
       end
 
-      it %q<handles octothorpes in the URL in the v2 grammar> do
+      it %q<handles octothorpes in a URL in the v2 grammar> do
         package = test_no_parse_exception(<<-"END_PACKAGE")
           grammar v2
           #{asset_type} 'foo#bar'
@@ -305,7 +340,7 @@ describe 'Parser' do
       end
 
       describe %Q<handles plus signs in the path (e.g. for C++ libraries)> do
-        %w< 0 1 >.each do
+        %w< 0 1 2 >.each do
           |version|
 
           it %Q<in the v#{version} grammar> do

@@ -1,6 +1,7 @@
 require 'fig/statement/grammar_version'
 require 'fig/unparser'
 require 'fig/unparser/v0'
+require 'fig/unparser/v1'
 require 'fig/unparser/v2'
 
 module Fig; end

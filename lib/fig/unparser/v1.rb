@@ -4,8 +4,8 @@ require 'fig/unparser/v0_ish'
 module Fig; end
 module Fig::Unparser; end
 
-# Handles serializing of statements in the v0 grammar.
-class Fig::Unparser::V0
+# Handles serializing of statements in the v1 grammar.
+class Fig::Unparser::V1
   include Fig::Unparser
   include Fig::Unparser::V0Ish
 
@@ -25,8 +25,7 @@ class Fig::Unparser::V0
   def grammar_version(statement)
     add_indent
 
-    # Comment out so that older clients don't have issues.
-    @text << "# grammar v0\n"
+    @text << "grammar v1\n"
 
     return
   end

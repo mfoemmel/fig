@@ -157,9 +157,21 @@ def testable_glob_characters()
     Fig::OperatingSystem.file_name_illegal_characters
 end
 
-def full_special_characters() return full_glob_characters + %w< # >; end
-def testable_special_characters()
-  return full_special_characters() -
+def v1_special_characters() return full_glob_characters + %w[ # ]; end
+def v1_non_special_characters() return %w[ < > | ]; end
+def v0_special_characters()
+  return v1_special_characters + v1_non_special_characters
+end
+def testable_v1_special_characters()
+  return v1_special_characters() -
+    Fig::OperatingSystem.file_name_illegal_characters
+end
+def testable_v1_non_special_characters()
+  return v1_non_special_characters() -
+    Fig::OperatingSystem.file_name_illegal_characters
+end
+def testable_v0_special_characters()
+  return v0_special_characters() -
     Fig::OperatingSystem.file_name_illegal_characters
 end
 
@@ -170,7 +182,7 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    %w< 0 2 >.each do
+    %w< 0 1 2 >.each do
       |version|
 
       it %Q<for v#{version} is accepted> do
@@ -224,7 +236,12 @@ describe 'Fig' do
       out, err =
         fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
 
-      out.should =~ /\b grammar [ ] v #{version} \b/x
+      if version == 0
+        out.should =~ / ^ [#][ ] grammar [ ] v #{version} \b/x
+      else
+        out.should =~ / ^ grammar [ ] v #{version} \b/x
+      end
+
       err.should == ''
 
       return
@@ -245,15 +262,19 @@ describe 'Fig' do
       check_published_grammar_version(0)
     end
 
-    it 'from v2 grammar file input with a "default" config' do
-      input = <<-END
-        grammar v2
-        config default
-        end
-      END
-      fig(%w< --publish foo/1.2.3 >, input, :fork => false)
+    %w< 1 2 >.each do
+      |version|
 
-      check_published_grammar_version(0)
+      it %Q<from v#{version} grammar file input with a "default" config> do
+        input = <<-END
+          grammar v#{version}
+          config default
+          end
+        END
+        fig(%w< --publish foo/1.2.3 >, input, :fork => false)
+
+        check_published_grammar_version(0)
+      end
     end
 
     %w< set append >.each do
@@ -317,11 +338,19 @@ describe 'Fig' do
       ['', %q<'>, %q<">].each do
         |quote|
 
-        testable_special_characters.each do
+        testable_v1_special_characters.each do
           |symbol|
 
           test_published_command_line_asset_with_file_with_symbol(
             'archive', symbol, quote, 2
+          )
+        end
+
+        testable_v1_non_special_characters.each do
+          |symbol|
+
+          test_published_command_line_asset_with_file_with_symbol(
+            'archive', symbol, quote, 1
           )
         end
       end
@@ -333,7 +362,7 @@ describe 'Fig' do
       ['', %q<'>, %q<">].each do
         |quote|
 
-        testable_special_characters.each do
+        testable_v0_special_characters.each do
           |symbol|
 
           test_published_command_line_asset_with_file_with_symbol(
@@ -381,14 +410,6 @@ describe 'Fig' do
         )
       end
 
-      [%q<'>, %q<">].each do
-        |quote|
-
-        test_published_file_asset_with_file_with_symbol(
-          asset_type, '#', quote, 2
-        )
-      end
-
       testable_glob_characters.each do
         |symbol|
 
@@ -410,13 +431,29 @@ describe 'Fig' do
       ['', %q<'>, %q<">].each do
         |quote|
 
-        (testable_special_characters - %w<#>).each do
+        (testable_v1_special_characters - %w<#>).each do
           |symbol|
 
           test_published_file_asset_with_file_with_symbol(
             'archive', symbol, quote, 2
           )
         end
+
+        testable_v1_non_special_characters.each do
+          |symbol|
+
+          test_published_file_asset_with_file_with_symbol(
+            'archive', symbol, quote, 1
+          )
+        end
+      end
+
+      [%q<'>, %q<">].each do
+        |quote|
+
+        test_published_file_asset_with_file_with_symbol(
+          'archive', '#', quote, 2
+        )
       end
 
       it_behaves_like 'asset statement', 'archive'
@@ -426,13 +463,21 @@ describe 'Fig' do
       ['', %q<'>, %q<">].each do
         |quote|
 
-        (testable_special_characters - %w<#>).each do
+        (testable_v0_special_characters - %w<#>).each do
           |symbol|
 
           test_published_file_asset_with_file_with_symbol(
             'resource', symbol, quote, 0
           )
         end
+      end
+
+      [%q<'>, %q<">].each do
+        |quote|
+
+        test_published_file_asset_with_file_with_symbol(
+          'resource', '#', quote, 0
+        )
       end
 
       it_behaves_like 'asset statement', 'resource'

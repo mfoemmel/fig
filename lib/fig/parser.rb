@@ -2,6 +2,7 @@ require 'set'
 
 require 'fig/grammar/version_identification'
 require 'fig/grammar/v0'
+require 'fig/grammar/v1'
 require 'fig/grammar/v2'
 require 'fig/logging'
 require 'fig/package_parse_error'
@@ -39,8 +40,11 @@ class Fig::Parser
       descriptor, directory, source_description, unparsed_text
     )
 
-    if version == 0
+    case version
+    when 0
       return parse_v0(descriptor, directory, source_description, unparsed_text)
+    when 1
+      return parse_v1(descriptor, directory, source_description, unparsed_text)
     end
 
     return parse_v2(descriptor, directory, source_description, unparsed_text)
@@ -92,12 +96,34 @@ class Fig::Parser
   end
 
   def parse_v0(descriptor, directory, source_description, unparsed_text)
+    return parse_v0_or_v1(
+      Fig::Grammar::V0Parser,
+      descriptor,
+      directory,
+      source_description,
+      unparsed_text
+    )
+  end
+
+  def parse_v1(descriptor, directory, source_description, unparsed_text)
+    return parse_v0_or_v1(
+      Fig::Grammar::V1Parser,
+      descriptor,
+      directory,
+      source_description,
+      unparsed_text
+    )
+  end
+
+  def parse_v0_or_v1(
+    parser_class, descriptor, directory, source_description, unparsed_text
+  )
     stripped_text = unparsed_text.gsub(/#.*$/, '') # Blech.
 
-    v0_parser = Fig::Grammar::V0Parser.new
+    parser = parser_class.new
 
     return drive_parser(
-      v0_parser,
+      parser,
       descriptor,
       directory,
       source_description,
@@ -124,7 +150,7 @@ class Fig::Parser
     descriptor,
     directory,
     source_description,
-    unparsed_text, # Ugh. V0 strips comments via regex.
+    unparsed_text, # Ugh. v[01] strip comments via regex.
     cleaned_text
   )
     # Extra space at the end because most of the rules in the grammar require

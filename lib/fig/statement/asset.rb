@@ -59,11 +59,14 @@ module Fig::Statement::Asset
     return 0 if value.nil?
     return 2 if value =~ /\s/
 
-    # Can't have octothorpes anywhere in v0 due to comment stripping via regex.
+    # Can't have octothorpes anywhere in v[01] due to comment stripping via
+    # regex.
     return 2 if value =~ /#/
 
     # If we shouldn't glob, but we've got glob characters...
     return 2 if ! glob_if_not_url? && value =~ /[*?\[\]{}]/
+
+    return 1 if value =~ / [<>|] /x
 
     return 0
   end
@@ -80,12 +83,7 @@ module Fig::Statement::Asset
         return
       end
 
-      if location =~ / ( ["<>|] ) /x
-        yield %Q<contains a "#{$1}", which isn't permitted because Windows doesn't allow it in file names.>
-        return
-      end
-
-      if location =~ / ( ' ) /x
+      if location =~ / ( ["'] ) /x
         yield %Q<contains a "#{$1}", which isn't permitted to allow for future grammar expansion.>
         return
       end

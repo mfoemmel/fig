@@ -5,6 +5,9 @@
 # are so close, this is everything from the early grammar other than the asset
 # location.
 
+# The difference between v0 and v1 is that v1 allows more characters in asset
+# paths.
+
 # Some aspects of this grammar are significantly dumber than they could be
 # because:
 #

@@ -98,7 +98,7 @@ require 'fig/statement/resource'
         return
       end
 
-      %w< @ \\' \\" < > | >.each do
+      %w< @ \\' \\" >.each do
         |character|
 
         it %Q<says «foo #{character} bar» isn't allowed> do

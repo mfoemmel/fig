@@ -7,7 +7,7 @@ module Fig::Unparser
     statements, emit_as_input_or_to_be_published_values
   )
     # Note: we very specifically do not require the files containing the
-    # classes in order to avoid circular dependencies.
+    # Unparser classes in order to avoid circular dependencies.
     statments = [statements].flatten
 
     versions = nil
@@ -18,17 +18,20 @@ module Fig::Unparser
     end
     version = versions.max || 0
 
-    if version != 0
-      # TODO: Until v2 grammar handling is done, ensure we don't emit anything
-      # old fig versions cannot handle.
-      if ! ENV['FIG_ALLOW_NON_V0_GRAMMAR']
-        raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
-      end
-
-      return Fig::Unparser::V2
+    case version
+    when 0
+      return Fig::Unparser::V0
+    when 1
+      return Fig::Unparser::V1
     end
 
-    return Fig::Unparser::V0
+    # TODO: Until v2 grammar handling is done, ensure we don't emit anything
+    # old fig versions cannot handle.
+    if ! ENV['FIG_ALLOW_NON_V0_GRAMMAR']
+      raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
+    end
+
+    return Fig::Unparser::V2
   end
 
   def self.determine_version_and_unparse(

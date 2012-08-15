@@ -79,6 +79,8 @@ module Fig
       end
 
       rule retrieve_path
+        # TODO: this should match asset location rules, but handling of
+        # "[package]" substitution is going to be interesting.
         [a-zA-Z0-9_/.\[\]-]+
       end
 

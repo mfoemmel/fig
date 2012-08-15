@@ -1,0 +1,22 @@
+# Treetop (http://treetop.rubyforge.org/) grammar for package definitions from
+# the early days.
+
+# This differs from v0 in that more characters are allowed in asset paths.
+
+require 'treetop'
+
+require 'fig/grammar/base'
+require 'fig/grammar/version'
+require 'fig/grammar/v0_ish'
+require 'fig/grammar/v1_asset_location'
+
+module Fig
+  module Grammar
+    grammar V1
+      include Fig::Grammar::Base
+      include Fig::Grammar::Version
+      include Fig::Grammar::V1AssetLocation
+      include Fig::Grammar::V0Ish
+    end
+  end
+end
