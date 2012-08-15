@@ -67,7 +67,7 @@ class Fig::Statement::Include < Fig::Statement
   end
 
   def minimum_grammar_for_publishing()
-    return 0
+    return [0]
   end
 
   private

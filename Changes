@@ -33,7 +33,7 @@ v0.1.77
     "another_symlink" will be copied to "somewhere" as a symlink.
 
   - Retrieves of symlinks will not occur if the symlink was previously
-    retrieved.  Previously, if you updates the same package multiple times and
+    retrieved.  Previously, if you updated the same package multiple times and
     that package contained symlinks, the symlinks would be recreated on every
     update, even though the regular files would not.
 

@@ -52,10 +52,10 @@ class Fig::Statement::Retrieve < Fig::Statement
   end
 
   def minimum_grammar_for_emitting_input()
-    return 0
+    return [0]
   end
 
   def minimum_grammar_for_publishing()
-    return 0
+    return [0]
   end
 end

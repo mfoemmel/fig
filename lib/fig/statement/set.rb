@@ -46,6 +46,6 @@ class Fig::Statement::Set < Fig::Statement
   def minimum_grammar_for_publishing()
     # TODO: fix this once going through
     # Statement.strip_quotes_and_process_escapes()
-    return 0
+    return [0]
   end
 end

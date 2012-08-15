@@ -40,6 +40,6 @@ class Fig::Statement::Configuration < Fig::Statement
   end
 
   def minimum_grammar_for_publishing()
-    return 0
+    return [0]
   end
 end

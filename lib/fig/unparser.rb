@@ -12,9 +12,9 @@ module Fig::Unparser
 
     versions = nil
     if emit_as_input_or_to_be_published_values == :emit_as_input
-      versions = statements.map {|s| s.minimum_grammar_for_emitting_input}
+      versions = statements.map {|s| s.minimum_grammar_for_emitting_input[0]}
     else
-      versions = statements.map {|s| s.minimum_grammar_for_publishing}
+      versions = statements.map {|s| s.minimum_grammar_for_publishing[0]}
     end
     version = versions.max || 0
 

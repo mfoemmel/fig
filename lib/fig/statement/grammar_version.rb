@@ -17,6 +17,6 @@ class Fig::Statement::GrammarVersion < Fig::Statement
   end
 
   def minimum_grammar_for_publishing()
-    return version
+    return [version]
   end
 end
