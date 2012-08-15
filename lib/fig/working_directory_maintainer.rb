@@ -3,6 +3,7 @@ require 'set'
 require 'fig/logging'
 require 'fig/logging/colorizable'
 require 'fig/package_descriptor'
+require 'fig/repository_error'
 require 'fig/working_directory_metadata'
 
 module Fig; end
@@ -37,8 +38,30 @@ class Fig::WorkingDirectoryMaintainer
     return
   end
 
+  SYMLOOP_MAX = 20 # https://duckduckgo.com/html?q=posix_symloop_max
+
   def retrieve(source, relpath)
-    copy(source, relpath)
+    resolved_source = source
+
+    # When recursing through a retrieve, if we encounter a symlink that doesn't
+    # point to a directory, we copy it as a symlink.  However, if the retrieve
+    # path itself is a symlink, we copy the target of the symlink, not the
+    # symlink itself.
+    if File.exist? resolved_source
+      traversal_count = 0
+      while File.symlink? resolved_source
+        resolved_source = File.readlink resolved_source
+        traversal_count += 1
+
+        if traversal_count > SYMLOOP_MAX
+          raise Fig::RepositoryError.new(
+            %Q<Could not resolve symlink "#{source}"; symlink chain exceeded #{SYMLOOP_MAX}.>
+          )
+        end
+      end
+    end
+
+    copy(resolved_source, relpath)
 
     return
   end

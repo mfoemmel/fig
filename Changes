@@ -1,3 +1,10 @@
+v0.1.xxx
+
+  Bug fixes:
+
+  - Fix for the case where the value of an environment variable statement is
+    the path to a symlink when a retrieve is in effect.
+
 v0.1.76
 
   New features:

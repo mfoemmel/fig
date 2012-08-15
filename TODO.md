@@ -39,6 +39,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * Clarify "URLs" that are either file-or-URL or proper URLs.
 * Whack wiki asset descriptions.
 * Document "looks like a URL".
+* Describe retrieve behavior in the presence of symlinks.
 * Document repository locking.
 * Document that command statements are only processed in published packages or with `--run-command-statement`.
 * Document quoting.
