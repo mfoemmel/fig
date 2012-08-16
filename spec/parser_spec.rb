@@ -283,9 +283,9 @@ describe 'Parser' do
             test_package_parse_error(input)
           end
 
-          it %Q<reject «#{character}» in a URL in the v2 grammar> do
+          it %Q<reject «#{character}» in a URL in the v1 grammar> do
             input = <<-"END_PACKAGE"
-              grammar v2
+              grammar v1
               #{asset_type} #{character}
             END_PACKAGE
 
@@ -309,7 +309,7 @@ describe 'Parser' do
           test_package_parse_error(input)
         end
 
-        %w< 1 2 >.each do
+        %w< 1 >.each do
           |version|
 
           it %Q<handles «#{character}» in a URL in the v#{version} grammar> do
@@ -327,9 +327,9 @@ describe 'Parser' do
         end
       end
 
-      it %q<handles octothorpes in a URL in the v2 grammar> do
+      it %q<handles octothorpes in a URL in the v1 grammar> do
         package = test_no_parse_exception(<<-"END_PACKAGE")
-          grammar v2
+          grammar v1
           #{asset_type} 'foo#bar'
           config default
           end
@@ -340,7 +340,7 @@ describe 'Parser' do
       end
 
       describe %Q<handles plus signs in the path (e.g. for C++ libraries)> do
-        %w< 0 1 2 >.each do
+        %w< 0 1 >.each do
           |version|
 
           it %Q<in the v#{version} grammar> do

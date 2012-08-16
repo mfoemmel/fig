@@ -3,7 +3,6 @@ require 'set'
 require 'fig/grammar/version_identification'
 require 'fig/grammar/v0'
 require 'fig/grammar/v1'
-require 'fig/grammar/v2'
 require 'fig/logging'
 require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
@@ -40,14 +39,11 @@ class Fig::Parser
       descriptor, directory, source_description, unparsed_text
     )
 
-    case version
-    when 0
+    if version == 0
       return parse_v0(descriptor, directory, source_description, unparsed_text)
-    when 1
-      return parse_v1(descriptor, directory, source_description, unparsed_text)
     end
 
-    return parse_v2(descriptor, directory, source_description, unparsed_text)
+    return parse_v1(descriptor, directory, source_description, unparsed_text)
   end
 
   private
@@ -86,7 +82,7 @@ class Fig::Parser
     return 0 if not statement
 
     version = statement.version
-    if version > 2
+    if version > 1
       raise Fig::PackageParseError.new(
         %Q<Don't know how to parse grammar version #{version}#{statement.position_string()}.>
       )
@@ -96,34 +92,12 @@ class Fig::Parser
   end
 
   def parse_v0(descriptor, directory, source_description, unparsed_text)
-    return parse_v0_or_v1(
-      Fig::Grammar::V0Parser,
-      descriptor,
-      directory,
-      source_description,
-      unparsed_text
-    )
-  end
-
-  def parse_v1(descriptor, directory, source_description, unparsed_text)
-    return parse_v0_or_v1(
-      Fig::Grammar::V1Parser,
-      descriptor,
-      directory,
-      source_description,
-      unparsed_text
-    )
-  end
-
-  def parse_v0_or_v1(
-    parser_class, descriptor, directory, source_description, unparsed_text
-  )
     stripped_text = unparsed_text.gsub(/#.*$/, '') # Blech.
 
-    parser = parser_class.new
+    v0_parser = Fig::Grammar::V0Parser.new
 
     return drive_parser(
-      parser,
+      v0_parser,
       descriptor,
       directory,
       source_description,
@@ -132,11 +106,11 @@ class Fig::Parser
     )
   end
 
-  def parse_v2(descriptor, directory, source_description, unparsed_text)
-    v2_parser = Fig::Grammar::V2Parser.new
+  def parse_v1(descriptor, directory, source_description, unparsed_text)
+    v1_parser = Fig::Grammar::V1Parser.new
 
     return drive_parser(
-      v2_parser,
+      v1_parser,
       descriptor,
       directory,
       source_description,
@@ -150,7 +124,7 @@ class Fig::Parser
     descriptor,
     directory,
     source_description,
-    unparsed_text, # Ugh. v[01] strip comments via regex.
+    unparsed_text, # Ugh. V0 strips comments via regex.
     cleaned_text
   )
     # Extra space at the end because most of the rules in the grammar require

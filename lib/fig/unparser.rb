@@ -19,17 +19,15 @@ module Fig::Unparser
     case version
     when 0
       return Fig::Unparser::V0, explanations
-    when 1
-      return Fig::Unparser::V1, explanations
     end
 
-    # TODO: Until v2 grammar handling is done, ensure we don't emit anything
+    # TODO: Until v1 grammar handling is done, ensure we don't emit anything
     # old fig versions cannot handle.
     if ! ENV['FIG_ALLOW_NON_V0_GRAMMAR']
       raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
     end
 
-    return Fig::Unparser::V2, explanations
+    return Fig::Unparser::V1, explanations
   end
 
   def self.determine_version_and_unparse(

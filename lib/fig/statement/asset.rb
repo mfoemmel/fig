@@ -59,19 +59,19 @@ module Fig::Statement::Asset
     return [0] if value.nil?
 
     if value =~ /\s/
-      return [2, 'contains whitespace']
+      return [1, 'contains whitespace']
     end
 
-    # Can't have octothorpes anywhere in v[01] due to comment stripping via
+    # Can't have octothorpes anywhere in v0 due to comment stripping via
     # regex.
     if value =~ /#/
-      return [2, 'contains a "#" character']
+      return [1, 'contains a "#" character']
     end
 
     # If we shouldn't glob, but we've got glob characters...
     if ! glob_if_not_url? && value =~ / ( [*?\[\]{}] ) /x
       return [
-        2, %Q<contains a glob character ("#{$1}") which should not be globbed>
+        1, %Q<contains a glob character ("#{$1}") which should not be globbed>
       ]
     end
 

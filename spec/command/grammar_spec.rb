@@ -71,7 +71,7 @@ def test_published_file_asset_with_url_with_symbol(
     |quoted_url|
 
     input = <<-"END"
-      grammar v2
+      grammar v1
 
       #{asset_type} #{quoted_url}
 
@@ -133,7 +133,7 @@ def test_published_file_asset_with_file_with_symbol(
     |quoted_url|
 
     input = <<-"END"
-      grammar v2
+      grammar v1
 
       #{asset_type} #{quoted_url}
 
@@ -182,7 +182,7 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    %w< 0 1 2 >.each do
+    %w< 0 1 >.each do
       |version|
 
       it %Q<for v#{version} is accepted> do
@@ -205,7 +205,7 @@ describe 'Fig' do
         input = <<-END
           config default
           end
-          grammar v2
+          grammar v1
         END
 
         out, err, exit_code =
@@ -262,7 +262,7 @@ describe 'Fig' do
       check_published_grammar_version(0)
     end
 
-    %w< 1 2 >.each do
+    %w< 1 >.each do
       |version|
 
       it %Q<from v#{version} grammar file input with a "default" config> do
@@ -313,7 +313,7 @@ describe 'Fig' do
         end
 
         test_published_command_line_asset_with_url_with_symbol(
-          asset_type, '#', quote, 2
+          asset_type, '#', quote, 1
         )
       end
 
@@ -321,7 +321,7 @@ describe 'Fig' do
         |symbol|
 
         test_published_command_line_asset_with_url_with_symbol(
-          asset_type, symbol, %q<'>, 2
+          asset_type, symbol, %q<'>, 1
         )
 
         ['', %q<">].each do
@@ -342,7 +342,7 @@ describe 'Fig' do
           |symbol|
 
           test_published_command_line_asset_with_file_with_symbol(
-            'archive', symbol, quote, 2
+            'archive', symbol, quote, 1
           )
         end
 
@@ -387,7 +387,7 @@ describe 'Fig' do
             write_file "#{USER_HOME}/nothing-special", ''
 
             input = <<-"END"
-              grammar v2
+              grammar v1
 
               #{asset_type} #{value}
 
@@ -406,7 +406,7 @@ describe 'Fig' do
         end
 
         test_published_file_asset_with_url_with_symbol(
-          asset_type, '#', quote, 2
+          asset_type, '#', quote, 1
         )
       end
 
@@ -414,7 +414,7 @@ describe 'Fig' do
         |symbol|
 
         test_published_file_asset_with_url_with_symbol(
-          asset_type, symbol, %q<'>, 2
+          asset_type, symbol, %q<'>, 1
         )
 
         ['', %q<">].each do
@@ -435,7 +435,7 @@ describe 'Fig' do
           |symbol|
 
           test_published_file_asset_with_file_with_symbol(
-            'archive', symbol, quote, 2
+            'archive', symbol, quote, 1
           )
         end
 
@@ -452,7 +452,7 @@ describe 'Fig' do
         |quote|
 
         test_published_file_asset_with_file_with_symbol(
-          'archive', '#', quote, 2
+          'archive', '#', quote, 1
         )
       end
 
@@ -500,7 +500,7 @@ describe 'Fig' do
           value = "#{quote}contains#octothorpe#{quote}"
           it %Q<with input containing «#{value}»> do
             input = <<-"END"
-              grammar v2
+              grammar v1
               #{asset_type} #{value}
             END
 
@@ -510,7 +510,7 @@ describe 'Fig' do
               :current_directory => USER_HOME,
               :fork => false
             )
-            out.should =~ /\b grammar [ ] v2 \b/x
+            out.should =~ /\b grammar [ ] v1 \b/x
             err.should == ''
           end
         end
