@@ -237,7 +237,7 @@ describe 'Fig' do
         fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
 
       if version == 0
-        out.should =~ / ^ [#][ ] grammar [ ] v #{version} \b/x
+        out.should =~ /^# grammar v0\b/
       else
         out.should =~ / ^ grammar [ ] v #{version} \b/x
       end
