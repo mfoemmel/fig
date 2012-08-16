@@ -1,9 +1,12 @@
 require 'fig/statement'
+require 'fig/statement/environment_variable'
 
 module Fig; end
 
 # A statement that sets the value of an environment variable.
 class Fig::Statement::Set < Fig::Statement
+  include Fig::Statement::EnvironmentVariable
+
   # We block quotes right now in order to allow for using them for
   # quoting later.
   VALUE_REGEX          = %r< \A [^\s\\'"]* \z >x
@@ -45,11 +48,5 @@ class Fig::Statement::Set < Fig::Statement
 
   def unparse_as_version(unparser)
     return unparser.set(self)
-  end
-
-  def minimum_grammar_for_publishing()
-    # TODO: fix this once going through
-    # Statement.strip_quotes_and_process_escapes()
-    return [0]
   end
 end

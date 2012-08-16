@@ -55,53 +55,47 @@ describe 'Fig' do
 
     describe '--dump-package-definition-parsed' do
       it %q<dumps the contents of a published package> do
-        pending 'implementation of environment variable statement minimum_grammar_for_emitting_input()' do
-          input = <<-END
-            config default
-              set FOO=BAR
-            end
-          END
-          fig(%w<--publish foo/1.2.3>, input, :fork => false, :fork => false)
+        input = <<-END
+          config default
+            set FOO=BAR
+          end
+        END
+        fig(%w<--publish foo/1.2.3>, input, :fork => false, :fork => false)
 
-          out, err =
-            fig(%w<foo/1.2.3 --dump-package-definition-parsed>, :fork => false)
+        out, err =
+          fig(%w<foo/1.2.3 --dump-package-definition-parsed>, :fork => false)
 
-          # Content from the input.
-          out.should =~ /set FOO=BAR/
+        # Content from the input.
+        out.should =~ /set FOO=BAR/
 
-          err.should == ''
-        end
+        err.should == ''
       end
 
       it %q<dumps the contents an unpublished package> do
-        pending 'implementation of environment variable statement minimum_grammar_for_emitting_input()' do
-          input = <<-END
-            config default
-              set FOO=BAR
-            end
-          END
-          out, err =
-            fig(%w<--dump-package-definition-parsed>, input, :fork => false)
-
-          [input, out].each do
-            |string|
-
-            string.gsub!(/^[ ]+/, '')
-            string.gsub!(/[ ]+/, ' ')
-            string.strip!
+        input = <<-END
+          config default
+            set FOO=BAR
           end
+        END
+        out, err =
+          fig(%w<--dump-package-definition-parsed>, input, :fork => false)
 
-          out.should be_include input
-          err.should == ''
+        [input, out].each do
+          |string|
+
+          string.gsub!(/^[ ]+/, '')
+          string.gsub!(/[ ]+/, ' ')
+          string.strip!
         end
+
+        out.should be_include input
+        err.should == ''
       end
 
       it %q<emits the synthetic package if there is no text> do
-        pending 'implementation of environment variable statement minimum_grammar_for_emitting_input()' do
-          out, err = fig(%w<--dump-package-definition-parsed>, :fork => false)
-          out.should =~ / \A \s* config \s+ default \s+ end \s* \z /x
-          err.should == ''
-        end
+        out, err = fig(%w<--dump-package-definition-parsed>, :fork => false)
+        out.should =~ / ^ \s* config \s+ default \s+ end \s* \z /x
+        err.should == ''
       end
     end
   end
