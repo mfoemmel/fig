@@ -35,6 +35,10 @@ class Fig::Statement::Set < Fig::Statement
     @value = value
   end
 
+  def statement_type()
+    return 'set'
+  end
+
   def is_environment_variable?()
     return true
   end

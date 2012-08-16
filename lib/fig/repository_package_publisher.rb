@@ -112,7 +112,11 @@ class Fig::RepositoryPackagePublisher
     add_output_statements_and_create_resource_archive()
     add_unparsed_text()
 
-    file_content = @text_assembler.assemble_package_definition()
+    file_content, explanations = @text_assembler.assemble_package_definition()
+    if Fig::Logging.debug?
+      explanations.each {|explanation| Fig::Logging.debug explanation}
+    end
+
     begin
       Fig::Parser.new(nil, false).parse_package(
         @descriptor,

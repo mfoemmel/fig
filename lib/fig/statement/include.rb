@@ -23,6 +23,10 @@ class Fig::Statement::Include < Fig::Statement
     @containing_package_descriptor = containing_package_descriptor
   end
 
+  def statement_type()
+    return 'include'
+  end
+
   def package_name
     return @descriptor.name
   end

@@ -12,6 +12,10 @@ class Fig::Statement::GrammarVersion < Fig::Statement
     @version = version
   end
 
+  def statement_type()
+    return 'grammar'
+  end
+
   def unparse_as_version(unparser)
     return unparser.grammar_version(self)
   end

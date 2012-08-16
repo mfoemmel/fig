@@ -61,19 +61,20 @@ class Fig::PackageDefinitionTextAssembler
   end
 
   def assemble_package_definition()
+    unparsed_statements, explanations = unparse_statements()
     definition =
-      [@header_text, unparse_statements(), @footer_text].flatten.join("\n")
+      [@header_text, unparsed_statements, @footer_text].flatten.join("\n")
     definition.gsub!(/\n{3,}/, "\n\n")
     definition.strip!
     definition << "\n"
 
-    return definition
+    return definition, explanations
   end
 
   private
 
   def unparse_statements()
-    unparser_class = Fig::Unparser.class_for_statements(
+    unparser_class, explanations = Fig::Unparser.class_for_statements(
       @output_statements, @emit_as_input_or_to_be_published_values
     )
 
@@ -87,6 +88,10 @@ class Fig::PackageDefinitionTextAssembler
     unparser = unparser_class.new @emit_as_input_or_to_be_published_values
     text = unparser.unparse( [grammar_statement] + @output_statements )
 
-    return text
+    explanations.unshift(
+      "Publishing using the #{unparser.grammar_description} grammar."
+    )
+
+    return text, explanations
   end
 end

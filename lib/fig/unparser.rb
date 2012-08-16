@@ -2,27 +2,25 @@ module Fig; end
 
 module Fig::Unparser
   # Determine the class of Unparser necessary for a set of Statements; the
-  # parameter can be a single statement or multiple.
+  # parameter can be a single statement or multiple.  Returns both the class
+  # and a list of explanations of why the class was picked.
   def self.class_for_statements(
     statements, emit_as_input_or_to_be_published_values
   )
     # Note: we very specifically do not require the files containing the
     # Unparser classes in order to avoid circular dependencies.
-    statments = [statements].flatten
+    statements = [statements].flatten
 
-    versions = nil
-    if emit_as_input_or_to_be_published_values == :emit_as_input
-      versions = statements.map {|s| s.minimum_grammar_for_emitting_input[0]}
-    else
-      versions = statements.map {|s| s.minimum_grammar_for_publishing[0]}
-    end
-    version = versions.max || 0
+    versions =
+      self.gather_versions statements, emit_as_input_or_to_be_published_values
+    version = (versions.map {|version_info| version_info[0]}).max || 0
+    explanations = (versions.collect {|v| v[1]}).reject {|e| e.nil?}
 
     case version
     when 0
-      return Fig::Unparser::V0
+      return Fig::Unparser::V0, explanations
     when 1
-      return Fig::Unparser::V1
+      return Fig::Unparser::V1, explanations
     end
 
     # TODO: Until v2 grammar handling is done, ensure we don't emit anything
@@ -31,21 +29,60 @@ module Fig::Unparser
       raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
     end
 
-    return Fig::Unparser::V2
+    return Fig::Unparser::V2, explanations
   end
 
   def self.determine_version_and_unparse(
     statements, emit_as_input_or_to_be_published_values
   )
-    unparser_class = Fig::Unparser.class_for_statements(
+    unparser_class, explanations = self.class_for_statements(
       statements, emit_as_input_or_to_be_published_values
     )
     unparser = unparser_class.new emit_as_input_or_to_be_published_values
 
-    return unparser.unparse [statements].flatten
+    return (unparser.unparse [statements].flatten), explanations
   end
 
+  private
+
+  def self.gather_versions(statements, emit_as_input_or_to_be_published_values)
+    if emit_as_input_or_to_be_published_values == :emit_as_input
+      return statements.map {
+        |statement|
+
+        self.expand_version_and_explanation(
+          statement, statement.minimum_grammar_for_emitting_input
+        )
+      }
+    end
+
+    return statements.map {
+      |statement|
+
+      self.expand_version_and_explanation(
+        statement, statement.minimum_grammar_for_publishing
+      )
+    }
+  end
+
+  def self.expand_version_and_explanation(statement, version_info)
+    version, explanation = *version_info
+    if explanation.nil?
+      return [version]
+    end
+
+    return [
+      version,
+      "Grammar v#{version} is required because the #{statement.statement_type} statement#{statement.position_string} #{explanation}."
+    ]
+  end
+
+
+  public
+
   def unparse(statements)
+    # It's double dispatch time!
+
     @text         = ''
     @indent_level = @initial_indent_level
 
@@ -143,6 +180,10 @@ module Fig::Unparser
     environment_variable(statement, 'set')
 
     return
+  end
+
+  def grammar_description
+    raise NotImplementedError
   end
 
   private

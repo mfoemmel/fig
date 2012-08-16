@@ -27,6 +27,10 @@ class Fig::Statement::Retrieve < Fig::Statement
     end
   end
 
+  def statement_type()
+    return 'retrieve'
+  end
+
   def loaded_but_not_referenced?()
     return added_to_environment? && ! referenced?
   end

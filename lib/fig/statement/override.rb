@@ -33,6 +33,10 @@ class Fig::Statement::Override < Fig::Statement
     @version = version
   end
 
+  def statement_type()
+    return 'override'
+  end
+
   def unparse_as_version(unparser)
     return unparser.override(self)
   end

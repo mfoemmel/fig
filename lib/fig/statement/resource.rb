@@ -18,6 +18,10 @@ class Fig::Statement::Resource < Fig::Statement
     @glob_if_not_url = glob_if_not_url
   end
 
+  def statement_type()
+    return 'resource'
+  end
+
   def asset_name()
     if Fig::URL.is_url?(location())
       return standard_asset_name()

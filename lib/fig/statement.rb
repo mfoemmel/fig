@@ -151,6 +151,12 @@ class Fig::Statement
     @source_description = source_description
   end
 
+  # A name for this kind of Statement, usually a keyword for this statement as
+  # it appears in package definition files.
+  def statement_type()
+    raise NotImplementedError
+  end
+
   # Block will receive a Statement.
   def walk_statements(&block)
     return
@@ -160,10 +166,14 @@ class Fig::Statement
     raise NotImplementedError
   end
 
+  # Returns a two element array containing the version and an explanation of
+  # why the version is necessary if the version is greater than 0.
   def minimum_grammar_for_emitting_input()
     raise NotImplementedError
   end
 
+  # Returns a two element array containing the version and an explanation of
+  # why the version is necessary if the version is greater than 0.
   def minimum_grammar_for_publishing()
     raise NotImplementedError
   end

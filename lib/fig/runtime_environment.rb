@@ -157,7 +157,7 @@ class Fig::RuntimeEnvironment
     when Fig::Statement::Command
       # Skip - has no effect on environment.
     else
-      text =
+      text, * =
         Fig::Unparser.determine_version_and_unparse(statement, :emit_as_input)
       raise "Unexpected statement in a config block: #{text.strip}"
     end
@@ -202,7 +202,7 @@ class Fig::RuntimeEnvironment
 
       statement = @retrieves[name]
       if statement.loaded_but_not_referenced?
-        text = Fig::Unparser.determine_version_and_unparse(
+        text, * = Fig::Unparser.determine_version_and_unparse(
           [statement], :emit_as_input
         )
         Fig::Logging.warn \

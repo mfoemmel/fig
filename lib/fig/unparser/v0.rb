@@ -30,4 +30,8 @@ class Fig::Unparser::V0
 
     return
   end
+
+  def grammar_description()
+    return 'v0'
+  end
 end

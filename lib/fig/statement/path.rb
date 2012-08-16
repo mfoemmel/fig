@@ -36,6 +36,10 @@ class Fig::Statement::Path < Fig::Statement
     @value = value
   end
 
+  def statement_type()
+    return 'path'
+  end
+
   def is_environment_variable?()
     return true
   end

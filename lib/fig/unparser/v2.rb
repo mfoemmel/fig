@@ -38,6 +38,10 @@ class Fig::Unparser::V2
     return
   end
 
+  def grammar_description()
+    return 'v2'
+  end
+
   private
 
   def asset(keyword, statement)

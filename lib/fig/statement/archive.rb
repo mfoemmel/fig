@@ -17,6 +17,10 @@ class Fig::Statement::Archive < Fig::Statement
     @glob_if_not_url = glob_if_not_url
   end
 
+  def statement_type()
+    return 'archive'
+  end
+
   def asset_name()
     return standard_asset_name()
   end

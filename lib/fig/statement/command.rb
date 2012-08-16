@@ -13,6 +13,10 @@ class Fig::Statement::Command < Fig::Statement
     @command = command
   end
 
+  def statement_type()
+    return 'command'
+  end
+
   def unparse_as_version(unparser)
     return unparser.command(self)
   end

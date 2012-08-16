@@ -57,16 +57,27 @@ module Fig::Statement::Asset
 
   def minimum_grammar_for_value(value)
     return [0] if value.nil?
-    return [2] if value =~ /\s/
+
+    if value =~ /\s/
+      return [2, 'contains whitespace']
+    end
 
     # Can't have octothorpes anywhere in v[01] due to comment stripping via
     # regex.
-    return [2] if value =~ /#/
+    if value =~ /#/
+      return [2, 'contains a "#" character']
+    end
 
     # If we shouldn't glob, but we've got glob characters...
-    return [2] if ! glob_if_not_url? && value =~ /[*?\[\]{}]/
+    if ! glob_if_not_url? && value =~ / ( [*?\[\]{}] ) /x
+      return [
+        2, %Q<contains a glob character ("#{$1}") which should not be globbed>
+      ]
+    end
 
-    return [1] if value =~ / [<>|] /x
+    if value =~ / ( [<>|] ) /x
+      return [1, %Q<contains a "#{$1}" character>]
+    end
 
     return [0]
   end

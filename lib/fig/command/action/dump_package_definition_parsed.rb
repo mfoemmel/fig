@@ -38,7 +38,8 @@ class Fig::Command::Action::DumpPackageDefinitionParsed
     text_assembler = Fig::PackageDefinitionTextAssembler.new :emit_as_input
     text_assembler.add_output @execution_context.base_package.statements
 
-    print text_assembler.assemble_package_definition
+    unparsed, explanations = text_assembler.assemble_package_definition
+    print unparsed
 
     return EXIT_SUCCESS
   end

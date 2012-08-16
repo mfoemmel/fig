@@ -19,7 +19,7 @@ class Fig::Command::Action::PublishLocal
   def execute()
     publish_preflight()
 
-    Fig::Logging.info "Publishing #{@descriptor.to_string()}."
+    Fig::Logging.info "Publishing #{@descriptor.to_string()} locally."
     @execution_context.repository.publish_package(
       @publish_statements,
       @descriptor,
