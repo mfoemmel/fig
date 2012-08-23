@@ -11,11 +11,11 @@
 
 Whitespace/quoting stuff in order to have a working command line.  It is currently possible to publish packages using `--set`/`--append`/`--resource`/`--archive` that can't be parsed.
 
-* <strike>Need to adjust v0 grammar to allow characters in file names that are not allowed by Windows.</strike>
-* <strike>Multiple places directly instantiate Unparser::V0.  Need to have a central place to determine unparse grammar.</strike>
+* ~~Need to adjust v0 grammar to allow characters in file names that are not allowed by Windows.~~
+* ~~Multiple places directly instantiate Unparser::V0.  Need to have a central place to determine unparse grammar.~~
 * Asset statements
-    * <strike>In package definition</strike>
-    * <strike>On command-line</strike>
+    * ~~In package definition~~
+    * ~~On command-line~~
 * Environment variable statements
     * In package definition
     * On command-line
