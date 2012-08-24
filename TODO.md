@@ -21,6 +21,13 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
     * On command-line
 * Fix all "pending" tests.
 * Quoting of retrieves: post 1.0? Although... this really should work along with environment variable statements.  Need to figure out escaping of "[package]".
+* Commands need to be specified as individual components, i.e. if we get a command with four arguments, even if they contain whitespace, then the command should receive four arguments.
+
+### Bugs that may involve breakage post v1.0
+
+* Asset statements have lots of issues with URLs.
+    * URLs that involve redirects.
+    * URLs that aren't simple protocol://host/path/to/asset, e.g. if they've got query parameters.
 
 # Tests
 
