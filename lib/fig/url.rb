@@ -3,8 +3,9 @@ require 'cgi'
 module Fig; end
 
 module Fig::URL
+  # From https://www.rfc-editor.org/rfc/rfc1738.txt
   def self.is_url?(url)
-    return url =~ %r<\A (?: ftp: | https?: | file: | ssh: ) //>x
+    return !! ( url =~ %r<\A [a-z0-9+.-]+ : >ix )
   end
 
   # Encodes components and joins with slashes.
