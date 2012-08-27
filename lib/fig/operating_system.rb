@@ -252,8 +252,7 @@ class Fig::OperatingSystem
         raise Fig::FileNotFoundError.new error.message, url
       end
     else
-      Fig::Logging.fatal "Unknown protocol: #{url}"
-      raise Fig::NetworkError.new("Unknown protocol: #{url}")
+      raise_unknown_protocol(url)
     end
   end
 
@@ -303,8 +302,8 @@ class Fig::OperatingSystem
       ftp_root_dirs = ftp_uri.path.split('/')
       remote_publish_path = uri.path[0, uri.path.rindex('/')]
       remote_publish_dirs = remote_publish_path.split('/')
-      # Use array subtraction to deduce which project/version folder to upload to,
-      # i.e. [1,2,3] - [2,3,4] = [1]
+      # Use array subtraction to deduce which project/version folder to upload
+      # to, i.e. [1,2,3] - [2,3,4] = [1]
       remote_project_dirs = remote_publish_dirs - ftp_root_dirs
       Net::FTP.open(uri.host) do |ftp|
         ftp_login(ftp, uri.host)
@@ -326,8 +325,7 @@ class Fig::OperatingSystem
       FileUtils.mkdir_p(File.dirname(unescaped_path))
       FileUtils.cp(local_file, unescaped_path)
     else
-      Fig::Logging.fatal "Unknown protocol: #{uri}"
-      raise Fig::NetworkError.new("Unknown protocol: #{uri}")
+      raise_unknown_protocol(uri)
     end
   end
 
@@ -496,6 +494,15 @@ class Fig::OperatingSystem
         "Download failed: #{response.code} #{response.message}.", uri_string
       )
     end
+
+    return
+  end
+
+  def raise_unknown_protocol(url)
+    Fig::Logging.fatal %Q<Don't know how to handle the protocol in "#{url}".>
+    raise Fig::NetworkError.new(
+      %Q<Don't know how to handle the protocol in "#{url}".>
+    )
 
     return
   end
