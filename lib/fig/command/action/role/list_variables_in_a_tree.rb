@@ -83,11 +83,8 @@ module Fig::Command::Action::Role::ListVariablesInATree
   def gather_variable_statements(config_statement)
     variable_statements = []
     config_statement.walk_statements() do |statement|
-      case statement
-        when Fig::Statement::Path
-          variable_statements << statement
-        when Fig::Statement::Set
-          variable_statements << statement
+      if statement.is_environment_variable?
+        variable_statements << statement
       end
     end
 

@@ -45,11 +45,8 @@ class Fig::Command::Action::ListVariables::AllConfigs
       |package, config_name, depth|
 
       package[config_name].walk_statements() do |statement|
-        case statement
-          when Fig::Statement::Path
-            variable_names << statement.name()
-          when Fig::Statement::Set
-            variable_names << statement.name()
+        if statement.is_environment_variable?
+          variable_names << statement.name()
         end
       end
     end

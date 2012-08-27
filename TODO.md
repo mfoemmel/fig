@@ -1,6 +1,6 @@
 # Code changes
 
-* Make use of Statement#is_environment_variable?().
+* ~~Make use of Statement#is_environment_variable?().~~
 * ~~Change `URL.is_url?()` to match arbitrary RFC-compliant URLs.~~
 * Bad URLs (FIG_REMOTE_URL, asset paths) will result in ugly stack traces; need to turn these into reasonable error messages.
 * Retrieve statements should validate their paths the same way that path statements do.
