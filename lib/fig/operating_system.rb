@@ -240,9 +240,9 @@ class Fig::OperatingSystem
       # TODO need better way to do conditional download
       timestamp = File.exist?(path) ? File.mtime(path).to_i : 0
       # Requires that remote installation of fig be at the same location as the local machine.
-      cmd = `which fig-download`.strip + " #{timestamp} #{uri.path}"
+      command = `which fig-download`.strip + " #{timestamp} #{uri.path}"
       log_download(url, path)
-      ssh_download(uri.user, uri.host, path, cmd)
+      ssh_download(uri.user, uri.host, path, command)
     when 'file'
       begin
         unescaped_path = CGI.unescape uri.path
@@ -407,18 +407,22 @@ class Fig::OperatingSystem
     end
   end
 
-  def shell_exec(cmd)
+  def shell_exec(command)
+    if Fig::OperatingSystem.windows?
+      plain_exec( [ ENV['ComSpec'], '/c', command.join(' ') ] )
+    else
+      plain_exec( [ ENV['SHELL'],   '-c', command.join(' ') ] )
+    end
+  end
+
+  def plain_exec(command)
     # Kernel#exec won't run Kernel#at_exit handlers.
     Fig::AtExit.execute()
     if ENV['FIG_COVERAGE']
       SimpleCov.at_exit.call
     end
 
-    if Fig::OperatingSystem.windows?
-      Kernel.exec(ENV['ComSpec'], '/c', cmd.join(' '))
-    else
-      Kernel.exec(ENV['SHELL'], '-c', cmd.join(' '))
-    end
+    Kernel.exec(*command)
   end
 
   private
@@ -428,13 +432,13 @@ class Fig::OperatingSystem
   NOT_FOUND = 4
 
   # path = The local path the file should be downloaded to.
-  # cmd = The command to be run on the remote host.
-  def ssh_download(user, host, path, cmd)
+  # command = The command to be run on the remote host.
+  def ssh_download(user, host, path, command)
     return_code = nil
     tempfile = Tempfile.new('tmp')
     Net::SSH.start(host, user) do |ssh|
       ssh.open_channel do |channel|
-        channel.exec(cmd)
+        channel.exec(command)
         channel.on_data() { |ch, data| tempfile << data }
         channel.on_extended_data() { |ch, type, data| Fig::Logging.error "SSH Download ERROR: #{data}" }
         channel.on_request('exit-status') { |ch, request|

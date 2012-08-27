@@ -1,3 +1,28 @@
+v0.1.xx
+
+  Backwards incompatibilities:
+
+  - Commands given via the command-line are no longer run through the shell if
+    given as multiple arguments.  This should be a pretty esoteric issue, but
+    if you're depending upon double interpolation of command-lines or joining
+    of quoted expressions, then this change will break your usage of fig.
+
+    Previously, running
+
+      fig -- javac -classpath '$SOMEPATH' whatever
+
+    would pass javac the value of the SOMEPATH environment variable after fig
+    had manipulated it.  If you still want the shell involved, pass a single
+    argument to fig by quoting, e.g.
+
+      fig -- 'javac -classpath $SOMEPATH whatever'
+
+  New features:
+
+  - Commands given via the command-line are no longer run through the shell if
+    given as multiple arguments.  This means that there should be fewer
+    surprises in usage.
+
 v0.1.77
 
   Bug fixes:
