@@ -38,14 +38,14 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * Test that v0 grammar results in double-quoted "resources.tar.gz" and v1 grammar single quotes it.
 * Get all the tests' `$PWD` out of `spec/runtime-work` and into `spec/runtime-work/userhome` so that we're properly testing paths to things.  Too many of the tests are counting on files being in `$HOME`.
 * Resource statements in published packages, particularly pointing to URLs. Resource statements containing URLs won't exist in any newly published packages, but they do in old ones.
-* Should be able to read a v1 package.fig with a resource with "#" in it and then publish using v0.
-* Serious testing of which grammar version stuff gets unparsed into.
+* ~~Should be able to read a v1 package.fig with a resource with "#" in it and then publish using v0.~~
+* ~~Serious testing of which grammar version stuff gets unparsed into.~~
 
 # Documentation
 
 * Clarify "URLs" that are either file-or-URL or proper URLs.
-* Whack wiki asset descriptions.
-* Document "looks like a URL".
+* Whack wiki asset descriptions, including quoting behaviors.
+* ~~Document "looks like a URL".~~
 * Describe retrieve behavior in the presence of symlinks.
 * Document repository locking.
 * Document that command statements are only processed in published packages or with `--run-command-statement`.
