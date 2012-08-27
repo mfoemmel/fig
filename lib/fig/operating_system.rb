@@ -425,6 +425,16 @@ class Fig::OperatingSystem
     Kernel.exec(*command)
   end
 
+  # *sigh* Apparently Ruby < v1.9.3 does some wacko thing with single argument
+  # exec that causes it to not invoke the shell, so we've got this mess.
+  def plain_or_shell_exec(command)
+    if command.size > 1
+      plain_exec(command)
+    else
+      shell_exec(command)
+    end
+  end
+
   private
 
   SUCCESS = 0

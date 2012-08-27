@@ -45,7 +45,7 @@ class Fig::Command::Action::RunCommandLine
 
   def execute()
     @execution_context.environment.execute_shell(@command_line) do
-      |command| @execution_context.operating_system.plain_exec command
+      |command| @execution_context.operating_system.plain_or_shell_exec command
     end
 
     return EXIT_SUCCESS
