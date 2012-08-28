@@ -207,7 +207,7 @@ Environment variables:
     end
 
     raise Fig::Command::OptionError.new(
-      %Q<Invalid value for #{option}: "#{value}".#{description}>
+      %Q<Invalid value for #{option}: "#{value}"#{description}>
     )
   end
 

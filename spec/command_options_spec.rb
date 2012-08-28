@@ -25,7 +25,7 @@ describe 'Command::Options' do
   def expect_invalid_value_error(option_name, value)
     expect { new_options(["--#{option_name}", value]) }.to raise_error(
       Fig::Command::OptionError,
-      %r<\AInvalid value for --#{option_name}: "#{Regexp.quote(value)}"[.]>
+      %r<\AInvalid value for --#{option_name}: "#{Regexp.quote(value)}">
     )
   end
 
