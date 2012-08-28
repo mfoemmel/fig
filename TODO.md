@@ -49,7 +49,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * Describe retrieve behavior in the presence of symlinks.
 * Document repository locking.
 * Document that command statements are only processed in published packages or with `--run-command-statement`.
-* Document quoting.
+* Document quoting, including the command-line option behaviors, e.g. `--resource 'foo'` vs `--resource "'foo'"` `--resource '"foo"'`.
 
 # Paranoia / things to think about
 
