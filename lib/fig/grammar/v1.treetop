@@ -157,14 +157,16 @@ module Fig
       end
 
       rule command
-        statement_start:'command' ws_or_comment+ string {
+        statement_start:'command' ws_or_comment+ command_line {
           def to_config_statement(build_state)
-            return build_state.new_command_statement(statement_start, string)
+            return build_state.new_command_statement(
+              statement_start, command_line
+            )
           end
         }
       end
 
-      rule string
+      rule command_line
         '"' value:[^"]* '"'
       end
 
