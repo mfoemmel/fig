@@ -256,7 +256,7 @@ describe 'Parser' do
             END_PACKAGE
 
             test_user_input_error(
-              input, /(?i:invalid value for append).*\bPATH_VARIABLE\b/
+              input, /(?i:invalid append statement).*\bPATH_VARIABLE\b/
             )
           end
         end
