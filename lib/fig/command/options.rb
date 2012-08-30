@@ -159,8 +159,6 @@ class Fig::Command::Options
 
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|
-      terminating_option = nil
-
       case arg
         when '--'
           set_base_action(Fig::Command::Action::RunCommandLine)

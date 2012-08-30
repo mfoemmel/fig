@@ -91,7 +91,7 @@ class Fig::FigRC
     begin
       os.download( figrc_url, repo_figrc_path )
       repo_config_exists = true
-    rescue Fig::FileNotFoundError => e
+    rescue Fig::FileNotFoundError
       repo_config_exists = false
     end
 
