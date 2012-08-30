@@ -145,9 +145,9 @@ class Fig::RuntimeEnvironment
   def apply_config_statement(base_package, statement, backtrace)
     case statement
     when Fig::Statement::Path
-      prepend_variable(base_package, statement.name, statement.value, backtrace)
+      prepend_variable(base_package, statement, backtrace)
     when Fig::Statement::Set
-      set_variable(base_package, statement.name, statement.value, backtrace)
+      set_variable(base_package, statement, backtrace)
     when Fig::Statement::Include
       include_config(base_package, statement.descriptor, backtrace)
     when Fig::Statement::Override
@@ -211,11 +211,11 @@ class Fig::RuntimeEnvironment
 
   private
 
-  def set_variable(base_package, name, value, backtrace)
-    expanded_value =
-      expand_variable_as_path_and_process_retrieves(
-        name, value, base_package, backtrace
-      )
+  def set_variable(base_package, statement, backtrace)
+    expanded_value = expand_variable_as_path_and_process_retrieves(
+      statement, base_package, backtrace
+    )
+    name = statement.name
     @variables[name] = expanded_value
 
     if Fig::Logging.debug?
@@ -231,11 +231,11 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def prepend_variable(base_package, name, value, backtrace)
-    expanded_value =
-      expand_variable_as_path_and_process_retrieves(
-        name, value, base_package, backtrace
-      )
+  def prepend_variable(base_package, statement, backtrace)
+    expanded_value = expand_variable_as_path_and_process_retrieves(
+      statement, base_package, backtrace
+    )
+    name = statement.name
     @variables.prepend_variable(name, expanded_value)
 
     if Fig::Logging.debug?
@@ -316,17 +316,17 @@ class Fig::RuntimeEnvironment
   end
 
   def expand_variable_as_path_and_process_retrieves(
-    variable_name, variable_value, base_package, backtrace
+    statement, base_package, backtrace
   )
-    return variable_value unless base_package && base_package.name
+    return statement.value unless base_package && base_package.name
 
     variable_value =
-      expand_at_signs_in_path(variable_value, base_package, backtrace)
+      expand_at_signs_in_path(statement.value, base_package, backtrace)
 
-    return variable_value if not @retrieves.member?(variable_name)
+    return variable_value if not @retrieves.member?(statement.name)
 
     return retrieve_files(
-      variable_name, variable_value, base_package, backtrace
+      statement.name, variable_value, base_package, backtrace
     )
   end
 
@@ -451,8 +451,8 @@ class Fig::RuntimeEnvironment
     return string.gsub(%r< \\ ([\\@]) >x, '\1')
   end
 
-  def get_retrieve_path_with_substitution(name, base_package)
-    retrieve_statement = @retrieves[name]
+  def get_retrieve_path_with_substitution(variable_name, base_package)
+    retrieve_statement = @retrieves[variable_name]
     retrieve_statement.referenced(true)
 
     return retrieve_statement.path.gsub(/ \[package\] /x, base_package.name)
