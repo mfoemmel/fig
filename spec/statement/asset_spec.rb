@@ -21,15 +21,16 @@ require 'fig/statement/resource'
         statement_type, original_location, location
       )
         block_message = nil
+        location      = location.clone
 
         should_be_globbed =
           statement_type.validate_and_process_escapes_in_location!(location) do
             |message| block_message = message
           end
 
-        location.should                == original_location
-        should_be_globbed.should  be_true
         block_message.should      be_nil
+        location.should           == original_location
+        should_be_globbed.should  be_true
 
         return
       end
@@ -38,15 +39,16 @@ require 'fig/statement/resource'
         statement_type, original_location, location
       )
         block_message = nil
+        location      = location.clone
 
         should_be_globbed =
           statement_type.validate_and_process_escapes_in_location!(location) do
             |message| block_message = message
           end
 
-        location.should                == original_location
-        should_be_globbed.should  be_false
         block_message.should      be_nil
+        location.should           == original_location
+        should_be_globbed.should  be_false
 
         return
       end
@@ -58,7 +60,7 @@ require 'fig/statement/resource'
 
         it %Q<does not modify «#{original_location}» and says that it should be globbed> do
           test_should_equal_and_should_glob(
-            statement_type, original_location, original_location.clone
+            statement_type, original_location, original_location
           )
         end
         it %Q<strips quotes from «"#{original_location}"» and says that it should be globbed> do
@@ -74,10 +76,43 @@ require 'fig/statement/resource'
         end
       end
 
-      it %q<strips quotes from «'foo\bar'» (no escaping in single quoted values) and says that it should not be globbed> do
-        test_should_equal_and_should_not_glob(
-          statement_type, 'foo\bar', %q<'foo\bar'>
-        )
+      %w< \\ ' >.each do
+        |character|
+
+        escaped_location = %Q<foo \\#{character} bar>
+        unescaped_location = %Q<foo #{character} bar>
+        it %Q<processes escapes from «#{escaped_location}» and says that it should be globbed> do
+          test_should_equal_and_should_glob(
+            statement_type, unescaped_location, escaped_location
+          )
+        end
+        it %Q<processes escapes from «"#{escaped_location}"» and says that it should be globbed> do
+          test_should_equal_and_should_glob(
+            statement_type, unescaped_location, %Q<"#{escaped_location}">
+          )
+        end
+        it %Q<processes escapes from «'#{escaped_location}'» and says that it should not be globbed> do
+          test_should_equal_and_should_not_glob(
+            statement_type, unescaped_location, %Q<'#{escaped_location}'>
+          )
+        end
+      end
+
+      %w< " @ >.each do
+        |character|
+
+        escaped_location = %Q<foo \\#{character} bar>
+        unescaped_location = %Q<foo #{character} bar>
+        it %Q<processes escapes from «#{escaped_location}» and says that it should be globbed> do
+          test_should_equal_and_should_glob(
+            statement_type, unescaped_location, escaped_location
+          )
+        end
+        it %Q<processes escapes from «"#{escaped_location}"» and says that it should be globbed> do
+          test_should_equal_and_should_glob(
+            statement_type, unescaped_location, %Q<"#{escaped_location}">
+          )
+        end
       end
 
       def test_got_error_message(statement_type, location, error_regex)
@@ -92,23 +127,19 @@ require 'fig/statement/resource'
         return
       end
 
-      def test_shouldnt_be_permitted(statement_type, location)
-        test_got_error_message(statement_type, location, /isn't permitted/i)
+      def test_contains_bad_escape(statement_type, location)
+        test_got_error_message(
+          statement_type, location, /contains a bad escape sequence/i
+        )
 
         return
       end
 
-      %w< @ \\' \\" >.each do
+      %w< @ " >.each do
         |character|
 
-        it %Q<says «foo #{character} bar» isn't allowed> do
-          test_shouldnt_be_permitted(statement_type, %Q<foo #{character} bar>)
-        end
-        it %Q<says «"foo #{character} bar"» isn't allowed> do
-          test_shouldnt_be_permitted(statement_type, %Q<"foo #{character} bar">)
-        end
-        it %Q<says «'foo #{character} bar'» isn't allowed> do
-          test_shouldnt_be_permitted(statement_type, %Q<'foo #{character} bar'>)
+        it %Q<says «'foo \\#{character} bar'» isn't allowed> do
+          test_contains_bad_escape(statement_type, %Q<'foo \\#{character} bar'>)
         end
       end
 
@@ -132,22 +163,22 @@ require 'fig/statement/resource'
         end
       end
 
+      %w< ' 'xxx xxx' '\' '\\ >.each do
+        |location|
+
+        it %Q<says «#{location}» has unbalanced quotes> do
+          test_got_error_message(
+            statement_type, location, /has unbalanced single quotes/i
+          )
+        end
+      end
+
       %w< " "xxx xxx" "\" "\\ >.each do
         |location|
 
         it %Q<says «#{location}» has unbalanced quotes> do
           test_got_error_message(
             statement_type, location, /has unbalanced double quotes/i
-          )
-        end
-      end
-
-      %w< ' 'xxx xxx' >.each do
-        |location|
-
-        it %Q<says «#{location}» has unbalanced quotes> do
-          test_got_error_message(
-            statement_type, location, /has unbalanced single quotes/i
           )
         end
       end
@@ -170,7 +201,7 @@ require 'fig/statement/resource'
         end
       end
 
-      %w< \\n "\\n" >.each do
+      %w< \\n '\\n' "\\n" >.each do
         |location|
 
         it %Q<says «#{location}» has bad escape> do
@@ -178,7 +209,9 @@ require 'fig/statement/resource'
         end
       end
 
-      %w< foo\\\\\\\\bar\\\\baz "foo\\\\\\\\bar\\\\baz" >.each do
+      %w<
+        foo\\\\\\\\bar\\\\baz 'foo\\\\\\\\bar\\\\baz' "foo\\\\\\\\bar\\\\baz"
+      >.each do
         |original_location|
 
         it %Q<collapses the backslashes in «#{original_location}»> do
@@ -190,9 +223,8 @@ require 'fig/statement/resource'
               |message| block_message = message
             end
 
-          location.should                == 'foo\\\\bar\\baz'
-          should_be_globbed.should  be_true
-          block_message.should      be_nil
+          location.should      == 'foo\\\\bar\\baz'
+          block_message.should be_nil
         end
       end
     end

@@ -53,7 +53,7 @@ class Fig::Unparser::V0
   end
 
   def grammar_description()
-    return 'v1'
+    return 'v0'
   end
 
   private

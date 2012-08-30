@@ -45,13 +45,9 @@ class Fig::Unparser::V1
   private
 
   def asset(keyword, statement)
-    quote = %q<'>
-    path  = asset_path statement
-
-    if statement.glob_if_not_url?
-      quote = %q<">
-      path = path.gsub(/\\/, ('\\' * 4))
-    end
+    quote = statement.glob_if_not_url? ? %q<"> : %q<'>
+    path  =
+      asset_path(statement).gsub('\\', ('\\' * 4)).gsub(quote, "\\#{quote}")
 
     add_indent
     @text << keyword

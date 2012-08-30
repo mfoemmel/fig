@@ -126,10 +126,10 @@ describe 'Command::Options' do
         expect_invalid_value_error(asset_type, '')
       end
 
-      %w[ @ " ' ].each do
+      %w[ " ' ].each do
         |character|
 
-        it %Q<complains about a value containing "#{character}"> do
+        it %Q<complains about a value containing unescaped "#{character}"> do
           expect_invalid_value_error(asset_type, character)
         end
       end

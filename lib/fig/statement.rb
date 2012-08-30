@@ -39,29 +39,37 @@ class Fig::Statement
   def self.strip_quotes_and_process_escapes!(string, &error_block)
     return false if string.length == 0
 
-    replaced_quotes = strip_single_quotes!(string, &error_block)
+    replaced_quotes =
+      strip_single_quotes_and_process_escapes!(string, &error_block)
     return true if replaced_quotes
     return      if replaced_quotes.nil?
 
-    return process_escapes_and_strip_double_quotes!(string, &error_block)
+    return strip_double_quotes_and_process_escapes!(string, &error_block)
   end
 
   private
 
-  def self.strip_single_quotes!(string)
+  def self.strip_single_quotes_and_process_escapes!(string, &error_block)
     return false if string[0..0] != %q<'> && string[-1..-1] != %q<'>
+    return false if string =~ %r< \A (?: \\{2} )* \\ ' \z >x # «\'» is legal
 
-    if string.length == 1 || string[0..0] != %q<'> || string[-1..-1] != %q<'>
+    if (
+      string.length  == 1                         ||
+      string[0..0]   != %q<'>                     ||
+      string[-1..-1] != %q<'>                     ||
+      string =~ %r< [^\\] (?: \\{2} )* \\ ' \z >x
+    )
       yield 'has unbalanced single quotes.'
       return
     end
 
-    if string =~ %r< \A ' [^']* ' .* ' \z >xs
-      yield %q<isn't permitted because it has a single quote inside single quotes.>
+    if string =~ %r< [^\\] (?: \\{2} )*? \\ ([^\\']) >x
+      yield "contains a bad escape sequence (\\#{$1})."
       return
     end
 
-    string.sub!(%r< \A ' (.*) ' \z >xs, '\1')
+    string.sub!( %r< \A ' (.*) ' \z >xs, '\1')
+    string.gsub!(%r< \\ (.) >xs,         '\1')
 
     return true
   end
@@ -72,7 +80,7 @@ class Fig::Statement
   ALLOWED_ESCAPED_CHARACTERS << %q<">
   ALLOWED_ESCAPED_CHARACTERS << '@' # Environment variable package replacement
 
-  def self.process_escapes_and_strip_double_quotes!(string)
+  def self.strip_double_quotes_and_process_escapes!(string, &error_block)
     if string[0..0] == %q<"> && (string.length == 1 || string[-1..-1] != %q<">)
       yield 'has unbalanced double quotes.'
       return

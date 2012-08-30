@@ -268,13 +268,13 @@ describe 'Parser' do
     |asset_type|
 
     describe "#{asset_type} statements" do
-      %w< @ ' " >.each do
+      %w< ' " >.each do
         |character|
 
         %w< 0 1 >.each do
           |version|
 
-          it %Q<produce a parse error with «#{character}» in a URL in the v#{version} grammar> do
+          it %Q<produce a parse error with unescaped «#{character}» in a URL in the v#{version} grammar> do
             input = <<-"END_PACKAGE"
               grammar v#{version}
               #{asset_type} #{character}
@@ -282,22 +282,10 @@ describe 'Parser' do
 
             test_package_parse_error(input)
           end
-
-          it %Q<reject «#{character}» in a URL in the v1 grammar> do
-            input = <<-"END_PACKAGE"
-              grammar v1
-              #{asset_type} #{character}
-            END_PACKAGE
-
-            test_user_input_error(
-              input,
-              %r<invalid url/path for #{asset_type} statement: "#{character}">i
-            )
-          end
         end
       end
 
-      %w[ < > | ].each do
+      %w[ @ < > | ].each do
         |character|
 
 
