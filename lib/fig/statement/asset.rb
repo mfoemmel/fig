@@ -88,16 +88,6 @@ module Fig::Statement::Asset
         Fig::Statement.strip_quotes_and_process_escapes!(location, &block)
       return if was_in_single_quotes.nil?
 
-#      if location.include? '@'
-#        yield %q<contains an "@", which isn't permitted in order to allow for package substitution.>
-#        return
-#      end
-
-#      if location =~ / ( ["'] ) /x
-#        yield %Q<contains a "#{$1}", which isn't permitted to allow for future grammar expansion.>
-#        return
-#      end
-
       # "config" is a reasonable asset name, so we let that pass.
       if Fig::Parser.strict_keyword?(location)
         yield 'is a keyword.'

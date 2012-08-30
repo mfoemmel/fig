@@ -30,8 +30,6 @@ class Fig::Statement::Path < Fig::Statement
     return [variable, value]
   end
 
-  attr_reader :name, :value
-
   def initialize(line_column, source_description, name, value)
     super(line_column, source_description)
 
