@@ -53,6 +53,6 @@ class Fig::Command::Action::RunCommandStatement
       base_package, base_config, @descriptor, @extra_argv || []
     ) { |command| @execution_context.operating_system.shell_exec command }
 
-    return EXIT_SUCCESS
+    # Will never get here.
   end
 end

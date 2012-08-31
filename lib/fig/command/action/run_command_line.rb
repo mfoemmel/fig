@@ -39,15 +39,22 @@ class Fig::Command::Action::RunCommandLine
 
   def configure(options)
     @command_line = options.shell_command
+    @descriptor   = options.descriptor
 
     return
   end
 
   def execute()
-    @execution_context.environment.execute_shell(@command_line) do
+    environment   = @execution_context.environment
+    base_package  = @execution_context.base_package
+    base_config   = @execution_context.base_config
+
+    environment.execute_command_line(
+      base_package, base_config, @descriptor, @command_line
+    ) do
       |command| @execution_context.operating_system.plain_or_shell_exec command
     end
 
-    return EXIT_SUCCESS
+    # Will never get here.
   end
 end

@@ -101,9 +101,11 @@ end
 
 def substitute_command(command)
   environment = new_example_environment
+  base_package =
+    Fig::Package.new('test-package', 'test-version', 'test-directory', [])
 
   substituted_command = nil
-  environment.execute_shell(command) {
+  environment.execute_command_line(base_package, nil, nil, command) {
     |command_line|
     substituted_command = command_line
   }
@@ -120,10 +122,12 @@ end
 
 def substitute_variable(variable_value, retrieve_vars = {})
   environment = new_example_environment(variable_value, retrieve_vars)
+  base_package =
+    Fig::Package.new('test-package', 'test-version', 'test-directory', [])
 
   output = nil
   variables = generate_shell_variable_expansions
-  environment.execute_shell([]) {
+  environment.execute_command_line(base_package, nil, nil, []) {
     # No space between the closing curly of an interpolation and the double
     # ampersand due to the way that echo works on MS Windows.
     output =
@@ -175,6 +179,12 @@ describe 'RuntimeEnvironment' do
       substituted_command.should == %w< @one@two >
     end
 
+    it 'can replace name after an escaped name' do
+      substituted_command = substitute_command %w< \@one@two >
+
+      substituted_command.should == %w< @onetwo-directory >
+    end
+
     it 'can handle escaped backslash' do
       substituted_command = substitute_command %w< bar\\\\foo >
 
@@ -210,9 +220,10 @@ describe 'RuntimeEnvironment' do
     end
 
     it 'does @ escaping' do
-      output = substitute_variable('\\@/foobie')
+      output = substitute_variable('\\@@/foobie')
 
-      output.should == "@/foobie\n@/foobie\n@/foobie\n"
+      output.should ==
+        "@one-directory/foobie\n@two-directory/foobie\n@three-directory/foobie\n"
     end
 
     it 'does retrieve variables [package] substitution' do

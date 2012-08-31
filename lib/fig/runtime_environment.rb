@@ -99,37 +99,31 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def execute_shell(command)
+  def execute_command_line(base_package, base_config, descriptor, command_line)
+    package, * =
+      determine_package_for_execution(base_package, base_config, descriptor)
+
+    expanded_command_line =
+      command_line.map {
+        |argument| expand_command_line_argument(argument, base_package)
+      }
+
     @variables.with_environment do
-      yield command.map{|arg| expand_command_line_argument(arg, nil, nil)}
+      yield expanded_command_line
     end
 
     return
   end
 
-  def execute_config(base_package, base_config, descriptor, args, &block)
-    config_name =
-      determine_config_to_executed(base_package, base_config, descriptor)
-
-    package = nil
-
-    if descriptor
-      name    = descriptor.name || base_package.name
-      package = lookup_package(
-        name,
-        descriptor.version,
-        Fig::IncludeBacktrace.new(
-          nil,
-          Fig::PackageDescriptor.new(name, descriptor.version, config_name)
-        )
-      )
-    else
-      package = base_package
-    end
+  def execute_config(
+    base_package, base_config, descriptor, extra_arguments, &block
+  )
+    package, config_name =
+      determine_package_for_execution(base_package, base_config, descriptor)
 
     command_statement = package[config_name].command_statement
     if command_statement
-      execute_command(command_statement, args, package, nil, &block)
+      execute_command(command_statement, extra_arguments, package, &block)
     else
       raise Fig::UserInputError.new(
         %Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>
@@ -276,6 +270,31 @@ class Fig::RuntimeEnvironment
     return package
   end
 
+  def determine_package_for_execution(base_package, base_config, descriptor)
+    config_name =
+      determine_config_to_executed(base_package, base_config, descriptor)
+
+    package = nil
+
+    if descriptor
+      package_name = descriptor.name || base_package.name
+      package      = lookup_package(
+        package_name,
+        descriptor.version,
+        Fig::IncludeBacktrace.new(
+          nil,
+          Fig::PackageDescriptor.new(
+            package_name, descriptor.version, config_name
+          )
+        )
+      )
+    else
+      package = base_package
+    end
+
+    return [package, config_name]
+  end
+
   def determine_config_to_executed(base_package, base_config, descriptor)
     return base_config if base_config
 
@@ -302,14 +321,14 @@ class Fig::RuntimeEnvironment
     return package.primary_config_name || Fig::Package::DEFAULT_CONFIG
   end
 
-  def execute_command(command_statement, args, package, backtrace)
+  def execute_command(command_statement, extra_arguments, package)
     @variables.with_environment do
       argument =
         expand_command_line_argument(
-          "#{command_statement.command} #{args.join(' ')}", backtrace, package
+          "#{command_statement.command} #{extra_arguments.join(' ')}", package
         )
 
-      yield expand_at_signs_in_path(argument, package, backtrace).split(' ')
+      yield argument.split(' ')
     end
 
     return
@@ -385,48 +404,75 @@ class Fig::RuntimeEnvironment
     return collapse_backslashes_for_escaped_at_signs(expanded_path)
   end
 
-  def replace_at_signs_with_package_references(arg, base_package)
-    return arg.gsub(
+  def replace_at_signs_with_package_references(argument, base_package)
+    return argument.gsub(
       %r<
         (?: ^ | \G)           # Zero-width anchor.
-        ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
+        ( [^\\@]* )           # A bunch of not-slashes-or-at-signs
+        ( \\* )               # Any leading backslashes
         \@                    # The package indicator
       >x
     ) do |match|
-      backslashes = $1 || ''
-      backslashes + base_package.directory
+      frontmatter, backslashes = $1, $2
+
+      replacement = backslashes.length % 2 == 1 ? '@' : base_package.directory
+
+      "#{frontmatter}#{backslashes}#{replacement}"
     end
   end
 
-  def expand_command_line_argument(arg, backtrace, package)
-    package_substituted = expand_named_package_references(arg, backtrace)
-    check_for_bad_escape(package_substituted, arg, package, backtrace)
+  def expand_command_line_argument(argument, package)
+    package_substituted = expand_package_references(argument, package)
+    check_for_bad_escape(package_substituted, argument, package, nil)
 
     return collapse_backslashes_for_escaped_at_signs(package_substituted)
   end
 
-  def expand_named_package_references(arg, backtrace)
-    return arg.gsub(
+  def expand_package_references(argument, base_package)
+    return argument.gsub(
       # TODO: Refactor package name regex into PackageDescriptor constant.
       %r<
         (?: ^ | \G)           # Zero-width anchor.
-        ( [^\\@]* (?:\\{2})*) # An even number of leading backslashes
+        ( [^\\@]* )           # A bunch of not-slashes-or-at-signs
+        ( \\* )               # Any leading backslashes
         \@                    # The package indicator
-        ( [a-zA-Z0-9_.-]+ )   # Package name
+        ( [a-zA-Z0-9_.-]* )   # Package name
       >x
     ) do |match|
-      backslashes = $1 || ''
-      package_name = $2
+      frontmatter, backslashes, package_name = $1, $2, $3
+
+      expand_package_reference(
+        frontmatter, backslashes, package_name, base_package
+      )
+    end
+  end
+
+  def expand_package_reference(
+    frontmatter, backslashes, package_name, base_package
+  )
+    if backslashes.length % 2 == 1
+      return "#{frontmatter}#{backslashes}@#{package_name}"
+    end
+
+    package = nil
+    if ! package_name.empty?
       package = get_package(package_name)
       if package.nil?
         raise_repository_error(
           %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>,
-          backtrace,
+          nil,
           nil
         )
       end
-      backslashes + package.directory
+    else
+      package = base_package
     end
+
+    if package && package.directory
+      return "#{frontmatter}#{backslashes}#{package.directory}"
+    end
+
+    return "#{frontmatter}#{backslashes}@"
   end
 
   # The value is expected to have had any @ substitution already done, but

@@ -17,11 +17,31 @@ v0.1.xx
 
       fig -- 'javac -classpath $SOMEPATH whatever'
 
+  - Commands given via the command-line have the same "@" expansion done on
+    them that "command" statements in a package definition do, i.e. "@package"
+    gets replaced with the path to that package and "@" gets replaced by the
+    path to the base package.
+
   New features:
 
   - Commands given via the command-line are no longer run through the shell if
     given as multiple arguments.  This means that there should be fewer
     surprises in usage.
+
+  - Commands given via the command-line have the same "@" expansion done on
+    them that "command" statements in a package definition do, i.e. "@package"
+    gets replaced with the path to that package and "@" gets replaced by the
+    path to the base package.
+
+  Bug fixes:
+
+  - For both environment variable and command statements, at signs that follow
+    escaped at signs are expanded.  Previously, if you had
+
+      set FOO=X\@Y@Z
+
+    then the value of FOO after expansion would be "X@Y@Z".  Now it would
+    (correctly) be "X@Ypackage-pathZ".
 
 v0.1.77
 
