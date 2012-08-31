@@ -28,6 +28,9 @@ v0.1.78.beta.1
     given as multiple arguments.  This means that there should be fewer
     surprises in usage.
 
+    Note that command statements still go through splitting on whitespace and
+    reassembling with space characters.
+
   - Commands given via the command-line have the same "@" expansion done on
     them that "command" statements in a package definition do, i.e. "@package"
     gets replaced with the path to that package and "@" gets replaced by the
