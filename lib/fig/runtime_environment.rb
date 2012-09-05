@@ -134,16 +134,16 @@ class Fig::RuntimeEnvironment
   end
 
   # In order for this to work correctly, any Overrides need to be processed
-  # before any other kind of Statement.  The Configuration class guarantees
-  # that those come first in its set of Statements.
-  def apply_config_statement(base_package, statement, backtrace)
+  # before any other kind of Statement.  The Statement::Configuration class
+  # guarantees that those come first in its set of Statements.
+  def apply_config_statement(package, statement, backtrace)
     case statement
     when Fig::Statement::Path
-      prepend_variable(base_package, statement, backtrace)
+      prepend_variable(package, statement, backtrace)
     when Fig::Statement::Set
-      set_variable(base_package, statement, backtrace)
+      set_variable(package, statement, backtrace)
     when Fig::Statement::Include
-      include_config(base_package, statement.descriptor, backtrace)
+      include_config(package, statement.descriptor, backtrace)
     when Fig::Statement::Override
       backtrace.add_override(statement)
     when Fig::Statement::Command
@@ -157,12 +157,12 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def include_config(base_package, descriptor, backtrace)
+  def include_config(starting_package, descriptor, backtrace)
     resolved_descriptor = nil
 
     # Check to see if this include has been overridden.
     if backtrace
-      override_package_name = descriptor.name || base_package.name
+      override_package_name = descriptor.name || starting_package.name
       override = backtrace.get_override(override_package_name)
       if override
         resolved_descriptor =
@@ -175,7 +175,7 @@ class Fig::RuntimeEnvironment
 
     new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
     package = lookup_package(
-      resolved_descriptor.name || base_package.name,
+      resolved_descriptor.name || starting_package.name,
       resolved_descriptor.version,
       new_backtrace
     )
@@ -205,9 +205,9 @@ class Fig::RuntimeEnvironment
 
   private
 
-  def set_variable(base_package, statement, backtrace)
+  def set_variable(package, statement, backtrace)
     expanded_value = expand_variable_as_path_and_process_retrieves(
-      statement, base_package, backtrace
+      statement, package, backtrace
     )
     name = statement.name
     @variables[name] = expanded_value
@@ -225,9 +225,9 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def prepend_variable(base_package, statement, backtrace)
+  def prepend_variable(package, statement, backtrace)
     expanded_value = expand_variable_as_path_and_process_retrieves(
-      statement, base_package, backtrace
+      statement, package, backtrace
     )
     name = statement.name
     @variables.prepend_variable(name, expanded_value)
@@ -335,30 +335,30 @@ class Fig::RuntimeEnvironment
   end
 
   def expand_variable_as_path_and_process_retrieves(
-    statement, base_package, backtrace
+    statement, package, backtrace
   )
-    return statement.value unless base_package && base_package.name
+    return statement.value unless package && package.name
 
     variable_value =
-      expand_at_signs_in_path(statement.value, base_package, backtrace)
+      expand_at_signs_in_path(statement.value, package, backtrace)
 
     return variable_value if not @retrieves.member?(statement.name)
 
     return retrieve_files(
-      statement.name, variable_value, base_package, backtrace
+      statement.name, variable_value, package, backtrace
     )
   end
 
-  def retrieve_files(variable_name, variable_value, base_package, backtrace)
+  def retrieve_files(variable_name, variable_value, package, backtrace)
     check_source_existence(
-      variable_name, variable_value, base_package, backtrace
+      variable_name, variable_value, package, backtrace
     )
 
     destination_path =
-      derive_retrieve_destination(variable_name, variable_value, base_package)
+      derive_retrieve_destination(variable_name, variable_value, package)
 
     @working_directory_maintainer.switch_to_package_version(
-      base_package.name, base_package.version
+      package.name, package.version
     )
     @working_directory_maintainer.retrieve(variable_value, destination_path)
 
@@ -366,20 +366,20 @@ class Fig::RuntimeEnvironment
   end
 
   def check_source_existence(
-    variable_name, variable_value, base_package, backtrace
+    variable_name, variable_value, package, backtrace
   )
     return if File.exists?(variable_value) || File.symlink?(variable_value)
 
     raise_repository_error(
-      %Q<In #{base_package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>,
+      %Q<In #{package}, the #{variable_name} variable points to a path that does not exist ("#{variable_value}", after expansion).>,
       backtrace,
-      base_package
+      package
     )
   end
 
-  def derive_retrieve_destination(variable_name, variable_value, base_package)
+  def derive_retrieve_destination(variable_name, variable_value, package)
     retrieve_path =
-      get_retrieve_path_with_substitution(variable_name, base_package)
+      get_retrieve_path_with_substitution(variable_name, package)
 
     # A '//' in the variable value tells us to preserve path
     # information after the '//' when doing a retrieve.
@@ -396,15 +396,15 @@ class Fig::RuntimeEnvironment
     return File.join(retrieve_path, File.basename(variable_value))
   end
 
-  def expand_at_signs_in_path(path, base_package, backtrace)
+  def expand_at_signs_in_path(path, package, backtrace)
     expanded_path =
-      replace_at_signs_with_package_references(path, base_package)
-    check_for_bad_escape(expanded_path, path, base_package, backtrace)
+      replace_at_signs_with_package_references(path, package)
+    check_for_bad_escape(expanded_path, path, package, backtrace)
 
     return collapse_backslashes_for_escaped_at_signs(expanded_path)
   end
 
-  def replace_at_signs_with_package_references(argument, base_package)
+  def replace_at_signs_with_package_references(argument, package)
     return argument.gsub(
       %r<
         (?: ^ | \G)           # Zero-width anchor.
@@ -415,7 +415,7 @@ class Fig::RuntimeEnvironment
     ) do |match|
       frontmatter, backslashes = $1, $2
 
-      replacement = backslashes.length % 2 == 1 ? '@' : base_package.directory
+      replacement = backslashes.length % 2 == 1 ? '@' : package.directory
 
       "#{frontmatter}#{backslashes}#{replacement}"
     end
@@ -428,7 +428,7 @@ class Fig::RuntimeEnvironment
     return collapse_backslashes_for_escaped_at_signs(package_substituted)
   end
 
-  def expand_package_references(argument, base_package)
+  def expand_package_references(argument, package)
     return argument.gsub(
       # TODO: Refactor package name regex into PackageDescriptor constant.
       %r<
@@ -442,13 +442,13 @@ class Fig::RuntimeEnvironment
       frontmatter, backslashes, package_name = $1, $2, $3
 
       expand_package_reference(
-        frontmatter, backslashes, package_name, base_package
+        frontmatter, backslashes, package_name, package
       )
     end
   end
 
   def expand_package_reference(
-    frontmatter, backslashes, package_name, base_package
+    frontmatter, backslashes, package_name, starting_package
   )
     if backslashes.length % 2 == 1
       return "#{frontmatter}#{backslashes}@#{package_name}"
@@ -465,7 +465,7 @@ class Fig::RuntimeEnvironment
         )
       end
     else
-      package = base_package
+      package = starting_package
     end
 
     if package && package.directory
@@ -497,11 +497,11 @@ class Fig::RuntimeEnvironment
     return string.gsub(%r< \\ ([\\@]) >x, '\1')
   end
 
-  def get_retrieve_path_with_substitution(variable_name, base_package)
+  def get_retrieve_path_with_substitution(variable_name, package)
     retrieve_statement = @retrieves[variable_name]
     retrieve_statement.referenced(true)
 
-    return retrieve_statement.path.gsub(/ \[package\] /x, base_package.name)
+    return retrieve_statement.path.gsub(/ \[package\] /x, package.name)
   end
 
   def raise_repository_error(message, backtrace, package)
