@@ -81,16 +81,6 @@ require 'fig/statement/resource'
 
         escaped_location = %Q<foo \\#{character} bar>
         unescaped_location = %Q<foo #{character} bar>
-        it %Q<processes escapes from «#{escaped_location}» and says that it should be globbed> do
-          test_should_equal_and_should_glob(
-            statement_type, unescaped_location, escaped_location
-          )
-        end
-        it %Q<processes escapes from «"#{escaped_location}"» and says that it should be globbed> do
-          test_should_equal_and_should_glob(
-            statement_type, unescaped_location, %Q<"#{escaped_location}">
-          )
-        end
         it %Q<processes escapes from «'#{escaped_location}'» and says that it should not be globbed> do
           test_should_equal_and_should_not_glob(
             statement_type, unescaped_location, %Q<'#{escaped_location}'>
@@ -98,7 +88,7 @@ require 'fig/statement/resource'
         end
       end
 
-      %w< " @ >.each do
+      %w< \\ " @ >.each do
         |character|
 
         escaped_location = %Q<foo \\#{character} bar>

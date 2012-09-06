@@ -64,87 +64,81 @@ class Fig::Statement
     end
 
     if string =~ %r< [^\\] (?: \\{2} )*? \\ ([^\\']) >x
-      yield "contains a bad escape sequence (\\#{$1})."
+      yield "contains a bad escape sequence (\\#{$1}) inside single quotes."
       return
     end
 
-    string.sub!( %r< \A ' (.*) ' \z >xs, '\1')
-    string.gsub!(%r< \\ (.) >xs,         '\1')
+    string.sub!( %r< \A ' (.*) ' \z >xm, '\1')
+    string.gsub!(%r< \\ (.) >xm,         '\1')
 
     return true
   end
 
-  ALLOWED_ESCAPED_CHARACTERS = Set.new
-  ALLOWED_ESCAPED_CHARACTERS << '\\'
-  ALLOWED_ESCAPED_CHARACTERS << %q<'>
-  ALLOWED_ESCAPED_CHARACTERS << %q<">
-  ALLOWED_ESCAPED_CHARACTERS << '@' # Environment variable package replacement
-
   def self.strip_double_quotes_and_process_escapes!(string, &error_block)
-    if string[0..0] == %q<"> && (string.length == 1 || string[-1..-1] != %q<">)
-      yield 'has unbalanced double quotes.'
-      return
+    return if ! check_and_strip_double_quotes(string, &error_block)
+
+    if string == %q<\\'>
+      string.replace %q<'>
+      return false
     end
 
-    new_string = ''
+    return if ! check_escapes(string, &error_block)
 
-    characters = string.each_char
-    initial_character   = characters.next
-    last_character      = nil
-    had_starting_quote  = initial_character == %q<">
-    in_escape           = initial_character == '\\'
-    if ! had_starting_quote && ! in_escape
-      new_string << initial_character
-    end
-
-    last_was_escaped = nil
-    loop do
-      last_character = character = characters.next
-      if in_escape
-        if ! ALLOWED_ESCAPED_CHARACTERS.include? character
-          yield "contains a bad escape sequence (\\#{character})."
-          return
-        end
-
-        new_string << character
-        in_escape = false
-        last_was_escaped = true
-      elsif character == %q<">
-        # If we're at the end of the string, we'll get bounced out of the loop
-        # by a StopIteration exception.
-        characters.next
-        yield 'has an unescaped double quote in the middle.'
-        return
-      elsif character == %q<'>
-        yield 'has an unescaped single quote in the middle.'
-        return
-      elsif character == '\\'
-        in_escape = true
-      # TODO: need an
-      #   «elsif character == '@'»
-      # here to deal with package substitution in variable statements
-      else
-        new_string << character
-        last_was_escaped = false
-      end
-    end
-
-    if in_escape
-      yield 'ends in an incomplete escape sequence.'
-      return
-    elsif had_starting_quote
-      if last_was_escaped
-        yield 'has unbalanced double quotes (last quote was escaped).'
-        return
-      end
-    elsif ! last_was_escaped && ! had_starting_quote && last_character == %q<">
-      yield 'has unbalanced double quotes.'
-      return
-    end
-
-    string.replace(new_string)
+    string.gsub!(%r< \\ (.) >xm, '\1')
 
     return false
+  end
+
+  def self.check_and_strip_double_quotes(string, &error_block)
+    return true if string =~ %r< \A \\ . \z >xm
+
+    if string[0..0] == %q<">
+      if string.length == 1 || string[-1..-1] != %q<">
+        yield 'has unbalanced double quotes.'
+        return
+      end
+      if string =~ %r< [^\\] (?: \\{2} )*? \\ " \z >xm
+        yield 'has unbalanced double quotes; the trailing double quote is escaped.'
+        return
+      end
+
+      string.sub!( %r< \A " (.*) " \z >xm, '\1' )
+    elsif string =~ %r< (?: \A | [^\\] ) (?: \\{2} )* " \z >xm
+      yield %q<has unbalanced double quotes; it ends in a double quote when it didn't start with one.>
+      return
+    end
+
+    return true
+  end
+
+  def self.check_escapes(string, &error_block)
+    if string =~ %r<
+      (?: \A | [^\\] ) # Start of string or not-a-backslash.
+      (?: \\{2} )*?    # Even number of backslashes (including none).
+      \\ ([^\\"@])     # Bad escaped character.
+    >x
+      yield "contains a bad escape sequence (\\#{$1})."
+      return
+    end
+    if string =~ %r<
+      (?: \A | [^\\] ) # Start of string or not-a-backslash.
+      (?: \\{2} )*?    # Even number of backslashes (including none).
+      \\ \z            # Backslash followed by end of string.
+    >x
+      yield 'ends in an incomplete escape.'
+      return
+    end
+    if string =~ %r<
+      (?: \A | [^\\] ) # Start of string or not-a-backslash.
+      (?: \\{2} )*?    # Even number of backslashes (including none).
+      (['"])           # Quote character.
+    >x
+      quote_name = $1 == %q<'> ? 'single' : 'double'
+      yield "contains an unescaped #{quote_name} quote."
+      return
+    end
+
+    return true
   end
 
   public
