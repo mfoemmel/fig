@@ -36,7 +36,9 @@ class Fig::Statement
   #
   # Returns whether parameter was single-quoted; if there was a parse error,
   # then the return value will be nil (and the block will have been invoked).
-  def self.strip_quotes_and_process_escapes!(string, &error_block)
+  def self.strip_quotes_and_process_escapes!(
+    string, subexpression_matchers = DEFAULT_SUBEXPRESSION_MATCHER, &error_block
+  )
     return false if string.length == 0
 
     replaced_quotes =
@@ -44,10 +46,16 @@ class Fig::Statement
     return true if replaced_quotes
     return      if replaced_quotes.nil?
 
-    return strip_double_quotes_and_process_escapes!(string, &error_block)
+    return strip_double_quotes_and_process_escapes!(
+      string, subexpression_matchers, &error_block
+    )
   end
 
   private
+
+  DEFAULT_SUBEXPRESSION_MATCHER = [
+    { :pattern => %r<\@>, :action => lambda {|character| character} }
+  ]
 
   def self.strip_single_quotes_and_process_escapes!(string, &error_block)
     return false if string[0..0] != %q<'> && string[-1..-1] != %q<'>
@@ -74,7 +82,9 @@ class Fig::Statement
     return true
   end
 
-  def self.strip_double_quotes_and_process_escapes!(string, &error_block)
+  def self.strip_double_quotes_and_process_escapes!(
+    string, subexpression_matchers, &error_block
+  )
     return if ! check_and_strip_double_quotes(string, &error_block)
 
     if string == %q<\\'>
@@ -82,14 +92,17 @@ class Fig::Statement
       return false
     end
 
-    return if ! check_escapes(string, &error_block)
+    return if ! tokenize(string, subexpression_matchers, &error_block)
 
+    # Needs to go away once we're using TokenizedString.
     string.gsub!(%r< \\ (.) >xm, '\1')
 
     return false
   end
 
   def self.check_and_strip_double_quotes(string, &error_block)
+    # We accept any unquoted single character at this point.  Later validation
+    # will catch bad characters.
     return true if string =~ %r< \A \\ . \z >xm
 
     if string[0..0] == %q<">
@@ -111,34 +124,66 @@ class Fig::Statement
     return true
   end
 
-  def self.check_escapes(string, &error_block)
-    if string =~ %r<
-      (?: \A | [^\\] ) # Start of string or not-a-backslash.
-      (?: \\{2} )*?    # Even number of backslashes (including none).
-      \\ ([^\\"@])     # Bad escaped character.
-    >x
-      yield "contains a bad escape sequence (\\#{$1})."
-      return
-    end
-    if string =~ %r<
-      (?: \A | [^\\] ) # Start of string or not-a-backslash.
-      (?: \\{2} )*?    # Even number of backslashes (including none).
-      \\ \z            # Backslash followed by end of string.
-    >x
-      yield 'ends in an incomplete escape.'
-      return
-    end
-    if string =~ %r<
-      (?: \A | [^\\] ) # Start of string or not-a-backslash.
-      (?: \\{2} )*?    # Even number of backslashes (including none).
-      (['"])           # Quote character.
-    >x
-      quote_name = $1 == %q<'> ? 'single' : 'double'
-      yield "contains an unescaped #{quote_name} quote."
-      return
+  def self.tokenize(string, subexpression_matchers, &error_block)
+    new_string     = ''
+    working_string = string.clone
+
+    while ! working_string.empty?
+      if working_string =~ %r< \A (\\+) ([^\\] .*)? \z >xm
+        slashes, remainder = $1, $2
+        if slashes.length % 2 == 1
+          if remainder.nil?
+            yield 'ends in an incomplete escape.'
+            return
+          end
+          if (
+                subexpression_match(remainder, subexpression_matchers) \
+            ||  remainder[0..0] == %q<">
+          )
+            new_string << slashes
+            new_string << remainder[0..0]
+            working_string = remainder[1..-1] || ''
+          else
+            yield "contains a bad escape sequence (\\#{$1})."
+            return
+          end
+        else
+          new_string << slashes
+          working_string = remainder
+        end
+      else
+        replacement, remainder =
+          subexpression_match(working_string, subexpression_matchers)
+        if replacement
+          new_string << replacement
+          working_string = remainder
+        elsif working_string =~ %r< \A (["']) >xm
+          quote_name = $1 == %q<'> ? 'single' : 'double'
+          yield "contains an unescaped #{quote_name} quote."
+          return
+        else
+          new_string << working_string[0..0]
+          working_string = working_string[1..-1] || ''
+        end
+      end
     end
 
     return true
+  end
+
+  def self.subexpression_match(string, subexpression_matchers)
+    subexpression_matchers.each do
+      |matcher|
+
+      pattern = matcher[:pattern]
+      if string =~ %r< \A ( #{pattern} ) >x
+        subexpression, remainder = $1, $'
+        replacement = matcher[:action].call subexpression
+        return [replacement, remainder]
+      end
+    end
+
+    return
   end
 
   public
