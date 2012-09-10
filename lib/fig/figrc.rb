@@ -44,9 +44,10 @@ class Fig::FigRC
   def self.handle_override_configuration(configuration, override_path)
     begin
       if not override_path.nil?
-        configuration.push_dataset(
-          JSON.parse(File::open(override_path).read)
-        )
+        configuration_text = File::open(override_path).read
+        if configuration_text.length > 0
+          configuration.push_dataset JSON.parse(configuration_text)
+        end
       end
     rescue JSON::ParserError => exception
       translate_parse_error(exception, override_path)
@@ -60,9 +61,8 @@ class Fig::FigRC
     return if not File.exists? user_figrc_path
 
     begin
-      configuration.push_dataset(
-        JSON.parse(File::open(user_figrc_path).read)
-      )
+      configuration_text = File::open(user_figrc_path).read
+      configuration.push_dataset JSON.parse(configuration_text)
     rescue JSON::ParserError => exception
       translate_parse_error(exception, user_figrc_path)
     end
@@ -98,9 +98,8 @@ class Fig::FigRC
     return if not repo_config_exists
 
     begin
-      configuration.push_dataset(
-        JSON.parse(File.open(repo_figrc_path).read)
-      )
+      configuration_text = File.open(repo_figrc_path).read
+      configuration.push_dataset JSON.parse(configuration_text)
     rescue JSON::ParserError => exception
       translate_parse_error(exception, figrc_url)
     end
