@@ -213,6 +213,7 @@ class Fig::RuntimeEnvironment
     @variables[name] = expanded_value
 
     if Fig::Logging.debug?
+      value = statement.value
       expanded_message =
         expanded_value == value ? ''  \
                                 : %Q< (expanded from "#{value}")>
@@ -233,6 +234,7 @@ class Fig::RuntimeEnvironment
     @variables.prepend_variable(name, expanded_value)
 
     if Fig::Logging.debug?
+      value = statement.value
       expanded_message =
         expanded_value == value ? ''  \
                                 : %Q< ("#{value}" expanded to "#{expanded_value}")>

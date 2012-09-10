@@ -195,6 +195,49 @@ class Fig::OperatingSystem
     all_packages.flatten.sort
   end
 
+  # Determine whether we need to update something.  Returns nil to indicate
+  # "don't know".
+  def path_up_to_date?(url, path)
+    return false if ! File.exist? path
+
+    uri = URI.parse(url)
+    case uri.scheme
+    when 'ftp'
+      begin
+        ftp = Net::FTP.new(uri.host)
+        ftp_login(ftp, uri.host)
+
+        if ftp.mtime(uri.path) <= File.mtime(path)
+          return true
+        end
+
+        return false
+      rescue Net::FTPPermError => error
+        Fig::Logging.debug error.message
+        raise Fig::FileNotFoundError.new error.message, url
+      rescue SocketError => error
+        Fig::Logging.debug error.message
+        raise Fig::FileNotFoundError.new error.message, url
+      end
+    when 'http'
+      return nil # Not implemented
+    when 'ssh'
+    when 'file'
+      begin
+        unescaped_path = CGI.unescape uri.path
+        if File.mtime(unescaped_path) <= File.mtime(path)
+          return true
+        end
+
+        return false
+      rescue Errno::ENOENT => error
+        raise Fig::FileNotFoundError.new error.message, url
+      end
+    else
+      raise_unknown_protocol(url)
+    end
+  end
+
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
   def download(url, path)

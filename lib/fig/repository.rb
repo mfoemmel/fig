@@ -286,6 +286,14 @@ class Fig::Repository
   def install_package(descriptor, temp_dir)
     remote_fig_file = remote_fig_file_for_package(descriptor)
     local_dir       = local_dir_for_package(descriptor)
+    local_fig_file  = fig_file_for_package_download(local_dir)
+
+    if @operating_system.path_up_to_date? remote_fig_file, local_fig_file
+      Fig::Logging.debug \
+        "Skipping update of #{descriptor.to_string} because it looks like #{local_fig_file} is up-to-date."
+      return
+    end
+
     temp_fig_file   = fig_file_for_package_download(temp_dir)
 
     FileUtils.rm_rf temp_dir

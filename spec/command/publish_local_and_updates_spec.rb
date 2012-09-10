@@ -6,10 +6,9 @@ describe 'Fig' do
     set_up_test_environment
   end
 
-  it %q<Doesn't remove --publish-local packages during a failed --update.> do
+  it %q<doesn't remove --publish-local packages during a failed --update.> do
     fig(
       %w<--publish-local publish-local/test --set foo=bar>,
-      fork => false,
       :current_directory => USER_HOME
     )
 
@@ -20,8 +19,7 @@ describe 'Fig' do
 
     # Should not work because we didn't send it to the remote repo.
     out, err, exit_code = fig(
-      %w<--update publish-local/test --get foo>,
-      :fork => false,
+      %w<publish-local/test --update --get foo>,
       :no_raise_on_error => true
     )
     exit_code.should_not == 0
