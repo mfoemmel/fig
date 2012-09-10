@@ -271,13 +271,9 @@ class Fig::Repository
       Fig::Logging.fatal \
         "Package #{descriptor.to_string()} not found in remote repository. (Was looking for #{error.path}.)"
 
-      delete_local_package(descriptor)
-
       raise Fig::RepositoryError.new
     rescue StandardError => exception
-      Fig::Logging.fatal %Q<Install failed, cleaning up: #{exception}>
-
-      delete_local_package(descriptor)
+      Fig::Logging.fatal %Q<Install failed: #{exception}>
 
       raise Fig::RepositoryError.new
     ensure
@@ -290,14 +286,17 @@ class Fig::Repository
   def install_package(descriptor, temp_dir)
     remote_fig_file = remote_fig_file_for_package(descriptor)
     local_dir       = local_dir_for_package(descriptor)
-    local_fig_file  = fig_file_for_package_download(local_dir)
-    return if not @operating_system.download(remote_fig_file, local_fig_file)
+    temp_fig_file   = fig_file_for_package_download(temp_dir)
 
-    @operating_system.delete_and_recreate_directory(temp_dir)
+    FileUtils.rm_rf temp_dir
+    if File.exist? local_dir
+      FileUtils.mkdir_p File.dirname(temp_dir)
+      FileUtils.cp_r local_dir, temp_dir, :preserve => true
+    else
+      FileUtils.mkdir_p temp_dir
+    end
 
-    temp_fig_file = fig_file_for_package_download(temp_dir)
-
-    @operating_system.download(remote_fig_file, temp_fig_file)
+    return if ! @operating_system.download(remote_fig_file, temp_fig_file)
 
     package = read_package_from_directory(temp_dir, descriptor)
 
@@ -350,12 +349,6 @@ class Fig::Repository
     @package_cache.add_package(package)
 
     return package
-  end
-
-  def delete_local_package(descriptor)
-    FileUtils.rm_rf(local_dir_for_package(descriptor))
-
-    return
   end
 
   def remote_fig_file_for_package(descriptor)
