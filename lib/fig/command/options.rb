@@ -590,14 +590,16 @@ class Fig::Command::Options
     return statement_class.new(nil, "#{option} option", variable, value)
   end
 
-  def new_content_statement(option, path, statement_class)
-    need_to_glob =
-      statement_class.validate_and_process_escapes_in_location!(path) do
-      |error_description|
+  def new_content_statement(option, raw_path, statement_class)
+    tokenized_path =
+      statement_class.validate_and_process_escapes_in_location(raw_path) do
+        |error_description|
 
-      @parser.raise_invalid_argument(option, path, error_description)
-    end
+        @parser.raise_invalid_argument(option, raw_path, error_description)
+      end
 
+    path = tokenized_path.to_expanded_string
+    need_to_glob = ! tokenized_path.single_quoted?
     return statement_class.new(nil, "#{option} option", path, need_to_glob)
   end
 

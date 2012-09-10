@@ -2,6 +2,7 @@ require 'cgi'
 
 require 'fig/parser'
 require 'fig/statement'
+require 'fig/string_tokenizer'
 require 'fig/url'
 
 module Fig; end
@@ -82,18 +83,17 @@ module Fig::Statement::Asset
   end
 
   module ClassMethods
-    # Modifies the parameter to deal with quoting, escaping.
-    def validate_and_process_escapes_in_location!(location, &block)
-      was_in_single_quotes =
-        Fig::Statement.strip_quotes_and_process_escapes!(location, &block)
-      return if was_in_single_quotes.nil?
+    def validate_and_process_escapes_in_location(location, &block)
+      tokenizer = Fig::StringTokenizer.new
+      tokenized_string = tokenizer.tokenize(location, &block)
+      return if ! tokenized_string
 
       # "config" is a reasonable asset name, so we let that pass.
-      if Fig::Parser.strict_keyword?(location)
+      if Fig::Parser.strict_keyword?(tokenized_string.to_expanded_string)
         yield 'is a keyword.'
       end
 
-      return ! was_in_single_quotes
+      return tokenized_string
     end
   end
 end

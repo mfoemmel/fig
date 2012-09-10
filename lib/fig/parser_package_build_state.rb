@@ -80,18 +80,19 @@ class Fig::ParserPackageBuildState
   end
 
   def new_asset_statement(statement_class, keyword_node, location_node)
-    location = location_node.text_value
+    raw_location = location_node.text_value
 
-    need_to_glob =
-      statement_class.validate_and_process_escapes_in_location!(location) do
+    tokenized_location =
+      statement_class.validate_and_process_escapes_in_location(raw_location) do
+        |error_description|
 
-      |error_description|
+        raise_invalid_value_parse_error(
+          keyword_node, location_node, 'URL/path', error_description
+        )
+      end
 
-      raise_invalid_value_parse_error(
-        keyword_node, location_node, 'URL/path', error_description
-      )
-    end
-
+    location = tokenized_location.to_expanded_string
+    need_to_glob = ! tokenized_location.single_quoted?
     return statement_class.new(
       node_location(keyword_node), source_description, location, need_to_glob
     )

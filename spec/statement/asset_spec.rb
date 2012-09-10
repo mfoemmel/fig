@@ -16,21 +16,24 @@ require 'fig/statement/resource'
       >.freeze
     TEST_KEYWORDS.each {|keyword| keyword.freeze}
 
-    describe '.validate_and_process_escapes_in_location!()' do
+    describe '.validate_and_process_escapes_in_location()' do
       def test_should_equal_and_should_glob(
         statement_type, original_location, location
       )
         block_message = nil
         location      = location.clone
 
-        should_be_globbed =
-          statement_type.validate_and_process_escapes_in_location!(location) do
+        tokenized_location =
+          statement_type.validate_and_process_escapes_in_location(location) do
             |message| block_message = message
           end
 
-        block_message.should      be_nil
-        location.should           == original_location
-        should_be_globbed.should  be_true
+        location     = tokenized_location.to_expanded_string
+        need_to_glob = ! tokenized_location.single_quoted?
+
+        block_message.should  be_nil
+        location.should       == original_location
+        need_to_glob.should   be_true
 
         return
       end
@@ -41,14 +44,17 @@ require 'fig/statement/resource'
         block_message = nil
         location      = location.clone
 
-        should_be_globbed =
-          statement_type.validate_and_process_escapes_in_location!(location) do
+        tokenized_location =
+          statement_type.validate_and_process_escapes_in_location(location) do
             |message| block_message = message
           end
 
-        block_message.should      be_nil
-        location.should           == original_location
-        should_be_globbed.should  be_false
+        location     = tokenized_location.to_expanded_string
+        need_to_glob = ! tokenized_location.single_quoted?
+
+        block_message.should  be_nil
+        location.should       == original_location
+        need_to_glob.should   be_false
 
         return
       end
@@ -108,7 +114,7 @@ require 'fig/statement/resource'
       def test_got_error_message(statement_type, location, error_regex)
         block_message = nil
 
-        statement_type.validate_and_process_escapes_in_location!(location.dup) do
+        statement_type.validate_and_process_escapes_in_location(location.dup) do
           |message| block_message = message
         end
 
@@ -208,13 +214,13 @@ require 'fig/statement/resource'
           location           = original_location.clone
           block_message = nil
 
-          should_be_globbed =
-            statement_type.validate_and_process_escapes_in_location!(location) do
+          tokenized_location =
+            statement_type.validate_and_process_escapes_in_location(location) do
               |message| block_message = message
             end
 
-          location.should      == 'foo\\\\bar\\baz'
-          block_message.should be_nil
+          tokenized_location.to_expanded_string == 'foo\\\\bar\\baz'
+          block_message.should                  be_nil
         end
       end
     end
