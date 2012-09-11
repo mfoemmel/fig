@@ -7,26 +7,17 @@ module Fig; end
 class Fig::Statement::Set < Fig::Statement
   include Fig::Statement::EnvironmentVariable
 
-  # We block quotes right now in order to allow for using them for
-  # quoting later.
-  VALUE_REGEX          = %r< \A [^\s\\'"]* \z >x
-  ARGUMENT_DESCRIPTION =
-    %q<The value must look like "NAME=VALUE"; VALUE cannot contain whitespace though it can be empty.>
-
   # Yields on error.
-  def self.parse_name_value(combined)
-    variable, value = combined.split('=')
+  def self.parse_name_value(combined, &error_block)
+    variable, raw_value = separate_name_and_value combined, &error_block
 
-    if variable !~ ENVIRONMENT_VARIABLE_NAME_REGEX
-      yield
-    end
+    return [variable, tokenize_value(raw_value, &error_block)]
+  end
 
-    value = '' if value.nil?
-    if value !~ VALUE_REGEX
-      yield
-    end
-
-    return [variable, value]
+  def self.parse_v0_name_value(combined, &error_block)
+    variable, raw_value = separate_name_and_value combined, &error_block
+    base_v0_value_validation(variable, raw_value)
+    return [variable, tokenize_value(raw_value, &error_block)]
   end
 
   def initialize(line_column, source_description, name, value)

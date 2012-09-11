@@ -14,11 +14,10 @@ require 'fig/statement/set'
 
 module Fig; end
 
+# The state of a Package while it is being built by a Parser.
 class Fig::ParserPackageBuildState
-  attr_reader :descriptor
-  attr_reader :source_description
-
-  def initialize(descriptor, source_description)
+  def initialize(grammar_version, descriptor, source_description)
+    @grammar_version    = grammar_version
     @descriptor         = descriptor
     @source_description = source_description
   end
@@ -40,7 +39,7 @@ class Fig::ParserPackageBuildState
     location = node_location(node)
 
     return Fig::Statement.position_description(
-      location[0], location[1], source_description
+      location[0], location[1], @source_description
     )
   end
 
@@ -64,8 +63,8 @@ class Fig::ParserPackageBuildState
     end
 
     return Fig::Package.new(
-      descriptor.name,
-      descriptor.version,
+      @descriptor.name,
+      @descriptor.version,
       directory,
       statement_objects
     )
@@ -74,7 +73,7 @@ class Fig::ParserPackageBuildState
   def new_grammar_version_statement(keyword_node, version_node)
     return Fig::Statement::GrammarVersion.new(
       node_location(keyword_node),
-      source_description,
+      @source_description,
       version_node.text_value.to_i
     )
   end
@@ -94,14 +93,14 @@ class Fig::ParserPackageBuildState
     location = tokenized_location.to_expanded_string
     need_to_glob = ! tokenized_location.single_quoted?
     return statement_class.new(
-      node_location(keyword_node), source_description, location, need_to_glob
+      node_location(keyword_node), @source_description, location, need_to_glob
     )
   end
 
   def new_retrieve_statement(keyword_node, variable_name_node, path_node)
     return Fig::Statement::Retrieve.new(
       node_location(keyword_node),
-      source_description,
+      @source_description,
       variable_name_node.text_value,
       path_node.text_value
     )
@@ -122,7 +121,7 @@ class Fig::ParserPackageBuildState
 
     return Fig::Statement::Configuration.new(
       node_location(keyword_node),
-      source_description,
+      @source_description,
       name_node.text_value,
       statement_objects
     )
@@ -138,9 +137,9 @@ class Fig::ParserPackageBuildState
 
     return Fig::Statement::Include.new(
       node_location(keyword_node),
-      source_description,
+      @source_description,
       include_descriptor,
-      descriptor
+      @descriptor
     )
   end
 
@@ -154,7 +153,7 @@ class Fig::ParserPackageBuildState
 
     return Fig::Statement::Override.new(
       node_location(keyword_node),
-      source_description,
+      @source_description,
       override_descriptor.name,
       override_descriptor.version
     )
@@ -170,14 +169,14 @@ class Fig::ParserPackageBuildState
       )
     }
     return statement_class.new(
-      node_location(keyword_node), source_description, name, value
+      node_location(keyword_node), @source_description, name, value
     )
   end
 
   def new_command_statement(keyword_node, command_node)
     return Fig::Statement::Command.new(
       node_location(keyword_node),
-      source_description,
+      @source_description,
       command_node.value.text_value
     )
   end

@@ -3,6 +3,7 @@ require 'set'
 require 'fig/grammar/version_identification'
 require 'fig/grammar/v0'
 require 'fig/grammar/v1'
+require 'fig/grammar_monkey_patches'
 require 'fig/logging'
 require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
@@ -77,7 +78,7 @@ class Fig::Parser
     end
 
     statement = result.get_grammar_version(
-      Fig::ParserPackageBuildState.new(descriptor, extended_description)
+      Fig::ParserPackageBuildState.new(nil, descriptor, extended_description)
     )
     return 0 if not statement
 
@@ -96,7 +97,7 @@ class Fig::Parser
 
     v0_parser = Fig::Grammar::V0Parser.new
 
-    return drive_parser(
+    return drive_treetop_parser(
       v0_parser,
       descriptor,
       directory,
@@ -109,7 +110,7 @@ class Fig::Parser
   def parse_v1(descriptor, directory, source_description, unparsed_text)
     v1_parser = Fig::Grammar::V1Parser.new
 
-    return drive_parser(
+    return drive_treetop_parser(
       v1_parser,
       descriptor,
       directory,
@@ -119,7 +120,7 @@ class Fig::Parser
     )
   end
 
-  def drive_parser(
+  def drive_treetop_parser(
     parser,
     descriptor,
     directory,
@@ -140,7 +141,9 @@ class Fig::Parser
 
     package = result.to_package(
       directory,
-      Fig::ParserPackageBuildState.new(descriptor, extended_description)
+      Fig::ParserPackageBuildState.new(
+        parser.version, descriptor, extended_description
+      )
     )
     package.unparsed_text = unparsed_text
 

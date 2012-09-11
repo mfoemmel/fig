@@ -11,23 +11,37 @@ class Fig::Statement::Path < Fig::Statement
   # We block single-quotes right now in order to allow for using them for
   # quoting later.
   VALUE_REGEX          = %r< \A [^;:'"<>|\s]+ \z >x
-  ARGUMENT_DESCRIPTION =
-    %q[The value must look like "NAME=VALUE". VALUE cannot contain any of ";:<>|", double quotes, or whitespace.]
 
   # Yields on error.
-  def self.parse_name_value(combined)
-    variable, value = combined.split('=')
+  def self.parse_name_value(combined, &error_block)
+    variable, raw_value = separate_name_and_value combined, &error_block
 
-    if variable !~ ENVIRONMENT_VARIABLE_NAME_REGEX
-      yield
+    tokenized_value = tokenize_value(raw_value, &error_block)
+
+    if tokenized_value.to_escaped_string.length < 1
+      yield %Q<The value of path variable #{variable} is empty.>
+      return
     end
 
-    value = '' if value.nil?
-    if value !~ VALUE_REGEX
-      yield
+    return [variable, tokenized_value]
+  end
+
+  def self.parse_v0_name_value(combined, &error_block)
+    variable, raw_value = separate_name_and_value combined, &error_block
+
+    if raw_value.length < 1
+      yield %Q<The value of path variable #{variable} is empty.>
+      return
     end
 
-    return [variable, value]
+    base_v0_value_validation(variable, raw_value)
+
+    if raw_value =~ /([;:<>|])/
+      yield %Q<The value of path variable #{variable} (#{raw_value}) contains a "#{raw_value}" character.>
+      return
+    end
+
+    return [variable, tokenize_value(raw_value, &error_block)]
   end
 
   def initialize(line_column, source_description, name, value)
