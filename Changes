@@ -1,12 +1,4 @@
-v0.1.78.beta.2
-
-  Bug fixes:
-
-  - Doing a --update after a --publish-local doesn't delete the local package.
-    Actually, updates handle failed downloads better in general and don't
-    delete local copies of packages.
-
-v0.1.78.beta.1
+v0.1.79
 
   Backwards incompatibilities:
 
@@ -53,6 +45,15 @@ v0.1.78.beta.1
 
     then the value of FOO after expansion would be "X@Y@Z".  Now it would
     (correctly) be "X@Ypackage-pathZ".
+
+  - Doing a --update after a --publish-local doesn't delete the local package.
+    Actually, updates handle failed downloads better in general and don't
+    delete local copies of packages.
+
+v0.1.78.beta.2
+v0.1.78.beta.1
+
+  - Test releases
 
 v0.1.77
 
