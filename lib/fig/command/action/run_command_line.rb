@@ -49,7 +49,7 @@ class Fig::Command::Action::RunCommandLine
     base_package  = @execution_context.base_package
     base_config   = @execution_context.base_config
 
-    environment.execute_command_line(
+    environment.expand_command_line(
       base_package, base_config, @descriptor, @command_line
     ) do
       |command| @execution_context.operating_system.plain_or_shell_exec command

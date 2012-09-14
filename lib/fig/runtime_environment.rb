@@ -99,7 +99,7 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def execute_command_line(base_package, base_config, descriptor, command_line)
+  def expand_command_line(base_package, base_config, descriptor, command_line)
     package, * =
       determine_package_for_execution(base_package, base_config, descriptor)
 
@@ -115,7 +115,7 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def execute_command_statement(
+  def expand_command_statement_from_config(
     base_package, base_config, descriptor, extra_arguments, &block
   )
     package, config_name =
@@ -123,7 +123,7 @@ class Fig::RuntimeEnvironment
 
     command_statement = package[config_name].command_statement
     if command_statement
-      execute_command(command_statement, extra_arguments, package, &block)
+      expand_command(command_statement, extra_arguments, package, &block)
     else
       raise Fig::UserInputError.new(
         %Q<The "#{package.to_s}" package with the "#{config_name}" configuration does not contain a command.>
@@ -323,7 +323,7 @@ class Fig::RuntimeEnvironment
     return package.primary_config_name || Fig::Package::DEFAULT_CONFIG
   end
 
-  def execute_command(command_statement, extra_arguments, package)
+  def expand_command(command_statement, extra_arguments, package)
     @variables.with_environment do
       argument =
         expand_command_line_argument(

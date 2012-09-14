@@ -49,7 +49,7 @@ class Fig::Command::Action::RunCommandStatement
     base_package  = @execution_context.base_package
     base_config   = @execution_context.base_config
 
-    environment.execute_command_statement(
+    environment.expand_command_statement_from_config(
       base_package, base_config, @descriptor, @extra_argv || []
     ) { |command| @execution_context.operating_system.shell_exec command }
 

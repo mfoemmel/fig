@@ -116,7 +116,7 @@ def substitute_command(command)
     Fig::Package.new('test-package', 'test-version', 'test-directory', [])
 
   substituted_command = nil
-  environment.execute_command_line(base_package, nil, nil, command) {
+  environment.expand_command_line(base_package, nil, nil, command) {
     |command_line|
     substituted_command = command_line
   }
@@ -138,7 +138,7 @@ def substitute_variable(variable_value, retrieve_vars = {})
 
   output = nil
   variables = generate_shell_variable_expansions
-  environment.execute_command_line(base_package, nil, nil, []) {
+  environment.expand_command_line(base_package, nil, nil, []) {
     # No space between the closing curly of an interpolation and the double
     # ampersand due to the way that echo works on MS Windows.
     output =
@@ -284,20 +284,20 @@ describe 'RuntimeEnvironment' do
     end
   end
 
-  describe 'command execution' do
-    it 'issues an error when attempting to execute a command from a config which contains no command' do
+  describe 'command expansion' do
+    it 'issues an error when attempting to expand a command statement from a config which contains no command' do
       environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       expect {
-        environment.execute_command_statement(
+        environment.expand_command_statement_from_config(
           nil, nil, Fig::PackageDescriptor.new('one', nil, nil), nil
         )
       }.to raise_error(Fig::UserInputError)
     end
 
-    it 'executes a command successfully' do
+    it 'expands a command statement successfully' do
       environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       received_command = nil
-      environment.execute_command_statement(
+      environment.expand_command_statement_from_config(
         nil, nil, Fig::PackageDescriptor.new('has_command', nil, nil), []
       ) { |command| received_command = command }
       received_command.should == %w<echo foo>
