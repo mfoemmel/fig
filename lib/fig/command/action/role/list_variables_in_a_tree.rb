@@ -135,7 +135,7 @@ module Fig::Command::Action::Role::ListVariablesInATree
 
       print "#{variable_indent}"
       print "#{statement.name().ljust(name_width)}"
-      print " = #{statement.value}"
+      print " = #{statement.tokenized_value.to_escaped_string}"
       if statement.is_a?(Fig::Statement::Path)
         print ":$#{statement.name}"
       end
