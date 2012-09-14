@@ -158,8 +158,9 @@ class Fig::StringTokenizer
             @segments << replacement
           end
           @string = remainder
-        elsif @string =~ %r< \A " >xm
-          @error_block.call 'contains an unescaped double quote.'
+        elsif @string =~ %r< \A (["']) >xm
+          quote_name = $1 == %q<'> ? 'single' : 'double'
+          @error_block.call "contains an unescaped #{quote_name} quote."
           return
         else
           plain_string ||= ''

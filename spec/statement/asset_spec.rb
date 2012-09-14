@@ -28,10 +28,11 @@ require 'fig/statement/resource'
             |message| block_message = message
           end
 
+        block_message.should be_nil
+
         location     = tokenized_location.to_expanded_string
         need_to_glob = ! tokenized_location.single_quoted?
 
-        block_message.should  be_nil
         location.should       == original_location
         need_to_glob.should   be_true
 
@@ -94,7 +95,7 @@ require 'fig/statement/resource'
         end
       end
 
-      %w< \\ " @ >.each do
+      %w< \\ " >.each do
         |character|
 
         escaped_location = %Q<foo \\#{character} bar>
