@@ -11,10 +11,10 @@ class Fig::TokenizedString::PlainSegment
   end
 
   def type
-    return :plain_segment
+    return nil
   end
 
-  def to_expanded_string()
+  def to_expanded_string(&block)
     return @raw_value.gsub(%r< \\ (.) >xm, '\1')
   end
 

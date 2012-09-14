@@ -12,6 +12,10 @@ class Fig::TokenizedString::Token
     return
   end
 
+  def to_expanded_string(&block)
+    block.call self
+  end
+
   def to_escaped_string()
     return raw_value
   end

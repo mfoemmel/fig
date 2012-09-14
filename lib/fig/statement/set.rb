@@ -9,7 +9,7 @@ class Fig::Statement::Set < Fig::Statement
 
   # Yields on error.
   def self.parse_name_value(combined, &error_block)
-    variable, raw_value = separate_name_and_value combined, &error_block
+    variable, raw_value = seperate_name_and_value combined, &error_block
 
     return [variable, tokenize_value(raw_value, &error_block)]
   end
@@ -20,11 +20,11 @@ class Fig::Statement::Set < Fig::Statement
     return [variable, tokenize_value(raw_value, &error_block)]
   end
 
-  def initialize(line_column, source_description, name, value)
+  def initialize(line_column, source_description, name, tokenized_value)
     super(line_column, source_description)
 
     @name = name
-    @value = value
+    @tokenized_value = tokenized_value
   end
 
   def statement_type()

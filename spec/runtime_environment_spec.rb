@@ -8,7 +8,7 @@ require 'fig/statement/configuration'
 require 'fig/statement/retrieve'
 require 'fig/statement/set'
 
-DEPENDED_UPON_PACKAGE_NAME = 'depended-upon'
+DEPENDED_UPON_PACKAGE_NAME = 'depended_upon'
 
 def standard_package_version(name)
   return "#{name}-version"
@@ -31,9 +31,7 @@ def new_example_package(environment, name, extra_statements, variable_value)
 
   # Kind of a cheat: we're creating a "set" statement that isn't in a "config"
   # block and then shoving it through the RuntimeEnvironment directly.
-  set_statement = Fig::Statement::Set.new(
-    nil, nil, "WHATEVER_#{name.upcase}", variable_value
-  )
+  set_statement = new_example_set_statement(name, variable_value)
   environment.apply_config_statement(package, set_statement, nil)
 
   return package
@@ -97,6 +95,19 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   )
 
   return environment
+end
+
+def new_example_set_statement(name, value)
+  parsed_name, parsed_value =
+    Fig::Statement::Set.parse_name_value("WHATEVER_#{name.upcase}=#{value}") do
+      |description|
+
+      raise StandardError.new(
+        %Q<Never should have gotten here.  Description: "#{description}">
+      )
+    end
+
+  return Fig::Statement::Set.new(nil, nil, parsed_name, parsed_value)
 end
 
 def substitute_command(command)

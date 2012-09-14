@@ -27,8 +27,10 @@ def create_local_repository()
 end
 
 def generate_package_statements
-  path_statement          = Fig::Statement::Path.new(nil, nil, 'FOO', 'bar')
-  configuration_statement =
+  parsed_name, parsed_value = Fig::Statement::Path.parse_name_value 'FOO=bar'
+  path_statement            =
+    Fig::Statement::Path.new(nil, nil, parsed_name, parsed_value)
+  configuration_statement   =
     Fig::Statement::Configuration.new(
       nil, nil, Fig::Package::DEFAULT_CONFIG, [path_statement]
     )

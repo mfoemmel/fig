@@ -69,7 +69,7 @@ class Fig::Unparser::V1
     @text << ' '
     @text << statement.name
     @text << '='
-    @text << statement.value
+    @text << statement.tokenized_value.to_escaped_string
     @text << "\n"
 
     return

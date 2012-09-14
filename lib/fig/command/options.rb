@@ -383,7 +383,7 @@ class Fig::Command::Options
         new_variable_statement('--append', name_value, Fig::Statement::Path)
     end
     @parser.add_argument_description(
-      %w<-p --append>, Fig::Statement::Path::ARGUMENT_DESCRIPTION
+      %w<-p --append>, %q<The value of this option must look like "NAME=VALUE".>
     )
 
     @parser.on(
@@ -396,7 +396,7 @@ class Fig::Command::Options
         new_variable_statement('--set', name_value, Fig::Statement::Set)
     end
     @parser.add_argument_description(
-      %w<-s --set>, Fig::Statement::Set::ARGUMENT_DESCRIPTION
+      %w<-s --set>, %q<The value of this option must look like "NAME=VALUE".>
     )
 
     @parser.on(

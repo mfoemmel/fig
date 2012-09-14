@@ -339,10 +339,11 @@ class Fig::RuntimeEnvironment
   def expand_variable_as_path_and_process_retrieves(
     statement, package, backtrace
   )
-    return statement.value unless package && package.name
+    tokenized_value = statement.tokenized_value
+    return tokenized_value.to_expanded_string { '@' } \
+      unless package && package.name
 
-    variable_value =
-      expand_at_signs_in_path(statement.value, package, backtrace)
+    variable_value = tokenized_value.to_expanded_string { package.directory }
 
     return variable_value if not @retrieves.member?(statement.name)
 
@@ -396,31 +397,6 @@ class Fig::RuntimeEnvironment
     end
 
     return File.join(retrieve_path, File.basename(variable_value))
-  end
-
-  def expand_at_signs_in_path(path, package, backtrace)
-    expanded_path =
-      replace_at_signs_with_package_references(path, package)
-    check_for_bad_escape(expanded_path, path, package, backtrace)
-
-    return collapse_backslashes_for_escaped_at_signs(expanded_path)
-  end
-
-  def replace_at_signs_with_package_references(argument, package)
-    return argument.gsub(
-      %r<
-        (?: ^ | \G)           # Zero-width anchor.
-        ( [^\\@]* )           # A bunch of not-slashes-or-at-signs
-        ( \\* )               # Any leading backslashes
-        \@                    # The package indicator
-      >x
-    ) do |match|
-      frontmatter, backslashes = $1, $2
-
-      replacement = backslashes.length % 2 == 1 ? '@' : package.directory
-
-      "#{frontmatter}#{backslashes}#{replacement}"
-    end
   end
 
   def expand_command_line_argument(argument, package)

@@ -1,4 +1,6 @@
+require 'fig/statement'
 require 'fig/string_tokenizer'
+require 'fig/tokenized_string/token'
 
 module Fig; end
 class Fig::Statement; end
@@ -49,7 +51,7 @@ module Fig::Statement::EnvironmentVariable
       end
 
       variable, raw_value = combined.split '=', 2
-      if variable !~ Fig::Statement::ENVIRONMENT_VARIABLE_REGEX
+      if variable !~ Fig::Statement::ENVIRONMENT_VARIABLE_NAME_REGEX
         yield \
           %Q<"#{variable}" does not consist solely of alphanumerics and underscores.>
         return
@@ -59,7 +61,7 @@ module Fig::Statement::EnvironmentVariable
     end
 
     def tokenize_value(value, &error_block)
-      tokenizer = Fig::StringTokenizer.new
+      tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER
       return tokenizer.tokenize value, &error_block
     end
 
@@ -79,5 +81,17 @@ module Fig::Statement::EnvironmentVariable
 
       return
     end
+
+    private
+
+    TOKENIZING_SUBEXPRESSION_MATCHER = [
+      {
+        :pattern => %r<\@>,
+        :action =>
+          lambda {
+            |subexpression| Fig::TokenizedString::Token.new :package_path, '@'
+          }
+      }
+    ]
   end
 end

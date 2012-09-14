@@ -15,8 +15,11 @@ describe 'Statement::Configuration' do
 
     command = Fig::Statement::Command.new(nil, nil, %w< something to run >)
     incorporate = Fig::Statement::Include.new(nil, nil, nil, nil)
-    path = Fig::Statement::Path.new(nil, nil, 'name', 'value')
-    set = Fig::Statement::Set.new(nil, nil, 'name', 'value')
+
+    parsed_name, parsed_value =
+      Fig::Statement::Path.parse_name_value 'name=value'
+    path = Fig::Statement::Path.new(nil, nil, parsed_name, parsed_value)
+    set = Fig::Statement::Set.new(nil, nil, parsed_name, parsed_value)
 
     config = Fig::Statement::Configuration.new(
       nil,

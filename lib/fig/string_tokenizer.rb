@@ -4,7 +4,7 @@ require 'fig/tokenized_string/plain_segment'
 module Fig; end
 
 class Fig::StringTokenizer
-  def initialize(subexpression_matchers = DEFAULT_SUBEXPRESSION_MATCHER)
+  def initialize(subexpression_matchers = [])
     @subexpression_matchers = subexpression_matchers
 
     return
@@ -32,10 +32,6 @@ class Fig::StringTokenizer
   end
 
   private
-
-  DEFAULT_SUBEXPRESSION_MATCHER = [
-    { :pattern => %r<\@>, :action => lambda {|character| character} }
-  ]
 
   def strip_quotes_and_process_escapes()
     if @string.length == 0
@@ -155,13 +151,15 @@ class Fig::StringTokenizer
           if replacement.is_a? String
             plain_string << replacement
           else
-            @segments << Fig::TokenizedString::PlainSegment.new(plain_string)
-            plain_string = nil
+            if ! plain_string.nil?
+              @segments << Fig::TokenizedString::PlainSegment.new(plain_string)
+              plain_string = nil
+            end
+            @segments << replacement
           end
           @string = remainder
-        elsif @string =~ %r< \A (["']) >xm # Fix single quotes in quoted strings
-          quote_name = $1 == %q<'> ? 'single' : 'double'
-          @error_block.call "contains an unescaped #{quote_name} quote."
+        elsif @string =~ %r< \A " >xm
+          @error_block.call 'contains an unescaped double quote.'
           return
         else
           plain_string ||= ''

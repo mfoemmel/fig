@@ -12,8 +12,10 @@ class Fig::TokenizedString
     return @single_quoted
   end
 
-  def to_expanded_string()
-    return ( @segments.collect {|segment| segment.to_expanded_string} ).join ''
+  def to_expanded_string(&block)
+    return (
+      @segments.collect { |segment| segment.to_expanded_string(&block) }
+    ).join ''
   end
 
   def to_escaped_string()
