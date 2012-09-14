@@ -35,19 +35,19 @@ describe Fig::Unparser::V1 do
             %Q[<indent>#{keyword} 'chocolate*pizza'\n]
         end
 
-        it %q<«chocolate\pizza» with globbing> do
+        it %q<«chocolate\\pizza» with globbing> do
           statement =
-            statement_class.new(nil, nil, 'chocolate\pizza', :glob_if_not_url)
+            statement_class.new(nil, nil, 'chocolate\\pizza', :glob_if_not_url)
 
           unparser.unparse([statement]).should ==
             %Q[<indent>#{keyword} "chocolate\\\\pizza"\n]
         end
 
-        it %q<«chocolate\pizza» without globbing> do
-          statement = statement_class.new(nil, nil, 'chocolate\pizza', false)
+        it %q<«chocolate\\pizza» without globbing> do
+          statement = statement_class.new(nil, nil, 'chocolate\\pizza', false)
 
           unparser.unparse([statement]).should ==
-            %Q[<indent>#{keyword} 'chocolate\\pizza'\n]
+            %Q[<indent>#{keyword} 'chocolate\\\\pizza'\n]
         end
       end
     end
