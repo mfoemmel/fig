@@ -19,6 +19,14 @@ def check_environment_variable_option(option_name)
     new_options(["--#{option_name}", 'variable=value'])
     # no exception
   end
+
+  it 'complains if there are unbalanced single quotes' do
+    expect_invalid_value_error(option_name, %q<'>)
+  end
+
+  it 'complains if there are unbalanced double quotes' do
+    expect_invalid_value_error(option_name, %q<">)
+  end
 end
 
 describe 'Command::Options' do
@@ -93,8 +101,8 @@ describe 'Command::Options' do
       # no exception
     end
 
-    it 'complains about a variable value containing a space character' do
-      expect_invalid_value_error('set', 'variable= stuff')
+    it 'allows a variable value containing a space character' do
+      new_options( ['--set', 'variable= stuff'] )
     end
   end
 
@@ -105,16 +113,18 @@ describe 'Command::Options' do
       expect_invalid_value_error('append', 'whatever=')
     end
 
-    %w[ ; : " < > | ].each do
+    %w[ ; : < > | ].each do
       |character|
 
-      it %Q<complains about a variable value containing "#{character}"> do
-        expect_invalid_value_error('append', "variable=#{character}")
+      it %Q<allows a variable value containing "#{character}"> do
+        new_options( ['--append', "variable=#{character}"] )
+        # no exception
       end
     end
 
-    it 'complains about a variable value containing a space character' do
-      expect_invalid_value_error('append', 'variable= stuff')
+    it 'allows a variable value containing a space character' do
+      new_options( ['--set', 'variable= stuff'] )
+      # no exception
     end
   end
 

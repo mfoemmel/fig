@@ -45,11 +45,6 @@ module Fig::Statement::EnvironmentVariable
 
   module ClassMethods
     def seperate_name_and_value(combined, &error_block)
-      if combined !~ /=/
-        yield 'does not contain an equals sign.'
-        return
-      end
-
       variable, raw_value = combined.split '=', 2
       if variable !~ Fig::Statement::ENVIRONMENT_VARIABLE_NAME_REGEX
         yield \
@@ -57,7 +52,7 @@ module Fig::Statement::EnvironmentVariable
         return
       end
 
-      return [variable, raw_value]
+      return [variable, raw_value || '']
     end
 
     def tokenize_value(value, &error_block)

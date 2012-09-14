@@ -584,7 +584,9 @@ class Fig::Command::Options
 
   def new_variable_statement(option, name_value, statement_class)
     variable, value = statement_class.parse_name_value(name_value) {
-      @parser.raise_invalid_argument(option, name_value)
+      |message|
+
+      @parser.raise_invalid_argument(option, name_value, message)
     }
 
     return statement_class.new(nil, "#{option} option", variable, value)
