@@ -115,7 +115,7 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def execute_config(
+  def execute_command_statement(
     base_package, base_config, descriptor, extra_arguments, &block
   )
     package, config_name =

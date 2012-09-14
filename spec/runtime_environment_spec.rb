@@ -288,7 +288,7 @@ describe 'RuntimeEnvironment' do
     it 'issues an error when attempting to execute a command from a config which contains no command' do
       environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       expect {
-        environment.execute_config(
+        environment.execute_command_statement(
           nil, nil, Fig::PackageDescriptor.new('one', nil, nil), nil
         )
       }.to raise_error(Fig::UserInputError)
@@ -297,7 +297,7 @@ describe 'RuntimeEnvironment' do
     it 'executes a command successfully' do
       environment = new_example_environment(FIG_FILE_GUARANTEED_TO_EXIST)
       received_command = nil
-      environment.execute_config(
+      environment.execute_command_statement(
         nil, nil, Fig::PackageDescriptor.new('has_command', nil, nil), []
       ) { |command| received_command = command }
       received_command.should == %w<echo foo>
