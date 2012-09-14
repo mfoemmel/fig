@@ -162,12 +162,24 @@ class Fig::ParserPackageBuildState
   def new_environment_variable_statement(
     statement_class, keyword_node, value_node
   )
-    name, value = statement_class.parse_name_value(value_node.text_value) {
-      description = statement_class.const_get(:ARGUMENT_DESCRIPTION)
-      raise Fig::PackageParseError.new(
-        %Q<Invalid #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
-      )
-    }
+    name = value = nil
+
+    if @grammar_version == 0
+      name, value = statement_class.parse_v0_name_value(value_node.text_value) {
+        |description|
+        raise_invalid_statement_parse_error(
+          keyword_node, value_node, description
+        )
+      }
+    else
+      name, value = statement_class.parse_name_value(value_node.text_value) {
+        |description|
+        raise_invalid_statement_parse_error(
+          keyword_node, value_node, description
+        )
+      }
+    end
+
     return statement_class.new(
       node_location(keyword_node), @source_description, name, value
     )
@@ -186,6 +198,12 @@ class Fig::ParserPackageBuildState
   )
     raise Fig::PackageParseError.new(
       %Q<Invalid #{value_name} for #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
+    )
+  end
+
+  def raise_invalid_statement_parse_error(keyword_node, value_node, description)
+    raise Fig::PackageParseError.new(
+      %Q<Invalid #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
     )
   end
 end

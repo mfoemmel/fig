@@ -15,8 +15,8 @@ class Fig::Statement::Set < Fig::Statement
   end
 
   def self.parse_v0_name_value(combined, &error_block)
-    variable, raw_value = separate_name_and_value combined, &error_block
-    base_v0_value_validation(variable, raw_value)
+    variable, raw_value = seperate_name_and_value combined, &error_block
+    base_v0_value_validation(variable, raw_value, &error_block)
     return [variable, tokenize_value(raw_value, &error_block)]
   end
 

@@ -243,23 +243,33 @@ describe 'Parser' do
     }.each do
       |display, character|
 
-      describe %Q<reject "#{display}" in a PATH component> do
-        %w< 0 1 >.each do
-          |version|
-
-          it %Q<in the v#{version} grammar> do
-            input = <<-"END_PACKAGE"
-              grammar v#{version}
-              config default
-                append PATH_VARIABLE=#{character}
-              end
-            END_PACKAGE
-
-            test_user_input_error(
-              input, /(?i:invalid append statement).*\bPATH_VARIABLE\b/
-            )
+      it %Q<reject "#{display}" in a PATH component in the v0 grammar> do
+        input = <<-"END_PACKAGE"
+          grammar v0
+          config default
+            append PATH_VARIABLE=#{character}
           end
+        END_PACKAGE
+
+        test_user_input_error(
+          input, /(?i:invalid append statement).*\bPATH_VARIABLE\b/
+        )
+      end
+
+      it %Q<accept "#{display}" in a PATH component in the v1 grammar> do
+        right_hand_side = nil
+        if character == '"' or character =~ /\s/
+          right_hand_side = %Q<'#{character}'>
+        else
+          right_hand_side = character
         end
+
+        test_no_parse_exception(<<-"END_PACKAGE")
+          grammar v1
+          config default
+            append PATH_VARIABLE=#{right_hand_side}
+          end
+        END_PACKAGE
       end
     end
   end

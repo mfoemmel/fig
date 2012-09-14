@@ -27,14 +27,14 @@ class Fig::Statement::Path < Fig::Statement
   end
 
   def self.parse_v0_name_value(combined, &error_block)
-    variable, raw_value = separate_name_and_value combined, &error_block
+    variable, raw_value = seperate_name_and_value combined, &error_block
 
     if raw_value.length < 1
       yield %Q<The value of path variable #{variable} is empty.>
       return
     end
 
-    base_v0_value_validation(variable, raw_value)
+    base_v0_value_validation(variable, raw_value, &error_block)
 
     if raw_value =~ /([;:<>|])/
       yield %Q<The value of path variable #{variable} (#{raw_value}) contains a "#{raw_value}" character.>
