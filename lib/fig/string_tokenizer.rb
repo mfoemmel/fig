@@ -81,7 +81,8 @@ class Fig::StringTokenizer
   end
 
   def strip_double_quotes_and_process_escapes()
-    return if ! check_and_strip_double_quotes
+    was_quoted = check_and_strip_double_quotes
+    return if was_quoted.nil?
 
     if @string == %q<\\'>
       @segments << Fig::TokenizedString::PlainSegment.new(%q<'>)
@@ -89,7 +90,7 @@ class Fig::StringTokenizer
       return
     end
 
-    generate_segments
+    generate_segments was_quoted
 
     return
   end
@@ -97,7 +98,7 @@ class Fig::StringTokenizer
   def check_and_strip_double_quotes()
     # We accept any unquoted single character at this point.  Later validation
     # will catch bad characters.
-    return true if @string =~ %r< \A \\ . \z >xm
+    return false if @string =~ %r< \A \\ . \z >xm
 
     if @string[0..0] == %q<">
       if @string.length == 1 || @string[-1..-1] != %q<">
@@ -111,16 +112,18 @@ class Fig::StringTokenizer
       end
 
       @string.sub!( %r< \A " (.*) " \z >xm, '\1' )
+
+      return true
     elsif @string =~ %r< (?: \A | [^\\] ) (?: \\{2} )* " \z >xm
       @error_block.call \
         %q<has unbalanced double quotes; it ends in a double quote when it didn't start with one.>
       return
     end
 
-    return true
+    return false
   end
 
-  def generate_segments()
+  def generate_segments(was_quoted)
     plain_string = nil
 
     while ! @string.empty?
@@ -158,9 +161,11 @@ class Fig::StringTokenizer
             @segments << replacement
           end
           @string = remainder
-        elsif @string =~ %r< \A (["']) >xm
-          quote_name = $1 == %q<'> ? 'single' : 'double'
-          @error_block.call "contains an unescaped #{quote_name} quote."
+        elsif @string =~ %r< \A " >xm
+          @error_block.call 'contains an unescaped double quote.'
+          return
+        elsif ! was_quoted && @string =~ %r< \A ' >xm
+          @error_block.call 'contains an unescaped single quote.'
           return
         else
           plain_string ||= ''
