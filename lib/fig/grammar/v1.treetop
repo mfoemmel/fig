@@ -165,7 +165,7 @@ module Fig
       end
 
       rule command
-        statement_start:'command' ws_or_comment+ command_line {
+        statement_start:'command' ws_or_comment+ command_line ws_or_comment+ 'end' {
           def to_config_statement(build_state)
             return build_state.new_command_statement(
               statement_start, command_line
@@ -175,7 +175,13 @@ module Fig
       end
 
       rule command_line
-        '"' value:[^"]* '"'
+        command_line_component (ws_or_comment+ command_line_component)*
+      end
+
+      rule command_line_component
+        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
+        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
+        [^\s#]+
       end
 
       rule descriptor_string
