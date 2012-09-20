@@ -8,10 +8,6 @@ module Fig; end
 class Fig::Statement::Path < Fig::Statement
   include Fig::Statement::EnvironmentVariable
 
-  # We block single-quotes right now in order to allow for using them for
-  # quoting later.
-  VALUE_REGEX          = %r< \A [^;:'"<>|\s]+ \z >x
-
   # Yields on error.
   def self.parse_name_value(combined, &error_block)
     variable, raw_value = seperate_name_and_value combined, &error_block
