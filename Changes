@@ -10,7 +10,7 @@ v0.1.80.beta.1
         command "echo 'foo   bar'"  # 3 space characters between "foo" and "bar"
       end
 
-    would be "foo bar"; it is now "foo   bar".  It is hoped that few things
+    would be "foo bar"; it is now "foo   bar".  It is expected that few things
     depended upon the old behavior.
 
   New features:
