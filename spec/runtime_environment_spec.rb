@@ -289,7 +289,7 @@ describe 'RuntimeEnvironment' do
       environment.execute_config(
         nil, nil, Fig::PackageDescriptor.new('has_command', nil, nil), []
       ) { |command| received_command = command }
-      received_command.should == %w<echo foo>
+      received_command.should == 'echo foo'
     end
   end
 end

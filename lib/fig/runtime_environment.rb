@@ -325,12 +325,13 @@ class Fig::RuntimeEnvironment
 
   def execute_command(command_statement, extra_arguments, package)
     @variables.with_environment do
-      argument =
+      command =
         expand_command_line_argument(
-          "#{command_statement.command} #{extra_arguments.join(' ')}", package
+          [command_statement.command, extra_arguments].flatten.join(' '),
+          package
         )
 
-      yield argument.split(' ')
+      yield command
     end
 
     return

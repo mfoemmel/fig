@@ -1,3 +1,24 @@
+v0.1.80.beta.1
+
+  Backwards incompatibilities:
+
+  - Command statements are no longer split on whitespace and then reassembled
+    with space characters.  Previously, the output of running a package
+    containing
+
+      config default
+        command "echo 'foo   bar'"  # 3 space characters between "foo" and "bar"
+      end
+
+    would be "foo bar"; it is now "foo   bar".  It is hoped that few things
+    depended upon the old behavior.
+
+  New features:
+
+  - Command statements are no longer split on whitespace and then reassembled
+    with space characters.  This should make what is run and what is in a
+    package definition file match most people's expectations.
+
 v0.1.79
 
   Backwards incompatibilities:
