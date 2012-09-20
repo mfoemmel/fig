@@ -452,9 +452,9 @@ class Fig::OperatingSystem
 
   def shell_exec(command)
     if Fig::OperatingSystem.windows?
-      plain_exec( [ ENV['ComSpec'], '/c', command.join(' ') ] )
+      plain_exec( [ ENV['ComSpec'], '/c', command ] )
     else
-      plain_exec( [ ENV['SHELL'],   '-c', command.join(' ') ] )
+      plain_exec( [ ENV['SHELL'],   '-c', command ] )
     end
   end
 
@@ -474,7 +474,7 @@ class Fig::OperatingSystem
     if command.size > 1
       plain_exec(command)
     else
-      shell_exec(command)
+      shell_exec(command[0])
     end
   end
 

@@ -37,6 +37,23 @@ describe 'Fig' do
             out.should == 'foo'
             err.should == ''
           end
+
+          if Fig::OperatingSystem.unix?
+            # Command statements used to be split on whitespace and put back
+            # together with space characters.
+            it %q<without manipulating whitespace> do
+              input = <<-END
+                config default
+                  command "echo 'foo   bar'"
+                end
+              END
+              fig(%w<--publish foo/1.2.3>, input)
+
+              out, err = fig(%w<foo/1.2.3>)
+              out.should == 'foo   bar'
+              err.should == ''
+            end
+          end
         end
 
         it %q<in the default config in an unpublished package when told to --run-command-statement> do
@@ -110,46 +127,49 @@ describe 'Fig' do
         end
       end
 
-      it %q<fails if command-line arguments specified but no command found> do
-        input = <<-END
-          config default
-          end
-        END
-        fig(%w<--publish foo/1.2.3>, input)
+      describe 'fails' do
+        it %q<if command-line arguments specified but no command statement found> do
+          input = <<-END
+            config default
+            end
+          END
+          fig(%w<--publish foo/1.2.3>, input)
 
-        out, err, exit_code =
-          fig(%w<foo/1.2.3 --command-extra-args yadda>, :no_raise_on_error => true)
-        exit_code.should_not == 0
-        out.should == ''
-        err.should =~ /does not contain a command/
-      end
+          out, err, exit_code =
+            fig(%w<foo/1.2.3 --command-extra-args yadda>, :no_raise_on_error => true)
+          exit_code.should_not == 0
+          out.should == ''
+          err.should =~ /does not contain a command/
+        end
 
-      it %q<prints a warning message when attempting to run multiple commands> do
-        input = <<-END
-          config default
-            command "echo foo"
-            command "echo bar"
-          end
-        END
-        out, err, exit_code =
-          fig(%w<--publish foo/1.2.3.4>, input, :no_raise_on_error => true)
-        err.should =~
-          %r<Found a second "command" statement within a "config" block \(line>
-      end
+        it %q<if it finds multiple command statements> do
+          input = <<-END
+            config default
+              command "echo foo"
+              command "echo bar"
+            end
+          END
+          out, err, exit_code =
+            fig(%w<--publish foo/1.2.3.4>, input, :no_raise_on_error => true)
+          err.should =~
+            %r<Found a second "command" statement within a "config" block \(line>
+          exit_code.should_not == 0
+        end
 
-      it %q<fails with an unpublished package and --run-command-statement wasn't specified> do
-        input = <<-END
-          config default
-            command "echo foo"
-          end
-        END
+        it %q<with an unpublished package and --run-command-statement wasn't specified> do
+          input = <<-END
+            config default
+              command "echo foo"
+            end
+          END
 
-        out, err, exit_code = fig([], input, :no_raise_on_error => true)
-        exit_code.should_not == 0
-        err.should =~ /\bnothing to do\b/i
-        err.should =~ /\byou have a command statement\b/i
-        err.should =~ /--run-command-statement\b/i
-        out.should == ''
+          out, err, exit_code = fig([], input, :no_raise_on_error => true)
+          exit_code.should_not == 0
+          err.should =~ /\bnothing to do\b/i
+          err.should =~ /\byou have a command statement\b/i
+          err.should =~ /--run-command-statement\b/i
+          out.should == ''
+        end
       end
     end
 
