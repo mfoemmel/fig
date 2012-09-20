@@ -45,7 +45,7 @@ module Fig
       end
 
       rule archive
-        statement_start:'archive' ws_or_comment+ location:asset_location {
+        statement_start:'archive' ws_or_comment+ location:quoted_or_bare_string {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
               Statement::Archive, statement_start, location
@@ -55,7 +55,7 @@ module Fig
       end
 
       rule resource
-        statement_start:'resource' ws_or_comment+ location:asset_location {
+        statement_start:'resource' ws_or_comment+ location:quoted_or_bare_string {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
               Statement::Resource, statement_start, location
@@ -64,24 +64,12 @@ module Fig
         }
       end
 
-      rule asset_location
-        '"' ( [^"\\] / '\\' . )* '"' /
-        "'" ( [^'\\] / '\\' . )* "'" /
-        [^\s#]+
-      end
-
       rule retrieve
-        statement_start:'retrieve' ws_or_comment+ var:environment_variable_name '->' path:retrieve_path {
+        statement_start:'retrieve' ws_or_comment+ var:environment_variable_name '->' path:quoted_or_bare_string {
           def to_package_statement(build_state)
             return build_state.new_retrieve_statement(statement_start, var, path)
           end
         }
-      end
-
-      rule retrieve_path
-        # TODO: this should match asset location rules, but handling of
-        # "[package]" substitution is going to be interesting.
-        [a-zA-Z0-9_/.\[\]-]+
       end
 
       rule config
@@ -132,10 +120,6 @@ module Fig
         }
       end
 
-      rule environment_variable_name
-        [a-zA-Z0-9_]+
-      end
-
       rule set
         statement_start:'set' ws_or_comment+ environment_variable_name_value {
           def to_config_statement(build_state)
@@ -156,14 +140,6 @@ module Fig
         }
       end
 
-      rule environment_variable_name_value
-        # Should result in somewhat reasonable handling by Treetop when
-        # encountering mis-quoted constructs.
-        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
-        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
-        [^\s#]+
-      end
-
       rule command
         statement_start:'command' ws_or_comment+ command_line ws_or_comment+ 'end' {
           def to_config_statement(build_state)
@@ -175,17 +151,35 @@ module Fig
       end
 
       rule command_line
-        command_line_component (ws_or_comment+ command_line_component)*
+        quoted_or_bare_string (ws_or_comment+ quoted_or_bare_string)*
       end
 
-      rule command_line_component
-        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
-        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
-        [^\s#]+
-      end
+      # Terminals
 
       rule descriptor_string
         [^\s#]+
+      end
+
+      rule environment_variable_name
+        [a-zA-Z0-9_]+
+      end
+
+      rule quoted_or_bare_string
+        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
+        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
+        ( [^\s#] / '\\#' )+
+      end
+
+      rule environment_variable_name_value
+        # This is like quoted_or_bare_string, but allows for the unquoted
+        # variable name followed by equals sign prior to the quotation marks
+        # coming in.
+        #
+        # Should result in somewhat reasonable handling by Treetop when
+        # encountering mis-quoted constructs.
+        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
+        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
+        ( [^\s#] / '\\#' )+
       end
     end
   end
