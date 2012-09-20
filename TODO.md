@@ -20,14 +20,15 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
     * In package definition
     * On command-line
 * Fix all "pending" tests.
-* Quoting of retrieves: post 1.0? Although... this really should work along with environment variable statements.  Need to figure out escaping of "[package]".
-* Commands need to be specified as individual components, i.e. if we get a command with four arguments, even if they contain whitespace, then the command should receive four arguments.
+* Quoting of retrieves.  Need to figure out escaping of "[package]".
+* Commands, both command statements and from the command-line.  Handling of quoting with `--command-extra-args` is going to be interesting.
 
 ### Bugs that may involve breakage post v1.0
 
 * Asset statements have lots of issues with URLs.
     * URLs that involve redirects.
     * URLs that aren't simple protocol://host/path/to/asset, e.g. if they've got query parameters.
+* Retrieves should turn unescaped "[" that aren't followed by "package]" into errors.
 
 # Tests
 
@@ -44,12 +45,15 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 # Documentation
 
 * Clarify "URLs" that are either file-or-URL or proper URLs.
-* Whack wiki asset descriptions, including quoting behaviors.
+* Document quoting, including the command-line option behaviors, e.g. `--resource 'foo'` vs `--resource "'foo'"` `--resource '"foo"'`.
+* Redo all the statement descriptions, including quoting behaviors.
+* Describe v0 vs v1 grammars.
 * ~~Document "looks like a URL".~~
 * Describe retrieve behavior in the presence of symlinks.
 * Document repository locking.
 * Document that command statements are only processed in published packages or with `--run-command-statement`.
-* Document quoting, including the command-line option behaviors, e.g. `--resource 'foo'` vs `--resource "'foo'"` `--resource '"foo"'`.
+* Document that exec(2) with a single command-line component goes through the shell, whereas multiple components do not.
+* The whole running commands vs. command-line expansion stuff needs reorganizing.
 
 # Paranoia / things to think about
 
