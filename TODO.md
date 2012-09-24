@@ -50,6 +50,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * Describe v0 vs v1 grammars.
 * ~~Document "looks like a URL".~~
 * Describe retrieve behavior in the presence of symlinks.
+* Document application configuration (the "Configuration" page in the wiki).
 * Document repository locking.
 * Document that command statements are only processed in published packages or with `--run-command-statement`.
 * Document that exec(2) with a single command-line component goes through the shell, whereas multiple components do not.
