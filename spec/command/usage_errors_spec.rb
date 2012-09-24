@@ -308,26 +308,31 @@ describe 'Fig' do
             |name|
 
             describe %Q<"#{name}"> do
-              it 'in a statement in a package definition file' do
-                input = <<-END
-                  #{asset_type} #{name}
-                  config default
-                    set FOO=BAR
-                  end
-                END
+              (0..1).each do
+                |grammar|
 
-                out, err, exit_code =
-                  fig(
-                    %w<--publish package/version>,
-                    input,
-                    :fork => false,
-                    :no_raise_on_error => true
-                  )
-                err.should =~ %r< \b #{name} \b >x
-                err.should =~ %r< \b keyword \b >ix
-                err.should =~ %r< \b #{asset_type} \b >ix
-                exit_code.should_not == 0
-                out.should == ''
+                it "in a statement in a v#{grammar} package definition file" do
+                  input = <<-END
+                    grammar v#{grammar}
+                    #{asset_type} #{name}
+                    config default
+                      set FOO=BAR
+                    end
+                  END
+
+                  out, err, exit_code =
+                    fig(
+                      %w<--publish package/version>,
+                      input,
+                      :fork => false,
+                      :no_raise_on_error => true
+                    )
+                  err.should =~ %r< \b #{name} \b >x
+                  err.should =~ %r< \b keyword \b >ix
+                  err.should =~ %r< \b #{asset_type} \b >ix
+                  exit_code.should_not == 0
+                  out.should == ''
+                end
               end
 
               it 'as a command-line option' do
