@@ -1,4 +1,5 @@
 require 'fig/package_descriptor_parse_error'
+require 'fig/statement'
 
 module Fig; end
 
@@ -116,7 +117,7 @@ class Fig::PackageDescriptor
   def validate_name(options)
     return if @name.nil?
 
-    return if ! Fig::Parser.strict_keyword? @name
+    return if ! Fig::Statement.strict_keyword? @name
 
     raise Fig::PackageDescriptorParseError.new(
       %Q<Invalid package name; "#{@name}" is a keyword#{standard_exception_suffix(options)}>,

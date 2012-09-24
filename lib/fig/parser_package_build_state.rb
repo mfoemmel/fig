@@ -107,7 +107,7 @@ class Fig::ParserPackageBuildState
   end
 
   def new_configuration_statement(keyword_node, name_node, statements)
-    if Fig::Parser.strict_keyword? name_node.text_value
+    if Fig::Statement.strict_keyword? name_node.text_value
       raise_invalid_value_parse_error(
         keyword_node, name_node, 'name', 'is a keyword.'
       )

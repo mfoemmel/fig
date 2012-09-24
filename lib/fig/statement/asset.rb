@@ -1,6 +1,3 @@
-require 'cgi'
-
-require 'fig/parser'
 require 'fig/statement'
 require 'fig/string_tokenizer'
 require 'fig/url'
@@ -89,7 +86,7 @@ module Fig::Statement::Asset
       return if ! tokenized_string
 
       # "config" is a reasonable asset name, so we let that pass.
-      if Fig::Parser.strict_keyword?(tokenized_string.to_expanded_string)
+      if Fig::Statement.strict_keyword?(tokenized_string.to_expanded_string)
         yield 'is a keyword.'
       end
 

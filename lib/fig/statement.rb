@@ -8,7 +8,18 @@ module Fig; end
 class Fig::Statement
   ENVIRONMENT_VARIABLE_NAME_REGEX = %r< \A \w+ \z >x
 
-  attr_reader :line, :column, :source_description
+  # Keywords that we really want to lock down.
+  def self.strict_keyword?(string)
+    # "config" is considered too useful for users, so we allow that where we
+    # restrict other keywords.
+    return false if string == 'config'
+
+    return keyword? string
+  end
+
+  def self.keyword?(string)
+    return KEYWORDS.include? string
+  end
 
   def self.position_description(line, column, source_description)
     if not line or not column
@@ -25,6 +36,8 @@ class Fig::Statement
 
     return description
   end
+
+  attr_reader :line, :column, :source_description
 
   # This mess of getting these as a single array necessary is due to
   # limitations of the "*" array splat operator in ruby v1.8.
@@ -85,6 +98,22 @@ class Fig::Statement
       @line, @column, @source_description
     )
   end
+
+  private
+
+  KEYWORDS = Set.new
+  KEYWORDS << 'add'
+  KEYWORDS << 'append'
+  KEYWORDS << 'archive'
+  KEYWORDS << 'command'
+  KEYWORDS << 'config'
+  KEYWORDS << 'end'
+  KEYWORDS << 'include'
+  KEYWORDS << 'override'
+  KEYWORDS << 'path'
+  KEYWORDS << 'resource'
+  KEYWORDS << 'retrieve'
+  KEYWORDS << 'set'
 end
 
 # vim: set fileencoding=utf8 :

@@ -17,19 +17,6 @@ module Fig; end
 # Parses .fig files (wrapping the Treetop-generated parser object) and deals
 # with a few restrictions on them.
 class Fig::Parser
-  # Keywords that we really want to lock down.
-  def self.strict_keyword?(string)
-    # "config" is considered too useful for users, so we allow that where we
-    # restrict other keywords.
-    return false if string == 'config'
-
-    return keyword? string
-  end
-
-  def self.keyword?(string)
-    return KEYWORDS.include? string
-  end
-
   def initialize(application_config, check_include_versions)
     @application_config     = application_config
     @check_include_versions = check_include_versions
@@ -48,21 +35,6 @@ class Fig::Parser
   end
 
   private
-
-  KEYWORDS = Set.new
-  KEYWORDS << 'add'
-  KEYWORDS << 'append'
-  KEYWORDS << 'archive'
-  KEYWORDS << 'command'
-  KEYWORDS << 'config'
-  KEYWORDS << 'end'
-  KEYWORDS << 'include'
-  KEYWORDS << 'override'
-  KEYWORDS << 'path'
-  KEYWORDS << 'resource'
-  KEYWORDS << 'retrieve'
-  KEYWORDS << 'set'
-
 
   def get_grammar_version(
     descriptor, directory, source_description, unparsed_text
