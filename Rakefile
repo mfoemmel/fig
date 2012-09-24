@@ -136,6 +136,18 @@ def main()
     end
   end
 
+  desc 'Create tags files for editors using ctags.'
+  task :ctags do
+    system 'ctags', * %w<
+      --exclude=lib/fig/grammar/*.rb
+      --extra=+f
+      --fields=+afikKlmnsSzt
+      --langmap=ruby:+.treetop
+      --recurse
+      --totals
+    >
+  end
+
   return
 end
 
