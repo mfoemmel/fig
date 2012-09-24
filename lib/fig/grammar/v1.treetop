@@ -143,7 +143,7 @@ module Fig
       rule command
         statement_start:'command' ws_or_comment+ command_line ws_or_comment+ 'end' {
           def to_config_statement(build_state)
-            return build_state.new_command_statement(
+            return build_state.new_v1_command_statement(
               statement_start, command_line
             )
           end
@@ -151,7 +151,13 @@ module Fig
       end
 
       rule command_line
-        quoted_or_bare_string (ws_or_comment+ quoted_or_bare_string)*
+        quoted_or_bare_string
+        ! { |sequence| sequence[-1].text_value == 'end' }
+        (
+          ws_or_comment+
+          quoted_or_bare_string
+          ! { |sequence| sequence[-1].text_value == 'end' }
+        )*
       end
 
       # Terminals

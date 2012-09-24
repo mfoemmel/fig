@@ -25,7 +25,7 @@ class Fig::Unparser::V0
     add_indent
 
     @text << %q<command ">
-    @text << statement.command
+    @text << statement.command.first
     @text << %Q<"\n>
 
     return

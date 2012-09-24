@@ -179,13 +179,14 @@ describe 'Parser' do
     %w< 0 1 >.each do
       |version|
 
+      command_terminator = version.to_i == 0 ? '' : ' end'
       describe %Q<in the v#{version} grammar> do
         it 'reject multiple commands in config file' do
           input = <<-"END_PACKAGE"
             grammar v#{version}
             config default
-              command "echo foo"
-              command "echo bar"
+              command "echo foo"#{command_terminator}
+              command "echo bar"#{command_terminator}
             end
           END_PACKAGE
 
@@ -199,10 +200,10 @@ describe 'Parser' do
           test_no_parse_exception(<<-"END_PACKAGE")
             grammar v#{version}
             config default
-              command "echo foo"
+              command "echo foo"#{command_terminator}
             end
             config another
-              command "echo bar"
+              command "echo bar"#{command_terminator}
             end
           END_PACKAGE
         end
@@ -211,11 +212,11 @@ describe 'Parser' do
           input = <<-"END_PACKAGE"
             grammar v#{version}
             config default
-              command "echo foo"
+              command "echo foo"#{command_terminator}
             end
             config another
-              command "echo bar"
-              command "echo baz"
+              command "echo bar"#{command_terminator}
+              command "echo baz"#{command_terminator}
             end
           END_PACKAGE
 

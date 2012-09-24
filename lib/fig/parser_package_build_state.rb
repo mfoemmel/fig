@@ -185,11 +185,20 @@ class Fig::ParserPackageBuildState
     )
   end
 
-  def new_command_statement(keyword_node, command_node)
+  def new_v0_command_statement(keyword_node, command_line_node)
     return Fig::Statement::Command.new(
       node_location(keyword_node),
       @source_description,
-      command_node.value.text_value
+      [command_line_node.value.text_value]
+    )
+  end
+
+  def new_v1_command_statement(keyword_node, command_line)
+    command_text = command_line.elements.map {|node| node.text_value}
+    return Fig::Statement::Command.new(
+      node_location(keyword_node),
+      @source_description,
+      command_text.select {|text| ! text.empty?}
     )
   end
 
