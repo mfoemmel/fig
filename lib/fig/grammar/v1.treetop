@@ -21,7 +21,11 @@ module Fig
       include Fig::Grammar::Version
 
       rule package
-        optional_ws_or_comment grammar_version:grammar_version? statements:(package_statement_with_ws*) optional_ws_or_comment {
+        optional_ws_or_comment
+        grammar_version:grammar_version?
+        statements:(package_statement_with_ws*)
+        optional_ws_or_comment
+        {
           def to_package(directory, build_state)
             return build_state.new_package_statement(
               directory, grammar_version, statements
@@ -45,7 +49,10 @@ module Fig
       end
 
       rule archive
-        statement_start:'archive' ws_or_comment+ location:quoted_or_bare_string {
+        statement_start:'archive'
+        ws_or_comment+
+        location:quoted_or_bare_string
+        {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
               Statement::Archive, statement_start, location
@@ -55,7 +62,10 @@ module Fig
       end
 
       rule resource
-        statement_start:'resource' ws_or_comment+ location:quoted_or_bare_string {
+        statement_start:'resource'
+        ws_or_comment+
+        location:quoted_or_bare_string
+        {
           def to_package_statement(build_state)
             return build_state.new_asset_statement(
               Statement::Resource, statement_start, location
@@ -65,25 +75,32 @@ module Fig
       end
 
       rule retrieve
-        statement_start:'retrieve' ws_or_comment+ var:environment_variable_name '->' path:quoted_or_bare_string {
+        statement_start:'retrieve'
+        ws_or_comment+
+        var:environment_variable_name '->' path:quoted_or_bare_string
+        {
           def to_package_statement(build_state)
-            return build_state.new_retrieve_statement(statement_start, var, path)
+            return build_state.new_retrieve_statement(
+              statement_start, var, path
+            )
           end
         }
       end
 
       rule config
-        statement_start:'config' ws_or_comment+ config_name ws_or_comment+ statements:config_statement_with_ws* 'end' {
+        statement_start:'config'
+        ws_or_comment+
+        config_name
+        ws_or_comment+
+        statements:config_statement_with_ws*
+        'end'
+        {
           def to_package_statement(build_state)
             return build_state.new_configuration_statement(
               statement_start, config_name, statements
             )
           end
         }
-      end
-
-      rule config_name
-        [a-zA-Z0-9_.-]+
       end
 
       # Shim between "config" and "config_statement" rules to allow the
@@ -131,7 +148,10 @@ module Fig
       end
 
       rule path
-        statement_start:('add' / 'append' / 'path') ws_or_comment+ environment_variable_name_value {
+        statement_start:('add' / 'append' / 'path')
+        ws_or_comment+
+        environment_variable_name_value
+        {
           def to_config_statement(build_state)
             return build_state.new_environment_variable_statement(
               Statement::Path, statement_start, environment_variable_name_value
@@ -141,7 +161,12 @@ module Fig
       end
 
       rule command
-        statement_start:'command' ws_or_comment+ command_line ws_or_comment+ 'end' {
+        statement_start:'command'
+        ws_or_comment+
+        command_line
+        ws_or_comment+
+        'end'
+        {
           def to_config_statement(build_state)
             return build_state.new_v1_command_statement(
               statement_start, command_line
@@ -166,14 +191,18 @@ module Fig
         [^\s#]+
       end
 
-      rule environment_variable_name
-        [a-zA-Z0-9_]+
+      rule config_name
+        [a-zA-Z0-9_.-]+
       end
 
       rule quoted_or_bare_string
         [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
         [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
         ( [^\s#] / '\\#' )+
+      end
+
+      rule environment_variable_name
+        [a-zA-Z0-9_]+
       end
 
       rule environment_variable_name_value
