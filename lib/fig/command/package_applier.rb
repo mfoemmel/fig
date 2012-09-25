@@ -5,6 +5,8 @@ module Fig; end
 class Fig::Command; end
 
 class Fig::Command::PackageApplier
+  attr_reader :synthetic_package_for_command_line
+
   def initialize(
     base_package,
     environment,
@@ -37,10 +39,10 @@ class Fig::Command::PackageApplier
 
   def apply_config_to_environment(ignore_base_config)
     begin
+      @synthetic_package_for_command_line =
+        synthesize_package_for_command_line_options(ignore_base_config)
       @environment.apply_config(
-        synthesize_package_for_command_line_options(ignore_base_config),
-        Fig::Package::DEFAULT_CONFIG,
-        nil
+        @synthetic_package_for_command_line, Fig::Package::DEFAULT_CONFIG, nil
       )
     rescue Fig::NoSuchPackageConfigError => exception
       make_no_such_package_exception_descriptive(exception)

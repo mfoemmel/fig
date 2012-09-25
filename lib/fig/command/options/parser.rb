@@ -47,13 +47,14 @@ Running under Fig:
 
 Querying:
 
+  fig {--list-local | --list-remote}                                      [...]
   fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
   fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
   fig --list-variables    [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
   fig --list-configs                                         [DESCRIPTOR] [...]
   fig --dump-package-definition-text                         [DESCRIPTOR] [...]
   fig --dump-package-definition-parsed                       [DESCRIPTOR] [...]
-  fig {--list-local | --list-remote}                                      [...]
+  fig --dump-package-definition-for-command-line             [DESCRIPTOR] [...]
 
 Publishing packages:
 

@@ -66,11 +66,12 @@ class Fig::Command
 
     context = ExecutionContext.new(
       @base_package,
+      @synthetic_package_for_command_line,
       base_config(),
       @environment,
       @repository,
       @operating_system,
-      @package_source_description
+      @package_source_description,
     )
 
     actions.each do
@@ -124,6 +125,7 @@ class Fig::Command
   ExecutionContext =
     Struct.new(
       :base_package,
+      :synthetic_package_for_command_line,
       :base_config,
       :environment,
       :repository,
@@ -279,6 +281,9 @@ class Fig::Command
     if apply_config
       applier.apply_config_to_environment(! apply_base_config)
     end
+
+    @synthetic_package_for_command_line =
+      applier.synthetic_package_for_command_line
 
     return
   end

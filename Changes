@@ -1,3 +1,11 @@
+v0.1.xxx
+
+  New features:
+
+  - New --dump-package-definition-for-command-line option useful for previewing
+    a package defined via the --set, --append, --archive, --resource,
+    --include, and --override options.
+
 v0.1.81
 
   Backwards incompatibilities:
