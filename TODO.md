@@ -15,7 +15,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * ~~Multiple places directly instantiate Unparser::V0.  Need to have a central place to determine unparse grammar.~~
 * Asset statements
     * ~~In package definition~~
-    * On command-line
+    * ~~On command-line~~
 * Environment variable statements
     * In package definition
     * On command-line

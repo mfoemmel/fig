@@ -134,13 +134,18 @@ class Fig::StringTokenizer
             @error_block.call 'ends in an incomplete escape.'
             return
           end
-          if subexpression_match(remainder) || remainder[0..0] == %q<">
+          if (
+            subexpression_match(remainder)              ||
+            remainder[0..0] == %q<">                    ||
+            ! was_quoted && remainder[0..0] == %q<'>
+          )
             plain_string ||= ''
             plain_string << slashes
             plain_string << remainder[0..0]
             @string = remainder[1..-1] || ''
           else
-            @error_block.call "contains a bad escape sequence (\\#{$1})."
+            @error_block.call \
+              "contains a bad escape sequence (\\#{remainder[0..0]})."
             return
           end
         else

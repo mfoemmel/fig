@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/command/option_error'
@@ -139,10 +141,28 @@ describe 'Command::Options' do
       %w[ " ' ].each do
         |character|
 
-        it %Q<complains about a value containing unescaped "#{character}"> do
+        it %Q<complains about a value containing unbalanced «#{character}»> do
           expect_invalid_value_error(asset_type, character)
         end
+
+        it "accepts a value quoted by «#{character}»" do
+          new_options(["--#{asset_type}", "#{character}x#{character}"])
+          # no exception
+        end
+
+        it "accepts a value with an escaped «#{character}»" do
+          new_options(["--#{asset_type}", "x\\#{character}x"])
+          # no exception
+        end
+      end
+
+      # Just to check that people don't think that "@" is a special character
+      # here.
+      it %Q<complains about a value containing escaped «@»> do
+        expect_invalid_value_error(asset_type, '\\@')
       end
     end
   end
 end
+
+# vim: set fileencoding=utf8 :

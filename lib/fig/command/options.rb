@@ -177,7 +177,7 @@ class Fig::Command::Options
     return
   end
 
-  def set_up_parser
+  def set_up_parser()
     set_up_package_configuration_source()
     set_up_remote_repository_access()
     set_up_queries()
