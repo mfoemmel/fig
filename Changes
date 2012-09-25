@@ -1,4 +1,4 @@
-v0.1.80.beta.1
+v0.1.81
 
   Backwards incompatibilities:
 
@@ -18,6 +18,10 @@ v0.1.80.beta.1
   - Command statements are no longer split on whitespace and then reassembled
     with space characters.  This should make what is run and what is in a
     package definition file match most people's expectations.
+
+v0.1.80.beta.1
+
+  - Test release
 
 v0.1.79
 
