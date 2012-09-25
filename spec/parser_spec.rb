@@ -356,3 +356,5 @@ describe 'Parser' do
     end
   end
 end
+
+# vim: set fileencoding=utf8 :
