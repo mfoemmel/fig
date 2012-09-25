@@ -71,7 +71,7 @@ class Fig::Command
       @environment,
       @repository,
       @operating_system,
-      @package_source_description,
+      @package_source_description
     )
 
     actions.each do
