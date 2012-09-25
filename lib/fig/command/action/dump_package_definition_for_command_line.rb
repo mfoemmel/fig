@@ -6,12 +6,12 @@ module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end
 
-class Fig::Command::Action::DumpPackageDefinitionParsed
+class Fig::Command::Action::DumpPackageDefinitionForCommandLine
   include Fig::Command::Action
   include Fig::Command::Action::Role::HasNoSubAction
 
   def options()
-    return %w<--dump-package-definition-parsed>
+    return %w<--dump-package-definition-for-command-line>
   end
 
   def descriptor_requirement()
@@ -34,30 +34,29 @@ class Fig::Command::Action::DumpPackageDefinitionParsed
     return false
   end
 
-  def execute()
-    if @execution_context.synthetic_package_for_command_line
-      # Purposely syntactically incorrect so that nothing attempts to round
-      # trip this.
-      puts "---- synthetic package for command-line ----\n"
-      dump_package @execution_context.synthetic_package_for_command_line
+  def configure(options)
+    @environment_statements       = options.environment_statements
+    @package_contents_statements  = options.package_contents_statements
 
-      puts "\n---- base package ----\n"
-    end
-
-    dump_package @execution_context.base_package
-
-    return EXIT_SUCCESS
+    return
   end
 
-  private
-
-  def dump_package(package)
+  def execute()
     text_assembler = Fig::PackageDefinitionTextAssembler.new :emit_as_input
-    text_assembler.add_output package.statements
+    text_assembler.add_output @package_contents_statements
+    text_assembler.add_output [
+      Fig::Statement::Configuration.new(
+        nil,
+        nil,
+        Fig::Package::DEFAULT_CONFIG,
+        @environment_statements
+      )
+    ]
+
 
     unparsed, explanations = text_assembler.assemble_package_definition
     print unparsed
 
-    return
+    return EXIT_SUCCESS
   end
 end

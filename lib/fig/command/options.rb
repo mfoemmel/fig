@@ -1,4 +1,5 @@
 require 'fig/command/action/clean'
+require 'fig/command/action/dump_package_definition_for_command_line'
 require 'fig/command/action/dump_package_definition_parsed'
 require 'fig/command/action/dump_package_definition_text'
 require 'fig/command/action/get'
@@ -238,6 +239,12 @@ class Fig::Command::Options
       'emit the parsed definition of the base package'
     ) do
       set_base_action(Fig::Command::Action::DumpPackageDefinitionParsed)
+    end
+    @parser.on(
+      '--dump-package-definition-for-command-line',
+      'emit the synthetic package for the other options (--set/--archive/etc.)'
+    ) do
+      set_base_action(Fig::Command::Action::DumpPackageDefinitionForCommandLine)
     end
 
     return
