@@ -15,12 +15,16 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * ~~Multiple places directly instantiate Unparser::V0.  Need to have a central place to determine unparse grammar.~~
 * Asset statements
     * ~~In package definition~~
-    * ~~On command-line~~
+    * On command-line
 * Environment variable statements
     * In package definition
     * On command-line
+* Command-line
+    * command
+    * `--command-extra-args`
+* Retrieve statements
+* Command statement
 * Fix all "pending" tests.
-* Quoting of retrieves.  Need to figure out escaping of "[package]".
 * Commands, both command statements and from the command-line.  Handling of quoting with `--command-extra-args` is going to be interesting.
 
 ### Bugs that may involve breakage post v1.0
