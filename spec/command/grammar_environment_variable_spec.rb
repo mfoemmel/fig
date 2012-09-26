@@ -46,25 +46,41 @@ describe 'Fig' do
       end
 
       {
-        %q<VARIABLE='foo\'bar'> => [
+        [%q<VARIABLE='foo\'bar'>, 1] => [
           %q<VARIABLE=foo\'bar>,
           %q<VARIABLE="foo'bar">,
           %q<VARIABLE='foo\'bar'>
         ],
-        %q<VARIABLE='foo"bar'> => [
+        [%q<VARIABLE='foo"bar'>,  1] => [
           %q<VARIABLE=foo\"bar>,
           %q<VARIABLE="foo\"bar">,
           %q<VARIABLE='foo"bar'>
         ],
-        %q<VARIABLE='foo#bar'> => [
+        [%q<VARIABLE='foo#bar'>,  1] => [
           %q<VARIABLE=foo#bar>,
           %q<VARIABLE="foo#bar">,
           %q<VARIABLE='foo#bar'>
+        ],
+        [%q<VARIABLE=foo@bar>,    0] => [
+          %q<VARIABLE=foo@bar>,
+          %q<VARIABLE="foo@bar">,
+        ],
+        [%q<VARIABLE=foo\@bar>,   0] => [
+          %q<VARIABLE=foo\@bar>,
+          %q<VARIABLE="foo\@bar">,
+          %q<VARIABLE='foo@bar'>
+        ],
+        [%q<VARIABLE=foo\\\\bar>,   0] => [
+          %q<VARIABLE=foo\\\\bar>,
+          %q<VARIABLE="foo\\\\bar">,
+          %q<VARIABLE='foo\\\\bar'>
         ]
       }.each do
-        |result, values|
+        |expected, inputs|
 
-        values.each do
+        result, version = *expected
+
+        inputs.each do
           |value|
 
           it "with «#{value}»" do
@@ -73,10 +89,34 @@ describe 'Fig' do
               :fork => false
             )
 
-            out, * = check_published_grammar_version(1)
+            out, * = check_published_grammar_version(version)
 
             out.should =~ / \b #{assignment_type} \s+ #{Regexp.quote result} /x
           end
+        end
+      end
+
+      {
+        'unquoted'        => %q<>,
+        'double quoted'   => %q<">
+      }.each do
+        |name, quote|
+
+        it "with #{name}, unescaped at sign, but forced to v1 grammar" do
+          fig(
+            [
+              %w< --publish foo/1.2.3>,
+              "--#{assignment_type}",
+              'VARIABLE_WITH_WHITESPACE_TO_FORCE=v1 grammar',
+              "--#{assignment_type}",
+              "VARIABLE=#{quote}foo@bar#{quote}"
+            ],
+            :fork => false
+          )
+
+          out, * = check_published_grammar_version(1)
+
+          out.should =~ / \b #{assignment_type} \s+ VARIABLE="foo@bar" /x
         end
       end
     end

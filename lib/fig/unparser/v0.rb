@@ -80,7 +80,14 @@ class Fig::Unparser::V0
     @text << ' '
     @text << statement.name
     @text << '='
-    @text << statement.tokenized_value.to_escaped_string
+
+    tokenized_value = statement.tokenized_value
+    if tokenized_value.single_quoted?
+      @text << tokenized_value.to_escaped_string.gsub('@', '\@')
+    else
+      @text << tokenized_value.to_escaped_string
+    end
+
     @text << "\n"
 
     return
