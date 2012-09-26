@@ -25,6 +25,6 @@ class Fig::TokenizedString::PlainSegment
   # Should not be invoked if original string was single quoted.
   def to_single_quoted_string()
     return \
-      @raw_value.gsub(%r< \\ (.) >xm, '\1').gsub(%r< \\ ([\\']) >xm, '\\\1')
+      @raw_value.gsub(%r< \\ (.) >xm, '\1').gsub(%r< ([\\']) >xm, '\\\\\1')
   end
 end

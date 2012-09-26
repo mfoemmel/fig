@@ -35,13 +35,48 @@ describe 'Fig' do
               %w< --publish foo/1.2.3>,
               "--#{assignment_type}",
               "VARIABLE=#{quote}foo bar#{quote}"
-          ],
+            ],
             :fork => false
           )
 
           out, * = check_published_grammar_version(1)
 
           out.should =~ / \b #{assignment_type} \s+ VARIABLE='foo[ ]bar' /x
+        end
+      end
+
+      {
+        %q<VARIABLE='foo\'bar'> => [
+          %q<VARIABLE=foo\'bar>,
+          %q<VARIABLE="foo'bar">,
+          %q<VARIABLE='foo\'bar'>
+        ],
+        %q<VARIABLE='foo"bar'> => [
+          %q<VARIABLE=foo\"bar>,
+          %q<VARIABLE="foo\"bar">,
+          %q<VARIABLE='foo"bar'>
+        ],
+        %q<VARIABLE='foo#bar'> => [
+          %q<VARIABLE=foo#bar>,
+          %q<VARIABLE="foo#bar">,
+          %q<VARIABLE='foo#bar'>
+        ]
+      }.each do
+        |result, values|
+
+        values.each do
+          |value|
+
+          it "with «#{value}»" do
+            fig(
+              [ %w< --publish foo/1.2.3>, "--#{assignment_type}", value ],
+              :fork => false
+            )
+
+            out, * = check_published_grammar_version(1)
+
+            out.should =~ / \b #{assignment_type} \s+ #{Regexp.quote result} /x
+          end
         end
       end
     end
