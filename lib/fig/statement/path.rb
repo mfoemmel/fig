@@ -58,4 +58,18 @@ class Fig::Statement::Path < Fig::Statement
   def unparse_as_version(unparser)
     return unparser.path(self)
   end
+
+  private
+
+  def minimum_grammar()
+    base_grammar_version = standard_minimum_grammar
+    return base_grammar_version if base_grammar_version[0] != 0
+
+    value = tokenized_value.to_escaped_string
+    if value =~ / ( [;:<>|] ) /x
+      return [1, %Q<contains a "#{$1}" character>]
+    end
+
+    return [0]
+  end
 end

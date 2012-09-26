@@ -121,12 +121,50 @@ describe 'Fig' do
       end
     end
 
+    ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS = %w< ; : < > | >
+
     describe 'for --set' do
       it_behaves_like 'environment variable option', 'set'
+
+      ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS.each do
+        |character|
+
+        it "for «#{character}»" do
+          fig(
+            [
+              %w<--publish foo/1.2.3 --set>,
+              "VARIABLE=#{character}"
+            ],
+            :fork => false
+          )
+
+          out, * = check_published_grammar_version(0)
+
+          out.should =~ / \b set \s+ VARIABLE=#{Regexp.quote character} /x
+        end
+      end
     end
 
     describe 'for --append' do
       it_behaves_like 'environment variable option', 'append'
+
+      ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS.each do
+        |character|
+
+        it "for «VARIABLE=#{character}»" do
+          fig(
+            [
+              %w<--publish foo/1.2.3 --append>,
+              "VARIABLE=#{character}"
+            ],
+            :fork => false
+          )
+
+          out, * = check_published_grammar_version(1)
+
+          out.should =~ / \b append \s+ VARIABLE='#{Regexp.quote character}' /x
+        end
+      end
     end
   end
 end

@@ -25,7 +25,7 @@ module Fig::Statement::EnvironmentVariable
 
   private
 
-  def minimum_grammar()
+  def standard_minimum_grammar()
     value = tokenized_value.to_escaped_string
     if value =~ /\s/
       return [1, 'contains whitespace']

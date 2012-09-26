@@ -38,4 +38,10 @@ class Fig::Statement::Set < Fig::Statement
   def unparse_as_version(unparser)
     return unparser.set(self)
   end
+
+  private
+
+  def minimum_grammar()
+    return standard_minimum_grammar
+  end
 end
