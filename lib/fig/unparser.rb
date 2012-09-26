@@ -1,3 +1,6 @@
+# Note: we very specifically do not require the files containing the
+# Unparser classes in order to avoid circular dependencies.
+
 module Fig; end
 
 module Fig::Unparser
@@ -7,8 +10,6 @@ module Fig::Unparser
   def self.class_for_statements(
     statements, emit_as_input_or_to_be_published_values
   )
-    # Note: we very specifically do not require the files containing the
-    # Unparser classes in order to avoid circular dependencies.
     statements = [statements].flatten
 
     versions =
@@ -44,8 +45,11 @@ module Fig::Unparser
   private
 
   def self.gather_versions(statements, emit_as_input_or_to_be_published_values)
+    all_statements = gather_all_statements statements
+
     if emit_as_input_or_to_be_published_values == :emit_as_input
-      return statements.map {
+      versions = []
+      return all_statements.map {
         |statement|
 
         self.expand_version_and_explanation(
@@ -54,13 +58,28 @@ module Fig::Unparser
       }
     end
 
-    return statements.map {
+    return all_statements.map {
       |statement|
 
       self.expand_version_and_explanation(
         statement, statement.minimum_grammar_for_publishing
       )
     }
+  end
+
+  def self.gather_all_statements(statements)
+    all_statements = []
+    statements.each do
+      |statement|
+
+      all_statements << statement
+
+      if statement.is_a? Fig::Statement::Configuration
+        all_statements << statement.statements
+      end
+    end
+
+    return all_statements.flatten
   end
 
   def self.expand_version_and_explanation(statement, version_info)
