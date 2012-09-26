@@ -61,15 +61,25 @@ class Fig::Unparser::V1
   end
 
   def environment_variable(statement, keyword)
-    # TODO: temporarily hack v0 grammar in here so we can test asset
-    # statements; proper implementation once asset statements are done.
     add_indent
 
     @text << keyword
     @text << ' '
     @text << statement.name
     @text << '='
-    @text << statement.tokenized_value.to_escaped_string
+
+    tokenized_value = statement.tokenized_value
+
+    if tokenized_value.can_be_single_quoted?
+      @text << %q<'>
+      @text << tokenized_value.to_single_quoted_string
+      @text << %q<'>
+    else
+      @text << %q<">
+      @text << tokenized_value.to_escaped_string
+      @text << %q<">
+    end
+
     @text << "\n"
 
     return

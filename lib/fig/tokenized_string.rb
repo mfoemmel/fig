@@ -12,6 +12,11 @@ class Fig::TokenizedString
     return @single_quoted
   end
 
+  def can_be_single_quoted?()
+    return true if single_quoted?
+    return @segments.all? {|segment| segment.type.nil?}
+  end
+
   def to_expanded_string(&block)
     return (
       @segments.collect { |segment| segment.to_expanded_string(&block) }
@@ -20,5 +25,13 @@ class Fig::TokenizedString
 
   def to_escaped_string()
     return ( @segments.collect {|segment| segment.to_escaped_string} ).join ''
+  end
+
+  def to_single_quoted_string()
+    return to_escaped_string if single_quoted?
+
+    return (
+      @segments.collect {|segment| segment.to_single_quoted_string}
+    ).join ''
   end
 end

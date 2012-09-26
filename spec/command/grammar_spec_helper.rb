@@ -13,7 +13,7 @@ def check_published_grammar_version(version)
 
   err.should == ''
 
-  return
+  return [out, err]
 end
 
 # vim: set fileencoding=utf8 :

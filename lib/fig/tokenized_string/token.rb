@@ -19,4 +19,8 @@ class Fig::TokenizedString::Token
   def to_escaped_string()
     return raw_value
   end
+
+  def to_single_quoted_string()
+    raise NotImplementedError.new 'Cannot single-quote a token.'
+  end
 end

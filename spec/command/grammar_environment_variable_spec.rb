@@ -8,17 +8,50 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    %w< set append >.each do
-      |option|
+    shared_examples_for 'environment variable option' do
+      |assignment_type|
 
-      it "for simple --#{option}" do
+      it 'with simple value' do
         fig(
-          [%w< --publish foo/1.2.3>, "--#{option}", 'VARIABLE=VALUE'],
+          [%w< --publish foo/1.2.3>, "--#{assignment_type}", 'VARIABLE=VALUE'],
           :fork => false
         )
 
-        check_published_grammar_version(0)
+        out, * = check_published_grammar_version(0)
+
+        out.should =~ / \b #{assignment_type} \s+ VARIABLE=VALUE \b /x
       end
+
+      {
+        'unquoted'        => %q<>,
+        'double quoted'   => %q<">,
+        'single quoted'   => %q<'>
+      }.each do
+        |name, quote|
+
+        it "with #{name} whitespace" do
+          fig(
+            [
+              %w< --publish foo/1.2.3>,
+              "--#{assignment_type}",
+              "VARIABLE=#{quote}foo bar#{quote}"
+          ],
+            :fork => false
+          )
+
+          out, * = check_published_grammar_version(1)
+
+          out.should =~ / \b #{assignment_type} \s+ VARIABLE='foo[ ]bar' /x
+        end
+      end
+    end
+
+    describe 'for --set' do
+      it_behaves_like 'environment variable option', 'set'
+    end
+
+    describe 'for --append' do
+      it_behaves_like 'environment variable option', 'append'
     end
   end
 end
