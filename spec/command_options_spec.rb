@@ -26,8 +26,28 @@ def check_environment_variable_option(option_name)
     expect_invalid_value_error(option_name, %q<'>)
   end
 
+  it 'allows a variable value containing an escaped single quote' do
+    new_options( ["--#{option_name}", %q<variable=\'>] )
+    # no exception
+  end
+
   it 'complains if there are unbalanced double quotes' do
     expect_invalid_value_error(option_name, %q<">)
+  end
+
+  it 'allows a variable value containing an escaped double quote' do
+    new_options( ["--#{option_name}", %q<variable=\">] )
+    # no exception
+  end
+
+  it 'allows a variable value containing a space character' do
+    new_options( ["--#{option_name}", 'variable= stuff'] )
+    # no exception
+  end
+
+  it 'allows a variable value containing an octothorpe' do
+    new_options( ["--#{option_name}", 'variable=red#green#blue'] )
+    # no exception
   end
 end
 
@@ -102,10 +122,6 @@ describe 'Command::Options' do
       new_options(%w< --set whatever= >)
       # no exception
     end
-
-    it 'allows a variable value containing a space character' do
-      new_options( ['--set', 'variable= stuff'] )
-    end
   end
 
   describe '--append' do
@@ -118,15 +134,11 @@ describe 'Command::Options' do
     %w[ ; : < > | ].each do
       |character|
 
+      # Need to check this because they are not allowed in the v0 grammar.
       it %Q<allows a variable value containing "#{character}"> do
         new_options( ['--append', "variable=#{character}"] )
         # no exception
       end
-    end
-
-    it 'allows a variable value containing a space character' do
-      new_options( ['--set', 'variable= stuff'] )
-      # no exception
     end
   end
 
