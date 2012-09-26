@@ -401,6 +401,7 @@ class Fig::RuntimeEnvironment
   end
 
   def expand_command_line_argument(argument, package)
+    # TODO: use TokenizedString#to_expanded_string().
     package_substituted = expand_package_references(argument, package)
     check_for_bad_escape(package_substituted, argument, package, nil)
 
@@ -456,6 +457,9 @@ class Fig::RuntimeEnvironment
 
   # The value is expected to have had any @ substitution already done, but
   # collapsing of escapes not done yet.
+  #
+  # TODO: this method should not exist after commands use
+  # TokenizedString#to_expanded_string()
   def check_for_bad_escape(substituted, original, package, backtrace)
     if substituted =~ %r<
       (?: ^ | [^\\])  # Start of line or non backslash
