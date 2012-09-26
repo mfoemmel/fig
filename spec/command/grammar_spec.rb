@@ -87,19 +87,6 @@ describe 'Fig' do
         check_published_grammar_version(0)
       end
     end
-
-    %w< set append >.each do
-      |option|
-
-      it "for simple --#{option}" do
-        fig(
-          [%w< --publish foo/1.2.3>, "--#{option}", 'VARIABLE=VALUE'],
-          :fork => false
-        )
-
-        check_published_grammar_version(0)
-      end
-    end
   end
 end
 
