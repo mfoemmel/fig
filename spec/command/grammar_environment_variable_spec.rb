@@ -43,10 +43,7 @@ describe 'Fig' do
       |assignment_type|
 
       it 'with simple value' do
-        fig(
-          [%w<--publish foo/1.2.3>, "--#{assignment_type}", 'VARIABLE=VALUE'],
-          :fork => false
-        )
+        fig [%w<--publish foo/1.2.3>, "--#{assignment_type}", 'VARIABLE=VALUE']
 
         out, * = check_published_grammar_version(0)
 
@@ -61,14 +58,11 @@ describe 'Fig' do
         |name, quote|
 
         it "with #{name} whitespace" do
-          fig(
-            [
+          fig [
               %w<--publish foo/1.2.3>,
               "--#{assignment_type}",
               "VARIABLE=#{quote}foo bar#{quote}"
-            ],
-            :fork => false
-          )
+          ]
 
           out, * = check_published_grammar_version(1)
 
@@ -85,10 +79,7 @@ describe 'Fig' do
           |value|
 
           it "with «#{value}»" do
-            fig(
-              [ %w<--publish foo/1.2.3>, "--#{assignment_type}", value ],
-              :fork => false
-            )
+            fig [ %w<--publish foo/1.2.3>, "--#{assignment_type}", value ]
 
             out, * = check_published_grammar_version(version)
 
@@ -98,14 +89,11 @@ describe 'Fig' do
       end
 
       it "with «VARIABLE=foo#bar»" do
-        fig(
-          [
+        fig [
             %w<--publish foo/1.2.3>,
             "--#{assignment_type}",
             %q<VARIABLE=foo#bar>
-          ],
-          :fork => false
-        )
+        ]
 
         out, * = check_published_grammar_version(1)
 
@@ -119,16 +107,13 @@ describe 'Fig' do
         |name, quote|
 
         it "with #{name}, unescaped at sign, but forced to v1 grammar" do
-          fig(
-            [
+          fig [
               %w<--publish foo/1.2.3>,
               "--#{assignment_type}",
               'VARIABLE_WITH_WHITESPACE_TO_FORCE=v1 grammar',
               "--#{assignment_type}",
               "VARIABLE=#{quote}foo@bar#{quote}"
-            ],
-            :fork => false
-          )
+          ]
 
           out, * = check_published_grammar_version(1)
 
@@ -146,13 +131,7 @@ describe 'Fig' do
         |character|
 
         it "for «#{character}»" do
-          fig(
-            [
-              %w<--publish foo/1.2.3 --set>,
-              "VARIABLE=#{character}"
-            ],
-            :fork => false
-          )
+          fig [ %w<--publish foo/1.2.3 --set>, "VARIABLE=#{character}" ]
 
           out, * = check_published_grammar_version(0)
 
@@ -168,13 +147,7 @@ describe 'Fig' do
         |character|
 
         it "for «VARIABLE=#{character}»" do
-          fig(
-            [
-              %w<--publish foo/1.2.3 --append>,
-              "VARIABLE=#{character}"
-            ],
-            :fork => false
-          )
+          fig [ %w<--publish foo/1.2.3 --append>, "VARIABLE=#{character}" ]
 
           out, * = check_published_grammar_version(1)
 
@@ -194,7 +167,7 @@ describe 'Fig' do
           end
         END_INPUT
 
-        fig %w<--publish foo/1.2.3>, input, :fork => false
+        fig %w<--publish foo/1.2.3>, input
 
         out, * = check_published_grammar_version(0)
 
@@ -215,7 +188,7 @@ describe 'Fig' do
             end
           END_INPUT
 
-          fig %w<--publish foo/1.2.3>, input, :fork => false
+          fig %w<--publish foo/1.2.3>, input
 
           out, * = check_published_grammar_version(1)
 
@@ -239,7 +212,7 @@ describe 'Fig' do
               end
             END_INPUT
 
-            fig %w<--publish foo/1.2.3>, input, :fork => false
+            fig %w<--publish foo/1.2.3>, input
 
             out, * = check_published_grammar_version(version)
 
@@ -263,7 +236,7 @@ describe 'Fig' do
             end
           END_INPUT
 
-          fig %w<--publish foo/1.2.3>, input, :fork => false
+          fig %w<--publish foo/1.2.3>, input
 
           out, * = check_published_grammar_version(0)
 
@@ -286,7 +259,7 @@ describe 'Fig' do
             end
           END_INPUT
 
-          fig %w<--publish foo/1.2.3>, input, :fork => false
+          fig %w<--publish foo/1.2.3>, input
 
           out, * = check_published_grammar_version(1)
 
