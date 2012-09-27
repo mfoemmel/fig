@@ -17,8 +17,8 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
     * ~~In package definition~~
     * ~~On command-line~~
 * Environment variable statements
-    * In package definition
-    * On command-line
+    * ~~In package definition~~
+    * ~~On command-line~~
 * Command-line
     * command
     * `--command-extra-args`
