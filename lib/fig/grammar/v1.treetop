@@ -198,7 +198,7 @@ module Fig
       rule quoted_or_bare_string
         [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
         [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
-        ( [^\s#] / '\\#' )+
+        [^\s#]+
       end
 
       rule environment_variable_name
@@ -212,9 +212,9 @@ module Fig
         #
         # Should result in somewhat reasonable handling by Treetop when
         # encountering mis-quoted constructs.
-        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
-        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
-        ( [^\s#] / '\\#' )+
+        [^\s#\\'"]* '"' ( [^"\\] / '\\' . )* '"' /
+        [^\s#\\'"]* "'" ( [^'\\] / '\\' . )* "'" /
+        [^\s#]+
       end
     end
   end
