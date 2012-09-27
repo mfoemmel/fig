@@ -1,4 +1,5 @@
 require 'cgi'
+require 'uri'
 
 module Fig; end
 
@@ -14,5 +15,10 @@ module Fig::URL
     encoded = components.map { |component| CGI.escape component }
 
     return [url, encoded].flatten.join('/')
+  end
+
+  # URI.parse() doesn't like space characters, unlike most of the world.
+  def self.parse(url)
+    return URI.parse(url.gsub ' ', '+')
   end
 end

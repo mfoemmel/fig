@@ -15,19 +15,19 @@ describe 'Fig' do
 
     describe 'retrieves resources' do
       before(:each) do
-        write_file("#{lib_directory}/a-library", 'some library')
+        write_file("#{lib_directory}/a library", 'some library')
 
-        another_library = "#{lib_directory}/another-library"
+        another_library = "#{lib_directory}/another library"
         url = 'file://' + File.expand_path(another_library)
         write_file(another_library, 'some other library')
 
         fig(
           [
             '--publish',  'prerequisite/1.2.3',
-            '--resource', 'lib/a-library',
+            '--resource', 'lib/a library',
             '--resource', url,
-            '--append',   'FOOPATH=@/lib/a-library',
-            '--append',   'FOOPATH=@/another-library'
+            '--append',   'FOOPATH=@/lib/a library',
+            '--append',   'FOOPATH=@/another library'
           ].flatten,
           :current_directory => publish_from_directory
         )
@@ -42,9 +42,9 @@ describe 'Fig' do
           end
         END
         out, err = fig(%w<--update-if-missing>, input)
-        File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+        File.read("#{retrieve_directory}/prerequisite/a library").should ==
           'some library'
-        File.read("#{retrieve_directory}/prerequisite/another-library").should ==
+        File.read("#{retrieve_directory}/prerequisite/another library").should ==
           'some other library'
 
         # Check for warning about the leading slash in FOOPATH looking like an
@@ -63,9 +63,9 @@ describe 'Fig' do
           end
         END
         fig(%w<--update-if-missing>, input)
-        File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+        File.read("#{retrieve_directory}/prerequisite/a library").should ==
           'some library'
-        File.read("#{retrieve_directory}/prerequisite/another-library").should ==
+        File.read("#{retrieve_directory}/prerequisite/another library").should ==
           'some other library'
       end
     end
@@ -98,16 +98,16 @@ describe 'Fig' do
     end
 
     it 'reports error for missing file in a package' do
-      write_file("#{lib_directory}/a-library", 'some library')
+      write_file("#{lib_directory}/a library", 'some library')
       fig(
-        %w<
-          --publish  prerequisite/1.2.3
-          --resource lib/a-library
-          --append   FOOPATH=@/lib/a-library
-        >,
+        [
+          %w< --publish  prerequisite/1.2.3 >,
+          '--resource', 'lib/a library',
+          '--append',   'FOOPATH=@/lib/a library',
+        ],
         :current_directory => publish_from_directory
       )
-      FileUtils.rm("#{FIG_HOME}/repos/prerequisite/1.2.3/lib/a-library")
+      FileUtils.rm("#{FIG_HOME}/repos/prerequisite/1.2.3/lib/a library")
 
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
@@ -212,14 +212,15 @@ describe 'Fig' do
     end
 
     it 'packages multiple resources' do
-      write_file("#{lib_directory}/a-library", 'some library')
-      write_file("#{lib_directory}/a-library2", 'some other library')
+      write_file("#{lib_directory}/a library", 'some library')
+      write_file("#{lib_directory}/a library2", 'some other library')
       input = <<-END
-        resource lib/a-library
-        resource lib/a-library2
+        grammar v1
+        resource 'lib/a library'
+        resource 'lib/a library2'
         config default
-          append FOOPATH=@/lib/a-library
-          append FOOPATH=@/lib/a-library2
+          append FOOPATH="@/lib/a library"
+          append FOOPATH="@/lib/a library2"
         end
       END
       fig(
@@ -234,9 +235,9 @@ describe 'Fig' do
         end
       END
       fig(%w<-m>, input)
-      File.read("#{retrieve_directory}/prerequisite/a-library").should ==
+      File.read("#{retrieve_directory}/prerequisite/a library").should ==
         'some library'
-      File.read("#{retrieve_directory}/prerequisite/a-library2").should ==
+      File.read("#{retrieve_directory}/prerequisite/a library2").should ==
         'some other library'
     end
 

@@ -10,7 +10,6 @@ require 'net/sftp'
 require 'net/netrc'
 require 'rbconfig'
 require 'tempfile'
-require 'uri'
 
 require 'highline/import'
 
@@ -20,6 +19,7 @@ require 'fig/environment_variables/case_sensitive'
 require 'fig/file_not_found_error'
 require 'fig/logging'
 require 'fig/network_error'
+require 'fig/url'
 
 module Fig; end
 
@@ -119,7 +119,7 @@ class Fig::OperatingSystem
 
   def download_list(url)
     begin
-      uri = URI.parse(url)
+      uri = Fig::URL.parse(url)
     rescue
       Fig::Logging.fatal %Q<Unable to parse url: "#{url}">
       raise Fig::NetworkError.new
@@ -200,7 +200,7 @@ class Fig::OperatingSystem
   def path_up_to_date?(url, path)
     return false if ! File.exist? path
 
-    uri = URI.parse(url)
+    uri = Fig::URL.parse(url)
     case uri.scheme
     when 'ftp'
       begin
@@ -242,7 +242,7 @@ class Fig::OperatingSystem
   # exists and is already up-to-date.
   def download(url, path)
     FileUtils.mkdir_p(File.dirname(path))
-    uri = URI.parse(url)
+    uri = Fig::URL.parse(url)
     case uri.scheme
     when 'ftp'
       begin
@@ -303,7 +303,7 @@ class Fig::OperatingSystem
   def download_resource(url, download_directory)
     FileUtils.mkdir_p(download_directory)
 
-    basename = CGI.unescape URI.parse(url).path.split('/').last
+    basename = CGI.unescape Fig::URL.parse(url).path.split('/').last
     path     = File.join(download_directory, basename)
 
     download(url, path)
@@ -333,14 +333,14 @@ class Fig::OperatingSystem
 
   def upload(local_file, remote_file)
     Fig::Logging.debug "Uploading #{local_file} to #{remote_file}."
-    uri = URI.parse(remote_file)
+    uri = Fig::URL.parse(remote_file)
     case uri.scheme
     when 'ssh'
       ssh_upload(uri.user, uri.host, local_file, remote_file)
     when 'ftp'
       #      fail unless system "curl -T #{local_file} --create-dirs --ftp-create-dirs #{remote_file}"
       require 'net/ftp'
-      ftp_uri = URI.parse(ENV['FIG_REMOTE_URL'])
+      ftp_uri = Fig::URL.parse(ENV['FIG_REMOTE_URL'])
       ftp_root_path = ftp_uri.path
       ftp_root_dirs = ftp_uri.path.split('/')
       remote_publish_path = uri.path[0, uri.path.rindex('/')]
@@ -520,7 +520,7 @@ class Fig::OperatingSystem
   end
 
   def ssh_upload(user, host, local_file, remote_file)
-    uri = URI.parse(remote_file)
+    uri = Fig::URL.parse(remote_file)
     dir = uri.path[0, uri.path.rindex('/')]
     Net::SSH.start(host, user) do |ssh|
       ssh.exec!("mkdir -p #{dir}")

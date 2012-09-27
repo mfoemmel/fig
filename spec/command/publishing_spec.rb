@@ -57,13 +57,14 @@ describe 'Fig' do
               [
                 %w<--publish foo/1.2.3>,
                 "--#{asset_type}",
-                %w<does-not-exist --set VARIABLE=VALUE>
+                'does not exist',
+                %w<--set VARIABLE=VALUE>
               ].flatten,
               :no_raise_on_error => true
             )
 
           err.should =~ /\bcould not find file\b/i
-          err.should =~ /\bdoes-not-exist\b/
+          err.should =~ /\bdoes not exist\b/
           exit_code.should_not == 0
         end
       end
