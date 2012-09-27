@@ -178,6 +178,8 @@ module Fig::Unparser
   end
 
   def path(statement)
+    # I'd really like to change this to "add", but because the command-line
+    # option is "--append", I'm not going to.
     environment_variable(statement, 'append')
 
     return
