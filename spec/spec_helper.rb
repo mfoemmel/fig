@@ -136,11 +136,11 @@ def fig(command_line, first_extra = nil, rest_extra = nil)
       standard_options << '--no-figrc'
     end
 
-    # Grrr.  Windows file locking is so busted.  Other than the specific
-    # locking tests, we turn off locking.
-    if \
-        Fig::OperatingSystem.windows? &&
-        ! command_line.include?('--update-lock-response')
+    if command_line.include?('--update-lock-response')
+      if ! options.fetch(:fork, true)
+        raise 'Cannot specify both ":fork => false" and --update-lock-response.'
+      end
+    elsif ! options.fetch(:fork, true) || Fig::OperatingSystem.windows?
       standard_options.concat %w< --update-lock-response ignore >
     end
 
