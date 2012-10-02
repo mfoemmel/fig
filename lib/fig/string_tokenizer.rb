@@ -59,10 +59,10 @@ class Fig::StringTokenizer
     return false if @string =~ %r< \A (?: \\{2} )* \\ ' \z >x # «\'» is legal
 
     if (
-      @string.length  == 1                           ||
-      @string[0..0]   != %q<'>                       ||
-      @string[-1..-1] != %q<'>                       ||
-      @string =~ %r< [^\\] (?: \\{2} )* ' .* ' \z >x
+      @string.length  == 1                                      ||
+      @string[0..0]   != %q<'>                                  ||
+      @string[-1..-1] != %q<'>                                  ||
+      @string =~ %r< [^\\] (?: \\{2} )* (?: \\ | ' .* ) ' \z >x
     )
       @error_block.call 'has unbalanced single quotes.'
       return
