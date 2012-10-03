@@ -61,6 +61,7 @@ module Fig::Statement::EnvironmentVariable
       return tokenizer.tokenize value, &error_block
     end
 
+    # TODO: Test coverage doesn't appear to be running this.
     def base_v0_value_validation(variable, raw_value)
       if raw_value =~ /\s/
         yield %Q<The value of #{variable} (#{raw_value}) contains whitespace.>
