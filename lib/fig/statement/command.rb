@@ -7,6 +7,13 @@ module Fig; end
 class Fig::Statement::Command < Fig::Statement
   attr_reader :command
 
+
+  def self.validate_and_process_escapes_in_argument(
+    command_line_argument, &block
+  )
+    return Fig::StringTokenizer.new.tokenize command_line_argument, &block
+  end
+
   def initialize(line_column, source_description, command)
     super(line_column, source_description)
 
@@ -21,7 +28,33 @@ class Fig::Statement::Command < Fig::Statement
     return unparser.command(self)
   end
 
+  def minimum_grammar_for_emitting_input()
+    return minimum_grammar()
+  end
+
   def minimum_grammar_for_publishing()
+    return minimum_grammar()
+  end
+
+  private
+
+  def minimum_grammar()
+    if command.size > 1
+      return [1, 'contains multiple components']
+    end
+
+    argument = command.first.to_escaped_string
+
+    # Can't have octothorpes anywhere in v0 due to comment stripping via
+    # regex.
+    if argument =~ /#/
+      return [1, 'contains a comment ("#") character']
+    end
+
+    if argument =~ /"/
+      return [1, %Q<contains a double quote>]
+    end
+
     return [0]
   end
 end

@@ -186,21 +186,30 @@ class Fig::ParserPackageBuildState
   end
 
   def new_v0_command_statement(keyword_node, command_line_node)
+    tokenized_command =
+      Fig::Statement::Command.validate_and_process_escapes_in_argument(
+        command_line_node.value.text_value
+      ) {
+        |description|
+        raise_invalid_statement_parse_error(
+          keyword_node, command_line_node, description
+        )
+      }
+
     return Fig::Statement::Command.new(
-      node_location(keyword_node),
-      @source_description,
-      [command_line_node.value.text_value]
+      node_location(keyword_node), @source_description, [tokenized_command]
     )
   end
 
   def new_v1_command_statement(keyword_node, command_line)
-    command_text = command_line.elements.map {|node| node.text_value}
     return Fig::Statement::Command.new(
       node_location(keyword_node),
       @source_description,
-      command_text.select {|text| ! text.empty?}
+      tokenize_v1_command_line(keyword_node, command_line)
     )
   end
+
+  private
 
   def raise_invalid_value_parse_error(
     keyword_node, value_node, value_name, description
@@ -214,5 +223,28 @@ class Fig::ParserPackageBuildState
     raise Fig::PackageParseError.new(
       %Q<Invalid #{keyword_node.text_value} statement: "#{value_node.text_value}" #{description}#{node_location_description(value_node)}>
     )
+  end
+
+  def tokenize_v1_command_line(keyword_node, command_line)
+    tokenized_command_line = []
+
+    command_line.elements.each do
+      |argument_node|
+
+      unparsed = argument_node.text_value
+      next if unparsed.empty?
+
+      tokenized_command_line <<
+        Fig::Statement::Command.validate_and_process_escapes_in_argument(
+          unparsed
+        ) {
+          |description|
+          raise_invalid_statement_parse_error(
+            keyword_node, argument_node, description
+          )
+        }
+    end
+
+    return tokenized_command_line
   end
 end

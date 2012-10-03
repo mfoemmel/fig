@@ -23,9 +23,16 @@ class Fig::Unparser::V1
   def command(statement)
     add_indent
 
-    @text << %q<command ">
-    @text << statement.command
-    @text << %Q<"\n>
+    @text << %q<command >
+
+    statement.command.each do
+      |argument|
+
+      emit_tokenized_value argument
+      @text << ' '
+    end
+
+    @text << %Q<end\n>
 
     return
   end
@@ -68,8 +75,14 @@ class Fig::Unparser::V1
     @text << statement.name
     @text << '='
 
-    tokenized_value = statement.tokenized_value
+    emit_tokenized_value statement.tokenized_value
 
+    @text << "\n"
+
+    return
+  end
+
+  def emit_tokenized_value(tokenized_value)
     if tokenized_value.can_be_single_quoted?
       @text << %q<'>
       @text << tokenized_value.to_single_quoted_string
@@ -79,8 +92,6 @@ class Fig::Unparser::V1
       @text << tokenized_value.to_escaped_string
       @text << %q<">
     end
-
-    @text << "\n"
 
     return
   end

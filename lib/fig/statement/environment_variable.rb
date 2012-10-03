@@ -34,7 +34,7 @@ module Fig::Statement::EnvironmentVariable
     # Can't have octothorpes anywhere in v0 due to comment stripping via
     # regex.
     if value =~ /#/
-      return [1, 'contains a "#" character']
+      return [1, 'contains a comment ("#") character']
     end
 
     if value =~ / ( ["'] ) /x
