@@ -1,7 +1,11 @@
 # coding: utf-8
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
-def check_published_grammar_version(version)
+def check_published_grammar_version(version, input = nil)
+  if input
+    fig %w< --publish foo/1.2.3 >, input, :fork => false
+  end
+
   out, err =
     fig(%w< foo/1.2.3 --dump-package-definition-text >, :fork => false)
 

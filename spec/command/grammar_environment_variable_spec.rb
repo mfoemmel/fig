@@ -187,16 +187,12 @@ describe 'Fig' do
       |assignment_type|
 
       it 'with simple value' do
-        input = <<-"END_INPUT"
+        out, * = check_published_grammar_version(0, <<-"END_INPUT")
           grammar v1
           config default
             #{assignment_type} VARIABLE=VALUE
           end
         END_INPUT
-
-        fig %w<--publish foo/1.2.3>, input, :fork => false
-
-        out, * = check_published_grammar_version(0)
 
         out.should =~ / \b #{assignment_type} \s+ VARIABLE=VALUE \b /x
       end
@@ -208,16 +204,12 @@ describe 'Fig' do
         |name, quote|
 
         it "with #{name} whitespace" do
-          input = <<-"END_INPUT"
+          out, * = check_published_grammar_version(1, <<-"END_INPUT")
             grammar v1
             config default
               #{assignment_type} VARIABLE=#{quote}foo bar#{quote}
             end
           END_INPUT
-
-          fig %w<--publish foo/1.2.3>, input, :fork => false
-
-          out, * = check_published_grammar_version(1)
 
           out.should =~ / \b #{assignment_type} \s+ VARIABLE='foo[ ]bar' /x
         end
@@ -232,16 +224,12 @@ describe 'Fig' do
           |value|
 
           it "with «#{value}»" do
-            input = <<-"END_INPUT"
+            out, * = check_published_grammar_version(version, <<-"END_INPUT")
               grammar v1
               config default
                 #{assignment_type} #{value}
               end
             END_INPUT
-
-            fig %w<--publish foo/1.2.3>, input, :fork => false
-
-            out, * = check_published_grammar_version(version)
 
             out.should =~ / \b #{assignment_type} \s+ #{Regexp.quote result} /x
           end
@@ -256,16 +244,12 @@ describe 'Fig' do
         |character|
 
         it "for «#{character}»" do
-          input = <<-"END_INPUT"
+          out, * = check_published_grammar_version(0, <<-"END_INPUT")
             grammar v1
             config default
               set VARIABLE=#{character}
             end
           END_INPUT
-
-          fig %w<--publish foo/1.2.3>, input, :fork => false
-
-          out, * = check_published_grammar_version(0)
 
           out.should =~ / \b set \s+ VARIABLE=#{Regexp.quote character} [^'] /x
         end
@@ -279,16 +263,12 @@ describe 'Fig' do
         |character|
 
         it "for «#{character}»" do
-          input = <<-"END_INPUT"
+          out, * = check_published_grammar_version(1, <<-"END_INPUT")
             grammar v1
             config default
               append VARIABLE=#{character}
             end
           END_INPUT
-
-          fig %w<--publish foo/1.2.3>, input, :fork => false
-
-          out, * = check_published_grammar_version(1)
 
           out.should =~ / \b append \s+ VARIABLE='#{Regexp.quote character}' /x
         end

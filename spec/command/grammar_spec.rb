@@ -64,27 +64,21 @@ describe 'Fig' do
     end
 
     it 'from unversioned file input with a "default" config' do
-      input = <<-END
+      check_published_grammar_version(0, <<-'END')
         config default
         end
       END
-      fig(%w< --publish foo/1.2.3 >, input, :fork => false)
-
-      check_published_grammar_version(0)
     end
 
     %w< 1 >.each do
       |version|
 
       it %Q<from v#{version} grammar file input with a "default" config> do
-        input = <<-END
+        check_published_grammar_version(0, <<-"END")
           grammar v#{version}
           config default
           end
         END
-        fig(%w< --publish foo/1.2.3 >, input, :fork => false)
-
-        check_published_grammar_version(0)
       end
     end
   end
