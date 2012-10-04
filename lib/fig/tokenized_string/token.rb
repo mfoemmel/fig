@@ -13,7 +13,7 @@ class Fig::TokenizedString::Token
   end
 
   def to_expanded_string(&block)
-    block.call self
+    return block.call self
   end
 
   def to_escaped_string()

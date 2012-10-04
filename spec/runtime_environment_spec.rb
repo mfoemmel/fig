@@ -125,8 +125,16 @@ def substitute_command(command)
   base_package =
     Fig::Package.new('test-package', 'test-version', 'test-directory', [])
 
+  tokenized_command = command.map {
+    |argument|
+
+    Fig::Statement::Command.validate_and_process_escapes_in_argument(argument) {
+      |error_description| raise error_description
+    }
+  }
+
   substituted_command = nil
-  environment.expand_command_line(base_package, nil, nil, command) {
+  environment.expand_command_line(base_package, nil, nil, tokenized_command) {
     |command_line|
     substituted_command = command_line
   }
@@ -224,11 +232,11 @@ describe 'RuntimeEnvironment' do
       substituted_command.should == %w< bar\\@one >
     end
 
-    it 'complains about unknown escapes' do
+    it 'complains about bad escapes' do
       expect {
         # Grrr, Ruby syntax: that's three backslashes followed by "f"
         substitute_command %w< bar\\\\\\foo >
-      }.to raise_error(/unknown escape/i)
+      }.to raise_error(/bad escape/i)
     end
   end
 

@@ -51,7 +51,9 @@ class Fig::Command::Action::RunCommandStatement
 
     environment.expand_command_statement_from_config(
       base_package, base_config, @descriptor, @extra_argv || []
-    ) { |command| @execution_context.operating_system.shell_exec command }
+    ) {
+      |command| @execution_context.operating_system.plain_or_shell_exec command
+    }
 
     # Will never get here.
   end

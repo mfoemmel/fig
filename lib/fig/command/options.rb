@@ -31,6 +31,7 @@ require 'fig/command/option_error'
 require 'fig/command/options/parser'
 require 'fig/package_descriptor'
 require 'fig/statement/archive'
+require 'fig/statement/command'
 require 'fig/statement/include'
 require 'fig/statement/path'
 require 'fig/statement/resource'
@@ -163,10 +164,11 @@ class Fig::Command::Options
       case arg
         when '--'
           set_base_action(Fig::Command::Action::RunCommandLine)
-          @shell_command = argv[(i+1)..-1]
+          @shell_command = tokenize_command_arguments '--', argv[(i+1)..-1]
         when '--command-extra-args'
           set_base_action(Fig::Command::Action::RunCommandStatement)
-          @command_extra_argv = argv[(i+1)..-1]
+          @command_extra_argv =
+            tokenize_command_arguments '--command-extra-args', argv[(i+1)..-1]
       end
 
       if @base_action
@@ -648,5 +650,19 @@ class Fig::Command::Options
     end
 
     return
+  end
+
+  def tokenize_command_arguments(option, arguments)
+    return arguments.map do
+      |argument|
+
+      Fig::Statement::Command.validate_and_process_escapes_in_argument(
+        argument
+      ) do
+        |error_description|
+
+        @parser.raise_invalid_argument(option, argument, error_description)
+      end
+    end
   end
 end

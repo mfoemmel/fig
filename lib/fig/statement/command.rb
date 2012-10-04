@@ -11,7 +11,9 @@ class Fig::Statement::Command < Fig::Statement
   def self.validate_and_process_escapes_in_argument(
     command_line_argument, &block
   )
-    return Fig::StringTokenizer.new.tokenize command_line_argument, &block
+    tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER
+
+    return tokenizer.tokenize command_line_argument, &block
   end
 
   def initialize(line_column, source_description, command)
@@ -57,4 +59,16 @@ class Fig::Statement::Command < Fig::Statement
 
     return [0]
   end
+
+  TOKENIZING_SUBEXPRESSION_MATCHER = [
+    {
+      :pattern => %r< \@ [a-zA-Z0-9_.-]* >x,
+      :action =>
+        lambda {
+          |subexpression|
+
+          Fig::TokenizedString::Token.new :package_path, subexpression[1..-1]
+        }
+    }
+  ]
 end

@@ -108,9 +108,7 @@ class Fig::RuntimeEnvironment
         |argument| expand_command_line_argument(argument, base_package)
       }
 
-    @variables.with_environment do
-      yield expanded_command_line
-    end
+    @variables.with_environment { yield expanded_command_line }
 
     return
   end
@@ -324,17 +322,12 @@ class Fig::RuntimeEnvironment
   end
 
   def expand_command(command_statement, extra_arguments, package)
-    @variables.with_environment do
-      command =
-        expand_command_line_argument(
-          [
-            command_statement.command.first.to_expanded_string, extra_arguments
-          ].flatten.join(' '),
-          package
-        )
+    expanded_command_line =
+      [ command_statement.command.first, extra_arguments ].flatten.map {
+        |argument| expand_command_line_argument(argument, package)
+      }
 
-      yield command
-    end
+    @variables.with_environment { yield expanded_command_line.join ' ' }
 
     return
   end
@@ -402,84 +395,31 @@ class Fig::RuntimeEnvironment
     return File.join(retrieve_path, File.basename(variable_value))
   end
 
-  def expand_command_line_argument(argument, package)
-    # TODO: use TokenizedString#to_expanded_string().
-    package_substituted = expand_package_references(argument, package)
-    check_for_bad_escape(package_substituted, argument, package, nil)
+  def expand_command_line_argument(argument, starting_package)
+    return argument.to_expanded_string() do
+      |token|
 
-    return collapse_backslashes_for_escaped_at_signs(package_substituted)
-  end
-
-  def expand_package_references(argument, package)
-    return argument.gsub(
-      # TODO: Refactor package name regex into PackageDescriptor constant.
-      %r<
-        (?: ^ | \G)           # Zero-width anchor.
-        ( [^\\@]* )           # A bunch of not-slashes-or-at-signs
-        ( \\* )               # Any leading backslashes
-        \@                    # The package indicator
-        ( [a-zA-Z0-9_.-]* )   # Package name
-      >x
-    ) do |match|
-      frontmatter, backslashes, package_name = $1, $2, $3
-
-      expand_package_reference(
-        frontmatter, backslashes, package_name, package
-      )
-    end
-  end
-
-  def expand_package_reference(
-    frontmatter, backslashes, package_name, starting_package
-  )
-    if backslashes.length % 2 == 1
-      return "#{frontmatter}#{backslashes}@#{package_name}"
-    end
-
-    package = nil
-    if ! package_name.empty?
-      package = get_package(package_name)
-      if package.nil?
-        raise_repository_error(
-          %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>,
-          nil,
-          nil
-        )
+      package_name = token.raw_value
+      package = nil
+      if package_name.empty?
+        package = starting_package
+      else
+        package = get_package(package_name)
+        if package.nil?
+          raise_repository_error(
+            %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>,
+            nil,
+            nil
+          )
+        end
       end
-    else
-      package = starting_package
+
+      if package && package.directory
+        next package.directory
+      end
+
+      next '@'
     end
-
-    if package && package.directory
-      return "#{frontmatter}#{backslashes}#{package.directory}"
-    end
-
-    return "#{frontmatter}#{backslashes}@"
-  end
-
-  # The value is expected to have had any @ substitution already done, but
-  # collapsing of escapes not done yet.
-  #
-  # TODO: this method should not exist after commands use
-  # TokenizedString#to_expanded_string()
-  def check_for_bad_escape(substituted, original, package, backtrace)
-    if substituted =~ %r<
-      (?: ^ | [^\\])  # Start of line or non backslash
-      (?: \\{2})*     # Even number of backslashes (including zero)
-      ( \\ [^\\@] )   # A bad escape
-    >x
-      raise_repository_error(
-        %Q<Unknown escape "#{$1}" in "#{original}">, backtrace, package
-      )
-    end
-
-    return
-  end
-
-  # After @ substitution, we need to get rid of the backslashes in front of
-  # any escaped @ signs.
-  def collapse_backslashes_for_escaped_at_signs(string)
-    return string.gsub(%r< \\ ([\\@]) >x, '\1')
   end
 
   def get_retrieve_path_with_substitution(variable_name, package)
