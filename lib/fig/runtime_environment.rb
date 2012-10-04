@@ -327,7 +327,9 @@ class Fig::RuntimeEnvironment
     @variables.with_environment do
       command =
         expand_command_line_argument(
-          [command_statement.command, extra_arguments].flatten.join(' '),
+          [
+            command_statement.command.first.to_expanded_string, extra_arguments
+          ].flatten.join(' '),
           package
         )
 

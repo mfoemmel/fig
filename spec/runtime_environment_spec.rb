@@ -4,6 +4,7 @@ require 'fig/environment_variables/case_sensitive'
 require 'fig/package'
 require 'fig/package_descriptor'
 require 'fig/runtime_environment'
+require 'fig/statement/command'
 require 'fig/statement/configuration'
 require 'fig/statement/retrieve'
 require 'fig/statement/set'
@@ -80,6 +81,15 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
     )
   end
 
+  command = Fig::Statement::Command.new(
+    nil,
+    nil,
+    [
+      Fig::Statement::Command.validate_and_process_escapes_in_argument(
+        'echo foo'
+      )
+    ]
+  )
   environment.register_package(
     Fig::Package.new(
       'has_command', 'version', 'directory',
@@ -88,7 +98,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
           nil,
           nil,
           Fig::Package::DEFAULT_CONFIG,
-          [Fig::Statement::Command.new(nil, nil, 'echo foo')]
+          [command]
         )
       ]
     )

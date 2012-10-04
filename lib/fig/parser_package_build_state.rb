@@ -188,7 +188,7 @@ class Fig::ParserPackageBuildState
   def new_v0_command_statement(keyword_node, command_line_node)
     tokenized_command =
       Fig::Statement::Command.validate_and_process_escapes_in_argument(
-        command_line_node.value.text_value
+        command_line_node.text_value
       ) {
         |description|
         raise_invalid_statement_parse_error(

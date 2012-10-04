@@ -149,7 +149,7 @@ module Fig
       end
 
       rule command_line
-        '"' value:[^"]* '"'
+        '"' [^"]* '"'
       end
 
       # Terminals
