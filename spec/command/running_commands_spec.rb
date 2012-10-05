@@ -11,7 +11,7 @@ describe 'Fig' do
 
     describe 'in a package config section' do
       describe %q<executes the command> do
-        describe %q<in a published package> do
+        describe %q<in a published v0 package> do
           it %q<when not told to --run-command-statement> do
             input = <<-END
               config default
@@ -56,7 +56,58 @@ describe 'Fig' do
           end
         end
 
-        it %q<in the default config in an unpublished package when told to --run-command-statement> do
+        describe %q<in a published v1 package> do
+          it %q<when not told to --run-command-statement> do
+            input = <<-END
+              grammar v1
+              config default
+                command "echo foo" end
+                set force='publishing in v1 grammar'
+              end
+            END
+            fig %w<--publish foo/1.2.3>, input
+
+            out, err = fig %w<foo/1.2.3>
+            out.should == 'foo'
+            err.should == ''
+          end
+
+          it %q<when told to --run-command-statement> do
+            input = <<-END
+              grammar v1
+              config default
+                command "echo foo" end
+                set force='publishing in v1 grammar'
+              end
+            END
+            fig %w<--publish foo/1.2.3>, input
+
+            out, err = fig %w<foo/1.2.3 --run-command-statement>
+            out.should == 'foo'
+            err.should == ''
+          end
+
+          if Fig::OperatingSystem.unix?
+            # Command statements used to be split on whitespace and put back
+            # together with space characters.
+            it %q<without manipulating whitespace> do
+              input = <<-END
+                grammar v1
+                config default
+                  command "echo 'foo   bar'" end
+                  set force='publishing in v1 grammar'
+                end
+              END
+              fig %w<--publish foo/1.2.3>, input
+
+              out, err = fig %w<foo/1.2.3>
+              out.should == 'foo   bar'
+              err.should == ''
+            end
+          end
+        end
+
+        it %q<in the default config in an unpublished v0 package when told to --run-command-statement> do
           input = <<-END
             config default
               command "echo foo"
@@ -68,7 +119,20 @@ describe 'Fig' do
           err.should == ''
         end
 
-        it %q<in a non-default config in an unpublished package when told to --run-command-statement> do
+        it %q<in the default config in an unpublished v1 package when told to --run-command-statement> do
+          input = <<-END
+            grammar v1
+            config default
+              command "echo foo" end
+            end
+          END
+
+          out, err = fig %w<--run-command-statement>, input
+          out.should == 'foo'
+          err.should == ''
+        end
+
+        it %q<in a non-default config in an unpublished v0 package when told to --run-command-statement> do
           input = <<-END
             config default
               command "echo default"
@@ -83,10 +147,27 @@ describe 'Fig' do
           out.should == 'non-default'
           err.should == ''
         end
+
+        it %q<in a non-default config in an unpublished v1 package when told to --run-command-statement> do
+          input = <<-END
+            grammar v1
+            config default
+              command "echo default" end
+            end
+
+            config non-default
+              command "echo non-default" end
+            end
+          END
+
+          out, err = fig %w<--run-command-statement --config non-default>, input
+          out.should == 'non-default'
+          err.should == ''
+        end
       end
 
       describe %q<passes command-line arguments to the command> do
-        it %q<in a published package> do
+        it %q<in a published v0 package> do
           input = <<-END
             config default
               command "echo Hi"
@@ -99,8 +180,37 @@ describe 'Fig' do
           err.should == ''
         end
 
+        it %q<in a published v1 package with a single command-line component> do
+          input = <<-END
+            grammar v1
+            config default
+              command "echo Hi" end
+              set force='publishing in v1 grammar'
+            end
+          END
+          fig %w<--publish foo/1.2.3>, input
+
+          out, err = fig %w<foo/1.2.3 --command-extra-args there>
+          out.should == 'Hi there'
+          err.should == ''
+        end
+
+        it %q<in a published v1 package with multiple command-line components> do
+          input = <<-END
+            grammar v1
+            config default
+              command echo Hi, won\\'t "you" 'be my' end
+            end
+          END
+          fig %w<--publish foo/1.2.3>, input
+
+          out, err = fig %w<foo/1.2.3 --command-extra-args neighbor?>
+          out.should == %q<Hi, won't you be my neighbor?>
+          err.should == ''
+        end
+
         describe %q<in an unpublished package> do
-          it %q<when only given --command-extra-args> do
+          it %q<when only given --command-extra-args with the v0 grammar> do
             input = <<-END
               config default
                 command "echo Hi"
@@ -112,7 +222,20 @@ describe 'Fig' do
             err.should == ''
           end
 
-          it %q<when also given --run-command-statement> do
+          it %q<when only given --command-extra-args with the v1 grammar> do
+            input = <<-END
+              grammar v1
+              config default
+                command echo Hi end
+              end
+            END
+
+            out, err = fig %w<--command-extra-args there>, input
+            out.should == 'Hi there'
+            err.should == ''
+          end
+
+          it %q<when also given --run-command-statement with the v0 grammar> do
             input = <<-END
               config default
                 command "echo Hi"
@@ -122,6 +245,24 @@ describe 'Fig' do
             out, err =
               fig %w<--run-command-statement --command-extra-args there>, input
             out.should == 'Hi there'
+            err.should == ''
+          end
+
+          it %q<when also given --run-command-statement with the v1 grammar> do
+            input = <<-END
+              grammar v1
+              config default
+                command "echo 'Hi" end
+              end
+            END
+
+            out, err = fig(
+              [%w<--run-command-statement --command-extra-args>, %q< there\\'>],
+              input
+            )
+            # Two spaces due to command-line concatenation and running through
+            # the shell.
+            out.should == 'Hi  there'
             err.should == ''
           end
         end
