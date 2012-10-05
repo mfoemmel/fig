@@ -22,9 +22,9 @@ class Fig::Unparser::V1
 
   def command(statement)
     add_indent
+    @text << %Q<command\n>
 
-    @text << %q<command >
-
+    add_indent(@indent_level + 1)
     statement.command.each do
       |argument|
 
@@ -32,6 +32,8 @@ class Fig::Unparser::V1
       @text << ' '
     end
 
+    @text << %Q<\n>
+    add_indent
     @text << %Q<end\n>
 
     return

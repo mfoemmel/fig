@@ -223,8 +223,8 @@ module Fig::Unparser
     raise NotImplementedError
   end
 
-  def add_indent()
-    @text << @indent_string * @indent_level
+  def add_indent(indent_level = @indent_level)
+    @text << @indent_string * indent_level
 
     return
   end
