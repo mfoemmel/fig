@@ -228,7 +228,7 @@ class Fig::ParserPackageBuildState
   def tokenize_v1_command_line(keyword_node, command_line)
     tokenized_command_line = []
 
-    command_line.elements.each do
+    command_line.each do
       |argument_node|
 
       unparsed = argument_node.text_value

@@ -45,7 +45,14 @@ class Fig::Statement::Command < Fig::Statement
       return [1, 'contains multiple components']
     end
 
-    argument = command.first.to_escaped_string
+    tokenized_argument = command.first
+    if tokenized_argument.single_quoted?
+      # TODO: we should be able to escape signs and get down to v0, but not
+      # taking the time now.
+      return [1, 'was single quoted in input']
+    end
+
+    argument = tokenized_argument.to_escaped_string
 
     # Can't have octothorpes anywhere in v0 due to comment stripping via
     # regex.

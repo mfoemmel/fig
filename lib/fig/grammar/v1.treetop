@@ -169,8 +169,24 @@ module Fig
         {
           def to_config_statement(build_state)
             return build_state.new_v1_command_statement(
-              statement_start, command_line
+              statement_start, gather_command_argument_nodes(command_line)
             )
+          end
+
+          def gather_command_argument_nodes(node, arguments = [])
+            if node.respond_to? 'quoted_or_bare_string?'
+              arguments << node
+              return arguments
+            end
+
+            return arguments if not node.elements
+
+            node.elements.each do
+              |element|
+              gather_command_argument_nodes(element, arguments)
+            end
+
+            return arguments
           end
         }
       end
@@ -196,9 +212,21 @@ module Fig
       end
 
       rule quoted_or_bare_string
-        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"' /
-        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'" /
+        # In order to deal with the hierarchy of nodes that the command_line
+        # rule above generates, we tag each of the expressions here so that
+        # they can be found in the syntax tree.
+        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"'
+        { def quoted_or_bare_string?() return true end }
+
+        /
+
+        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'"
+        { def quoted_or_bare_string?() return true end }
+
+        /
+
         [^\s#]+
+        { def quoted_or_bare_string?() return true end }
       end
 
       rule environment_variable_name
