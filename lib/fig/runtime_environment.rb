@@ -323,11 +323,15 @@ class Fig::RuntimeEnvironment
 
   def expand_command(command_statement, extra_arguments, package)
     expanded_command_line =
-      [ command_statement.command.first, extra_arguments ].flatten.map {
+      [ command_statement.command, extra_arguments ].flatten.map {
         |argument| expand_command_line_argument(argument, package)
       }
 
-    @variables.with_environment { yield expanded_command_line.join ' ' }
+    if command_statement.command.size == 1
+      expanded_command_line = [ expanded_command_line.join(' ') ]
+    end
+
+    @variables.with_environment { yield expanded_command_line }
 
     return
   end
