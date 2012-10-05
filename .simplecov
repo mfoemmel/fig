@@ -19,7 +19,7 @@ SimpleCov.add_group 'Model',
   '(?x) lib/fig/ (?: package (?: _descriptor | ) [.]rb | statement (?: [.]rb | _container | / ) )'
 
 SimpleCov.add_group 'Package runtime environment',
-  '(?x) lib/fig/ (?: environment_variables | include_backtrace | runtime_environment | working_directory )'
+  '(?x) lib/fig/ (?: environment_variables | grammar_monkey_patches | include_backtrace | runtime_environment | working_directory )'
 
 SimpleCov.add_group 'Package management',
   '(?x) lib/fig/ (?: repository | package_cache | package_definition | [^/]* parse [^/]* $ | unparser/ )'
