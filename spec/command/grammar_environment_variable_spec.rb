@@ -14,6 +14,16 @@ describe 'Fig' do
         %q<VARIABLE="foo'bar">,
         %q<VARIABLE='foo\'bar'>
       ],
+      [%q<VARIABLE='foobar\''>, 1] => [
+        %q<VARIABLE=foobar\'>,
+        %q<VARIABLE="foobar'">,
+        %q<VARIABLE='foobar\''>
+      ],
+      [%q<VARIABLE='foobar"'>, 1] => [
+        %q<VARIABLE=foobar\">,
+        %q<VARIABLE="foobar\"">,
+        %q<VARIABLE='foobar"'>
+      ],
       [%q<VARIABLE='foo"bar'>,  1] => [
         %q<VARIABLE=foo\"bar>,
         %q<VARIABLE="foo\"bar">,

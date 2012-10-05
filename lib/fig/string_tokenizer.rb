@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/tokenized_string'
 require 'fig/tokenized_string/plain_segment'
 
@@ -56,7 +58,9 @@ class Fig::StringTokenizer
 
   def strip_single_quotes_and_process_escapes()
     return false if @string[0..0] != %q<'> && @string[-1..-1] != %q<'>
-    return false if @string =~ %r< \A (?: \\{2} )* \\ ' \z >x # «\'» is legal
+    return false if @string =~ %r< # «\'» is legal
+      \A ( [^\\']* (?: \\{2} )* \\ ' )* \z
+    >x
 
     if (
       @string.length  == 1                                      ||
