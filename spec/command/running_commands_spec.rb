@@ -18,9 +18,9 @@ describe 'Fig' do
                 command "echo foo"
               end
             END
-            fig(%w<--publish foo/1.2.3>, input)
+            fig %w<--publish foo/1.2.3>, input
 
-            out, err = fig(%w<foo/1.2.3>)
+            out, err = fig %w<foo/1.2.3>
             out.should == 'foo'
             err.should == ''
           end
@@ -31,9 +31,9 @@ describe 'Fig' do
                 command "echo foo"
               end
             END
-            fig(%w<--publish foo/1.2.3>, input)
+            fig %w<--publish foo/1.2.3>, input
 
-            out, err = fig(%w<foo/1.2.3 --run-command-statement>)
+            out, err = fig %w<foo/1.2.3 --run-command-statement>
             out.should == 'foo'
             err.should == ''
           end
@@ -47,9 +47,9 @@ describe 'Fig' do
                   command "echo 'foo   bar'"
                 end
               END
-              fig(%w<--publish foo/1.2.3>, input)
+              fig %w<--publish foo/1.2.3>, input
 
-              out, err = fig(%w<foo/1.2.3>)
+              out, err = fig %w<foo/1.2.3>
               out.should == 'foo   bar'
               err.should == ''
             end
@@ -63,7 +63,7 @@ describe 'Fig' do
             end
           END
 
-          out, err = fig(%w<--run-command-statement>, input)
+          out, err = fig %w<--run-command-statement>, input
           out.should == 'foo'
           err.should == ''
         end
@@ -79,7 +79,7 @@ describe 'Fig' do
             end
           END
 
-          out, err = fig(%w<--run-command-statement --config non-default>, input)
+          out, err = fig %w<--run-command-statement --config non-default>, input
           out.should == 'non-default'
           err.should == ''
         end
@@ -92,9 +92,9 @@ describe 'Fig' do
               command "echo Hi"
             end
           END
-          fig(%w<--publish foo/1.2.3>, input)
+          fig %w<--publish foo/1.2.3>, input
 
-          out, err = fig(%w<foo/1.2.3 --command-extra-args there>)
+          out, err = fig %w<foo/1.2.3 --command-extra-args there>
           out.should == 'Hi there'
           err.should == ''
         end
@@ -107,7 +107,7 @@ describe 'Fig' do
               end
             END
 
-            out, err = fig(%w<--command-extra-args there>, input)
+            out, err = fig %w<--command-extra-args there>, input
             out.should == 'Hi there'
             err.should == ''
           end
@@ -120,7 +120,7 @@ describe 'Fig' do
             END
 
             out, err =
-              fig(%w<--run-command-statement --command-extra-args there>, input)
+              fig %w<--run-command-statement --command-extra-args there>, input
             out.should == 'Hi there'
             err.should == ''
           end
@@ -133,10 +133,12 @@ describe 'Fig' do
             config default
             end
           END
-          fig(%w<--publish foo/1.2.3>, input)
+          fig %w<--publish foo/1.2.3>, input
 
-          out, err, exit_code =
-            fig(%w<foo/1.2.3 --command-extra-args yadda>, :no_raise_on_error => true)
+          out, err, exit_code = fig(
+            %w<foo/1.2.3 --command-extra-args yadda>,
+            :no_raise_on_error => true
+          )
           exit_code.should_not == 0
           out.should == ''
           err.should =~ /does not contain a command/
@@ -150,7 +152,7 @@ describe 'Fig' do
             end
           END
           out, err, exit_code =
-            fig(%w<--publish foo/1.2.3.4>, input, :no_raise_on_error => true)
+            fig %w<--publish foo/1.2.3.4>, input, :no_raise_on_error => true
           err.should =~
             %r<Found a second "command" statement within a "config" block \(line>
           exit_code.should_not == 0
@@ -163,7 +165,7 @@ describe 'Fig' do
             end
           END
 
-          out, err, exit_code = fig([], input, :no_raise_on_error => true)
+          out, err, exit_code = fig [], input, :no_raise_on_error => true
           exit_code.should_not == 0
           err.should =~ /\bnothing to do\b/i
           err.should =~ /\byou have a command statement\b/i
@@ -176,14 +178,14 @@ describe 'Fig' do
     if Fig::OperatingSystem.unix?
       describe %q<from the command line> do
         it %q<via the shell if given a single argument> do
-          out, err = fig(['--', 'echo foo $0 bar'])
+          out, err = fig ['--', 'echo foo $0 bar']
           out.should     =~ /\A foo [ ] .+ [ ] bar \z/x
           out.should_not == 'foo $0 bar'
           err.should == ''
         end
 
         it %q<without the shell if given multiple arguments> do
-          out, err = fig(%w<-- echo foo $0 bar>)
+          out, err = fig %w<-- echo foo $0 bar>
           out.should == 'foo $0 bar'
           err.should == ''
         end
