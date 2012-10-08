@@ -165,6 +165,12 @@ class Fig::Command::Options
         when '--'
           set_base_action(Fig::Command::Action::RunCommandLine)
           @shell_command = tokenize_command_arguments '--', argv[(i+1)..-1]
+
+          if @shell_command.empty?
+            raise Fig::Command::OptionError.new(
+              %q<The "--" option was used, but no command was specified.>
+            )
+          end
         when '--command-extra-args'
           set_base_action(Fig::Command::Action::RunCommandStatement)
           @command_extra_argv =

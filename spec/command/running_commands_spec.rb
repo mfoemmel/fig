@@ -289,9 +289,9 @@ describe 'Fig' do
             %w<foo/1.2.3 --command-extra-args yadda>,
             :no_raise_on_error => true
           )
-          exit_code.should_not == 0
           out.should == ''
           err.should =~ /does not contain a command/
+          exit_code.should_not == 0
         end
 
         it %q<if it finds multiple command statements> do
@@ -316,11 +316,11 @@ describe 'Fig' do
           END
 
           out, err, exit_code = fig [], input, :no_raise_on_error => true
-          exit_code.should_not == 0
           err.should =~ /\bnothing to do\b/i
           err.should =~ /\byou have a command statement\b/i
           err.should =~ /--run-command-statement\b/i
           out.should == ''
+          exit_code.should_not == 0
         end
       end
     end
@@ -338,6 +338,13 @@ describe 'Fig' do
           out, err = fig %w<-- echo foo $0 bar>
           out.should == 'foo $0 bar'
           err.should == ''
+        end
+
+        it %q<fails if no actual command specified> do
+          out, err, exit_code = fig ['--'], :no_raise_on_error => true
+          err.should =~ /no command.*specified/i
+          out.should == ''
+          exit_code.should_not == 0
         end
       end
     end

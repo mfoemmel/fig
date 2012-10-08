@@ -20,6 +20,7 @@ require 'fig/file_not_found_error'
 require 'fig/logging'
 require 'fig/network_error'
 require 'fig/url'
+require 'fig/user_input_error'
 
 module Fig; end
 
@@ -465,7 +466,11 @@ class Fig::OperatingSystem
       SimpleCov.at_exit.call
     end
 
-    Kernel.exec(*command)
+    begin
+      Kernel.exec(*command)
+    rescue SystemCallError => exception
+      raise Fig::UserInputError.new exception
+    end
   end
 
   # *sigh* Apparently Ruby < v1.9.3 does some wacko thing with single argument
