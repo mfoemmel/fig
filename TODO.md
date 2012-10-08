@@ -20,12 +20,12 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
     * ~~In package definition~~
     * ~~On command-line~~
 * Command-line
-    * command
-    * `--command-extra-args`
+    * ~~command~~
+    * ~~`--command-extra-args`~~
 * Retrieve statements
-* Command statement
+* ~~Command statement~~
 * Fix all "pending" tests.
-* Commands, both command statements and from the command-line.  Handling of quoting with `--command-extra-args` is going to be interesting.
+* ~~Commands, both command statements and from the command-line.  Handling of quoting with `--command-extra-args` is going to be interesting.~~
 
 ### Bugs that may involve breakage post v1.0
 
@@ -62,6 +62,6 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 
 # Paranoia / things to think about
 
-* Check "@" escapes with `--set`/`--append`.
+* ~~Check "@" escapes with `--set`/`--append`.~~
 * Look into Simplecov CSV outputter for diffing runs.
 * Double check where archives are extracted under the influence of a retrieve.
