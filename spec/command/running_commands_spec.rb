@@ -195,18 +195,21 @@ describe 'Fig' do
           err.should == ''
         end
 
-        it %q<in a published v1 package with multiple command-line components> do
-          input = <<-END
-            grammar v1
-            config default
-              command echo Hi, won\\'t "you" 'be my' end
-            end
-          END
-          fig %w<--publish foo/1.2.3>, input
+        if Fig::OperatingSystem.unix?
+          # "echo" does not exist outside of the command interpreter on Windows.
+          it %q<in a published v1 package with multiple command-line components> do
+            input = <<-END
+              grammar v1
+              config default
+                command echo Hi, won\\'t "you" 'be  my' end
+              end
+            END
+            fig %w<--publish foo/1.2.3>, input
 
-          out, err = fig %w<foo/1.2.3 --command-extra-args neighbor?>
-          out.should == %q<Hi, won't you be my neighbor?>
-          err.should == ''
+            out, err = fig %w<foo/1.2.3 --command-extra-args neighbor?>
+            out.should == %q<Hi, won't you be  my neighbor?>
+            err.should == ''
+          end
         end
 
         describe %q<in an unpublished package> do
@@ -222,17 +225,20 @@ describe 'Fig' do
             err.should == ''
           end
 
-          it %q<when only given --command-extra-args with the v1 grammar> do
-            input = <<-END
-              grammar v1
-              config default
-                command echo Hi end
-              end
-            END
+          if Fig::OperatingSystem.unix?
+            # "echo" does not exist outside of the command interpreter on Windows.
+            it %q<when only given --command-extra-args with the v1 grammar> do
+              input = <<-END
+                grammar v1
+                config default
+                  command echo Hi end
+                end
+              END
 
-            out, err = fig %w<--command-extra-args there>, input
-            out.should == 'Hi there'
-            err.should == ''
+              out, err = fig %w<--command-extra-args there>, input
+              out.should == 'Hi there'
+              err.should == ''
+            end
           end
 
           it %q<when also given --run-command-statement with the v0 grammar> do
@@ -248,22 +254,25 @@ describe 'Fig' do
             err.should == ''
           end
 
-          it %q<when also given --run-command-statement with the v1 grammar> do
-            input = <<-END
-              grammar v1
-              config default
-                command "echo 'Hi" end
-              end
-            END
+          if Fig::OperatingSystem.unix?
+            # Cannot figure out the quoting to get this to work on Windows.
+            it %q<when also given --run-command-statement with the v1 grammar> do
+              input = <<-END
+                grammar v1
+                config default
+                  command "echo 'Hi" end
+                end
+              END
 
-            out, err = fig(
-              [%w<--run-command-statement --command-extra-args>, %q< there\\'>],
-              input
-            )
-            # Two spaces due to command-line concatenation and running through
-            # the shell.
-            out.should == 'Hi  there'
-            err.should == ''
+              out, err = fig(
+                [%w<--run-command-statement --command-extra-args>, %q< there\\'>],
+                input
+              )
+              # Two spaces due to command-line concatenation and running through
+              # the shell.
+              out.should == 'Hi  there'
+              err.should == ''
+            end
           end
         end
       end
