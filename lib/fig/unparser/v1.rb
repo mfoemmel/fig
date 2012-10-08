@@ -47,6 +47,20 @@ class Fig::Unparser::V1
     return
   end
 
+  def retrieve(statement)
+    add_indent
+
+    @text << 'retrieve '
+    @text << statement.variable
+    @text << '->'
+
+    emit_tokenized_value statement.tokenized_path
+
+    @text << "\n"
+
+    return
+  end
+
   def grammar_description()
     return 'v1'
   end

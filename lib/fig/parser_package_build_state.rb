@@ -102,7 +102,7 @@ class Fig::ParserPackageBuildState
       node_location(keyword_node),
       @source_description,
       variable_name_node.text_value,
-      path_node.text_value
+      Fig::Statement::Retrieve.tokenize_path(path_node.text_value)
     )
   end
 
