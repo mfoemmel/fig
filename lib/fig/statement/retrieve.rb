@@ -7,12 +7,13 @@ module Fig; end
 # Specifies that files from a package should be copied into the current
 # directory when an environment variable has its value changed.
 class Fig::Statement::Retrieve < Fig::Statement
-  attr_reader   :var, :path
+  attr_reader :variable
+  attr_reader :path
 
-  def initialize(line_column, source_description, var, path)
+  def initialize(line_column, source_description, variable, path)
     super(line_column, source_description)
 
-    @var = var
+    @variable = variable
     @path = path
 
     # Yeah, it's not cross-platform, but File doesn't have an #absolute? method

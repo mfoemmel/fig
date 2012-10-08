@@ -44,7 +44,7 @@ class Fig::Unparser::V0
     add_indent
 
     @text << 'retrieve '
-    @text << statement.var
+    @text << statement.variable
     @text << '->'
     @text << statement.path
     @text << "\n"

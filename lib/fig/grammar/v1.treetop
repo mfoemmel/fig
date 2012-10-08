@@ -77,11 +77,11 @@ module Fig
       rule retrieve
         statement_start:'retrieve'
         ws_or_comment+
-        var:environment_variable_name '->' path:quoted_or_bare_string
+        variable:environment_variable_name '->' path:quoted_or_bare_string
         {
           def to_package_statement(build_state)
             return build_state.new_retrieve_statement(
-              statement_start, var, path
+              statement_start, variable, path
             )
           end
         }

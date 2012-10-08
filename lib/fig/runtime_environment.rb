@@ -42,7 +42,7 @@ class Fig::RuntimeEnvironment
   # Indicates that the values from a particular environment variable path
   # should be copied to a local directory.
   def add_retrieve(retrieve_statement)
-    name = retrieve_statement.var
+    name = retrieve_statement.variable
     if @retrieves.has_key?(name)
       Fig::Logging.warn \
         %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name].path}" with "#{retrieve_statement.path}".>
