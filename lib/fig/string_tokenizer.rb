@@ -6,6 +6,21 @@ require 'fig/tokenized_string/plain_segment'
 module Fig; end
 
 class Fig::StringTokenizer
+  # subexpression_matchers is an array of hashes.  Each hash is expected to
+  # contain two keys: :pattern and :action.
+  #
+  # The :pattern value needs to be a regular expression for the substring that
+  # needs special handling.
+  #
+  # The :action value needs to be a block that takes two parameters.
+  #
+  # The first parameter is the text that was matched and the second is the
+  # error block passed to #tokenize().
+  #
+  # On success the block returns either a String containing replacement text or
+  # a Fig::TokenizedString::Token representing the special handling of the
+  # consumed text.  If there was a problem, then the error block should have
+  # been invoked and the block should return nil.
   def initialize(subexpression_matchers = [])
     @subexpression_matchers = subexpression_matchers
 
@@ -138,8 +153,10 @@ class Fig::StringTokenizer
             @error_block.call 'ends in an incomplete escape.'
             return
           end
+          subexpression_matched = subexpression_match(remainder)
+          return if subexpression_matched.nil?
           if (
-            subexpression_match(remainder)              ||
+            subexpression_matched                       ||
             remainder[0..0] == %q<">                    ||
             ! was_quoted && remainder[0..0] == %q<'>
           )
@@ -159,6 +176,7 @@ class Fig::StringTokenizer
         end
       else
         replacement, remainder = subexpression_match @string
+        return if replacement.nil?
         if replacement
           if replacement.is_a? String
             plain_string << replacement
@@ -198,11 +216,13 @@ class Fig::StringTokenizer
       pattern = matcher[:pattern]
       if sub_string =~ %r< \A ( #{pattern} ) >x
         subexpression, remainder = $1, $'
-        replacement = matcher[:action].call subexpression
+        replacement = matcher[:action].call subexpression, @error_block
+
+        return if ! replacement
         return [replacement, remainder]
       end
     end
 
-    return
+    return false
   end
 end

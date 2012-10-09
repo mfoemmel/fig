@@ -99,12 +99,20 @@ class Fig::Statement::Retrieve < Fig::Statement
 
   TOKENIZING_SUBEXPRESSION_MATCHER = [
     {
-      :pattern => %r< \[ package \] >x,
-      :action =>
+      # Shortest sequence of characters that starts with an open square bracket
+      # and ends with either a close square bracket or end of string.
+      :pattern => %r< \[ [^\]]* \]? >x,
+      :action  =>
         lambda {
-          |subexpression|
+          |subexpression, error_block|
 
-          Fig::TokenizedString::Token.new :package_path, '[package]'
+          if subexpression == '[package]'
+            return Fig::TokenizedString::Token.new :package_path, '[package]'
+          end
+
+          error_block.call \
+            %q<contains an unescaped "[" that is not followed by "ackage]".>
+          return
         }
     }
   ]

@@ -72,7 +72,7 @@ class Fig::Statement::Command < Fig::Statement
       :pattern => %r< \@ [a-zA-Z0-9_.-]* >x,
       :action =>
         lambda {
-          |subexpression|
+          |subexpression, error_block|
 
           Fig::TokenizedString::Token.new :package_path, subexpression[1..-1]
         }

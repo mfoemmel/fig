@@ -1,5 +1,18 @@
 v0.1.xxx
 
+  Backwards incompatibilities:
+
+  - In a retrieve statement, it is now an error to have an unescaped open
+    square bracket ("[") that is not followed by "ackage]".  In other words,
+    the following was previously acceptable:
+
+    retrieve VARIABLE->foo[bar]baz
+
+  You now will need to use the v1 grammar and escape the square bracket:
+
+    grammar v1
+    retrieve VARIABLE->foo\[bar]baz
+
   New features:
 
   - New --dump-package-definition-for-command-line option useful for previewing

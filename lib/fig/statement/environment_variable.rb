@@ -86,7 +86,9 @@ module Fig::Statement::EnvironmentVariable
         :pattern => %r<\@>,
         :action =>
           lambda {
-            |subexpression| Fig::TokenizedString::Token.new :package_path, '@'
+            |subexpression, error_block|
+
+            Fig::TokenizedString::Token.new :package_path, '@'
           }
       }
     ]

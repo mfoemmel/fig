@@ -2,12 +2,12 @@
 require File.expand_path(File.dirname(__FILE__) + '/grammar_spec_helper')
 
 describe 'Fig' do
-  describe %q<uses the correct grammar version in the package definition created for publishing> do
-    before(:each) do
-      clean_up_test_environment
-      set_up_test_environment
-    end
+  before(:each) do
+    clean_up_test_environment
+    set_up_test_environment
+  end
 
+  describe %q<uses the correct grammar version in the package definition created for publishing> do
     it 'from v1 file input with a simple, unquoted retrieve statement' do
       check_published_grammar_version 0, <<-'END'
         grammar v1
@@ -51,6 +51,23 @@ describe 'Fig' do
         retrieve variable->"some#value"
       END
     end
+  end
+
+  it %q<considers a retrieve path containing an unescaped square bracket that is not followed by "package]" to be a syntax error> do
+    input = <<-'END'
+      grammar v1
+      retrieve variable->value[something]value
+    END
+
+    out, err, exit_code = fig(
+      %w< --publish foo/1.2.3 >,
+      input,
+      :no_raise_on_error => true,
+      :fork => false
+    )
+    err.should =~ /\[something\]/
+    out.should == ''
+    exit_code.should_not == 0
   end
 end
 

@@ -98,11 +98,20 @@ class Fig::ParserPackageBuildState
   end
 
   def new_retrieve_statement(keyword_node, variable_name_node, path_node)
+    tokenized_path =
+      Fig::Statement::Retrieve.tokenize_path(path_node.text_value) do
+        |error_description|
+
+        raise_invalid_value_parse_error(
+          keyword_node, path_node, 'path', error_description
+        )
+      end
+
     return Fig::Statement::Retrieve.new(
       node_location(keyword_node),
       @source_description,
       variable_name_node.text_value,
-      Fig::Statement::Retrieve.tokenize_path(path_node.text_value)
+      tokenized_path
     )
   end
 
