@@ -430,7 +430,11 @@ class Fig::RuntimeEnvironment
     retrieve_statement = @retrieves[variable_name]
     retrieve_statement.referenced(true)
 
-    return retrieve_statement.path.gsub(/ \[package\] /x, package.name)
+    return retrieve_statement.tokenized_path.to_expanded_string() do
+      |token|
+
+      package.name
+    end
   end
 
   def raise_repository_error(message, backtrace, package)

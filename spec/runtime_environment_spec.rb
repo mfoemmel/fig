@@ -51,8 +51,9 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
 
   if retrieve_vars
     retrieve_vars.each do |name, path|
+      tokenized_path = Fig::Statement::Retrieve.tokenize_path path
       environment.add_retrieve(
-        Fig::Statement::Retrieve.new(nil, nil, name, path)
+        Fig::Statement::Retrieve.new(nil, nil, name, tokenized_path)
       )
     end
   end
