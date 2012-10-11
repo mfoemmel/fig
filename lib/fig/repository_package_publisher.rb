@@ -113,8 +113,8 @@ class Fig::RepositoryPackagePublisher
     add_unparsed_text()
 
     file_content, explanations = @text_assembler.assemble_package_definition()
-    if Fig::Logging.debug?
-      explanations.each {|explanation| Fig::Logging.debug explanation}
+    if Fig::Logging.info?
+      explanations.each {|explanation| Fig::Logging.info explanation}
     end
 
     begin
