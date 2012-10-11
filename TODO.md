@@ -23,7 +23,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * Command-line
     * ~~command~~
     * ~~`--command-extra-args`~~
-* Retrieve statements
+* ~~Retrieve statements~~
 * ~~Command statement~~
 * Fix all "pending" tests.
 * ~~Commands, both command statements and from the command-line.  Handling of quoting with `--command-extra-args` is going to be interesting.~~

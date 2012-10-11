@@ -189,10 +189,10 @@ class Fig::Command::Options
   def set_up_parser()
     set_up_package_configuration_source()
     set_up_remote_repository_access()
-    set_up_queries()
     set_up_commands()
     set_up_environment_statements()
     set_up_package_contents_statements()
+    set_up_queries()
     set_up_program_configuration()
 
     return
@@ -315,16 +315,6 @@ class Fig::Command::Options
   end
 
   def set_up_commands()
-    @parser.on('--clean', 'remove package from $FIG_HOME') do
-      set_base_action(Fig::Command::Action::Clean)
-    end
-
-    @parser.on(
-      '--run-command-statement', 'run the command in even in local file'
-    ) do
-      set_base_action(Fig::Command::Action::RunCommandStatement)
-    end
-
     @parser.on(
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
@@ -343,6 +333,17 @@ class Fig::Command::Options
       'force-overwrite existing version of a package to the remote repo'
     ) do |force|
       @force = force
+    end
+
+    @parser.on('--clean', 'remove package from $FIG_HOME') do
+      set_base_action(Fig::Command::Action::Clean)
+    end
+
+    @parser.on(
+      '--run-command-statement',
+      'run the command in even in package definition file (i.e. no descriptor)'
+    ) do
+      set_base_action(Fig::Command::Action::RunCommandStatement)
     end
 
     return
@@ -372,7 +373,7 @@ class Fig::Command::Options
     @parser.on(
       '--file FILE',
       FILE_OPTION_VALUE_PATTERN,
-      %q<read Fig file FILE. Use '-' for stdin. See also --no-file>
+      %q<read package definition FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
       @package_definition_file = path
     end

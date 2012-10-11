@@ -18,16 +18,16 @@ Running under Fig:
   fig [...] [DESCRIPTOR] --command-extra-args VALUES
   fig [...] [DESCRIPTOR] --run-command-statement
 
-Querying:
-  fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
-  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
-  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
-
 Publishing packages:
   fig {--publish | --publish-local} DESCRIPTOR
       [--resource PATH]      [--archive  PATH]
       [--include DESCRIPTOR] [--override DESCRIPTOR]
       [...]
+
+Querying:
+  fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
+  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-variables [--list-tree] [--list-all-configs]    [DESCRIPTOR] [...]
 
 Standard options (represented as "[...]" above):
       [--update | --update-if-missing]
@@ -45,17 +45,6 @@ Running under Fig:
   fig [...] [DESCRIPTOR] --command-extra-args VALUES
   fig [...] [DESCRIPTOR] --run-command-statement
 
-Querying:
-
-  fig {--list-local | --list-remote}                                      [...]
-  fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
-  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
-  fig --list-variables    [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
-  fig --list-configs                                         [DESCRIPTOR] [...]
-  fig --dump-package-definition-text                         [DESCRIPTOR] [...]
-  fig --dump-package-definition-parsed                       [DESCRIPTOR] [...]
-  fig --dump-package-definition-for-command-line             [DESCRIPTOR] [...]
-
 Publishing packages:
 
   fig {--publish | --publish-local} DESCRIPTOR
@@ -69,6 +58,17 @@ Publishing packages:
 Local repository maintenance:
 
   fig --clean DESCRIPTOR [...]
+
+Querying:
+
+  fig {--list-local | --list-remote}                                      [...]
+  fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
+  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-variables    [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-configs                                         [DESCRIPTOR] [...]
+  fig --dump-package-definition-text                         [DESCRIPTOR] [...]
+  fig --dump-package-definition-parsed                       [DESCRIPTOR] [...]
+  fig --dump-package-definition-for-command-line             [DESCRIPTOR] [...]
 
 Standard options (represented as "[...]" above):
 
