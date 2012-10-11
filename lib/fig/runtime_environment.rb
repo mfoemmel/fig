@@ -211,10 +211,12 @@ class Fig::RuntimeEnvironment
     @variables[name] = expanded_value
 
     if Fig::Logging.debug?
-      value = statement.value
+      tokenized_value = statement.tokenized_value
+      escaped_value = tokenized_value.to_escaped_string
       expanded_message =
-        expanded_value == value ? ''  \
-                                : %Q< (expanded from "#{value}")>
+        expanded_value == escaped_value \
+            ? ''  \
+            : %Q< (expanded from "#{escaped_value}")>
 
       Fig::Logging.debug(
         %Q<Set #{name} to "#{expanded_value}"#{expanded_message}.>
@@ -232,10 +234,12 @@ class Fig::RuntimeEnvironment
     @variables.prepend_variable(name, expanded_value)
 
     if Fig::Logging.debug?
-      value = statement.value
+      tokenized_value = statement.tokenized_value
+      escaped_value = tokenized_value.to_escaped_string
       expanded_message =
-        expanded_value == value ? ''  \
-                                : %Q< ("#{value}" expanded to "#{expanded_value}")>
+        expanded_value == escaped_value \
+          ? ''  \
+          : %Q< ("#{escaped_value}" expanded to "#{expanded_value}")>
 
       Fig::Logging.debug(
         %Q<Prepending to #{name} resulted in "#{@variables[name]}"#{expanded_message}.>
