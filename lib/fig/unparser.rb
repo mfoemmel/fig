@@ -22,12 +22,6 @@ module Fig::Unparser
       return Fig::Unparser::V0, explanations
     end
 
-    # TODO: Until v1 grammar handling is done, ensure we don't emit anything
-    # old fig versions cannot handle.
-    if ! ENV['FIG_ALLOW_NON_V0_GRAMMAR']
-      raise 'Reached a point where something could not be represented by the v0 grammar. Bailing out.'
-    end
-
     return Fig::Unparser::V1, explanations
   end
 
