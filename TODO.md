@@ -33,7 +33,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 * Asset statements have lots of issues with URLs.
     * URLs that involve redirects.
     * URLs that aren't simple protocol://host/path/to/asset, e.g. if they've got query parameters.
-* Retrieves should turn unescaped "[" that aren't followed by "package]" into errors.
+* ~~Retrieves should turn unescaped "[" that aren't followed by "package]" into errors.~~
 
 # Tests
 
@@ -50,15 +50,15 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 # Documentation
 
 * Clarify "URLs" that are either file-or-URL or proper URLs.
-* Document quoting, including the command-line option behaviors, e.g. `--resource 'foo'` vs `--resource "'foo'"` `--resource '"foo"'`.
-* Redo all the statement descriptions, including quoting behaviors.
-* Describe v0 vs v1 grammars.
+* ~~Document quoting, including the command-line option behaviors, e.g. `--resource 'foo'` vs `--resource "'foo'"` `--resource '"foo"'`.~~
+* ~~Redo all the statement descriptions, including quoting behaviors.~~
+* ~~Describe v0 vs v1 grammars.~~
 * ~~Document "looks like a URL".~~
 * Describe retrieve behavior in the presence of symlinks.
 * Document application configuration (the "Configuration" page in the wiki).
 * Document repository locking.
-* Document that command statements are only processed in published packages or with `--run-command-statement`.
-* Document that exec(2) with a single command-line component goes through the shell, whereas multiple components do not.
+* ~~Document that command statements are only processed in published packages or with `--run-command-statement`.
+* ~~Document that exec(2) with a single command-line component goes through the shell, whereas multiple components do not.~~
 * The whole running commands vs. command-line expansion stuff needs reorganizing.
 
 # Paranoia / things to think about
