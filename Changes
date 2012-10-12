@@ -15,9 +15,56 @@ v0.2.0.beta.1
 
   New features:
 
-  - New --dump-package-definition-for-command-line option useful for previewing
-    a package defined via the --set, --append, --archive, --resource,
-    --include, and --override options.
+  - New --dump-package-definition-for-command-line option, useful for
+    previewing a package defined via the --set, --append, --archive,
+    --resource, --include, and --override options.
+
+  - The long in-progress v1 grammar is available.  It solves a lot of
+    inconsistencies in the original, now v0, grammar.  The primary differences
+    are in allowing Bourne-shell like quoting and escaping of values (double
+    quotes allow whitespace, single quotes turns all interpolation off, etc.)
+    and the command statement now can be used without involving the shell.
+
+    For the most part, this should be transparent to you.
+
+    Command-line options are treated as if they were specified in the v1
+    grammar.
+
+    Older versions of fig cannot read v1 format, but versions since v0.1.75
+    will cleanly tell you that they can't handle it.
+
+    In order to be as compatible with older fig versions, the new fig will
+    publish packages using the v0 grammar, if it can find a way to do so, even
+    if the input package definition is given in the v1 grammar.  Thus, given a
+    package.fig file containing
+
+      grammar v1
+
+      config default
+        set foo='bar'
+      end
+
+    the published package will look like
+
+      # grammar v0
+
+      config default
+        set foo=bar
+      end
+
+    If, when publishing, fig determines that it needs to use the v1 grammar, it
+    will tell you why:
+
+      > fig --set 'baz=foo#bar' --publish-local v1-grammar/test
+
+      Publishing v1-grammar/test locally.
+      Publishing using the v1 grammar.
+      Grammar v1 is required because the set statement (--set option) contains a comment ("#") character.
+
+    Documentation for the new grammar is available at
+    https://github.com/mfoemmel/fig/wiki/v1-grammar.  It may be helpful to have
+    a look at the old one, as well:
+    https://github.com/mfoemmel/fig/wiki/v0-grammar
 
 v0.1.81
 
