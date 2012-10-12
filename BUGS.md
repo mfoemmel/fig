@@ -1,3 +1,2 @@
-- "command" statements are split on whitespace and then put back together with
-  single space characters.
-- "command" statements always go through the shell.
+- Bad values in `FIG_HOME` and `FIG_REMOTE_URL` produce nasty errors.
+- URLs with query parameters or involve redirects are untested.
