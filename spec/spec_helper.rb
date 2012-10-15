@@ -12,14 +12,16 @@ require 'rbconfig'
 require 'rspec'
 
 require 'fileutils'
+require 'tmpdir'
 
 require 'fig/command'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/repository'
 
-FIG_SPEC_BASE_DIRECTORY =
-  File.expand_path(File.dirname(__FILE__) + '/../spec/runtime-work')
+FIG_SPEC_BASE_DIRECTORY = Dir.mktmpdir 'fig-rspec-'
+at_exit { FileUtils.rm_rf FIG_SPEC_BASE_DIRECTORY }
+
 USER_HOME         = FIG_SPEC_BASE_DIRECTORY + '/userhome'
 FIG_HOME          = FIG_SPEC_BASE_DIRECTORY + '/fighome'
 FIG_REMOTE_DIR    = FIG_SPEC_BASE_DIRECTORY + '/remote'
