@@ -14,10 +14,10 @@ def test_published_asset_with_url_with_symbol(
   file_name     = "with#{symbol}symbol"
   escaped_file  = CGI.escape file_name
   quoted_url    =
-    "#{quote}file://#{USER_HOME}/#{escaped_file}#{quote}"
+    "#{quote}file://#{CURRENT_DIRECTORY}/#{escaped_file}#{quote}"
 
   it %Q<with URL «#{quoted_url}» (contains a «#{symbol}»)> do
-    write_file "#{USER_HOME}/#{file_name}", ''
+    write_file "#{CURRENT_DIRECTORY}/#{file_name}", ''
 
     yield quoted_url
 
@@ -53,7 +53,6 @@ def test_published_command_line_asset_with_url_with_symbol(
 
     fig(
       [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_url ],
-      :current_directory => USER_HOME,
       :fork => false
     )
   end
@@ -77,12 +76,7 @@ def test_published_file_asset_with_url_with_symbol(
       config default
       end
     END
-    fig(
-      %w< --publish foo/1.2.3 >,
-      input,
-      :current_directory => USER_HOME,
-      :fork => false
-    )
+    fig %w< --publish foo/1.2.3 >, input, :fork => false
   end
 
   return
@@ -95,7 +89,7 @@ def test_published_asset_with_file_with_symbol(
   quoted_name = "#{quote}#{file_name}#{quote}"
 
   it %Q<with file «#{quoted_name}»> do
-    write_file "#{USER_HOME}/#{file_name}", ''
+    write_file "#{CURRENT_DIRECTORY}/#{file_name}", ''
 
     yield quoted_name
 
@@ -115,7 +109,6 @@ def test_published_command_line_asset_with_file_with_symbol(
 
     fig(
       [ %w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", quoted_name ],
-      :current_directory => USER_HOME,
       :fork => false
     )
   end
@@ -139,12 +132,7 @@ def test_published_file_asset_with_file_with_symbol(
       config default
       end
     END
-    fig(
-      %w< --publish foo/1.2.3 >,
-      input,
-      :current_directory => USER_HOME,
-      :fork => false
-    )
+    fig %w< --publish foo/1.2.3 >, input, :fork => false
   end
 
   return
@@ -191,11 +179,10 @@ describe 'Fig' do
           value = "#{quote}nothing-special#{quote}"
 
           it %Q<with file «#{value}»> do
-            write_file "#{USER_HOME}/nothing-special", ''
+            write_file "#{CURRENT_DIRECTORY}/nothing-special", ''
 
             fig(
               [%w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", value],
-              :current_directory => USER_HOME,
               :fork => false
             )
 
@@ -275,7 +262,7 @@ describe 'Fig' do
           value = "#{quote}nothing-special#{quote}"
 
           it %Q<with file «#{value}»> do
-            write_file "#{USER_HOME}/nothing-special", ''
+            write_file "#{CURRENT_DIRECTORY}/nothing-special", ''
 
             input = <<-"END"
               grammar v1
@@ -285,12 +272,7 @@ describe 'Fig' do
               config default
               end
             END
-            fig(
-              %w< --publish foo/1.2.3 >,
-              input,
-              :current_directory => USER_HOME,
-              :fork => false
-            )
+            fig %w< --publish foo/1.2.3 >, input, :fork => false
 
             check_published_grammar_version(0)
           end
@@ -395,12 +377,8 @@ describe 'Fig' do
               #{asset_type} #{value}
             END
 
-            out, err = fig(
-              ['--dump-package-definition-parsed'],
-              input,
-              :current_directory => USER_HOME,
-              :fork => false
-            )
+            out, err =
+              fig ['--dump-package-definition-parsed'], input, :fork => false
             out.should =~ /\b grammar [ ] v1 \b/x
             err.should == ''
           end

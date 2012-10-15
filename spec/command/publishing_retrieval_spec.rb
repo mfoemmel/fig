@@ -6,11 +6,12 @@ describe 'Fig' do
   describe 'publishing/retrieval' do
     let(:publish_from_directory)  { "#{FIG_SPEC_BASE_DIRECTORY}/publish-home" }
     let(:lib_directory)           { "#{publish_from_directory}/lib" }
-    let(:retrieve_directory)      { "#{FIG_SPEC_BASE_DIRECTORY}/retrieve" }
+    let(:retrieve_directory)      { "#{CURRENT_DIRECTORY}/retrieve" }
 
     before(:each) do
       clean_up_test_environment
-      FileUtils.mkdir_p(lib_directory)
+      FileUtils.mkdir_p CURRENT_DIRECTORY
+      FileUtils.mkdir_p lib_directory
     end
 
     describe 'retrieves resources' do
@@ -167,10 +168,10 @@ describe 'Fig' do
       fig(%w<--update>, input)
 
       File.read(
-        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello.h"
+        "#{CURRENT_DIRECTORY}/include2/prerequisite/include/hello.h"
       ).should == 'a header file'
       File.read(
-        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/include/hello2.h"
+        "#{CURRENT_DIRECTORY}/include2/prerequisite/include/hello2.h"
       ).should == 'another header file'
     end
 
@@ -204,10 +205,10 @@ describe 'Fig' do
       fig(%w<-u>, input)
 
       File.read(
-        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello.h"
+        "#{CURRENT_DIRECTORY}/include2/prerequisite/hello.h"
       ).should == 'a header file'
       File.read(
-        "#{FIG_SPEC_BASE_DIRECTORY}/include2/prerequisite/hello2.h"
+        "#{CURRENT_DIRECTORY}/include2/prerequisite/hello2.h"
       ).should == 'another header file'
     end
 
@@ -303,11 +304,11 @@ describe 'Fig' do
 
         FileUtils.rm_rf(FIG_HOME)
 
-        File.exist?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") and
+        File.exist?("#{CURRENT_DIRECTORY}/dangling-symlink") and
           fail 'Symlink should not exist prior to using package.'
 
         fig(%w<--update dependent/1.2.3 -- echo>)
-        File.symlink?("#{FIG_SPEC_BASE_DIRECTORY}/dangling-symlink") or
+        File.symlink?("#{CURRENT_DIRECTORY}/dangling-symlink") or
           fail 'Symlink should exist after using package.'
       end
     end
@@ -315,7 +316,7 @@ describe 'Fig' do
     describe 'cleanup' do
       let(:cleanup_dependency_basename) { 'from-dependency.txt' }
       let(:cleanup_dependency_file)     {
-        "#{FIG_SPEC_BASE_DIRECTORY}/#{cleanup_dependency_basename}"
+        "#{CURRENT_DIRECTORY}/#{cleanup_dependency_basename}"
       }
 
       before(:each) do

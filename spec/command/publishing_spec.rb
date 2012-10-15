@@ -305,7 +305,7 @@ describe 'Fig' do
       end
 
       it 'refuses to publish with --file and an environment variable option' do
-        write_file("#{FIG_SPEC_BASE_DIRECTORY}/example.fig", '')
+        write_file("#{CURRENT_DIRECTORY}/example.fig", '')
 
         out, err, exit_code =
           fig(
@@ -322,7 +322,7 @@ describe 'Fig' do
       describe 'with both a package.fig file in the current directory and an environment variable option' do
         before(:each) do
           write_file(
-            "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+            "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
             <<-END_PACKAGE_DOT_FIG
               config default
               end
@@ -355,10 +355,10 @@ describe 'Fig' do
       end
 
       it 'publishes resource to remote repository' do
-        FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
+        FileUtils.mkdir_p("#{CURRENT_DIRECTORY}/bin")
+        File.open("#{CURRENT_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?
-          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+          fail unless system "chmod +x #{CURRENT_DIRECTORY}/bin/hello.bat"
         end
         input = <<-END
           resource bin/hello.bat
@@ -373,10 +373,10 @@ describe 'Fig' do
       end
 
       it 'publishes resource to remote repository using command line' do
-        FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
+        FileUtils.mkdir_p("#{CURRENT_DIRECTORY}/bin")
+        File.open("#{CURRENT_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?
-          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+          fail unless system "chmod +x #{CURRENT_DIRECTORY}/bin/hello.bat"
         end
         fig(%w<--publish foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin>)
         fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
@@ -388,10 +388,10 @@ describe 'Fig' do
         # This shouldn't matter because the remote repo shouldn't be looked at.
         set_remote_repository_format_to_future_version()
 
-        FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
+        FileUtils.mkdir_p("#{CURRENT_DIRECTORY}/bin")
+        File.open("#{CURRENT_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} bar" }
         if Fig::OperatingSystem.unix?
-          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+          fail unless system "chmod +x #{CURRENT_DIRECTORY}/bin/hello.bat"
         end
         fig(
           %w<
@@ -423,10 +423,10 @@ describe 'Fig' do
       end
 
       it 'updates local packages if they already exist' do
-        FileUtils.mkdir_p("#{FIG_SPEC_BASE_DIRECTORY}/bin")
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} sheep" }
+        FileUtils.mkdir_p("#{CURRENT_DIRECTORY}/bin")
+        File.open("#{CURRENT_DIRECTORY}/bin/hello.bat", 'w') { |f| f << "#{ECHO_COMMAND} sheep" }
         if Fig::OperatingSystem.unix?
-          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+          fail unless system "chmod +x #{CURRENT_DIRECTORY}/bin/hello.bat"
         end
         fig(
           %w<
@@ -444,11 +444,11 @@ describe 'Fig' do
           >
         )[0].should == 'sheep'
 
-        File.open("#{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat", 'w') {
+        File.open("#{CURRENT_DIRECTORY}/bin/hello.bat", 'w') {
           |f| f << "#{ECHO_COMMAND} cheese"
         }
         if Fig::OperatingSystem.unix?
-          fail unless system "chmod +x #{FIG_SPEC_BASE_DIRECTORY}/bin/hello.bat"
+          fail unless system "chmod +x #{CURRENT_DIRECTORY}/bin/hello.bat"
         end
         fig(
           %w<

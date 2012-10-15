@@ -22,8 +22,11 @@ require 'fig/repository'
 FIG_SPEC_BASE_DIRECTORY = Dir.mktmpdir 'fig-rspec-'
 at_exit { FileUtils.rm_rf FIG_SPEC_BASE_DIRECTORY }
 
-USER_HOME         = FIG_SPEC_BASE_DIRECTORY + '/userhome'
-FIG_HOME          = FIG_SPEC_BASE_DIRECTORY + '/fighome'
+# "Current" as in current directory when running fig.
+CURRENT_DIRECTORY = FIG_SPEC_BASE_DIRECTORY + '/current-directory'
+
+USER_HOME         = FIG_SPEC_BASE_DIRECTORY + '/user-home'
+FIG_HOME          = FIG_SPEC_BASE_DIRECTORY + '/fig-home'
 FIG_REMOTE_DIR    = FIG_SPEC_BASE_DIRECTORY + '/remote'
 FIG_REMOTE_URL    = %Q<file://#{FIG_REMOTE_DIR}>
 
@@ -44,7 +47,7 @@ self.class.const_defined?(:FIG_PROGRAM) ||
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
-  File.expand_path(FIG_SPEC_BASE_DIRECTORY + '/file-guaranteed-to-exist')
+  File.expand_path(CURRENT_DIRECTORY + '/file-guaranteed-to-exist')
 
 # If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
 RUBY_EXE =
@@ -122,7 +125,7 @@ def fig(command_line, first_extra = nil, rest_extra = nil)
 
   out = err = exit_code = nil
 
-  current_directory = options[:current_directory] || FIG_SPEC_BASE_DIRECTORY
+  current_directory = options[:current_directory] || CURRENT_DIRECTORY
   Dir.chdir current_directory do
     standard_options = []
     standard_options.concat %w< --log-level warn >
@@ -267,16 +270,17 @@ def _run_command_internally(command_line, input, options)
 end
 
 def set_up_test_environment()
-  FileUtils.mkdir_p(FIG_SPEC_BASE_DIRECTORY)
-  FileUtils.mkdir_p(USER_HOME)
-  FileUtils.mkdir_p(FIG_HOME)
-  FileUtils.mkdir_p(FIG_REMOTE_DIR)
+  FileUtils.mkdir_p FIG_SPEC_BASE_DIRECTORY
+  FileUtils.mkdir_p CURRENT_DIRECTORY
+  FileUtils.mkdir_p USER_HOME
+  FileUtils.mkdir_p FIG_HOME
+  FileUtils.mkdir_p FIG_REMOTE_DIR
 
-  FileUtils.touch(FIG_FILE_GUARANTEED_TO_EXIST)
+  FileUtils.touch FIG_FILE_GUARANTEED_TO_EXIST
 
   metadata_directory =
-    File.join(FIG_REMOTE_DIR, Fig::Repository::METADATA_SUBDIRECTORY)
-  FileUtils.mkdir_p(metadata_directory)
+    File.join FIG_REMOTE_DIR, Fig::Repository::METADATA_SUBDIRECTORY
+  FileUtils.mkdir_p metadata_directory
 
   File.open(
     File.join(FIG_REMOTE_DIR, Fig::FigRC::REPOSITORY_CONFIGURATION), 'w'

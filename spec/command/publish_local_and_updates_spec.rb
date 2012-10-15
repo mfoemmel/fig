@@ -7,10 +7,7 @@ describe 'Fig' do
   end
 
   it %q<doesn't remove --publish-local packages during a failed --update.> do
-    fig(
-      %w<--publish-local publish-local/test --set foo=bar>,
-      :current_directory => USER_HOME
-    )
+    fig %w<--publish-local publish-local/test --set foo=bar>
 
     out, err, exit_code = fig(
       %w<publish-local/test --get foo>, :fork => false
