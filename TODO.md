@@ -42,7 +42,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
     * Including those with special characters.
     * Test effects of escapes.
 * Test that v0 grammar results in double-quoted "resources.tar.gz" and v1 grammar single quotes it.
-* Get all the tests' `$PWD` out of `spec/runtime-work` and into `spec/runtime-work/userhome` so that we're properly testing paths to things.  Too many of the tests are counting on files being in `$HOME`.
+* ~~Get all the tests' `$PWD` out of `spec/runtime-work` and into `spec/runtime-work/userhome` so that we're properly testing paths to things.  Too many of the tests are counting on files being in `$HOME`.~~
 * Resource statements in published packages, particularly pointing to URLs. Resource statements containing URLs won't exist in any newly published packages, but they do in old ones.
 * ~~Should be able to read a v1 package.fig with a resource with "#" in it and then publish using v0.~~
 * ~~Serious testing of which grammar version stuff gets unparsed into.~~
