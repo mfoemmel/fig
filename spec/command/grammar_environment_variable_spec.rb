@@ -2,6 +2,8 @@
 require File.expand_path(File.dirname(__FILE__) + '/grammar_spec_helper')
 
 describe 'Fig' do
+  ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS = %w< ; : < > | >
+
   describe %q<uses the correct grammar version in the package definition created for publishing> do
     before(:each) do
       clean_up_test_environment
@@ -147,8 +149,6 @@ describe 'Fig' do
       end
     end
 
-    ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS = %w< ; : < > | >
-
     describe 'for --set' do
       it_behaves_like 'environment variable option', 'set'
 
@@ -283,6 +283,100 @@ describe 'Fig' do
           out.should =~ / \b append \s+ VARIABLE='#{Regexp.quote character}' /x
         end
       end
+    end
+  end
+
+  describe %q<rejects path statements from v0 package definition files containing> do
+    before(:each) do
+      clean_up_test_environment
+      set_up_test_environment
+    end
+
+    ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS.each do
+      |character|
+
+      it %Q<«#{character}»> do
+        input = <<-END
+          grammar v0
+          config default
+            add VARIABLE=x#{character}x
+          end
+        END
+
+        out, err, exit_code =
+          fig [], input, :no_raise_on_error => true, :fork => false
+        err.should =~
+          /value of path variable VARIABLE.*contains.*x#{Regexp.quote character}x/
+        out.should == ''
+        exit_code.should_not == 0
+      end
+    end
+
+    it %Q<«'»> do
+      input = <<-END
+        grammar v0
+        config default
+          add VARIABLE=x'x
+        end
+      END
+
+      out, err, exit_code =
+        fig [], input, :no_raise_on_error => true, :fork => false
+      err.should =~ /value of VARIABLE.*contains.*single quote/
+      out.should == ''
+      exit_code.should_not == 0
+    end
+
+    it %Q<«"»> do
+      input = <<-END
+        grammar v0
+        config default
+          add VARIABLE=x"x
+        end
+      END
+
+      out, err, exit_code =
+        fig [], input, :no_raise_on_error => true, :fork => false
+      err.should =~ /value of VARIABLE.*contains.*double quote/
+      out.should == ''
+      exit_code.should_not == 0
+    end
+  end
+
+  describe %q<rejects set statements from v0 package definition files containing> do
+    before(:each) do
+      clean_up_test_environment
+      set_up_test_environment
+    end
+
+    it %Q<«'»> do
+      input = <<-END
+        grammar v0
+        config default
+          set VARIABLE=x'x
+        end
+      END
+
+      out, err, exit_code =
+        fig [], input, :no_raise_on_error => true, :fork => false
+      err.should =~ /value of VARIABLE.*contains.*single quote/
+      out.should == ''
+      exit_code.should_not == 0
+    end
+
+    it %Q<«"»> do
+      input = <<-END
+        grammar v0
+        config default
+          set VARIABLE=x"x
+        end
+      END
+
+      out, err, exit_code =
+        fig [], input, :no_raise_on_error => true, :fork => false
+      err.should =~ /value of VARIABLE.*contains.*double quote/
+      out.should == ''
+      exit_code.should_not == 0
     end
   end
 end
