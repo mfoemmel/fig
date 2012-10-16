@@ -46,7 +46,7 @@ class Fig::Unparser::V0
     @text << 'retrieve '
     @text << statement.variable
     @text << '->'
-    @text << statement.tokenized_path.to_escaped_string
+    @text << statement.tokenized_path.to_double_quoted_string
     @text << "\n"
 
     return

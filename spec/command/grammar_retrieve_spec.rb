@@ -16,7 +16,7 @@ describe 'Fig' do
     end
 
     it 'from v1 file input with a simple, single-quoted retrieve statement (v1 currently, should change to v0 eventually)' do
-      check_published_grammar_version 1, <<-'END'
+      check_published_grammar_version 0, <<-'END'
         grammar v1
         retrieve variable->'value'
       END

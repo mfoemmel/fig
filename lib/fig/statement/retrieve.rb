@@ -73,12 +73,6 @@ class Fig::Statement::Retrieve < Fig::Statement
   private
 
   def minimum_grammar()
-    if tokenized_path.single_quoted?
-      # TODO: we should be able to escape square brackets and get down to v0,
-      # but not taking the time now.
-      return [1, 'was single quoted in input']
-    end
-
     path = tokenized_path.to_escaped_string
     if path =~ /\s/
       return [1, 'contains whitespace']
@@ -88,6 +82,14 @@ class Fig::Statement::Retrieve < Fig::Statement
     # regex.
     if path =~ /#/
       return [1, 'contains a comment ("#") character']
+    end
+
+    if path =~ %r< ' >x
+      return [1, %Q<contains a single quote character>]
+    end
+
+    if path =~ %r< " >x
+      return [1, %Q<contains a double quote character>]
     end
 
     if path =~ %r< ( [^a-zA-Z0-9_/.\[\]-] ) >x
