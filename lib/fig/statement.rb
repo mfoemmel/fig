@@ -52,7 +52,7 @@ class Fig::Statement
   # A name for this kind of Statement, usually a keyword for this statement as
   # it appears in package definition files.
   def statement_type()
-    raise NotImplementedError
+    raise NotImplementedError.new self.class.name
   end
 
   # Block will receive a Statement.
@@ -61,19 +61,19 @@ class Fig::Statement
   end
 
   def unparse_as_version(unparser)
-    raise NotImplementedError
+    raise NotImplementedError.new self.class.name
   end
 
   # Returns a two element array containing the version and an explanation of
   # why the version is necessary if the version is greater than 0.
   def minimum_grammar_for_emitting_input()
-    raise NotImplementedError
+    raise NotImplementedError.new self.class.name
   end
 
   # Returns a two element array containing the version and an explanation of
   # why the version is necessary if the version is greater than 0.
   def minimum_grammar_for_publishing()
-    raise NotImplementedError
+    raise NotImplementedError.new self.class.name
   end
 
   def urls()

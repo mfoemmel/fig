@@ -20,6 +20,10 @@ class Fig::Statement::GrammarVersion < Fig::Statement
     return unparser.grammar_version(self)
   end
 
+  def minimum_grammar_for_emitting_input()
+    return [version]
+  end
+
   def minimum_grammar_for_publishing()
     return [version]
   end
