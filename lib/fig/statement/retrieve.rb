@@ -8,7 +8,7 @@ module Fig; end
 # directory when an environment variable has its value changed.
 class Fig::Statement::Retrieve < Fig::Statement
   def self.tokenize_path(path, &error_block)
-    tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER
+    tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER, '\\['
     return tokenizer.tokenize path, &error_block
   end
 

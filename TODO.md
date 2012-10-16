@@ -37,7 +37,7 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 
 # Tests
 
-* Put spaces into filenames in all the tests.  Can't do this until environment variable statements can handle whitespace.
+* ~~Put spaces into filenames in all the tests.  Can't do this until environment variable statements can handle whitespace.~~
 * Test actual asset globbing/non-globbing of disk files
     * Including those with special characters.
     * Test effects of escapes.

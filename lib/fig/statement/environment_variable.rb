@@ -57,7 +57,7 @@ module Fig::Statement::EnvironmentVariable
     end
 
     def tokenize_value(value, &error_block)
-      tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER
+      tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER, '@'
       return tokenizer.tokenize value, &error_block
     end
 

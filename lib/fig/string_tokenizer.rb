@@ -21,8 +21,13 @@ class Fig::StringTokenizer
   # a Fig::TokenizedString::Token representing the special handling of the
   # consumed text.  If there was a problem, then the error block should have
   # been invoked and the block should return nil.
-  def initialize(subexpression_matchers = [])
+  #
+  #
+  # metacharacters is a regular expression character class for characters that
+  # need to be escaped when un-single quoting a string.
+  def initialize(subexpression_matchers = [], metacharacters = '')
     @subexpression_matchers = subexpression_matchers
+    @metacharacters         = metacharacters
 
     return
   end
@@ -45,7 +50,7 @@ class Fig::StringTokenizer
 
     return if @segments.empty?
 
-    return Fig::TokenizedString.new(@segments, @single_quoted)
+    return Fig::TokenizedString.new(@segments, @single_quoted, @metacharacters)
   end
 
   private

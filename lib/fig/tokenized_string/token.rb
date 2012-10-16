@@ -20,6 +20,10 @@ class Fig::TokenizedString::Token
     return raw_value
   end
 
+  def to_double_quoted_string(metacharacters)
+    return raw_value
+  end
+
   def to_single_quoted_string()
     raise NotImplementedError.new 'Cannot single-quote a token.'
   end

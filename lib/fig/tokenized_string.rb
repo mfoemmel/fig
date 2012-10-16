@@ -1,9 +1,10 @@
 module Fig; end
 
 class Fig::TokenizedString
-  def initialize(segments, single_quoted)
-    @segments      = segments
-    @single_quoted = single_quoted
+  def initialize(segments, single_quoted, metacharacters)
+    @segments       = segments
+    @single_quoted  = single_quoted
+    @metacharacters = metacharacters
 
     return
   end
@@ -32,6 +33,16 @@ class Fig::TokenizedString
 
     return (
       @segments.collect {|segment| segment.to_single_quoted_string}
+    ).join ''
+  end
+
+  def to_double_quoted_string()
+    return to_escaped_string if ! single_quoted?
+
+    return (
+      @segments.collect {
+        |segment| segment.to_double_quoted_string @metacharacters
+      }
     ).join ''
   end
 end

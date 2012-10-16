@@ -25,7 +25,7 @@ class Fig::Unparser::V0
     add_indent
 
     @text << %q<command ">
-    @text << statement.command.first.to_escaped_string
+    @text << statement.command.first.to_double_quoted_string
     @text << %Q<"\n>
 
     return

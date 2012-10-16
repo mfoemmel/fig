@@ -56,8 +56,8 @@ describe 'Fig' do
       END
     end
 
-    it 'from v1 file input with a single-quoted command statement (v1 currently, should change to v0 eventually)' do
-      check_published_grammar_version 1, <<-'END'
+    it 'from v1 file input with a single-quoted command statement' do
+      check_published_grammar_version 0, <<-'END'
         grammar v1
         config default
           command 'bar baz' end

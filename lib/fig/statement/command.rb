@@ -11,7 +11,7 @@ class Fig::Statement::Command < Fig::Statement
   def self.validate_and_process_escapes_in_argument(
     command_line_argument, &block
   )
-    tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER
+    tokenizer = Fig::StringTokenizer.new TOKENIZING_SUBEXPRESSION_MATCHER, '@'
 
     return tokenizer.tokenize command_line_argument, &block
   end
@@ -45,14 +45,7 @@ class Fig::Statement::Command < Fig::Statement
       return [1, 'contains multiple components']
     end
 
-    tokenized_argument = command.first
-    if tokenized_argument.single_quoted?
-      # TODO: we should be able to escape signs and get down to v0, but not
-      # taking the time now.
-      return [1, 'was single quoted in input']
-    end
-
-    argument = tokenized_argument.to_escaped_string
+    argument = command.first.to_escaped_string
 
     # Can't have octothorpes anywhere in v0 due to comment stripping via
     # regex.
