@@ -1,4 +1,3 @@
-require 'fig/package_descriptor'
 require 'fig/unparser'
 
 module Fig; end
