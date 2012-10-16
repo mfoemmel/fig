@@ -25,7 +25,7 @@ class Fig::Unparser::V0
     add_indent
 
     @text << %q<command ">
-    @text << statement.command.first.to_double_quoted_string
+    @text << statement.command.first.to_double_quotable_string
     @text << %Q<"\n>
 
     return
@@ -46,7 +46,7 @@ class Fig::Unparser::V0
     @text << 'retrieve '
     @text << statement.variable
     @text << '->'
-    @text << statement.tokenized_path.to_double_quoted_string
+    @text << statement.tokenized_path.to_double_quotable_string
     @text << "\n"
 
     return
@@ -80,14 +80,7 @@ class Fig::Unparser::V0
     @text << ' '
     @text << statement.name
     @text << '='
-
-    tokenized_value = statement.tokenized_value
-    if tokenized_value.single_quoted?
-      @text << tokenized_value.to_escaped_string.gsub('@', '\@')
-    else
-      @text << tokenized_value.to_escaped_string
-    end
-
+    @text << statement.tokenized_value.to_double_quotable_string
     @text << "\n"
 
     return

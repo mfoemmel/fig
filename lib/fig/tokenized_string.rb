@@ -36,12 +36,12 @@ class Fig::TokenizedString
     ).join ''
   end
 
-  def to_double_quoted_string()
+  def to_double_quotable_string()
     return to_escaped_string if ! single_quoted?
 
     return (
       @segments.collect {
-        |segment| segment.to_double_quoted_string @metacharacters
+        |segment| segment.to_double_quotable_string @metacharacters
       }
     ).join ''
   end

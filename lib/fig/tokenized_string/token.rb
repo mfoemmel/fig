@@ -20,7 +20,7 @@ class Fig::TokenizedString::Token
     return raw_value
   end
 
-  def to_double_quoted_string(metacharacters)
+  def to_double_quotable_string(metacharacters)
     return raw_value
   end
 

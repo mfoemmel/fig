@@ -32,7 +32,7 @@ class Fig::TokenizedString::PlainSegment
   end
 
   # Should not be invoked if original string was not single quoted.
-  def to_double_quoted_string(metacharacters)
+  def to_double_quotable_string(metacharacters)
     quoted_value = @raw_value.gsub %r< ( ["#{metacharacters}] ) >xm, '\\\\\1'
 
     quoted_value.gsub!(
