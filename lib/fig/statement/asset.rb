@@ -81,16 +81,7 @@ module Fig::Statement::Asset
 
   module ClassMethods
     def validate_and_process_escapes_in_location(location, &block)
-      tokenizer = Fig::StringTokenizer.new
-      tokenized_string = tokenizer.tokenize(location, &block)
-      return if ! tokenized_string
-
-      # "config" is a reasonable asset name, so we let that pass.
-      if Fig::Statement.strict_keyword?(tokenized_string.to_expanded_string)
-        yield 'is a keyword.'
-      end
-
-      return tokenized_string
+      return Fig::StringTokenizer.new.tokenize(location, &block)
     end
   end
 end

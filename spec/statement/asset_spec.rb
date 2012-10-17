@@ -9,13 +9,6 @@ require 'fig/statement/resource'
   |statement_type|
 
   describe statement_type do
-    TEST_KEYWORDS =
-      %w<
-        add      append    archive  command   end
-        include  override  path     resource  retrieve  set
-      >.freeze
-    TEST_KEYWORDS.each {|keyword| keyword.freeze}
-
     describe '.validate_and_process_escapes_in_location()' do
       def test_should_equal_and_should_glob(
         statement_type, original_location, location
@@ -61,8 +54,7 @@ require 'fig/statement/resource'
       end
 
       # "foo * bar": whitespace and glob character
-      # "config":    the one keyword we allow to be used everywhere
-      [%q<foo * bar>, 'config'].each do
+      [%q<foo * bar>].each do
         |original_location|
 
         it %Q<does not modify «#{original_location}» and says that it should be globbed> do
@@ -137,26 +129,6 @@ require 'fig/statement/resource'
 
         it %Q<says «'foo \\#{character} bar'» isn't allowed> do
           test_contains_bad_escape(statement_type, %Q<'foo \\#{character} bar'>)
-        end
-      end
-
-      def test_is_a_keyword(statement_type, location)
-        test_got_error_message(statement_type, location, /is a keyword/i)
-
-        return
-      end
-
-      TEST_KEYWORDS.each do
-        |keyword|
-
-        it %Q<says «#{keyword}» is a keyword> do
-          test_is_a_keyword(statement_type, keyword)
-        end
-        it %Q<says «"#{keyword}"» is a keyword> do
-          test_is_a_keyword(statement_type, %Q<"#{keyword}">)
-        end
-        it %Q<says «'#{keyword}'» is a keyword> do
-          test_is_a_keyword(statement_type, %Q<'#{keyword}'>)
         end
       end
 

@@ -65,7 +65,6 @@ class Fig::PackageDescriptor
     validate_component name,    'name',    :name,    options
     validate_component version, 'version', :version, options
     validate_component config,  'config',  :config,  options
-    validate_name      options
     validate_across_components options
   end
 
@@ -110,17 +109,6 @@ class Fig::PackageDescriptor
 
     raise Fig::PackageDescriptorParseError.new(
       %Q<Invalid #{name} ("#{value}")#{standard_exception_suffix(options)}>,
-      @original_string
-    )
-  end
-
-  def validate_name(options)
-    return if @name.nil?
-
-    return if ! Fig::Statement.strict_keyword? @name
-
-    raise Fig::PackageDescriptorParseError.new(
-      %Q<Invalid package name; "#{@name}" is a keyword#{standard_exception_suffix(options)}>,
       @original_string
     )
   end

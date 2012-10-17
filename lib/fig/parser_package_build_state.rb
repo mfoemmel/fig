@@ -116,12 +116,6 @@ class Fig::ParserPackageBuildState
   end
 
   def new_configuration_statement(keyword_node, name_node, statements)
-    if Fig::Statement.strict_keyword? name_node.text_value
-      raise_invalid_value_parse_error(
-        keyword_node, name_node, 'name', 'is a keyword.'
-      )
-    end
-
     statement_objects = statements.elements.map do
       |statement|
 
