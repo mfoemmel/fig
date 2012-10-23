@@ -6,6 +6,8 @@ v0.2.0.beta.x
     reversed.  If changes are required to deal with that, there'll just be a
     new grammar version introduced.
 
+  - Fig can translate more v1 input into v0 output.
+
 v0.2.0.beta.1
 
   Backwards incompatibilities:
