@@ -549,7 +549,7 @@ class Fig::OperatingSystem
     when Net::HTTPRedirection then
       location = response['location']
       Fig::Logging.debug "Redirecting to #{location}."
-      download_via_http_get(location, file, limit - 1)
+      download_via_http_get(location, file, redirection_limit - 1)
     else
       Fig::Logging.debug "Download failed: #{response.code} #{response.message}."
       raise Fig::FileNotFoundError.new(
