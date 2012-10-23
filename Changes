@@ -8,6 +8,8 @@ v0.2.0.beta.x
 
   - Fig can translate more v1 input into v0 output.
 
+  - Fewer stack traces with network errors.
+
 v0.2.0.beta.1
 
   Backwards incompatibilities:

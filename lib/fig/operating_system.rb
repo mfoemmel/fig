@@ -125,35 +125,44 @@ class Fig::OperatingSystem
       Fig::Logging.fatal %Q<Unable to parse url: "#{url}">
       raise Fig::NetworkError.new
     end
-    case uri.scheme
-    when 'ftp'
-      ftp = Net::FTP.new(uri.host)
-      ftp_login(ftp, uri.host)
-      ftp.chdir(uri.path)
-      dirs = ftp.nlst
-      ftp.close
 
-      download_ftp_list(uri, dirs)
-    when 'ssh'
-      packages = []
-      Net::SSH.start(uri.host, uri.user) do |ssh|
-        ls = ssh.exec!("[ -d #{uri.path} ] && find #{uri.path}")
-        strip_paths_for_list(ls, packages, uri.path)
+    begin
+      case uri.scheme
+      when 'ftp'
+        ftp = Net::FTP.new(uri.host)
+        ftp_login(ftp, uri.host)
+        ftp.chdir(uri.path)
+        dirs = ftp.nlst
+        ftp.close
+
+        download_ftp_list(uri, dirs)
+      when 'ssh'
+        packages = []
+        Net::SSH.start(uri.host, uri.user) do |ssh|
+          ls = ssh.exec!("[ -d #{uri.path} ] && find #{uri.path}")
+          strip_paths_for_list(ls, packages, uri.path)
+        end
+        packages
+      when 'file'
+        packages = []
+        unescaped_path = CGI.unescape uri.path
+        return packages if ! File.exist?(unescaped_path)
+
+        ls = ''
+        Find.find(unescaped_path) { |file| ls << file.to_s; ls << "\n" }
+
+        strip_paths_for_list(ls, packages, unescaped_path)
+        return packages
+      else
+        Fig::Logging.fatal "Protocol not supported: #{url}"
+        raise Fig::NetworkError.new "Protocol not supported: #{url}"
       end
-      packages
-    when 'file'
-      packages = []
-      unescaped_path = CGI.unescape uri.path
-      return packages if ! File.exist?(unescaped_path)
-
-      ls = ''
-      Find.find(unescaped_path) { |file| ls << file.to_s; ls << "\n" }
-
-      strip_paths_for_list(ls, packages, unescaped_path)
-      return packages
-    else
-      Fig::Logging.fatal "Protocol not supported: #{url}"
-      raise Fig::NetworkError.new("Protocol not supported: #{url}")
+    rescue SocketError => error
+      Fig::Logging.debug error.message
+      raise Fig::NetworkError.new "#{url}: #{error.message}"
+    rescue Errno::ETIMEDOUT => error
+      Fig::Logging.debug error.message
+      raise Fig::NetworkError.new "#{url}: #{error.message}"
     end
   end
 
@@ -262,6 +271,9 @@ class Fig::OperatingSystem
         Fig::Logging.debug error.message
         raise Fig::FileNotFoundError.new error.message, url
       rescue SocketError => error
+        Fig::Logging.debug error.message
+        raise Fig::FileNotFoundError.new error.message, url
+      rescue Errno::ETIMEDOUT => error
         Fig::Logging.debug error.message
         raise Fig::FileNotFoundError.new error.message, url
       end

@@ -1,6 +1,8 @@
 require 'cgi'
 require 'uri'
 
+require 'fig/user_input_error'
+
 module Fig; end
 
 module Fig::URL
@@ -19,6 +21,11 @@ module Fig::URL
 
   # URI.parse() doesn't like space characters, unlike most of the world.
   def self.parse(url)
-    return URI.parse(url.gsub ' ', '+')
+    begin
+      return URI.parse(url.gsub ' ', '+')
+    rescue URI::InvalidURIError => error
+      raise Fig::UserInputError.new \
+        %Q<Cannot parse URL "#{url}": #{error.message}>
+    end
   end
 end
