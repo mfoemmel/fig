@@ -1,4 +1,4 @@
-v0.2.0.beta.x
+v0.2.0.beta.2
 
   Miscellaneous:
 
@@ -9,6 +9,8 @@ v0.2.0.beta.x
   - Fig can translate more v1 input into v0 output.
 
   - Fewer stack traces with network errors.
+
+  - Has not fully been tested with Ruby v1.8
 
 v0.2.0.beta.1
 
