@@ -26,7 +26,15 @@ class Fig::Command::Action::ListLocal
   end
 
   def execute()
-    @execution_context.repository.list_packages.sort.each {|item| puts item}
+    packages = @execution_context.repository.list_packages
+
+    if packages.empty?
+      if $stdout.tty?
+        puts 'No local packages exist.'
+      end
+    else
+      packages.sort.each {|item| puts item}
+    end
 
     return EXIT_SUCCESS
   end

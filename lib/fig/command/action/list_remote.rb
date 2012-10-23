@@ -30,7 +30,15 @@ class Fig::Command::Action::ListRemote
   end
 
   def execute()
-    @execution_context.repository.list_remote_packages.sort.each {|item| puts item}
+    packages = @execution_context.repository.list_remote_packages
+
+    if packages.empty?
+      if $stdout.tty?
+        puts 'No local packages exist.'
+      end
+    else
+      packages.sort.each {|item| puts item}
+    end
 
     return EXIT_SUCCESS
   end
