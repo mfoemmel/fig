@@ -5,6 +5,8 @@ require 'rbconfig'
 
 source 'http://rubygems.org'
 
+# ruby '1.9.2'
+
 # All environments
 gem 'colorize',          '>= 0.5.8'
 gem 'highline',          '>= 1.6.2'

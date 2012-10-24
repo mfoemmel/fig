@@ -1,8 +1,9 @@
 # Code changes
 
+* Require Ruby v1.9.2. See [[https://github.com/ultrasaurus/ruby_version_check]]
 * ~~Make use of Statement#is_environment_variable?().~~
 * ~~Change `URL.is_url?()` to match arbitrary RFC-compliant URLs.~~
-* Single-quoted command and retrieve statements that could be unparsed to v0 should be.
+* ~~Single-quoted command and retrieve statements that could be unparsed to v0 should be.~~
 * ~~Bad URLs (FIG_REMOTE_URL, asset paths) will result in ugly stack traces; need to turn these into reasonable error messages.~~
 * Retrieve statements should validate their paths the same way that path statements do.
 * Produce nice error messages when packages contain file names that Windows can't deal with.
@@ -48,17 +49,17 @@ Whitespace/quoting stuff in order to have a working command line.  It is current
 
 # Documentation
 
-* Clarify "URLs" that are either file-or-URL or proper URLs.
+* ~~Clarify "URLs" that are either file-or-URL or proper URLs.~~
 * ~~Document quoting, including the command-line option behaviors, e.g. `--resource 'foo'` vs `--resource "'foo'"` `--resource '"foo"'`.~~
 * ~~Redo all the statement descriptions, including quoting behaviors.~~
 * ~~Describe v0 vs v1 grammars.~~
 * ~~Document "looks like a URL".~~
 * Describe retrieve behavior in the presence of symlinks.
 * Document application configuration (the "Configuration" page in the wiki).
-* Document repository locking.
+* ~~Document repository locking.~~
 * ~~Document that command statements are only processed in published packages or with `--run-command-statement`.
 * ~~Document that exec(2) with a single command-line component goes through the shell, whereas multiple components do not.~~
-* The whole running commands vs. command-line expansion stuff needs reorganizing.
+* ~~The whole running commands vs. command-line expansion stuff needs reorganizing.~~
 
 # Paranoia / things to think about
 
