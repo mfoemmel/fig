@@ -28,7 +28,6 @@ group :development do
   gem 'rspec-core',         '>= 2.7.1'
   gem 'rspec-expectations', '>= 2.7.0'
   gem 'rspec-mocks',        '>= 2.7.0'
-  gem 'psych',              '>= 1.3.4'	# For Ubuntu 12.10 Ruby
 
   if 1.9 <= RbConfig::CONFIG['ruby_version'].to_f
     gem 'simplecov',        '>= 0.6.2'
