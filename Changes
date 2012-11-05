@@ -1,22 +1,4 @@
-v0.2.0.beta.2
-
-  Bug fix:
-
-  - Bad variable name with HTTP downloads fixed.
-
-  Miscellaneous:
-
-  - The restriction on using keywords in names introduced in v0.1.71 has been
-    reversed.  If changes are required to deal with that, there'll just be a
-    new grammar version introduced.
-
-  - Fig can translate more v1 input into v0 output.
-
-  - Fewer stack traces with network errors.
-
-  - Has not fully been tested with Ruby v1.8.
-
-v0.2.0.beta.1
+v0.2.1
 
   Backwards incompatibilities:
 
@@ -24,12 +6,18 @@ v0.2.0.beta.1
     square bracket ("[") that is not followed by "ackage]".  In other words,
     the following was previously acceptable:
 
-    retrieve VARIABLE->foo[bar]baz
+      retrieve VARIABLE->foo[bar]baz
 
-  You now will need to use the v1 grammar and escape the square bracket:
+    You now will need to use the v1 grammar and escape the square bracket:
 
-    grammar v1
-    retrieve VARIABLE->foo\[bar]baz
+      grammar v1
+      retrieve VARIABLE->foo\[bar]baz
+
+  - Next version will not support Ruby v1.8.
+
+  Bug fix:
+
+  - Bad variable name with HTTP downloads fixed.
 
   New features:
 
@@ -83,6 +71,19 @@ v0.2.0.beta.1
     https://github.com/mfoemmel/fig/wiki/v1-grammar.  It may be helpful to have
     a look at the old one, as well:
     https://github.com/mfoemmel/fig/wiki/v0-grammar
+
+  Miscellaneous:
+
+  - The restriction on using keywords in names introduced in v0.1.71 has been
+    reversed.  If changes are required to deal with that, there'll just be a
+    new grammar version introduced.
+
+  - Fewer stack traces with network errors.
+
+v0.2.0.beta.2
+v0.2.0.beta.1
+
+  - Test releases
 
 v0.1.81
 
