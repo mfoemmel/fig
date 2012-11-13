@@ -33,36 +33,17 @@ FIG_HOME          = FIG_SPEC_BASE_DIRECTORY + '/fig-home'
 FIG_REMOTE_DIR    = FIG_SPEC_BASE_DIRECTORY + '/remote'
 FIG_REMOTE_URL    = %Q<file://#{FIG_REMOTE_DIR}>
 
-# Ruby v1.8 won't let you do "CONSTANT ||= whatever".
-self.class.const_defined? :FIG_DIRECTORY or
-  self.class.const_set(
-    :FIG_DIRECTORY, File.expand_path(File.dirname(__FILE__)) + '/../bin'
-  )
-self.class.const_defined? :FIG_COMMAND_CLASS or
-  self.class.const_set :FIG_COMMAND_CLASS, Fig::Command
-
-FIG_PROGRAM       =
-self.class.const_defined?(:FIG_PROGRAM) ||
-  self.class.const_set(
-    :FIG_PROGRAM,
+FIG_DIRECTORY     ||= File.expand_path(File.dirname(__FILE__)) + '/../bin'
+FIG_COMMAND_CLASS ||= Fig::Command
+FIG_PROGRAM       ||=
     %Q<#{FIG_DIRECTORY}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
-  )
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
   File.expand_path(CURRENT_DIRECTORY + '/file-guaranteed-to-exist')
 
-# If/when support for v1.8 gets dropped, replace this with RbConfig.ruby().
-RUBY_EXE =
-  [
-    RbConfig::CONFIG['bindir'],
-    '/',
-    RbConfig::CONFIG['RUBY_INSTALL_NAME'],
-    RbConfig::CONFIG['EXEEXT']
-  ].join
-
-self.class.const_defined? :BASE_FIG_COMMAND_LINE or
-  self.class.const_set :BASE_FIG_COMMAND_LINE, [RUBY_EXE, FIG_PROGRAM]
+RUBY_EXE              ||= RbConfig.ruby
+BASE_FIG_COMMAND_LINE ||= [RUBY_EXE, FIG_PROGRAM]
 
 ENV['HOME']           = USER_HOME
 ENV['FIG_HOME']       = FIG_HOME
