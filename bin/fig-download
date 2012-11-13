@@ -1,5 +1,8 @@
 #!/usr/bin/env ruby
 
+( [1, 9, 2] <=> ( RUBY_VERSION.split(".").collect {|x| x.to_i} ) ) <= 0 or
+  abort "Ruby v1.9.2 is required; this is v#{RUBY_VERSION}."
+
 # todo copied from os.rb
 NOT_MODIFIED = 3
 NOT_FOUND = 4

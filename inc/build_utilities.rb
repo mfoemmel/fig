@@ -25,7 +25,7 @@ def add_dependencies(gemspec)
   gemspec.add_development_dependency 'rspec-expectations', '>= 2.7.0'
   gemspec.add_development_dependency 'rspec-mocks',        '>= 2.7.0'
 
-  # gemspec.required_ruby_version = '>= 1.9.2'
+  gemspec.required_ruby_version = '>= 1.9.2'
 
   if 1.9 <= RbConfig::CONFIG['ruby_version'].to_f
     gemspec.add_development_dependency 'simplecov',        '>= 0.6.2'

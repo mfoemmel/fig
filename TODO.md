@@ -1,6 +1,6 @@
 # Code changes
 
-* Require Ruby v1.9.2. See [[https://github.com/ultrasaurus/ruby_version_check]]
+* ~Require Ruby v1.9.2. See [[https://github.com/ultrasaurus/ruby_version_check]]~
 * ~~Make use of Statement#is_environment_variable?().~~
 * ~~Change `URL.is_url?()` to match arbitrary RFC-compliant URLs.~~
 * ~~Single-quoted command and retrieve statements that could be unparsed to v0 should be.~~

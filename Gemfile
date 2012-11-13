@@ -5,7 +5,7 @@ require 'rbconfig'
 
 source 'http://rubygems.org'
 
-# ruby '1.9.2'
+ruby '1.9.2'
 
 # All environments
 gem 'colorize',          '>= 0.5.8'
