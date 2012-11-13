@@ -5,7 +5,10 @@ require 'rbconfig'
 
 source 'http://rubygems.org'
 
-ruby '1.9.2'
+( [1, 9, 2] <=> ( RUBY_VERSION.split(".").collect {|x| x.to_i} ) ) <= 0 or
+  abort "Ruby v1.9.2 is required; this is v#{RUBY_VERSION}."
+
+ruby RUBY_VERSION
 
 # All environments
 gem 'colorize',          '>= 0.5.8'
