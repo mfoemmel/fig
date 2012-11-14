@@ -1,6 +1,6 @@
-require 'fig/application_configuration'
-
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+
+require 'fig/application_configuration'
 
 REPOSITORY_TEST_URL = 'http://example.com'
 WHITELIST_TEST_URL = 'http://foo.com'

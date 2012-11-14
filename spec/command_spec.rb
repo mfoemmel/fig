@@ -1,7 +1,7 @@
+require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
+
 require 'fig/command'
 require 'fig/package_descriptor'
-
-require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 describe 'Command (in-process, instead of external program)' do
   before(:each) do
