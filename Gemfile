@@ -31,9 +31,6 @@ group :development do
   gem 'rspec-core',         '>= 2.7.1'
   gem 'rspec-expectations', '>= 2.7.0'
   gem 'rspec-mocks',        '>= 2.7.0'
-
-  if 1.9 <= RbConfig::CONFIG['ruby_version'].to_f
-    gem 'simplecov',        '>= 0.6.2'
-    gem 'simplecov-html',   '>= 0.5.3'
-  end
+  gem 'simplecov',          '>= 0.6.2'
+  gem 'simplecov-html',     '>= 0.5.3'
 end
