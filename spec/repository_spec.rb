@@ -92,7 +92,7 @@ describe 'Repository' do
       end
 
       Fig::Logging.should_receive(:fatal).with(
-        /install failed.*#{exception_message}/i
+        %r<install of package-name/package-version failed.*#{exception_message}>i
       )
 
       descriptor = Fig::PackageDescriptor.new(

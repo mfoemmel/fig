@@ -269,11 +269,11 @@ class Fig::Repository
       install_package(descriptor, temp_dir)
     rescue Fig::FileNotFoundError => error
       Fig::Logging.fatal \
-        "Package #{descriptor.to_string()} not found in remote repository. (Was looking for #{error.path}.)"
+        "Package #{descriptor.to_string} not found in remote repository. (Was looking for #{error.path}.)"
 
       raise Fig::RepositoryError.new
     rescue StandardError => exception
-      Fig::Logging.fatal %Q<Install failed: #{exception}>
+      Fig::Logging.fatal %Q<Install of #{descriptor.to_string} failed: #{exception}>
 
       raise Fig::RepositoryError.new
     ensure
