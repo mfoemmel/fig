@@ -18,6 +18,10 @@ class Fig::Command::Action::DumpPackageDefinitionForCommandLine
     return nil
   end
 
+  def cares_about_package_content_options?()
+    return true
+  end
+
   def modifies_repository?()
     return false
   end
