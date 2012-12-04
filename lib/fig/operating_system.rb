@@ -19,6 +19,7 @@ require 'fig/environment_variables/case_sensitive'
 require 'fig/file_not_found_error'
 require 'fig/logging'
 require 'fig/network_error'
+require 'fig/repository_error'
 require 'fig/url'
 require 'fig/user_input_error'
 
@@ -445,7 +446,20 @@ class Fig::OperatingSystem
     Dir.chdir(dir) do
       ::Archive.read_open_filename(file) do |reader|
         while entry = reader.next_header
-          reader.extract(entry)
+          begin
+            reader.extract(entry)
+          rescue Archive::Error => exception
+            # Nice how the error message doesn't include any information about
+            # what was having the problem.
+            message = exception.message.sub /^Extract archive failed: /, ''
+            new_exception =
+              Fig::RepositoryError.new(
+                "Could not extract #{entry.pathname} from #{file}: #{message}"
+              )
+
+            new_exception.set_backtrace exception.backtrace
+            raise new_exception
+          end
         end
       end
     end
@@ -453,9 +467,9 @@ class Fig::OperatingSystem
 
   def shell_exec(command)
     if Fig::OperatingSystem.windows?
-      plain_exec( [ ENV['ComSpec'], '/c', command ] )
+      plain_exec [ ENV['ComSpec'], '/c', command ]
     else
-      plain_exec( [ ENV['SHELL'],   '-c', command ] )
+      plain_exec [ ENV['SHELL'],   '-c', command ]
     end
   end
 
