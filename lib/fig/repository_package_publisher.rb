@@ -267,10 +267,7 @@ class Fig::RepositoryPackagePublisher
     @operating_system.copy(
       asset_local, @local_dir_for_package + '/' + asset_name
     )
-    if (
-        asset_statement.is_a?(Fig::Statement::Archive)                &&
-        asset_statement.location != Fig::Repository::RESOURCES_FILE
-    )
+    if asset_statement.is_a?(Fig::Statement::Archive)
       @operating_system.unpack_archive(@local_dir_for_package, asset_name)
     end
 
