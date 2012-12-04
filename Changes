@@ -4,6 +4,10 @@ v0.2.2.beta.1
 
   - Now requires Ruby v1.9.2.
 
+  Miscellaneous:
+
+  - Small error message clarifications.
+
 v0.2.1
 
   Backwards incompatibilities:

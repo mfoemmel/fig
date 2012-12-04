@@ -415,7 +415,7 @@ class Fig::RuntimeEnvironment
         package = get_package(package_name)
         if package.nil?
           raise_repository_error(
-            %Q<Command-line referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>,
+            %Q<Command referenced the "#{package_name}" package, which has not been referenced by any other package, so there's nothing to substitute with.>,
             nil,
             nil
           )
