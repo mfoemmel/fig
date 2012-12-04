@@ -54,7 +54,7 @@ ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
 Fig::Logging.initialize_post_configuration(nil, 'off', true)
 
 class Popen
-  def self.setup_open3
+  def self.set_up_open3
     require 'open3'
     def self.popen(*cmd)
       exit_code = nil
@@ -70,9 +70,7 @@ class Popen
   end
 
   if Fig::OperatingSystem.windows?
-    setup_open3
-  elsif Fig::OperatingSystem.java?
-    setup_open3
+    set_up_open3
   else
     require 'open4'
     def self.popen(*cmd)

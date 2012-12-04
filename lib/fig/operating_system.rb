@@ -3,7 +3,7 @@ require 'fileutils'
 require 'find'
 # Must specify absolute path of ::Archive when using
 # this module to avoid conflicts with Fig::Statement::Archive
-require 'libarchive_ruby' unless RUBY_PLATFORM == 'java'
+require 'libarchive_ruby'
 require 'net/http'
 require 'net/ssh'
 require 'net/sftp'
@@ -32,10 +32,6 @@ class Fig::OperatingSystem
 
   def self.windows?
     RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
-  end
-
-  def self.java?
-    RUBY_PLATFORM == 'java'
   end
 
   def self.unix?
@@ -418,26 +414,22 @@ class Fig::OperatingSystem
 
   # Expects files_to_archive as an Array of filenames.
   def create_archive(archive_name, files_to_archive)
-    if Fig::OperatingSystem.java?
-      `tar czvf #{archive_name} #{files_to_archive.join(' ')}`
-    else
-      # TODO: Need to verify files_to_archive exists.
-      ::Archive.write_open_filename(
-        archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR
-      ) do |writer|
-        files_to_archive.each do |file_name|
-          writer.new_entry do |entry|
-            entry.copy_lstat(file_name)
-            entry.pathname = file_name
-            if entry.symbolic_link?
-              linked = File.readlink(file_name)
-              entry.symlink = linked
-            end
-            writer.write_header(entry)
+    # TODO: Need to verify files_to_archive exists.
+    ::Archive.write_open_filename(
+      archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR
+    ) do |writer|
+      files_to_archive.each do |file_name|
+        writer.new_entry do |entry|
+          entry.copy_lstat(file_name)
+          entry.pathname = file_name
+          if entry.symbolic_link?
+            linked = File.readlink(file_name)
+            entry.symlink = linked
+          end
+          writer.write_header(entry)
 
-            if entry.regular?
-              writer.write_data(open(file_name) {|f| f.binmode; f.read })
-            end
+          if entry.regular?
+            writer.write_data(open(file_name) {|f| f.binmode; f.read })
           end
         end
       end
@@ -451,13 +443,9 @@ class Fig::OperatingSystem
   # .zip
   def unpack_archive(dir, file)
     Dir.chdir(dir) do
-      if Fig::OperatingSystem.java?
-        `tar xzvf #{file}`
-      else
-        ::Archive.read_open_filename(file) do |reader|
-          while entry = reader.next_header
-            reader.extract(entry)
-          end
+      ::Archive.read_open_filename(file) do |reader|
+        while entry = reader.next_header
+          reader.extract(entry)
         end
       end
     end
