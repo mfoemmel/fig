@@ -149,6 +149,7 @@ class Fig::Command
     end
 
     $stderr.puts %q<Run "fig --help" for a full list of commands.>
+    check_package_content_options
 
     return Fig::Command::Action::EXIT_FAILURE
   end
