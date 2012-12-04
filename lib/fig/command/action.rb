@@ -39,7 +39,7 @@ module Fig::Command::Action
 
   # Does the action care about command-line options that affect package
   # contents, i.e. --resource/--archive?
-  def cares_about_package_content_options?()
+  def cares_about_asset_options?()
     return false
   end
 

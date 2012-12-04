@@ -51,7 +51,7 @@ class Fig::Command::Options
   attr_reader   :home
   attr_reader   :log_config
   attr_reader   :log_level
-  attr_reader   :package_contents_statements
+  attr_reader   :asset_statements
   attr_reader   :package_definition_file
   attr_reader   :parser
   attr_reader   :shell_command
@@ -191,7 +191,7 @@ class Fig::Command::Options
     set_up_remote_repository_access()
     set_up_commands()
     set_up_environment_statements()
-    set_up_package_contents_statements()
+    set_up_asset_statements()
     set_up_queries()
     set_up_program_configuration()
 
@@ -459,15 +459,15 @@ class Fig::Command::Options
     return
   end
 
-  def set_up_package_contents_statements()
-    @package_contents_statements = []
+  def set_up_asset_statements()
+    @asset_statements = []
     @parser.on(
       '--archive PATH',
       STARTS_WITH_NON_HYPHEN,
       'include PATH archive in package (when using --publish)'
     ) do |path|
-      @package_contents_statements <<
-        new_content_statement('--archive', path, Fig::Statement::Archive)
+      @asset_statements <<
+        new_asset_statement('--archive', path, Fig::Statement::Archive)
     end
 
     @parser.on(
@@ -475,8 +475,8 @@ class Fig::Command::Options
       STARTS_WITH_NON_HYPHEN,
       'include PATH resource in package (when using --publish)'
     ) do |path|
-      @package_contents_statements <<
-        new_content_statement('--resource', path, Fig::Statement::Resource)
+      @asset_statements <<
+        new_asset_statement('--resource', path, Fig::Statement::Resource)
     end
 
     return
@@ -608,7 +608,7 @@ class Fig::Command::Options
     return statement_class.new(nil, "#{option} option", variable, value)
   end
 
-  def new_content_statement(option, raw_path, statement_class)
+  def new_asset_statement(option, raw_path, statement_class)
     tokenized_path =
       statement_class.validate_and_process_escapes_in_location(raw_path) do
         |error_description|

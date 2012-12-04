@@ -19,7 +19,7 @@ module Fig::Command::Action::Role::Publish
     return true
   end
 
-  def cares_about_package_content_options?()
+  def cares_about_asset_options?()
     return true
   end
 
@@ -48,10 +48,10 @@ module Fig::Command::Action::Role::Publish
   end
 
   def configure(options)
-    @descriptor                   = options.descriptor
-    @environment_statements       = options.environment_statements
-    @package_contents_statements  = options.package_contents_statements
-    @force                        = options.force?
+    @descriptor             = options.descriptor
+    @environment_statements = options.environment_statements
+    @asset_statements       = options.asset_statements
+    @force                  = options.force?
 
     return
   end
@@ -70,7 +70,7 @@ module Fig::Command::Action::Role::Publish
 
     if not @environment_statements.empty?
       derive_publish_statements_from_environment_statements
-    elsif not @package_contents_statements.empty?
+    elsif not @asset_statements.empty?
       raise Fig::UserInputError.new(
         '--resource/--archive options were specified, but no --set/--append option was given. Will not publish.'
       )
@@ -104,7 +104,7 @@ module Fig::Command::Action::Role::Publish
     end
 
     @publish_statements =
-      @package_contents_statements +
+      @asset_statements +
       [
         Fig::Statement::Configuration.new(
           nil,

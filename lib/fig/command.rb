@@ -58,7 +58,7 @@ class Fig::Command
     if actions.any? {|action| not action.allow_both_descriptor_and_file? }
       ensure_descriptor_and_file_were_not_both_specified()
     end
-    check_package_content_options()
+    check_asset_options()
 
     configure()
     set_up_base_package()
@@ -149,7 +149,7 @@ class Fig::Command
     end
 
     $stderr.puts %q<Run "fig --help" for a full list of commands.>
-    check_package_content_options
+    check_asset_options
 
     return Fig::Command::Action::EXIT_FAILURE
   end
@@ -381,12 +381,12 @@ class Fig::Command
     return
   end
 
-  def check_package_content_options()
-    statements = @options.package_contents_statements
+  def check_asset_options()
+    statements = @options.asset_statements
     return if statements.empty?
 
     return if @options.actions.any? \
-      {|action| action.cares_about_package_content_options?}
+      {|action| action.cares_about_asset_options?}
 
     statements.each do
       |statement|

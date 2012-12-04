@@ -18,7 +18,7 @@ class Fig::Command::Action::DumpPackageDefinitionForCommandLine
     return nil
   end
 
-  def cares_about_package_content_options?()
+  def cares_about_asset_options?()
     return true
   end
 
@@ -39,15 +39,15 @@ class Fig::Command::Action::DumpPackageDefinitionForCommandLine
   end
 
   def configure(options)
-    @environment_statements       = options.environment_statements
-    @package_contents_statements  = options.package_contents_statements
+    @environment_statements = options.environment_statements
+    @asset_statements       = options.asset_statements
 
     return
   end
 
   def execute()
     text_assembler = Fig::PackageDefinitionTextAssembler.new :emit_as_input
-    text_assembler.add_output @package_contents_statements
+    text_assembler.add_output @asset_statements
     text_assembler.add_output [
       Fig::Statement::Configuration.new(
         nil,
