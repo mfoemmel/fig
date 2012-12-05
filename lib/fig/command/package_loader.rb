@@ -5,6 +5,8 @@ module Fig; end
 class Fig::Command; end
 
 class Fig::Command::PackageLoader
+  attr_reader :package_loaded_from_path
+
   DEFAULT_FIG_FILE = 'package.fig'
 
   def initialize(
@@ -43,8 +45,9 @@ class Fig::Command::PackageLoader
     if @package_loaded_from_path
       return @package_loaded_from_path
     elsif @descriptor
-      return
-        Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, nil)
+      return Fig::PackageDescriptor.format(
+        @descriptor.name, @descriptor.version, nil
+      )
     end
 
     return nil
@@ -92,14 +95,17 @@ class Fig::Command::PackageLoader
 
     source_description = package_source_description()
 
+    descriptor = Fig::PackageDescriptor.new(
+      nil,
+      nil,
+      nil,
+      :description => source_description,
+      :source_description => source_description
+    )
+
     @base_package =
       Fig::Parser.new(@application_configuration, :check_include_versions).parse_package(
-        Fig::PackageDescriptor.new(
-          nil, nil, nil, :source_description => source_description
-        ),
-        '.',
-        source_description,
-        definition_text
+        descriptor, '.', source_description, definition_text
       )
 
     return
@@ -109,6 +115,7 @@ class Fig::Command::PackageLoader
     @base_package = Fig::Package.new(
       nil,
       nil,
+      'synthetic',
       '.',
       [
         Fig::Statement::Configuration.new(

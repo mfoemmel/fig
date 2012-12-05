@@ -25,7 +25,11 @@ def new_example_package(environment, name, extra_statements, variable_value)
 
   package =
     Fig::Package.new(
-      name, standard_package_version(name), "#{name}-directory", statements
+      name,
+      standard_package_version(name),
+      'test',
+      "#{name}-directory",
+      statements
     )
 
   environment.register_package(package)
@@ -93,7 +97,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   )
   environment.register_package(
     Fig::Package.new(
-      'has_command', 'version', 'directory',
+      'has_command', 'version', 'test', 'directory',
       [
         Fig::Statement::Configuration.new(
           nil,
@@ -124,7 +128,9 @@ end
 def substitute_command(command)
   environment = new_example_environment
   base_package =
-    Fig::Package.new('test-package', 'test-version', 'test-directory', [])
+    Fig::Package.new(
+      'test-package', 'test-version', 'test-description', 'test-directory', []
+    )
 
   tokenized_command = command.map {
     |argument|
@@ -153,7 +159,9 @@ end
 def substitute_variable(variable_value, retrieve_vars = {})
   environment = new_example_environment(variable_value, retrieve_vars)
   base_package =
-    Fig::Package.new('test-package', 'test-version', 'test-directory', [])
+    Fig::Package.new(
+      'test-package', 'test-version', 'test-description', 'test-directory', []
+    )
 
   output = nil
   variables = generate_shell_variable_expansions

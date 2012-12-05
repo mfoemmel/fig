@@ -51,7 +51,7 @@ class Fig::IncludeBacktrace
     for descriptor in stack
       indent=''
       i.times { indent += '  ' }
-      out.puts indent + descriptor.to_string(:use_default_config)
+      out.puts indent + descriptor.to_string(:use_default_config, :use_description)
       i += 1
     end
   end

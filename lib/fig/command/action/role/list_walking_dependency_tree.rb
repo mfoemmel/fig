@@ -28,7 +28,8 @@ module Fig::Command::Action::Role::ListWalkingDependencyTree
         Fig::PackageDescriptor.new(
           base_package.name(),
           base_package.version(),
-          config_name
+          config_name,
+          :description => base_package.description
         )
       )
 

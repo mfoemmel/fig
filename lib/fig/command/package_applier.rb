@@ -66,7 +66,10 @@ class Fig::Command::PackageApplier
         nil,
         %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
         Fig::PackageDescriptor.new(
-          @base_package.name(), @base_package.version(), @base_config
+          @base_package.name(),
+          @base_package.version(),
+          @base_config,
+          :description => @base_package.description
         ),
         nil
       )
@@ -82,7 +85,9 @@ class Fig::Command::PackageApplier
         configuration_statements.flatten()
       )
 
-    return Fig::Package.new(nil, nil, '.', [configuration_statement])
+    return Fig::Package.new(
+      nil, nil, 'command-line', '.', [configuration_statement]
+    )
   end
 
   def make_no_such_package_exception_descriptive(exception)

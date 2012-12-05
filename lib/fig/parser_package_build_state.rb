@@ -65,6 +65,7 @@ class Fig::ParserPackageBuildState
     return Fig::Package.new(
       @descriptor.name,
       @descriptor.version,
+      @descriptor.description,
       directory,
       statement_objects
     )

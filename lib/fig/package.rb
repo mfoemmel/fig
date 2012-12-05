@@ -20,14 +20,16 @@ class Fig::Package
 
   attr_reader   :name
   attr_reader   :version
+  attr_reader   :description
   attr_reader   :directory
   attr_reader   :statements
   attr_accessor :backtrace
   attr_accessor :unparsed_text
 
-  def initialize(name, version, directory, statements)
+  def initialize(name, version, description, directory, statements)
     @name                 = name
     @version              = version
+    @description          = description
     @directory            = directory
     @statements           = statements
     @applied_config_names = []
@@ -39,7 +41,9 @@ class Fig::Package
       return stmt if stmt.is_a?(Fig::Statement::Configuration) && stmt.name == config_name
     end
 
-    descriptor = Fig::PackageDescriptor.new(@name, @version, config_name)
+    descriptor = Fig::PackageDescriptor.new(
+      @name, @version, config_name, :description => @description
+    )
     config_description = nil
     if @name.nil? and @version.nil?
       config_description = config_name

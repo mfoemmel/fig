@@ -7,10 +7,15 @@ module Fig; end
 class Fig::PackageDescriptor
   include Comparable
 
-  attr_reader :name, :version, :config, :original_string
+  attr_reader :name, :version, :config, :original_string, :description
 
-  def self.format(name, version, config, use_default_config = false)
-    string = name || ''
+  def self.format(
+    name, version, config, use_default_config = false, description = nil
+  )
+    string = name
+    if ! string
+      string = description ? "<#{description}>" : ''
+    end
 
     if version
       string += '/'
@@ -50,6 +55,8 @@ class Fig::PackageDescriptor
   #   :version                        => { :required | :forbidden }
   #   :config                         => { :required | :forbidden }
   #   :original_string                => the unparsed form
+  #   :description                    => meta-information, if this is for a
+  #                                      synthetic package
   #   :require_at_least_one_component => should we have at least one of
   #                                      name, version, and config
   #   :validation_context             => what the descriptor is for
@@ -61,6 +68,7 @@ class Fig::PackageDescriptor
     @version         = version
     @config          = config
     @original_string = options[:original_string]
+    @description     = options[:description]
 
     validate_component name,    'name',    :name,    options
     validate_component version, 'version', :version, options
@@ -69,9 +77,13 @@ class Fig::PackageDescriptor
   end
 
   # Specifically not named :to_s because it doesn't act like that should.
-  def to_string(use_default_config = false)
+  def to_string(use_default_config = false, use_description = false)
     return Fig::PackageDescriptor.format(
-      @name, @version, @config, use_default_config
+      @name,
+      @version,
+      @config,
+      use_default_config,
+      use_description ? @description : nil
     )
   end
 

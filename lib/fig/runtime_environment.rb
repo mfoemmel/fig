@@ -84,7 +84,12 @@ class Fig::RuntimeEnvironment
     new_backtrace = backtrace ||
       Fig::IncludeBacktrace.new(
         nil,
-        Fig::PackageDescriptor.new(package.name, package.version, config_name)
+        Fig::PackageDescriptor.new(
+          package.name,
+          package.version,
+          config_name,
+          :description => package.description
+        )
       )
 
     config = package[config_name]

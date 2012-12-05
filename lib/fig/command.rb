@@ -71,7 +71,8 @@ class Fig::Command
       @environment,
       @repository,
       @operating_system,
-      @package_source_description
+      @package_source_description,
+      @package_loaded_from_path
     )
 
     actions.each do
@@ -130,7 +131,8 @@ class Fig::Command
       :environment,
       :repository,
       :operating_system,
-      :package_source_description
+      :package_source_description,
+      :package_loaded_from_path
     )
 
   def handle_nothing_to_do()
@@ -297,6 +299,7 @@ class Fig::Command
       @base_package = package_loader.load_package_object_from_file()
     end
     @package_source_description = package_loader.package_source_description()
+    @package_loaded_from_path = package_loader.package_loaded_from_path()
 
     return
   end
