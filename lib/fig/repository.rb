@@ -336,7 +336,14 @@ class Fig::Repository
   def read_package_from_directory(directory, descriptor)
     dot_fig_file = File.join(directory, PACKAGE_FILE_IN_REPO)
     if not File.exist?(dot_fig_file)
-      Fig::Logging.fatal %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}". There is nothing in "#{dot_fig_file}".>
+      message =
+        %Q<Fig file not found for package "#{descriptor.name || '<unnamed>'}". There is nothing in "#{dot_fig_file}".>
+      if ! @update_condition
+        message +=
+          ' You might want to try specifying the --update or --update-if-missing options.'
+      end
+
+      Fig::Logging.fatal message
       raise Fig::RepositoryError.new
     end
 
