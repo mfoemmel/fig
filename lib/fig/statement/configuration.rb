@@ -1,5 +1,6 @@
 require 'fig/statement'
 require 'fig/statement/command'
+require 'fig/statement/synthetic_raw_text'
 
 module Fig; end
 
@@ -18,7 +19,12 @@ class Fig::Statement::Configuration < Fig::Statement
       |statement| statement.is_a?(Fig::Statement::Override)
     end
 
-    @statements = [overrides, others].flatten
+    text = []
+    if ! overrides.empty?
+      text << Fig::Statement::SyntheticRawText.new(nil, nil, "\n")
+    end
+
+    @statements = [overrides, text, others].flatten
   end
 
   def statement_type()

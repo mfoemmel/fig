@@ -195,6 +195,12 @@ module Fig::Unparser
     return
   end
 
+  def synthetic_raw_text(statement)
+    @text << statement.text
+
+    return
+  end
+
   def grammar_description
     raise NotImplementedError
   end
