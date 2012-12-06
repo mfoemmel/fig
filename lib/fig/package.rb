@@ -126,14 +126,6 @@ class Fig::Package
     return
   end
 
-  def ==(other)
-    return false if other.nil?
-
-    return @name == other.name &&
-           @version == other.version &&
-           @statements.to_yaml == other.statements.to_yaml
-  end
-
   def to_s
     name    = @name || UNPUBLISHED
     version = @version || '<empty>'
