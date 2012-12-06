@@ -356,12 +356,15 @@ class Fig::RuntimeEnvironment
   end
 
   def retrieve_files(variable_name, variable_value, package, backtrace)
+    destination_path =
+      derive_retrieve_destination(variable_name, variable_value, package)
+
+    # Check this *after* determining destination so that
+    # derive_retrieve_destination() can mark retrieve statements as being
+    # referenced.
     check_source_existence(
       variable_name, variable_value, package, backtrace
     )
-
-    destination_path =
-      derive_retrieve_destination(variable_name, variable_value, package)
 
     @working_directory_maintainer.switch_to_package_version(
       package.name, package.version
