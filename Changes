@@ -6,9 +6,20 @@ v0.2.2.beta.1
 
   Miscellaneous:
 
-  - Error message clarifications.  Stack traces of includes contain file names
-    and "command-line" if the includes came from package definition files or
-    from "--include" options.
+  - Error message clarifications.
+
+  - Stack traces of includes contain file names and "command-line" if the
+    includes came from package definition files or from "--include" options.
+    E.g.
+
+      fig --update --list-variables --include thingy/1.0.0.30 --file some-dependencies.fig --config blahblahblah
+
+      Version mismatch for package thingy (1.0.0.30 vs 1.0.0.81).
+      <command-line>:default
+        thingy/1.0.0.30:default
+      <command-line>:default
+        <some-dependencies.fig>:blahblahblah
+          thingy/1.0.0.81:default
 
 v0.2.1
 
