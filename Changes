@@ -6,7 +6,7 @@ v0.2.2.beta.1
 
   Miscellaneous:
 
-  - Error message clarifications.
+  - Clearer error messages.
 
   - Stack traces of includes contain file names and "command-line" if the
     includes came from package definition files or from "--include" options.

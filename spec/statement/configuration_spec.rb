@@ -6,6 +6,7 @@ require 'fig/statement/include'
 require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
+require 'fig/statement/synthetic_raw_text'
 
 describe 'Statement::Configuration' do
   it 'moves override statements to the front of the set of statements' do
@@ -28,7 +29,11 @@ describe 'Statement::Configuration' do
       [command, override_c, incorporate, override_b, path, override_a, set]
     )
 
-    config.statements.should ==
+    statements_to_be_checked =
+      config.statements.reject {
+        |statement| statement.is_a? Fig::Statement::SyntheticRawText
+      }
+    statements_to_be_checked.should ==
       [override_c, override_b, override_a, command, incorporate, path, set]
   end
 end
