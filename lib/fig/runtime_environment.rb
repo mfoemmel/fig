@@ -4,8 +4,8 @@ require 'fig/include_backtrace'
 require 'fig/logging'
 require 'fig/package'
 require 'fig/repository_error'
-require 'fig/statement/command'
 require 'fig/statement/include'
+require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
 require 'fig/user_input_error'
@@ -149,12 +149,6 @@ class Fig::RuntimeEnvironment
       include_config(package, statement.descriptor, backtrace)
     when Fig::Statement::Override
       backtrace.add_override(statement)
-    when Fig::Statement::Command
-      # Skip - has no effect on environment.
-    else
-      text, * =
-        Fig::Unparser.determine_version_and_unparse(statement, :emit_as_input)
-      raise "Unexpected statement in a config block: #{text.strip}"
     end
 
     return
