@@ -1,3 +1,25 @@
+v0.2.2.beta.3
+
+  Miscellaneous:
+
+  - Warns about environment variables that refer to non-existent paths after
+    publishing.
+
+      fig --publish package/version --set foo=@/bar
+
+      Checking status of package/version...
+      Publishing package/version.
+      Publishing using the v0 grammar.
+      The foo variable points to a path that does not exist
+      (/tmp/fig-testing/home/repos/package/version/bar); retrieve statements
+      that are active when this package is included may fail.
+
+    Note that this check is done after the package has been successfully
+    published; it does not prevent problems, but only detects potential ones.
+    Due to the indirect and inexact relationship between paths from asset
+    statements and environment variable statements, the check cannot be done
+    before publishing.
+
 v0.2.2.beta.2
 
   Miscellaneous:

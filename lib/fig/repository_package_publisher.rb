@@ -56,7 +56,7 @@ class Fig::RepositoryPackagePublisher
     @operating_system.delete_and_recreate_directory(@local_dir_for_package)
 
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
-    content = derive_definition_file
+    content, published_package = derive_definition_file
     @operating_system.write(fig_file, content)
 
     publish_package_contents
@@ -68,6 +68,8 @@ class Fig::RepositoryPackagePublisher
     notify_listeners
 
     FileUtils.rm_rf(temp_dir)
+
+    check_published_environment_variables published_package
 
     return true
   end
@@ -117,10 +119,11 @@ class Fig::RepositoryPackagePublisher
       explanations.each {|explanation| Fig::Logging.info explanation}
     end
 
+    published_package = nil
     begin
-      Fig::Parser.new(nil, false).parse_package(
+      published_package = Fig::Parser.new(nil, false).parse_package(
         @descriptor,
-        'the directory should not matter for a consistency check',
+        @local_dir_for_package,
         '<package to be published>',
         file_content
       )
@@ -130,7 +133,7 @@ class Fig::RepositoryPackagePublisher
         "#{error}\n\nGenerated contents:\n#{file_content}"
     end
 
-    return file_content
+    return file_content, published_package
   end
 
   def add_package_metadata_comments()
@@ -336,6 +339,28 @@ class Fig::RepositoryPackagePublisher
       end
 
       raise Fig::RepositoryError.new
+    end
+
+    return
+  end
+
+  def check_published_environment_variables(published_package)
+    published_package.walk_statements do
+      |statement|
+
+      if statement.is_environment_variable?
+        tokenized_value = statement.tokenized_value
+        expansion_happened = false
+        expanded_value = tokenized_value.to_expanded_string {
+          expansion_happened = true; published_package.directory
+        }
+
+        if expansion_happened && ! File.exists?(expanded_value) && ! File.symlink?(expanded_value)
+          Fig::Logging.warn(
+            %Q<The #{statement.name} variable points to a path that does not exist (#{expanded_value}); retrieve statements that are active when this package is included may fail.>
+          )
+        end
+      end
     end
 
     return
