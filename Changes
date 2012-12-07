@@ -1,3 +1,10 @@
+v0.2.2.beta.2
+
+  Miscellaneous:
+
+  - Warning about unused retrieve no longer appears when there is a problem
+    with the variable itself.
+
 v0.2.2.beta.1
 
   Backwards incompatibilities:
