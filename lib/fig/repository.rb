@@ -53,12 +53,12 @@ class Fig::Repository
     check_local_repository_format
 
     results = []
-    if File.exist?(local_package_repository_directory)
-      @operating_system.list(local_package_repository_directory).each do
+    if File.exist?(local_package_directory)
+      @operating_system.list(local_package_directory).each do
         |name|
 
         @operating_system.list(
-          File.join local_package_repository_directory(), name
+          File.join local_package_directory(), name
         ).each do
           |version|
 
@@ -142,8 +142,8 @@ class Fig::Repository
     publisher.was_forced                   = was_forced
     publisher.base_temp_dir                = base_temp_dir
     publisher.runtime_for_package          = runtime_for_package(descriptor)
-    publisher.local_repository_for_package =
-      local_repository_for_package(descriptor)
+    publisher.local_directory_for_package  =
+      local_directory_for_package(descriptor)
     publisher.remote_directory_for_package =
       remote_directory_for_package(descriptor)
     publisher.local_only                   = local_only
@@ -220,7 +220,7 @@ class Fig::Repository
     return File.join(@local_repository_directory, VERSION_FILE_NAME)
   end
 
-  def local_package_repository_directory()
+  def local_package_directory()
     return File.expand_path(File.join(@local_repository_directory, 'packages'))
   end
 
@@ -279,7 +279,7 @@ class Fig::Repository
   end
 
   def read_local_package(descriptor)
-    directory = local_repository_for_package(descriptor)
+    directory = local_directory_for_package(descriptor)
     return read_package_from_directory(directory, descriptor)
   end
 
@@ -304,9 +304,9 @@ class Fig::Repository
   end
 
   def install_package(descriptor, temporary_directory)
-    remote_fig_file      = remote_fig_file_for_package(descriptor)
-    repository_directory = local_repository_for_package(descriptor)
-    local_fig_file       = fig_file_for_package_download(repository_directory)
+    remote_fig_file   = remote_fig_file_for_package(descriptor)
+    package_directory = local_directory_for_package(descriptor)
+    local_fig_file    = fig_file_for_package_download(package_directory)
 
     if @operating_system.path_up_to_date? remote_fig_file, local_fig_file
       Fig::Logging.debug \
@@ -314,23 +314,23 @@ class Fig::Repository
       return
     end
 
-    temporary_repository = File.join temporary_directory, 'packages'
+    temporary_package = File.join temporary_directory, 'packages'
     temporary_runtime = File.join temporary_directory, 'runtime'
-    temp_fig_file   = fig_file_for_package_download(temporary_repository)
+    temp_fig_file   = fig_file_for_package_download(temporary_package)
 
     FileUtils.rm_rf temporary_directory
-    if File.exist? repository_directory
-      FileUtils.mkdir_p File.dirname(temporary_repository)
+    if File.exist? package_directory
+      FileUtils.mkdir_p File.dirname(temporary_package)
       FileUtils.cp_r(
-        repository_directory, temporary_repository, :preserve => true
+        package_directory, temporary_package, :preserve => true
       )
     else
-      FileUtils.mkdir_p temporary_repository
+      FileUtils.mkdir_p temporary_package
     end
 
     return if ! @operating_system.download(remote_fig_file, temp_fig_file)
 
-    package = read_package_from_directory(temporary_repository, descriptor)
+    package = read_package_from_directory(temporary_package, descriptor)
 
     remote_package_directory = remote_directory_for_package(descriptor)
     package.archive_locations.each do
@@ -342,7 +342,7 @@ class Fig::Repository
         )
       end
       @operating_system.download_and_unpack_archive(
-        archive_location, temporary_repository, temporary_runtime
+        archive_location, temporary_package, temporary_runtime
       )
     end
     package.resource_locations.each do
@@ -356,7 +356,7 @@ class Fig::Repository
 
       basename, path =
         @operating_system.download_resource(
-          resource_location, temporary_repository
+          resource_location, temporary_package
         )
 
       @operating_system.copy path, File.join(temporary_runtime, basename)
@@ -364,8 +364,8 @@ class Fig::Repository
 
     nuke_package descriptor
 
-    FileUtils.mkdir_p File.dirname(repository_directory)
-    FileUtils.mv temporary_repository, repository_directory
+    FileUtils.mkdir_p File.dirname(package_directory)
+    FileUtils.mv temporary_package, package_directory
 
     runtime_directory = runtime_for_package(descriptor)
     if File.exists? temporary_runtime
@@ -421,7 +421,7 @@ class Fig::Repository
   end
 
   def local_fig_file_for_package(descriptor)
-    File.join(local_repository_for_package(descriptor), PACKAGE_FILE_IN_REPO)
+    File.join(local_directory_for_package(descriptor), PACKAGE_FILE_IN_REPO)
   end
 
   def fig_file_for_package_download(package_download_dir)
@@ -434,9 +434,9 @@ class Fig::Repository
     )
   end
 
-  def local_repository_for_package(descriptor)
+  def local_directory_for_package(descriptor)
     return File.join(
-      local_package_repository_directory, descriptor.name, descriptor.version
+      local_package_directory, descriptor.name, descriptor.version
     )
   end
 
@@ -465,7 +465,7 @@ class Fig::Repository
 
   def nuke_package(descriptor)
     FileUtils.rm_rf runtime_for_package(descriptor)
-    FileUtils.rm_rf local_repository_for_package(descriptor)
+    FileUtils.rm_rf local_directory_for_package(descriptor)
 
     return
   end

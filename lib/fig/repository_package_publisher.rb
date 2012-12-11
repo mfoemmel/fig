@@ -31,7 +31,7 @@ class Fig::RepositoryPackagePublisher
   attr_writer :was_forced
   attr_writer :base_temp_dir
   attr_writer :runtime_for_package
-  attr_writer :local_repository_for_package
+  attr_writer :local_directory_for_package
   attr_writer :remote_directory_for_package
   attr_writer :local_fig_file_for_package
   attr_writer :remote_fig_file_for_package
@@ -54,7 +54,7 @@ class Fig::RepositoryPackagePublisher
 
     temp_dir = publish_temp_dir()
     @operating_system.delete_and_recreate_directory(temp_dir)
-    @operating_system.delete_and_recreate_directory(@local_repository_for_package)
+    @operating_system.delete_and_recreate_directory(@local_directory_for_package)
 
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
     content, published_package = derive_definition_file
@@ -269,7 +269,7 @@ class Fig::RepositoryPackagePublisher
     end
 
     @operating_system.copy(
-      asset_local, @local_repository_for_package + '/' + asset_name
+      asset_local, @local_directory_for_package + '/' + asset_name
     )
     if asset_statement.is_a?(Fig::Statement::Archive)
       @operating_system.unpack_archive(
@@ -309,7 +309,7 @@ class Fig::RepositoryPackagePublisher
     publish_information[:was_forced]          = @was_forced ? true : false
     publish_information[:local_only]          = @local_only ? true : false
 
-    publish_information[:local_destination]   = @local_repository_for_package
+    publish_information[:local_destination]   = @local_directory_for_package
     publish_information[:remote_destination]  = @remote_directory_for_package
 
     @publish_listeners.each do
