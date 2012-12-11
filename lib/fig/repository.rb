@@ -20,11 +20,12 @@ module Fig; end
 # Overall management of a repository.  Handles local operations itself;
 # defers remote operations to others.
 class Fig::Repository
-  METADATA_SUBDIRECTORY = '_meta'
-  PACKAGE_FILE_IN_REPO  = '.fig'
-  RESOURCES_FILE        = 'resources.tar.gz'
-  VERSION_FILE_NAME     = 'repository-format-version'
-  VERSION_SUPPORTED     = 1
+  METADATA_SUBDIRECTORY     = '_meta'
+  PACKAGE_FILE_IN_REPO      = '.fig'
+  RESOURCES_FILE            = 'resources.tar.gz'
+  VERSION_FILE_NAME         = 'repository-format-version'
+  LOCAL_VERSION_SUPPORTED   = 2
+  REMOTE_VERSION_SUPPORTED  = 1
 
   def initialize(
     os,
@@ -169,28 +170,30 @@ class Fig::Repository
 
     version_file = local_version_file()
     if not File.exist?(version_file)
-      File.open(version_file, 'w') { |handle| handle.write(VERSION_SUPPORTED) }
+      File.open(version_file, 'w') { |handle| handle.write(LOCAL_VERSION_SUPPORTED) }
     end
 
     return
   end
 
   def check_local_repository_format()
-    check_repository_format('Local', local_repository_version())
+    version = local_repository_version
+
+    if version != LOCAL_VERSION_SUPPORTED
+      Fig::Logging.fatal \
+        "Local repository is in version #{version} format. This version of fig can only deal with repositories in version #{LOCAL_VERSION_SUPPORTED} format."
+      raise Fig::RepositoryError.new
+    end
 
     return
   end
 
   def check_remote_repository_format()
-    check_repository_format('Remote', remote_repository_version())
+    version = remote_repository_version
 
-    return
-  end
-
-  def check_repository_format(name, version)
-    if version != VERSION_SUPPORTED
+    if version != REMOTE_VERSION_SUPPORTED
       Fig::Logging.fatal \
-        "#{name} repository is in version #{version} format. This version of fig can only deal with repositories in version #{VERSION_SUPPORTED} format."
+        "Remote repository is in version #{version} format. This version of fig can only deal with repositories in version #{REMOTE_VERSION_SUPPORTED} format."
       raise Fig::RepositoryError.new
     end
 
