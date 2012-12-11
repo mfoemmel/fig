@@ -180,8 +180,13 @@ class Fig::Repository
     version = local_repository_version
 
     if version != LOCAL_VERSION_SUPPORTED
-      Fig::Logging.fatal \
+      message =
         "Local repository is in version #{version} format. This version of fig can only deal with repositories in version #{LOCAL_VERSION_SUPPORTED} format."
+      if version < LOCAL_VERSION_SUPPORTED
+        message +=
+          " Either point $FIG_HOME to a different location or rename or delete #{@local_repository_directory}. (Be mindful of packages that have been published only locally.)"
+      end
+      Fig::Logging.fatal message
       raise Fig::RepositoryError.new
     end
 
