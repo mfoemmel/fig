@@ -346,7 +346,8 @@ class Fig::RuntimeEnvironment
     return tokenized_value.to_expanded_string { '@' } \
       unless package && package.name
 
-    variable_value = tokenized_value.to_expanded_string { package.directory }
+    variable_value =
+      tokenized_value.to_expanded_string { package.runtime_directory }
 
     return variable_value if not @retrieves.member?(statement.name)
 
@@ -424,8 +425,8 @@ class Fig::RuntimeEnvironment
         end
       end
 
-      if package && package.directory
-        next package.directory
+      if package && package.runtime_directory
+        next package.runtime_directory
       end
 
       next '@'

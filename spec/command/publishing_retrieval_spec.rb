@@ -108,7 +108,7 @@ describe 'Fig' do
         ],
         :current_directory => publish_from_directory
       )
-      FileUtils.rm("#{FIG_HOME}/repos/prerequisite/1.2.3/lib/a library")
+      FileUtils.rm("#{FIG_HOME}/runtime/prerequisite/1.2.3/lib/a library")
 
       input = <<-END
         retrieve FOOPATH->retrieve/[package]
@@ -165,7 +165,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig(%w<--update>, input)
+      fig %w<--update>, input
 
       File.read(
         "#{CURRENT_DIRECTORY}/include2/prerequisite/include/hello.h"
@@ -194,7 +194,7 @@ describe 'Fig' do
         :current_directory => publish_from_directory
       )
 
-      FileUtils.rm_rf(FIG_HOME)
+      FileUtils.rm_rf FIG_HOME
 
       input = <<-END
         retrieve INCLUDE->include2/[package]
@@ -202,7 +202,7 @@ describe 'Fig' do
           include prerequisite/1.2.3
         end
       END
-      fig(%w<-u>, input)
+      fig %w<-u>, input
 
       File.read(
         "#{CURRENT_DIRECTORY}/include2/prerequisite/hello.h"

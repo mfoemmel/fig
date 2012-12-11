@@ -30,8 +30,9 @@ class Fig::RepositoryPackagePublisher
   attr_writer :source_package
   attr_writer :was_forced
   attr_writer :base_temp_dir
-  attr_writer :local_dir_for_package
-  attr_writer :remote_dir_for_package
+  attr_writer :runtime_for_package
+  attr_writer :local_repository_for_package
+  attr_writer :remote_directory_for_package
   attr_writer :local_fig_file_for_package
   attr_writer :remote_fig_file_for_package
   attr_writer :local_only
@@ -53,7 +54,7 @@ class Fig::RepositoryPackagePublisher
 
     temp_dir = publish_temp_dir()
     @operating_system.delete_and_recreate_directory(temp_dir)
-    @operating_system.delete_and_recreate_directory(@local_dir_for_package)
+    @operating_system.delete_and_recreate_directory(@local_repository_for_package)
 
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
     content, published_package = derive_definition_file
@@ -123,7 +124,7 @@ class Fig::RepositoryPackagePublisher
     begin
       published_package = Fig::Parser.new(nil, false).parse_package(
         @descriptor,
-        @local_dir_for_package,
+        @runtime_for_package,
         '<package to be published>',
         file_content
       )
@@ -215,7 +216,7 @@ class Fig::RepositoryPackagePublisher
     if @resource_paths.size > 0
       check_asset_paths(@resource_paths)
 
-      file = Fig::Repository::RESOURCES_FILE
+      file = File.join publish_temp_dir, Fig::Repository::RESOURCES_FILE
       @operating_system.create_archive(file, @resource_paths)
       Fig::AtExit.add { FileUtils.rm_f(file) }
 
@@ -247,7 +248,7 @@ class Fig::RepositoryPackagePublisher
   def publish_asset(asset_statement)
     asset_name = asset_statement.asset_name()
     asset_remote =
-      Fig::URL.append_path_components @remote_dir_for_package, [asset_name]
+      Fig::URL.append_path_components @remote_directory_for_package, [asset_name]
 
     if Fig::URL.is_url? asset_statement.location
       asset_local = File.join(publish_temp_dir(), asset_name)
@@ -268,10 +269,16 @@ class Fig::RepositoryPackagePublisher
     end
 
     @operating_system.copy(
-      asset_local, @local_dir_for_package + '/' + asset_name
+      asset_local, @local_repository_for_package + '/' + asset_name
     )
     if asset_statement.is_a?(Fig::Statement::Archive)
-      @operating_system.unpack_archive(@local_dir_for_package, asset_name)
+      @operating_system.unpack_archive(
+        @runtime_for_package, File.absolute_path(asset_local)
+      )
+    else
+      @operating_system.copy(
+        asset_local, @runtime_for_package + '/' + asset_name
+      )
     end
 
     return
@@ -302,8 +309,8 @@ class Fig::RepositoryPackagePublisher
     publish_information[:was_forced]          = @was_forced ? true : false
     publish_information[:local_only]          = @local_only ? true : false
 
-    publish_information[:local_destination]   = @local_dir_for_package
-    publish_information[:remote_destination]  = @remote_dir_for_package
+    publish_information[:local_destination]   = @local_repository_for_package
+    publish_information[:remote_destination]  = @remote_directory_for_package
 
     @publish_listeners.each do
       |listener|
@@ -352,7 +359,7 @@ class Fig::RepositoryPackagePublisher
         tokenized_value = statement.tokenized_value
         expansion_happened = false
         expanded_value = tokenized_value.to_expanded_string {
-          expansion_happened = true; published_package.directory
+          expansion_happened = true; published_package.runtime_directory
         }
 
         if expansion_happened && ! File.exists?(expanded_value) && ! File.symlink?(expanded_value)
