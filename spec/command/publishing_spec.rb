@@ -285,7 +285,7 @@ describe 'Fig' do
           end
         END
         fig(%w<--publish foo/1.2.3>, input)
-        fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+        fail unless File.exists? FIG_HOME + '/packages/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
         fig(%w<--update --include foo/1.2.3 --get FOO>)[0].should == 'SHEEP'
 
@@ -367,7 +367,7 @@ describe 'Fig' do
           end
         END
         fig(%w<--publish foo/1.2.3>, input)
-        fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+        fail unless File.exists? FIG_HOME + '/packages/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
         fig(%w<--update --include foo/1.2.3 -- hello.bat>)[0].should == 'bar'
       end
@@ -379,7 +379,7 @@ describe 'Fig' do
           fail unless system "chmod +x #{CURRENT_DIRECTORY}/bin/hello.bat"
         end
         fig(%w<--publish foo/1.2.3 --resource bin/hello.bat --append PATH=@/bin>)
-        fail unless File.exists? FIG_HOME + '/repos/foo/1.2.3/.fig'
+        fail unless File.exists? FIG_HOME + '/packages/foo/1.2.3/.fig'
         fail unless File.exists? FIG_REMOTE_DIR + '/foo/1.2.3/.fig'
         fig(%w<--update --include foo/1.2.3 -- hello.bat>)[0].should == 'bar'
       end

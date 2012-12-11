@@ -221,7 +221,7 @@ class Fig::Repository
   end
 
   def local_package_repository_directory()
-    return File.expand_path(File.join(@local_repository_directory, 'repos'))
+    return File.expand_path(File.join(@local_repository_directory, 'packages'))
   end
 
   def package_runtime_directory()
@@ -314,7 +314,7 @@ class Fig::Repository
       return
     end
 
-    temporary_repository = File.join temporary_directory, 'repos'
+    temporary_repository = File.join temporary_directory, 'packages'
     temporary_runtime = File.join temporary_directory, 'runtime'
     temp_fig_file   = fig_file_for_package_download(temporary_repository)
 
