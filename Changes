@@ -1,4 +1,8 @@
-v0.2.2.beta.3
+v0.2.3
+
+  Backwards incompatibilities:
+
+  - Now requires Ruby v1.9.2.
 
   Miscellaneous:
 
@@ -20,22 +24,8 @@ v0.2.2.beta.3
     statements and environment variable statements, the check cannot be done
     before publishing.
 
-v0.2.2.beta.2
-
-  Miscellaneous:
-
   - Warning about unused retrieve no longer appears when there is a problem
     with the variable itself.
-
-v0.2.2.beta.1
-
-  Backwards incompatibilities:
-
-  - Now requires Ruby v1.9.2.
-
-  Miscellaneous:
-
-  - Clearer error messages.
 
   - Stack traces of includes contain file names and "command-line" if the
     includes came from package definition files or from "--include" options.
@@ -49,6 +39,14 @@ v0.2.2.beta.1
       <command-line>:default
         <some-dependencies.fig>:blahblahblah
           thingy/1.0.0.81:default
+
+  - Other error message clarifications.
+
+v0.2.2.beta.3
+v0.2.2.beta.2
+v0.2.2.beta.1
+
+  - Test releases
 
 v0.2.1
 
