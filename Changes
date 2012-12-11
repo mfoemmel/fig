@@ -1,3 +1,35 @@
+v0.2.x
+
+  Backwards incompatibilities:
+
+  - The layout of $FIG_HOME has changed in a backwards-incompatible manner (See
+    "Bug fix" section below).
+
+    When run with a local repository created by an earlier version of Fig, Fig
+    will exit with the message
+
+      Local repository is in version 1 format. This version of fig can only
+      deal with repositories in version 2 format. Either point $FIG_HOME to a
+      different location or rename or delete «existing path».  (Be mindful of
+      packages that have been published only locally.)
+
+    If you don't have any packages that were were only locally published (i.e.
+    created using the --publish-local option), it should be safe to simply
+    remove the directory and then use the --update or --update-if-missing
+    option to pull packages from the remote repository.
+
+    Any local repository created by this version of Fig will not be readable by
+    earlier versions.  Fig v0.1.64 and later will fail with a "Local repository
+    is in version 2 format. This version of fig can only deal with repositories
+    in version 1 format." message when reading a repository created by this
+    version.
+
+  Bug fix:
+
+  - The contents of packages are no longer intermingled with archives used in
+    the packages, meaning that there's a smaller chance of different assets
+    clobbering each other and of packages getting corrupted.
+
 v0.2.3
 
   Backwards incompatibilities:

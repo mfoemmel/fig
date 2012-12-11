@@ -321,18 +321,18 @@ class Fig::OperatingSystem
     return basename, path
   end
 
-  def download_and_unpack_archive(url, download_directory)
+  def download_and_unpack_archive(url, download_directory, unpack_directory)
     basename, path = download_resource(url, download_directory)
 
     case path
     when /\.tar\.gz$/
-      unpack_archive(download_directory, path)
+      unpack_archive(unpack_directory, path)
     when /\.tgz$/
-      unpack_archive(download_directory, path)
+      unpack_archive(unpack_directory, path)
     when /\.tar\.bz2$/
-      unpack_archive(download_directory, path)
+      unpack_archive(unpack_directory, path)
     when /\.zip$/
-      unpack_archive(download_directory, path)
+      unpack_archive(unpack_directory, path)
     else
       Fig::Logging.fatal "Unknown archive type: #{basename}"
       raise Fig::NetworkError.new("Unknown archive type: #{basename}")
@@ -396,7 +396,7 @@ class Fig::OperatingSystem
         end
       end
     else
-      if !File.exist?(target) || File.mtime(source) != File.mtime(target)
+      if ! File.exist?(target) || File.mtime(source) != File.mtime(target)
         log_info "#{msg} #{target}" if msg
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)
@@ -405,8 +405,8 @@ class Fig::OperatingSystem
     end
   end
 
-  def move_file(dir, from, to)
-    Dir.chdir(dir) { FileUtils.mv(from, to, :force => true) }
+  def move_file(directory, from, to)
+    Dir.chdir(directory) { FileUtils.mv(from, to, :force => true) }
   end
 
   def log_info(msg)
@@ -442,8 +442,13 @@ class Fig::OperatingSystem
   # .tar.gz
   # .tgz
   # .zip
-  def unpack_archive(dir, file)
-    Dir.chdir(dir) do
+  def unpack_archive(directory, file)
+    FileUtils.mkdir_p directory
+    Dir.chdir(directory) do
+      if ! File.exists? file
+        raise Fig::RepositoryError.new "#{file} does not exist."
+      end
+
       ::Archive.read_open_filename(file) do |reader|
         while entry = reader.next_header
           begin

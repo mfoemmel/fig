@@ -21,16 +21,16 @@ class Fig::Package
   attr_reader   :name
   attr_reader   :version
   attr_reader   :description
-  attr_reader   :directory
+  attr_reader   :runtime_directory
   attr_reader   :statements
   attr_accessor :backtrace
   attr_accessor :unparsed_text
 
-  def initialize(name, version, description, directory, statements)
+  def initialize(name, version, description, runtime_directory, statements)
     @name                 = name
     @version              = version
     @description          = description
-    @directory            = directory
+    @runtime_directory    = runtime_directory
     @statements           = statements
     @applied_config_names = []
     @backtrace            = nil
