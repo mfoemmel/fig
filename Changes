@@ -1,4 +1,4 @@
-v0.2.4.beta.1
+v0.2.5
 
   Backwards incompatibilities:
 
@@ -29,6 +29,10 @@ v0.2.4.beta.1
   - The contents of packages are no longer intermingled with archives used in
     the packages, meaning that there's a smaller chance of different assets
     clobbering each other and of packages getting corrupted.
+
+v0.2.4.beta.1
+
+  - Test release
 
 v0.2.3
 
