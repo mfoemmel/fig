@@ -154,6 +154,23 @@ class Fig::RuntimeEnvironment
     return
   end
 
+  def check_unused_retrieves()
+    @retrieves.keys().sort().each do
+      |name|
+
+      statement = @retrieves[name]
+      if statement.loaded_but_not_referenced?
+        text, * = Fig::Unparser.determine_version_and_unparse(
+          [statement], :emit_as_input
+        )
+        Fig::Logging.warn \
+          %Q<The #{name} variable was never referenced or didn't need expansion, so "#{text.strip}"#{statement.position_string} was ignored.>
+      end
+    end
+  end
+
+  private
+
   def include_config(starting_package, descriptor, backtrace)
     resolved_descriptor = nil
 
@@ -184,23 +201,6 @@ class Fig::RuntimeEnvironment
 
     return
   end
-
-  def check_unused_retrieves()
-    @retrieves.keys().sort().each do
-      |name|
-
-      statement = @retrieves[name]
-      if statement.loaded_but_not_referenced?
-        text, * = Fig::Unparser.determine_version_and_unparse(
-          [statement], :emit_as_input
-        )
-        Fig::Logging.warn \
-          %Q<The #{name} variable was never referenced or didn't need expansion, so "#{text.strip}"#{statement.position_string} was ignored.>
-      end
-    end
-  end
-
-  private
 
   def set_variable(package, statement, backtrace)
     expanded_value = expand_variable_as_path_and_process_retrieves(
