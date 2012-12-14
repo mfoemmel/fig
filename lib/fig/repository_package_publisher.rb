@@ -4,6 +4,7 @@ require 'socket'
 require 'sys/admin'
 require 'tmpdir'
 
+require 'fig/statement/synthetic_raw_text'
 require 'fig'
 require 'fig/at_exit'
 require 'fig/file_not_found_error'
@@ -221,6 +222,7 @@ class Fig::RepositoryPackagePublisher
       Fig::AtExit.add { FileUtils.rm_f(file) }
 
       @text_assembler.add_output(
+        Fig::Statement::SyntheticRawText.new(nil, nil, "\n"),
         Fig::Statement::Archive.new(
           nil,
           %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,

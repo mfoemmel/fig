@@ -31,12 +31,12 @@ class Fig::PackageDefinitionTextAssembler
   end
 
   # Argument can either be a single Statement or an array of them.
-  def add_output(statements)
-    @output_statements << statements
-    @output_statements.flatten!
-
+  def add_output(*statements)
     # Version gets determined by other statements, not by existing grammar.
-    @output_statements.reject! { |s| s.is_a? Fig::Statement::GrammarVersion }
+    @output_statements <<
+      statements.reject { |s| s.is_a? Fig::Statement::GrammarVersion }
+
+    @output_statements.flatten!
 
     return
   end
