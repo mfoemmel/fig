@@ -372,6 +372,12 @@ describe 'Fig' do
           fail 'File should not exist after using beta.'
       end
 
+      it 'does not happen with --update and --suppress-cleanup-of-retrieves' do
+        fig(%w<--update --suppress-cleanup-of-retrieves beta/1.2.3 -- echo>)
+        File.exist?(cleanup_dependency_file) or
+          fail 'File should exist after using beta.'
+      end
+
       it 'does not happen without --update' do
         fig(%w<beta/1.2.3 -- echo>)
         File.exist?(cleanup_dependency_file) or

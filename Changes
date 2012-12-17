@@ -1,3 +1,12 @@
+v0.2.6.beta.1
+
+  New features:
+
+  - New --suppress-cleanup-of-retrieves option that stops Fig from deleting
+    files previously downloaded as a result of a retrieve statement.  Useful if
+    you wish to toggle between multiple configurations rapidly without waiting
+    for file shuffling.
+
 v0.2.5
 
   Backwards incompatibilities:

@@ -243,7 +243,9 @@ class Fig::Command
 
     Fig::AtExit.add do
       working_directory_maintainer.prepare_for_shutdown(
-        @base_package && retrieves_should_happen?
+        @base_package                             &&
+        retrieves_should_happen?                  &&
+        ! @options.suppress_cleanup_of_retrieves
       )
     end
 

@@ -42,6 +42,7 @@ class Fig::Command; end
 
 # Command-line processing.
 class Fig::Command::Options
+  attr_reader   :asset_statements
   attr_reader   :command_extra_argv
   attr_reader   :config
   attr_reader   :descriptor
@@ -51,10 +52,10 @@ class Fig::Command::Options
   attr_reader   :home
   attr_reader   :log_config
   attr_reader   :log_level
-  attr_reader   :asset_statements
   attr_reader   :package_definition_file
   attr_reader   :parser
   attr_reader   :shell_command
+  attr_reader   :suppress_cleanup_of_retrieves
   attr_reader   :update_lock_response
   attr_reader   :variable_to_get
   attr_accessor :version_message
@@ -486,7 +487,7 @@ class Fig::Command::Options
     @parser.on(
       '-u',
       '--update',
-      'check remote repo for updates and download to $FIG_HOME as necessary'
+      'check remote repo for updates, download to $FIG_HOME and process retrieves'
     ) do
       set_update_action(Fig::Command::Action::Update)
     end
@@ -497,6 +498,13 @@ class Fig::Command::Options
       'check remote repo for updates only if package missing from $FIG_HOME'
     ) do
       set_update_action(Fig::Command::Action::UpdateIfMissing)
+    end
+
+    @parser.on(
+      '--suppress-cleanup-of-retrieves',
+      %q<don't delete files from unreferenced retrieves>,
+    ) do
+      @suppress_cleanup_of_retrieves = true
     end
 
     @parser.on(
