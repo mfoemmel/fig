@@ -21,16 +21,22 @@ class Fig::RuntimeEnvironment
   # noun and not a verb, e.g. "retrieve path" means the value of a retrieve
   # statement and not the action of retrieving a path.
 
-  def initialize(repository, variables_override, working_directory_maintainer)
-    @repository = repository
-    @variables =
+  def initialize(
+    repository,
+    suppress_includes,
+    variables_override,
+    working_directory_maintainer
+  )
+    @repository                   = repository
+    @suppress_includes            = suppress_includes
+    @variables                    =
       variables_override || Fig::OperatingSystem.get_environment_variables()
-    @retrieves = {}
-    @packages = {}
+    @retrieves                    = {}
+    @packages                     = {}
     @working_directory_maintainer = working_directory_maintainer
   end
 
-  # Returns the value of an envirionment variable
+  # Returns the value of an environment variable
   def [](name)
     return @variables[name]
   end
@@ -172,6 +178,8 @@ class Fig::RuntimeEnvironment
   private
 
   def include_config(starting_package, descriptor, backtrace)
+    return if @suppress_includes == :all
+
     resolved_descriptor = nil
 
     # Check to see if this include has been overridden.
@@ -186,6 +194,10 @@ class Fig::RuntimeEnvironment
       end
     end
     resolved_descriptor ||= descriptor
+
+    return if                                                   \
+          @suppress_includes == :cross_package                  \
+      &&  resolved_descriptor.name != starting_package.name
 
     new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
     package = lookup_package(

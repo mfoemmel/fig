@@ -47,6 +47,11 @@ module Fig::Command::Action::Role::Publish
     return nil # don't care
   end
 
+  # Is this a publish action?
+  def publish?()
+    return true
+  end
+
   def configure(options)
     @descriptor             = options.descriptor
     @environment_statements = options.environment_statements

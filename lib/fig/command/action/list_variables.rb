@@ -20,4 +20,9 @@ class Fig::Command::Action::ListVariables
   def reset_environment?()
     return true
   end
+
+  # Is this --list-variables?
+  def list_variables?()
+    return true
+  end
 end

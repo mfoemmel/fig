@@ -16,4 +16,9 @@ class Fig::Command::Action::ListDependencies
 
     return %w<--list-dependencies>
   end
+
+  # Is this --list-dependencies?
+  def list_dependencies?()
+    return true
+  end
 end

@@ -255,7 +255,10 @@ class Fig::Command
     end
 
     @environment = Fig::RuntimeEnvironment.new(
-      @repository, environment_variables, working_directory_maintainer
+      @repository,
+      @options.suppress_includes,
+      environment_variables,
+      working_directory_maintainer,
     )
 
     Fig::AtExit.add { @environment.check_unused_retrieves() }

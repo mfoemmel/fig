@@ -49,6 +49,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   environment =
     Fig::RuntimeEnvironment.new(
       nil,
+      nil,
       Fig::EnvironmentVariables::CaseSensitive.new({'FOO' => 'bar'}),
       maintainer_double
     )

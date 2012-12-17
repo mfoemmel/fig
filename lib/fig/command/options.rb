@@ -56,6 +56,7 @@ class Fig::Command::Options
   attr_reader   :parser
   attr_reader   :shell_command
   attr_reader   :suppress_cleanup_of_retrieves
+  attr_reader   :suppress_includes
   attr_reader   :update_lock_response
   attr_reader   :variable_to_get
   attr_accessor :version_message
@@ -89,6 +90,8 @@ class Fig::Command::Options
       set_base_action(Fig::Command::Action::RunCommandStatement)
     end
     set_up_sub_actions()
+
+    validate
 
     actions().each {|action| action.configure(self)}
 
@@ -188,7 +191,7 @@ class Fig::Command::Options
   end
 
   def set_up_parser()
-    set_up_package_configuration_source()
+    set_up_package_definition()
     set_up_remote_repository_access()
     set_up_commands()
     set_up_environment_statements()
@@ -360,7 +363,7 @@ class Fig::Command::Options
       \z
     >x
 
-  def set_up_package_configuration_source()
+  def set_up_package_definition()
     @parser.on(
       '-c',
       '--config CONFIG',
@@ -370,19 +373,31 @@ class Fig::Command::Options
       @config = config
     end
 
-    @package_definition_file = nil
     @parser.on(
       '--file FILE',
       FILE_OPTION_VALUE_PATTERN,
       %q<read package definition FILE. Use '-' for stdin. See also --no-file>
     ) do |path|
-      @package_definition_file = path
+      set_package_definition_file(path)
     end
 
     @parser.on(
       '--no-file', 'ignore package.fig file in current directory'
-    ) do |path|
-      @package_definition_file = :none
+    ) do
+      set_package_definition_file(:none)
+    end
+
+    @parser.on(
+      '--suppress-all-includes', %q<don't process include statements>,
+    ) do
+      set_suppress_includes(:all)
+    end
+
+    @parser.on(
+      '--suppress-cross-package-includes',
+      %q<don't process includes of configs from other packages>,
+    ) do
+      set_suppress_includes(:cross_package)
     end
 
     return
@@ -595,6 +610,18 @@ class Fig::Command::Options
     return
   end
 
+  def set_package_definition_file(value)
+    if @package_definition_file
+      raise Fig::Command::OptionError.new(
+        'Can only specify one --file/--no-file option.'
+      )
+    end
+
+    @package_definition_file = value
+
+    return
+  end
+
   def set_update_action(update_action_class)
     update_action = update_action_class.new
     if @update_action
@@ -604,6 +631,8 @@ class Fig::Command::Options
     end
 
     @update_action = update_action
+
+    return
   end
 
   def new_variable_statement(option, name_value, statement_class)
@@ -627,6 +656,44 @@ class Fig::Command::Options
     path = tokenized_path.to_expanded_string
     need_to_glob = ! tokenized_path.single_quoted?
     return statement_class.new(nil, "#{option} option", path, need_to_glob)
+  end
+
+  def validate()
+    if suppress_includes
+      if list_tree?
+        # Not incompatible, just not implemented (would need to handle in
+        # command/action/role/list_*)
+        raise Fig::Command::OptionError.new(
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-tree.'
+        )
+      elsif list_all_configs?
+        # Not incompatible, just not implemented (would need to handle in
+        # command/action/role/list_*)
+        raise Fig::Command::OptionError.new(
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-all-configs.'
+        )
+      elsif @base_action.publish?
+        # Don't want to support broken publishes (though versionless includes
+        # are pretty broken).
+        raise Fig::Command::OptionError.new(
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes when publishing.'
+        )
+      end
+    elsif list_tree?
+      if ! @base_action.list_dependencies? && ! @base_action.list_variables?
+        raise Fig::Command::OptionError.new(
+          %q<The --list-tree option isn't useful without --list-dependencies/--list-variables.>
+        )
+      end
+    elsif list_all_configs?
+      if ! @base_action.list_dependencies? && ! @base_action.list_variables?
+        raise Fig::Command::OptionError.new(
+          %q<The --list-all-configs option isn't useful without --list-dependencies/--list-variables.>
+        )
+      end
+    end
+
+    return
   end
 
   def set_up_sub_actions()
