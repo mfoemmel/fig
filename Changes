@@ -2,6 +2,39 @@ v0.2.6.beta.1
 
   New features:
 
+  - New --suppress-all-includes and --suppress-cross-package-includes options
+    prevent package traversal.  The driving use case is retrieving individual
+    components of path statements.  Say you have a package definition that
+    looked like:
+
+      config default
+        include something/some-version
+        include other/whatever
+        add CLASSPATH=@/foo.jar
+      end
+
+    You could then get the portion of CLASSPATH from the package definition
+    only and not any dependencies via
+
+      fig --suppress-all-includes --get CLASSPATH
+
+    If you've got multiple config blocks, you can still have intra-package
+    dependencies take effect:
+
+      config default
+        include something/some-version
+        include other/whatever
+        include :base-environment
+      end
+
+      config base-environment
+        add CLASSPATH=@/foo.jar
+      end
+
+    You just allow those includes to work:
+
+      fig --suppress-cross-package-includes --get CLASSPATH
+
   - New --suppress-cleanup-of-retrieves option that stops Fig from deleting
     files previously downloaded as a result of a retrieve statement.  Useful if
     you wish to toggle between multiple configurations rapidly without waiting
