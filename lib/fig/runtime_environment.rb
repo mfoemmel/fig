@@ -3,6 +3,7 @@ require 'stringio'
 require 'fig/include_backtrace'
 require 'fig/logging'
 require 'fig/package'
+require 'fig/package_descriptor'
 require 'fig/repository_error'
 require 'fig/statement/include'
 require 'fig/statement/override'
@@ -100,12 +101,14 @@ class Fig::RuntimeEnvironment
 
     config = package[config_name]
 
-    Fig::Logging.debug("Applying #{package}:#{config_name}.")
+    Fig::Logging.debug(
+      "Applying #{package.to_descriptive_string_with_config config_name}."
+    )
+    package.add_applied_config_name(config_name)
     config.statements.each do
       |statement|
       apply_config_statement(package, statement, new_backtrace)
     end
-    package.add_applied_config_name(config_name)
 
     return
   end
@@ -178,7 +181,13 @@ class Fig::RuntimeEnvironment
   private
 
   def include_config(starting_package, descriptor, backtrace)
-    return if @suppress_includes == :all
+    # Because package application starts with the synthetic package for the
+    # command-line, we can't really disable includes, full stop.  Instead, we
+    # use the flag on the base package to break the chain of includes.
+    #
+    # Alternative approach: We could put a flag on synthetic include statements
+    # that says to always apply them.
+    return if starting_package.base? && @suppress_includes == :all
 
     resolved_descriptor = nil
 
@@ -195,16 +204,18 @@ class Fig::RuntimeEnvironment
     end
     resolved_descriptor ||= descriptor
 
-    return if                                                   \
-          @suppress_includes == :cross_package                  \
-      &&  resolved_descriptor.name != starting_package.name
-
     new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
     package = lookup_package(
       resolved_descriptor.name || starting_package.name,
       resolved_descriptor.version,
       new_backtrace
     )
+
+    return if                                   \
+          starting_package.base?                \
+      &&  @suppress_includes == :cross_package  \
+      &&  package != starting_package
+
     apply_config(
       package,
       resolved_descriptor.config || Fig::Package::DEFAULT_CONFIG,

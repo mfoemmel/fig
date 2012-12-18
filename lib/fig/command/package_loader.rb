@@ -4,6 +4,7 @@ require 'fig/parser'
 module Fig; end
 class Fig::Command; end
 
+# Loads the base package.
 class Fig::Command::PackageLoader
   attr_reader :package_loaded_from_path
 
@@ -35,7 +36,7 @@ class Fig::Command::PackageLoader
     if @descriptor.nil?
       load_package_object_from_file()
     else
-      @base_package = @repository.get_package(@descriptor)
+      set_base_package @repository.get_package(@descriptor)
     end
 
     return @base_package
@@ -103,29 +104,41 @@ class Fig::Command::PackageLoader
       :source_description => source_description
     )
 
-    @base_package =
-      Fig::Parser.new(@application_configuration, :check_include_versions).parse_package(
+    set_base_package(
+      Fig::Parser.new(
+        @application_configuration, :check_include_versions
+      ).parse_package(
         descriptor, '.', source_description, definition_text
       )
+    )
 
     return
   end
 
   def set_base_package_to_empty_synthetic_one()
-    @base_package = Fig::Package.new(
-      nil,
-      nil,
-      'synthetic',
-      '.',
-      [
-        Fig::Statement::Configuration.new(
-          nil,
-          %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-          @base_config,
-          []
-        )
-      ]
+    set_base_package(
+      Fig::Package.new(
+        nil,
+        nil,
+        'synthetic',
+        '.',
+        [
+          Fig::Statement::Configuration.new(
+            nil,
+            %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+            @base_config,
+            []
+          )
+        ]
+      )
     )
+
+    return
+  end
+
+  def set_base_package(package)
+    @base_package = package
+    package.set_base true
 
     return
   end

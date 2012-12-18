@@ -622,6 +622,18 @@ class Fig::Command::Options
     return
   end
 
+  def set_suppress_includes(value)
+    if @suppress_includes
+      raise Fig::Command::OptionError.new(
+        'Can only specify one --suppress-all-includes/--suppress-cross-package-includes option.'
+      )
+    end
+
+    @suppress_includes = value
+
+    return
+  end
+
   def set_update_action(update_action_class)
     update_action = update_action_class.new
     if @update_action
@@ -661,16 +673,20 @@ class Fig::Command::Options
   def validate()
     if suppress_includes
       if list_tree?
-        # Not incompatible, just not implemented (would need to handle in
-        # command/action/role/list_*)
+        # Not conceptually incompatible, just not implemented (would need to
+        # handle in command/action/role/list_*)
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-tree.'
         )
       elsif list_all_configs?
-        # Not incompatible, just not implemented (would need to handle in
-        # command/action/role/list_*)
+        # Not conceptually incompatible, just not implemented (would need to
+        # handle in command/action/role/list_*)
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-all-configs.'
+        )
+      elsif @base_action.list_dependencies?
+        raise Fig::Command::OptionError.new(
+          %q<It doesn't make much sense to suppress dependencies when attempting to list them.>
         )
       elsif @base_action.publish?
         # Don't want to support broken publishes (though versionless includes

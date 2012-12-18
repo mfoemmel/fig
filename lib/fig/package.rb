@@ -36,6 +36,17 @@ class Fig::Package
     @backtrace            = nil
   end
 
+  # Is this the base package?
+  def base?()
+    return @base
+  end
+
+  def set_base(yea_or_nay)
+    @base = yea_or_nay
+
+    return
+  end
+
   def [](config_name)
     @statements.each do |stmt|
       return stmt if stmt.is_a?(Fig::Statement::Configuration) && stmt.name == config_name
@@ -133,23 +144,17 @@ class Fig::Package
   end
 
   def to_s_with_config(config_name)
-    string = nil
-
-    if name.nil?
-      string = UNPUBLISHED
-    else
-      string = to_s
-    end
-
-    if not config_name.nil? and config_name != DEFAULT_CONFIG
-      string += ":#{config_name}"
-    end
-
-    return string
+    displayed_config = config_name == DEFAULT_CONFIG ? nil : config_name
+    return Fig::PackageDescriptor.format(
+      name || UNPUBLISHED, version, displayed_config
+    )
   end
 
-  def to_s_with_primary_config()
-    return to_s_with_config(primary_config_name)
+  # Useful for debugging; should not be used for regular output.
+  def to_descriptive_string_with_config(config_name)
+    return Fig::PackageDescriptor.format(
+      name, version, config_name, :use_default_config, description
+    )
   end
 
   private
