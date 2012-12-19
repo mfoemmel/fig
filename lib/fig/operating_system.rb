@@ -515,15 +515,15 @@ class Fig::OperatingSystem
 
   def check_archive_entry_for_windows(entry, archive_path)
     bad_type = nil
-    if entry.is_symbolic_link
+    if entry.symbolic_link?
       bad_type = 'symbolic link'
-    elsif entry.is_block_special
+    elsif entry.block_special?
       bad_type = 'block device'
-    elsif entry.is_character_special
+    elsif entry.character_special?
       bad_type = 'character device'
-    elsif entry.is_fifo
+    elsif entry.fifo?
       bad_type = 'pipe'
-    elsif entry.is_socket
+    elsif entry.socket?
       bad_type = 'socket'
     end
 
