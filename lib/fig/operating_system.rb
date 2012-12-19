@@ -442,15 +442,20 @@ class Fig::OperatingSystem
   # .tar.gz
   # .tgz
   # .zip
-  def unpack_archive(directory, file)
+  def unpack_archive(directory, archive_path)
     FileUtils.mkdir_p directory
     Dir.chdir(directory) do
-      if ! File.exists? file
-        raise Fig::RepositoryError.new "#{file} does not exist."
+      if ! File.exists? archive_path
+        raise Fig::RepositoryError.new "#{archive_path} does not exist."
       end
 
-      ::Archive.read_open_filename(file) do |reader|
+      windows = Fig::OperatingSystem.windows?
+      ::Archive.read_open_filename(archive_path) do |reader|
         while entry = reader.next_header
+          if windows
+            check_archive_entry_for_windows entry, archive_path
+          end
+
           begin
             reader.extract(entry)
           rescue Archive::Error => exception
@@ -459,7 +464,7 @@ class Fig::OperatingSystem
             message = exception.message.sub /^Extract archive failed: /, ''
             new_exception =
               Fig::RepositoryError.new(
-                "Could not extract #{entry.pathname} from #{file}: #{message}"
+                "Could not extract #{entry.pathname} from #{archive_path}: #{message}"
               )
 
             new_exception.set_backtrace exception.backtrace
@@ -507,6 +512,29 @@ class Fig::OperatingSystem
   SUCCESS = 0
   NOT_MODIFIED = 3
   NOT_FOUND = 4
+
+  def check_archive_entry_for_windows(entry, archive_path)
+    bad_type = nil
+    if entry.is_symbolic_link
+      bad_type = 'symbolic link'
+    elsif entry.is_block_special
+      bad_type = 'block device'
+    elsif entry.is_character_special
+      bad_type = 'character device'
+    elsif entry.is_fifo
+      bad_type = 'pipe'
+    elsif entry.is_socket
+      bad_type = 'socket'
+    end
+
+    if bad_type
+      raise Fig::RepositoryError.new(
+        "Could not extract #{entry.pathname} from #{archive_path} because it is a #{bad_type}."
+      )
+    end
+
+    return
+  end
 
   # path = The local path the file should be downloaded to.
   # command = The command to be run on the remote host.
