@@ -32,11 +32,11 @@ class Fig::OperatingSystem
   UNIX_FILE_NAME_ILLEGAL_CHARACTERS    = %w[ / ]
 
   def self.windows?
-    RbConfig::CONFIG['host_os'] =~ /mswin|mingw/
+    return !! (RbConfig::CONFIG['host_os'] =~ /mswin|mingw/)
   end
 
   def self.unix?
-    !windows?
+    ! Fig::OperatingSystem.windows?
   end
 
   def self.file_name_illegal_characters()
@@ -94,7 +94,7 @@ class Fig::OperatingSystem
   end
 
   def list(dir)
-    Dir.entries(dir) - ['.','..']
+    Dir.entries(dir) - ['.', '..']
   end
 
   def mtime(path)
@@ -449,10 +449,10 @@ class Fig::OperatingSystem
         raise Fig::RepositoryError.new "#{archive_path} does not exist."
       end
 
-      windows = Fig::OperatingSystem.windows?
+      running_on_windows = Fig::OperatingSystem.windows?
       ::Archive.read_open_filename(archive_path) do |reader|
         while entry = reader.next_header
-          if windows
+          if running_on_windows
             check_archive_entry_for_windows entry, archive_path
           end
 
