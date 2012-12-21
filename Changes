@@ -1,9 +1,6 @@
 v0.2.6.beta.2
 
-  Miscellaneous:
-
-  - On Windows, contents of archives are checked for special file types
-    (symlinks, pipes, etc.) so that better error messages can be produced.
+xxxxxxxx
 
 v0.2.6.beta.1
 
