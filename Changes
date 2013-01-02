@@ -1,8 +1,4 @@
-v0.2.6.beta.2
-
-xxxxxxxx
-
-v0.2.6.beta.1
+v1.0.0
 
   New features:
 
@@ -43,6 +39,10 @@ v0.2.6.beta.1
     files previously downloaded as a result of a retrieve statement.  Useful if
     you wish to toggle between multiple configurations rapidly without waiting
     for file shuffling.
+
+v0.2.6.beta.1
+
+  - Test release
 
 v0.2.5
 
