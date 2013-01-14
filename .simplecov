@@ -28,7 +28,7 @@ SimpleCov.add_group 'Fig environment/config',
   '(?x) lib/fig/ (?: application_configuration | config_file| figrc | url_access_error )'
 
 SimpleCov.add_group 'I/O',
-  '(?x) lib/fig/ (?: at_exit | log (?: 4r | ging ) | network | not_found | operating_system | update_lock )'
+  '(?x) lib/fig/ (?: at_exit | log (?: 4r | ging ) | network | not_found | operating_system | protocol | update_lock )'
 
 SimpleCov.add_group 'Utilities',
   '(?x) lib/fig/ (?: tokenized_string | string_tokenizer | url[.]rb )'
