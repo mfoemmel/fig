@@ -30,7 +30,7 @@ class Fig::Protocol::SSH
   # exists and is already up-to-date.
   def download(uri, path)
     # TODO need better way to do conditional download
-    timestamp = File.exist?(path) ? File.mtime(path).to_i : 0
+    timestamp = ::File.exist?(path) ? ::File.mtime(path).to_i : 0
     # Requires that remote installation of fig be at the same location as the local machine.
     command = `which fig-download`.strip + " #{timestamp} #{uri.path}"
     log_download(uri, path)

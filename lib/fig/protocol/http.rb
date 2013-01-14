@@ -17,7 +17,7 @@ class Fig::Protocol::HTTP
   # exists and is already up-to-date.
   def download(uri, path)
     log_download(uri, path)
-    File.open(path, 'wb') do |file|
+    ::File.open(path, 'wb') do |file|
       file.binmode
 
       begin
