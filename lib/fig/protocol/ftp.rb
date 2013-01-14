@@ -62,7 +62,7 @@ class Fig::Protocol::FTP
       ftp = Net::FTP.new(uri.host)
       ftp_login(ftp, uri.host)
 
-      if ftp.mtime(uri.path) <= File.mtime(path)
+      if ftp.mtime(uri.path) <= ::File.mtime(path)
         return true
       end
 
@@ -83,7 +83,7 @@ class Fig::Protocol::FTP
       ftp = Net::FTP.new(uri.host)
       ftp_login(ftp, uri.host)
 
-      if File.exist?(path) && ftp.mtime(uri.path) <= File.mtime(path)
+      if ::File.exist?(path) && ftp.mtime(uri.path) <= ::File.mtime(path)
         Fig::Logging.debug "#{path} is up to date."
         return false
       else
