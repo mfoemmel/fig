@@ -167,14 +167,15 @@ class Fig::Command
 
   def configure()
     set_up_update_lock()
+
+    @operating_system = Fig::OperatingSystem.new(@options.login?)
+
     set_up_application_configuration()
 
     Fig::Logging.initialize_post_configuration(
       @options.log_config() || @application_configuration['log configuration'],
       @options.log_level()
     )
-
-    @operating_system = Fig::OperatingSystem.new(@options.login?)
 
     prepare_repository()
     prepare_environment()
@@ -205,10 +206,10 @@ class Fig::Command
 
   def set_up_application_configuration()
     @application_configuration = Fig::FigRC.find(
-      @options.figrc(),
+      @options.figrc,
       ENV['FIG_REMOTE_URL'],
-      @options.login?,
-      @options.home(),
+      @operating_system,
+      @options.home,
       @options.no_figrc?
     )
 

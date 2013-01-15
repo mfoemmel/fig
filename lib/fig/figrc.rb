@@ -17,7 +17,7 @@ class Fig::FigRC
   def self.find(
     override_path,
     specified_repository_url,
-    login,
+    operating_system,
     fig_home,
     disable_figrc = false
   )
@@ -33,7 +33,7 @@ class Fig::FigRC
     configuration.remote_repository_url = repository_url
 
     handle_repository_configuration(
-      configuration, repository_url, login, fig_home
+      configuration, repository_url, operating_system, fig_home
     )
 
     return configuration
@@ -77,7 +77,7 @@ class Fig::FigRC
   end
 
   def self.handle_repository_configuration(
-    configuration, repository_url, login, fig_home
+    configuration, repository_url, operating_system, fig_home
   )
     return if repository_url.nil?
 
@@ -85,11 +85,9 @@ class Fig::FigRC
     repo_figrc_path =
       File.expand_path(File.join(fig_home, REPOSITORY_CONFIGURATION))
 
-    os = Fig::OperatingSystem.new(login)
-
     repo_config_exists = nil
     begin
-      os.download( figrc_url, repo_figrc_path )
+      operating_system.download figrc_url, repo_figrc_path
       repo_config_exists = true
     rescue Fig::FileNotFoundError
       repo_config_exists = false
