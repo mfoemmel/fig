@@ -4,6 +4,7 @@ require 'stringio'
 require 'tempfile'
 
 require 'fig/figrc'
+require 'fig/operating_system'
 require 'fig/repository'
 require 'fig/working_directory_maintainer'
 
@@ -41,6 +42,16 @@ describe 'FigRC' do
     return
   end
 
+  def invoke_find(override_path, repository_url)
+    return Fig::FigRC.find(
+      override_path,
+      repository_url,
+      Fig::OperatingSystem.new(false),
+      FIG_HOME,
+      true
+    )
+  end
+
   before(:all) do
     set_up_test_environment
   end
@@ -53,41 +64,40 @@ describe 'FigRC' do
     tempfile = create_override_file('loaded as override')
 
     create_remote_config("loaded from repository (shouldn't be)")
-    configuration =
-      Fig::FigRC.find(tempfile.path, FIG_REMOTE_URL, true, FIG_HOME, true)
+    configuration = invoke_find tempfile.path, FIG_REMOTE_URL
     tempfile.unlink
 
     configuration['foo'].should == 'loaded as override'
   end
 
   it 'handles no override, no repository (full stop)' do
-    configuration = Fig::FigRC.find(nil, nil, true, FIG_HOME, true)
+    configuration = invoke_find nil, nil
     configuration['foo'].should == nil
   end
 
   it 'handles no repository config and no override specified, and config does NOT exist on server' do
-    configuration = Fig::FigRC.find(nil, %Q<file:///does_not_exist/>, true, FIG_HOME, true)
+    configuration = invoke_find nil, 'file:///does_not_exist/'
     configuration['foo'].should == nil
   end
 
   it 'retrieves configuration from repository with no override' do
     create_remote_config('loaded from repository')
 
-    configuration = Fig::FigRC.find(nil, FIG_REMOTE_URL, true, FIG_HOME, true)
+    configuration = invoke_find nil, FIG_REMOTE_URL
     configuration['foo'].should == 'loaded from repository'
   end
 
   it 'has a remote config but gets its config from the override file provided' do
     create_remote_config('loaded from remote repository')
     tempfile = create_override_file('loaded as override to override remote config')
-    configuration = Fig::FigRC.find(tempfile.path, FIG_REMOTE_URL, true, FIG_HOME, true)
+    configuration = invoke_find tempfile.path, FIG_REMOTE_URL
     configuration['foo'].should == 'loaded as override to override remote config'
   end
 
   it 'merges override file config over remote config' do
     create_remote_config('loaded from remote repository', 'should not be overwritten')
     tempfile = create_override_file('loaded as override to override remote config')
-    configuration = Fig::FigRC.find(tempfile.path, FIG_REMOTE_URL, true, FIG_HOME, true)
+    configuration = invoke_find tempfile.path, FIG_REMOTE_URL
     configuration['foo'].should == 'loaded as override to override remote config'
     configuration['bar'].should == 'should not be overwritten'
   end
@@ -96,7 +106,7 @@ describe 'FigRC' do
     tempfile = create_override_file_with_repository_url
     create_remote_config('loaded from repository')
 
-    configuration = Fig::FigRC.find(tempfile.path, nil, true, FIG_HOME, true)
+    configuration = invoke_find tempfile.path, nil
     configuration['foo'].should == 'loaded from repository'
   end
 end
