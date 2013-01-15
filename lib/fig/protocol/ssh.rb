@@ -1,7 +1,6 @@
-require 'cgi'
 require 'fileutils'
-require 'net/ssh'
 require 'net/sftp'
+require 'net/ssh'
 
 require 'fig/file_not_found_error'
 require 'fig/logging'

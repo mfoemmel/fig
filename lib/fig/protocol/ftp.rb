@@ -1,5 +1,4 @@
 require 'net/ftp'
-require 'net/netrc'
 
 require 'fig/file_not_found_error'
 require 'fig/logging'
