@@ -1,3 +1,12 @@
+v1.0.1.beta.1
+
+  Backwards incompatibilities:
+
+  - The FIG_USERNAME and FIG_PASSWORD environment variables take precedence
+    over values in ~/.netrc.  This is a better fit with the general *nix idea
+    that the command-line should take precedence over the environment which
+    should take precedence over dotfiles.
+
 v1.0.0
 
   New features:
