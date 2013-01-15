@@ -6,7 +6,7 @@ SimpleCov.merge_timeout 2 * 60 * 60 # 2 hours
 # directory.
 class FigFileFilter < SimpleCov::Filter
   def matches?(source_file)
-    return source_file.filename =~ %r<\bspec\b>
+    return source_file.filename =~ %r< \b spec \b | \b vendor \b >x
   end
 end
 SimpleCov.add_filter FigFileFilter.new(nil)
