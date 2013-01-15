@@ -1,11 +1,12 @@
 require 'fig/package_descriptor_parse_error'
-require 'fig/statement'
 
 module Fig; end
 
 # Parsed representation of a package specification, i.e. "name/version:config".
 class Fig::PackageDescriptor
   include Comparable
+
+  COMPONENT_PATTERN = / \A (?! [.]{1,2} $) [a-zA-Z0-9_.-]+ \z /x
 
   attr_reader :name, :version, :config, :original_string, :description
 
@@ -117,7 +118,7 @@ class Fig::PackageDescriptor
   def validate_component_format(value, name, options)
     return if value.nil?
 
-    return if value =~ / \A [a-zA-Z0-9_.-]+ \z /x
+    return if value =~ COMPONENT_PATTERN
 
     raise Fig::PackageDescriptorParseError.new(
       %Q<Invalid #{name} ("#{value}")#{standard_exception_suffix(options)}>,
