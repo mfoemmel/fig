@@ -34,7 +34,8 @@ module Fig::Protocol
     if not ls_output.nil?
       ls_output = ls_output.gsub(path + '/', '').gsub(path, '').split("\n")
       ls_output.each do |line|
-        parts = line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
+        parts =
+          line.gsub(/\\/, '/').sub(/^\.\//, '').sub(/:$/, '').chomp().split('/')
         packages << parts.join('/') if parts.size == 2
       end
     end

@@ -1,11 +1,11 @@
 require 'net/ftp'
 require 'net/netrc'
 
-require 'highline/import'
-
 require 'fig/file_not_found_error'
 require 'fig/logging'
+require 'fig/network_error'
 require 'fig/protocol'
+require 'fig/protocol/netrc_enabled'
 require 'fig/url'
 
 module Fig; end
@@ -14,35 +14,10 @@ module Fig::Protocol; end
 # File transfers via FTP
 class Fig::Protocol::FTP
   include Fig::Protocol
+  include Fig::Protocol::NetRCEnabled
 
   def initialize(login)
     @login = login
-    @username = ENV['FIG_USERNAME']
-    @password = ENV['FIG_PASSWORD']
-  end
-
-  def get_username()
-    # #ask() comes from highline
-    @username ||= ask('Username: ') { |q| q.echo = true }
-  end
-
-  def get_password()
-    # #ask() comes from highline
-    @password ||= ask('Password: ') { |q| q.echo = false }
-  end
-
-  def ftp_login(ftp, host)
-    if @login
-      rc = Net::Netrc.locate(host)
-      if rc
-        @username = rc.login
-        @password = rc.password
-      end
-      ftp.login(get_username, get_password)
-    else
-      ftp.login()
-    end
-    ftp.passive = true
   end
 
   def download_list(uri)
@@ -130,6 +105,22 @@ class Fig::Protocol::FTP
   end
 
   private
+
+  def ftp_login(ftp, host)
+    begin
+      if @login
+        load_authentication_for host
+        ftp.login get_username, get_password
+      else
+        ftp.login
+      end
+      ftp.passive = true
+    rescue Net::FTPPermError => error
+      raise Fig::NetworkError.new "Could not log in: #{error.message}"
+    end
+
+    return
+  end
 
   def download_ftp_list(uri, dirs)
     # Run a bunch of these in parallel since they're slow as hell

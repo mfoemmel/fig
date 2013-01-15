@@ -25,7 +25,6 @@ class Fig::Protocol::SSH
     return packages
   end
 
-
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
   def download(uri, path)
@@ -38,7 +37,7 @@ class Fig::Protocol::SSH
   end
 
   def upload(local_file, uri)
-    ssh_upload(uri.user, uri.host, local_file, remote_file)
+    ssh_upload(uri.user, uri.host, local_file, uri)
   end
 
   private
@@ -82,8 +81,7 @@ class Fig::Protocol::SSH
     end
   end
 
-  def ssh_upload(user, host, local_file, remote_file)
-    uri = Fig::URL.parse(remote_file)
+  def ssh_upload(user, host, local_file, uri)
     dir = uri.path[0, uri.path.rindex('/')]
     Net::SSH.start(host, user) do |ssh|
       ssh.exec!("mkdir -p #{dir}")
