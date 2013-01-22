@@ -74,3 +74,5 @@ DEPENDENCIES
   simplecov-html (>= 0.5.3)
   sys-admin (>= 1.5.6)
   treetop (>= 1.4.2)
+  win32-security (= 0.1.4)
+  windows-pr (= 1.2.2)
