@@ -523,7 +523,7 @@ class Fig::Command::Options
     end
 
     @parser.on(
-      '-l', '--login', 'login to remote repo as a non-anonymous user'
+      '-l', '--login', 'login to FTP repo as a non-anonymous user'
     ) do
       @login = true
     end

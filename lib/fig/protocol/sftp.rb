@@ -109,7 +109,13 @@ class Fig::Protocol::SFTP
     load_authentication_for host
 
     begin
-      Net::SFTP.start(host, get_username, :password => get_password, &block)
+      options = {:password => get_password}
+      port = uri.port
+      if port
+        options[:port] = port
+      end
+
+      Net::SFTP.start(host, get_username, options, &block)
     rescue Net::SSH::Exception => error
       raise Fig::NetworkError.new error.message
     rescue Net::SFTP::Exception => error

@@ -11,6 +11,14 @@ v1.0.1.beta.1
     that the command-line should take precedence over the environment which
     should take precedence over dotfiles.
 
+  New features:
+
+  - Support for SFTP.  Set FIG_REMOTE_URL to something like
+    «sftp://host:port/some/path».  Note that this *requires* the use of
+    ~/.netrc or FIG_USERNAME/FIG_PASSWORD in order to authenticate; there is no
+    anonymous SFTP.  Thus, the use of the --login option is superfluous with
+    SFTP.
+
 v1.0.0
 
   New features:
