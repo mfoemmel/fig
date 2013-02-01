@@ -59,7 +59,7 @@ def main()
       >
     ].to_a + compiled_grammars
 
-    gemspec.executables = ['fig', 'fig-download']
+    gemspec.executables = ['fig']
   end
 
   Gem::PackageTask.new(fig_gemspec).define

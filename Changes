@@ -11,6 +11,10 @@ v1.0.1.beta.1
     that the command-line should take precedence over the environment which
     should take precedence over dotfiles.
 
+  - Removed support for SSH.  It was never fully functional and depended upon
+    fig being installed at the same absolute path on the remote machine as it
+    was on the local one.  Use SFTP instead.
+
   New features:
 
   - Support for SFTP.  Set FIG_REMOTE_URL to something like
