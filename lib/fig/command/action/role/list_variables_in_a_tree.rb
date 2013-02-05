@@ -53,7 +53,7 @@ module Fig::Command::Action::Role::ListVariablesInATree
     current_parent = tree
 
     walk_dependency_tree(
-      @execution_context.base_package, base_display_config_names(), nil, 0
+      @execution_context.base_package, base_display_config_names()
     ) do
       |package, config_name, depth|
 

@@ -40,7 +40,7 @@ class Fig::Command::Action::ListVariables::AllConfigs
     variable_names = Set.new()
 
     walk_dependency_tree(
-      @execution_context.base_package, base_display_config_names(), nil, 0
+      @execution_context.base_package, base_display_config_names()
     ) do
       |package, config_name, depth|
 

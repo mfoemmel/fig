@@ -9,6 +9,8 @@ require 'fig/command/action/list_configs'
 require 'fig/command/action/list_dependencies'
 require 'fig/command/action/list_dependencies/all_configs'
 require 'fig/command/action/list_dependencies/default'
+require 'fig/command/action/list_dependencies/graphviz'
+require 'fig/command/action/list_dependencies/graphviz_all_configs'
 require 'fig/command/action/list_dependencies/tree'
 require 'fig/command/action/list_dependencies/tree_all_configs'
 require 'fig/command/action/list_local'
@@ -163,6 +165,10 @@ class Fig::Command::Options
     return @list_tree
   end
 
+  def graphviz?()
+    return @graphviz
+  end
+
   def strip_shell_command(argv)
     argv.each_with_index do |arg, i|
       case arg
@@ -306,6 +312,12 @@ class Fig::Command::Options
       '--list-tree', 'for listings, output a tree instead of a list'
     ) do
       @list_tree = true
+    end
+
+    @parser.on(
+      '--graphviz', 'for listings, output a Graphviz tree instead of a list'
+    ) do
+      @graphviz = true
     end
 
     @parser.on(
@@ -678,6 +690,12 @@ class Fig::Command::Options
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-tree.'
         )
+      elsif graphviz?
+        # Not conceptually incompatible, just not implemented (would need to
+        # handle in command/action/role/list_*)
+        raise Fig::Command::OptionError.new(
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --graphviz.'
+        )
       elsif list_all_configs?
         # Not conceptually incompatible, just not implemented (would need to
         # handle in command/action/role/list_*)
@@ -696,17 +714,27 @@ class Fig::Command::Options
         )
       end
     elsif list_tree?
-      if ! @base_action.list_dependencies? && ! @base_action.list_variables?
-        raise Fig::Command::OptionError.new(
-          %q<The --list-tree option isn't useful without --list-dependencies/--list-variables.>
-        )
-      end
+      validate_list_option '--list-tree'
+    elsif graphviz?
+      validate_list_option '--graphviz'
     elsif list_all_configs?
-      if ! @base_action.list_dependencies? && ! @base_action.list_variables?
-        raise Fig::Command::OptionError.new(
-          %q<The --list-all-configs option isn't useful without --list-dependencies/--list-variables.>
-        )
-      end
+      validate_list_option '--list-all-configs'
+    end
+
+    if list_tree? && graphviz?
+      raise Fig::Command::OptionError.new(
+        'Cannot use --list-tree and --graphviz at the same time.'
+      )
+    end
+
+    return
+  end
+
+  def validate_list_option(option)
+    if ! @base_action.list_dependencies? && ! @base_action.list_variables?
+      raise Fig::Command::OptionError.new(
+        %Q<The #{option} option isn't useful without --list-dependencies/--list-variables.>
+      )
     end
 
     return
@@ -720,6 +748,8 @@ class Fig::Command::Options
       sub_action_name = :Default
       if list_tree?
         sub_action_name = list_all_configs? ? :TreeAllConfigs : :Tree
+      elsif graphviz?
+        sub_action_name = list_all_configs? ? :GraphvizAllConfigs : :Graphviz
       elsif list_all_configs?
         sub_action_name = :AllConfigs
       end
