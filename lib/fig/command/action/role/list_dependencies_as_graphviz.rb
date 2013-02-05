@@ -10,6 +10,7 @@ module  Fig::Command::Action::Role; end
 module Fig::Command::Action::Role::ListDependenciesAsGraphviz
   def execute()
     puts 'digraph {'
+    puts '    node [shape = box];'
     walk_dependency_tree(
       @execution_context.base_package,
       base_display_config_names(),
@@ -52,14 +53,17 @@ module Fig::Command::Action::Role::ListDependenciesAsGraphviz
         visited << name
 
         style = ''
-        if (
-          package == @execution_context.base_package      &&
-          base_display_config_names.include?(config_name)
-        )
-          style = ' style = bold'
+        color = ''
+        if package == @execution_context.base_package
+          if base_display_config_names.include?(config_name)
+            style = ' style = "rounded, bold"'
+          end
+          if config_name == @execution_context.base_config
+            color = ' color = blue'
+          end
         end
 
-        puts %Q<    "#{name}" [label = "#{name}"#{style}];>
+        puts %Q<    "#{name}" [label = "#{name}"#{style}#{color}];>
       end
     end
   end
