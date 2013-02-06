@@ -18,6 +18,8 @@ require 'fig/command/action/list_remote'
 require 'fig/command/action/list_variables'
 require 'fig/command/action/list_variables/all_configs'
 require 'fig/command/action/list_variables/default'
+require 'fig/command/action/list_variables/graphviz'
+require 'fig/command/action/list_variables/graphviz_all_configs'
 require 'fig/command/action/list_variables/tree'
 require 'fig/command/action/list_variables/tree_all_configs'
 require 'fig/command/action/options'
@@ -315,7 +317,8 @@ class Fig::Command::Options
     end
 
     @parser.on(
-      '--graphviz', 'for listings, output a Graphviz tree instead of a list'
+      '--graphviz',
+      'for listings, output DOT (http://graphviz.org/content/dot-language)'
     ) do
       @graphviz = true
     end

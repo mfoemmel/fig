@@ -1,7 +1,5 @@
 require 'set'
 
-require 'fig/command/action'
-
 module  Fig; end
 class   Fig::Command; end
 module  Fig::Command::Action; end

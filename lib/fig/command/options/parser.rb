@@ -63,12 +63,17 @@ Querying:
 
   fig {--list-local | --list-remote}                                      [...]
   fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
-  fig --list-dependencies [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
-  fig --list-variables    [--list-tree] [--list-all-configs] [DESCRIPTOR] [...]
+  fig --list-dependencies [...list options...]               [DESCRIPTOR] [...]
+  fig --list-variables    [...list options...]               [DESCRIPTOR] [...]
   fig --list-configs                                         [DESCRIPTOR] [...]
   fig --dump-package-definition-text                         [DESCRIPTOR] [...]
   fig --dump-package-definition-parsed                       [DESCRIPTOR] [...]
   fig --dump-package-definition-for-command-line             [DESCRIPTOR] [...]
+
+List options (represented as "[...list options...]" above):
+
+      [--list-tree | --graphviz]
+      [--list-all-configs]
 
 Standard options (represented as "[...]" above):
 
