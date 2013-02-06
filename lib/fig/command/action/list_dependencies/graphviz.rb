@@ -1,4 +1,5 @@
 require 'fig/command/action'
+require 'fig/command/action/role/list_as_graphviz'
 require 'fig/command/action/role/list_base_config'
 require 'fig/command/action/role/list_dependencies_as_graphviz'
 require 'fig/command/action/role/list_walking_dependency_tree'
@@ -10,6 +11,7 @@ class   Fig::Command::Action::ListDependencies; end
 
 class Fig::Command::Action::ListDependencies::Graphviz
   include Fig::Command::Action
+  include Fig::Command::Action::Role::ListAsGraphviz
   include Fig::Command::Action::Role::ListBaseConfig
   include Fig::Command::Action::Role::ListDependenciesAsGraphviz
   include Fig::Command::Action::Role::ListWalkingDependencyTree
