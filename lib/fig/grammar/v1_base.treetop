@@ -1,0 +1,229 @@
+# Reusable parts of Treetop (http://treetop.rubyforge.org/) grammar for package
+# definitions in v1 format.
+
+# Some aspects of this grammar are significantly dumber than they could be
+# because:
+#
+#   * We want to treat statements as identically as possible to their
+#     command-line equivalents.
+#   * Treetop parse errors are pretty inscrutable at times and we can make
+#     error messages clearer by validating a lot of the terminals ourselves.
+
+require 'treetop'
+
+module Fig
+  module Grammar
+    # Consumers of this need to mix in Fig::Grammar::Base and
+    # Fig::Grammar::Version and have a "rule config_statement".
+    grammar V1Base
+      # Shim between "package" and "package_statement" rules to allow the
+      # compiled v0 and v1 grammars to have the same interface.
+      rule package_statement_with_ws
+        package_statement:package_statement ws_or_comment+ {
+          def to_package_statement(build_state)
+            return package_statement.to_package_statement(build_state)
+          end
+        }
+      end
+
+      rule package_statement
+        archive / resource / retrieve / config
+      end
+
+      rule archive
+        statement_start:'archive'
+        ws_or_comment+
+        location:quoted_or_bare_string
+        {
+          def to_package_statement(build_state)
+            return build_state.new_asset_statement(
+              Statement::Archive, statement_start, location
+            )
+          end
+        }
+      end
+
+      rule resource
+        statement_start:'resource'
+        ws_or_comment+
+        location:quoted_or_bare_string
+        {
+          def to_package_statement(build_state)
+            return build_state.new_asset_statement(
+              Statement::Resource, statement_start, location
+            )
+          end
+        }
+      end
+
+      rule retrieve
+        statement_start:'retrieve'
+        ws_or_comment+
+        variable:environment_variable_name '->' path:quoted_or_bare_string
+        {
+          def to_package_statement(build_state)
+            return build_state.new_retrieve_statement(
+              statement_start, variable, path
+            )
+          end
+        }
+      end
+
+      rule config
+        statement_start:'config'
+        ws_or_comment+
+        config_name
+        ws_or_comment+
+        statements:config_statement_with_ws*
+        'end'
+        {
+          def to_package_statement(build_state)
+            return build_state.new_configuration_statement(
+              statement_start, config_name, statements
+            )
+          end
+        }
+      end
+
+      # Shim between "config" and "config_statement" rules to allow the
+      # compiled v0 and v1 grammars to have the same interface.
+      rule config_statement_with_ws
+        config_statement:config_statement ws_or_comment+ {
+          def to_config_statement(build_state)
+            return config_statement.to_config_statement(build_state)
+          end
+        }
+      end
+
+      # Need rule config_statement
+
+      rule include
+        statement_start:'include' ws_or_comment+ descriptor_string {
+          def to_config_statement(build_state)
+            return build_state.new_include_statement(
+              statement_start, descriptor_string
+            )
+          end
+        }
+      end
+
+      rule override
+        statement_start:'override' ws_or_comment+ descriptor_string {
+          def to_config_statement(build_state)
+            return build_state.new_override_statement(
+              statement_start, descriptor_string
+            )
+          end
+        }
+      end
+
+      rule set
+        statement_start:'set' ws_or_comment+ environment_variable_name_value {
+          def to_config_statement(build_state)
+            return build_state.new_environment_variable_statement(
+              Statement::Set, statement_start, environment_variable_name_value
+            )
+          end
+        }
+      end
+
+      rule path
+        statement_start:('add' / 'append' / 'path')
+        ws_or_comment+
+        environment_variable_name_value
+        {
+          def to_config_statement(build_state)
+            return build_state.new_environment_variable_statement(
+              Statement::Path, statement_start, environment_variable_name_value
+            )
+          end
+        }
+      end
+
+      rule command
+        statement_start:'command'
+        ws_or_comment+
+        command_line
+        ws_or_comment+
+        'end'
+        {
+          def to_config_statement(build_state)
+            return build_state.new_v1_command_statement(
+              statement_start, gather_command_argument_nodes(command_line)
+            )
+          end
+
+          def gather_command_argument_nodes(node, arguments = [])
+            if node.respond_to? 'quoted_or_bare_string?'
+              arguments << node
+              return arguments
+            end
+
+            return arguments if not node.elements
+
+            node.elements.each do
+              |element|
+              gather_command_argument_nodes(element, arguments)
+            end
+
+            return arguments
+          end
+        }
+      end
+
+      rule command_line
+        quoted_or_bare_string
+        ! { |sequence| sequence[-1].text_value == 'end' }
+        (
+          ws_or_comment+
+          quoted_or_bare_string
+          ! { |sequence| sequence[-1].text_value == 'end' }
+        )*
+      end
+
+      # Terminals
+
+      rule descriptor_string
+        [^\s#]+
+      end
+
+      rule config_name
+        [a-zA-Z0-9_.-]+
+      end
+
+      rule quoted_or_bare_string
+        # In order to deal with the hierarchy of nodes that the command_line
+        # rule above generates, we tag each of the expressions here so that
+        # they can be found in the syntax tree.
+        [^\s#\\"]* '"' ( [^"\\] / '\\' . )* '"'
+        { def quoted_or_bare_string?() return true end }
+
+        /
+
+        [^\s#\\']* "'" ( [^'\\] / '\\' . )* "'"
+        { def quoted_or_bare_string?() return true end }
+
+        /
+
+        [^\s#]+
+        { def quoted_or_bare_string?() return true end }
+      end
+
+      rule environment_variable_name
+        [a-zA-Z0-9_]+
+      end
+
+      rule environment_variable_name_value
+        # This is like quoted_or_bare_string, but allows for the unquoted
+        # variable name followed by equals sign prior to the quotation marks
+        # coming in.
+        #
+        # Should result in somewhat reasonable handling by Treetop when
+        # encountering mis-quoted constructs.
+        [^\s#\\'"]* '"' ( [^"\\] / '\\' . )* '"' /
+        [^\s#\\'"]* "'" ( [^'\\] / '\\' . )* "'" /
+        [^\s#]+
+      end
+    end
+  end
+end
