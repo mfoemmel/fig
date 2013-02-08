@@ -3,6 +3,7 @@ require 'set'
 require 'fig/grammar/version_identification'
 require 'fig/grammar/v0'
 require 'fig/grammar/v1'
+require 'fig/grammar/v2'
 require 'fig/grammar_monkey_patches'
 require 'fig/logging'
 require 'fig/package_parse_error'
@@ -31,10 +32,20 @@ class Fig::Parser
       return parse_v0(descriptor, directory, source_description, unparsed_text)
     end
 
-    return parse_v1(descriptor, directory, source_description, unparsed_text)
+    return parse_v1_or_later(
+      version, descriptor, directory, source_description, unparsed_text
+    )
   end
 
   private
+
+  PARSER_CLASS = {
+    1 => Fig::Grammar::V1Parser,
+    2 => Fig::Grammar::V2Parser,
+  }
+
+  # TODO: Remove this once stablized.
+  @@seen_v2 = false
 
   def get_grammar_version(
     descriptor, directory, source_description, unparsed_text
@@ -55,9 +66,15 @@ class Fig::Parser
     return 0 if not statement
 
     version = statement.version
-    if version > 1
+    if version > 2
       raise Fig::PackageParseError.new(
         %Q<Don't know how to parse grammar version #{version}#{statement.position_string()}.>
+      )
+    end
+    if version == 2 && ! @@seen_v2
+      @@seen_v2 = true
+      Fig::Logging.info(
+        'Encountered v2 grammar.  This is experimental and subject to change without notice.'
       )
     end
 
@@ -79,11 +96,13 @@ class Fig::Parser
     )
   end
 
-  def parse_v1(descriptor, directory, source_description, unparsed_text)
-    v1_parser = Fig::Grammar::V1Parser.new
+  def parse_v1_or_later(
+    version, descriptor, directory, source_description, unparsed_text
+  )
+    parser = PARSER_CLASS[version].new
 
     return drive_treetop_parser(
-      v1_parser,
+      parser,
       descriptor,
       directory,
       source_description,

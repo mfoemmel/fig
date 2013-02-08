@@ -6,6 +6,7 @@ require 'fig/statement/command'
 require 'fig/statement/configuration'
 require 'fig/statement/grammar_version'
 require 'fig/statement/include'
+require 'fig/statement/include_file'
 require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/resource'
@@ -143,6 +144,20 @@ class Fig::ParserPackageBuildState
       node_location(keyword_node),
       @source_description,
       include_descriptor,
+      @descriptor
+    )
+  end
+
+require 'ap'
+  def new_include_file_statement(keyword_node, path_node, config_name_node)
+ap path_node
+ap config_name_node
+
+    return Fig::Statement::IncludeFile.new(
+      node_location(keyword_node),
+      @source_description,
+      path_node.text_value,
+      config_name_node.nil? ? nil : config_name_node.text_value,
       @descriptor
     )
   end

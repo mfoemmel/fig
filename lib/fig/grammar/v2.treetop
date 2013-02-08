@@ -1,0 +1,66 @@
+# Treetop (http://treetop.rubyforge.org/) grammar for package definitions in v2
+# format.
+
+require 'treetop'
+
+require 'fig/grammar/base'
+require 'fig/grammar/v1_base'
+require 'fig/grammar/version'
+
+module Fig
+  module Grammar
+    grammar V2
+      include Fig::Grammar::Base
+      include Fig::Grammar::Version
+      include Fig::Grammar::V1Base
+
+      # It would nice to be able to put this into Fig::Grammar::V1Base, but it
+      # looks like the root has to be declared in the concrete grammar.
+      rule package
+        optional_ws_or_comment
+        grammar_version:grammar_version?
+        statements:(package_statement_with_ws*)
+        optional_ws_or_comment
+        {
+          def to_package(directory, build_state)
+            return build_state.new_package_statement(
+              directory, grammar_version, statements
+            )
+          end
+        }
+      end
+
+      rule config_statement
+        override / include / include_file / command / path / set
+      end
+
+      rule include_file
+        statement_start:'include-file'
+        ws_or_comment+
+        path:file_path
+        # No space allowed!!!
+        config:(':' config_name:config_name)?
+        {
+          def to_config_statement(build_state)
+            config_name = nil
+            if config.respond_to? :config_name
+              config_name = config.config_name
+            end
+
+            return build_state.new_include_file_statement(
+              statement_start, path, config_name
+            )
+          end
+        }
+      end
+
+      rule file_path
+        # This is like quoted_or_bare_string, but disallows unquoted colons so
+        # that we can differentiate config names.
+        '"' ( [^"\\] / '\\' . )* '"' /
+        "'" ( [^'\\] / '\\' . )* "'" /
+        [^\s#:]+
+      end
+    end
+  end
+end
