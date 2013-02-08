@@ -4,24 +4,7 @@ v1.xxxx
 
   - Unparsing of unglobbed asset paths containing single quotes was broken.
 
-v1.0.1.beta.2
-
-  New features:
-
-  - Graphviz (http://graphviz.org/) output for --list-dependencies and
-    --list-variables via --graphviz option.  You'll need something that can
-    interpret .dot files to use this.
-
-      fig package/v1.2.3 --list-dependencies --graphviz |
-        dot -Tpng -o package-1.2.3.png
-
-      fig package/v1.2:config --list-variables --list-all-configs --graphviz |
-        dot -Tpng -o package-1.2.3.png
-
-    Since Fig just emits DOT (http://graphviz.org/content/dot-language), Fig
-    doesn't have a dependency upon Graphviz libraries, etc.
-
-v1.0.1.beta.1
+v1.1.0
 
   Backwards incompatibilities:
 
@@ -40,11 +23,29 @@ v1.0.1.beta.1
 
   New features:
 
+  - Graphviz (http://graphviz.org/) output for --list-dependencies and
+    --list-variables via --graphviz option.  You'll need something that can
+    interpret .dot files to use this.
+
+      fig package/v1.2.3 --list-dependencies --graphviz |
+        dot -Tpng -o package-1.2.3.png
+
+      fig package/v1.2:config --list-variables --list-all-configs --graphviz |
+        dot -Tpng -o package-1.2.3.png
+
+    Since Fig just emits DOT (http://graphviz.org/content/dot-language), Fig
+    doesn't have a dependency upon Graphviz libraries, etc.
+
   - Support for SFTP.  Set FIG_REMOTE_URL to something like
     «sftp://host:port/some/path».  Note that this *requires* the use of
     ~/.netrc or FIG_USERNAME/FIG_PASSWORD in order to authenticate; there is no
     anonymous SFTP.  Thus, the use of the --login option is superfluous with
     SFTP.
+
+v1.0.1.beta.2
+v1.0.1.beta.1
+
+  - Test releases.
 
 v1.0.0
 
