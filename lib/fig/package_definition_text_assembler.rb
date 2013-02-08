@@ -2,6 +2,7 @@ require 'fig/statement/grammar_version'
 require 'fig/unparser'
 require 'fig/unparser/v0'
 require 'fig/unparser/v1'
+require 'fig/unparser/v2'
 
 module Fig; end
 
@@ -34,7 +35,7 @@ class Fig::PackageDefinitionTextAssembler
   def add_output(*statements)
     # Version gets determined by other statements, not by existing grammar.
     @output_statements <<
-      statements.reject { |s| s.is_a? Fig::Statement::GrammarVersion }
+      statements.flatten.reject { |s| s.is_a? Fig::Statement::GrammarVersion }
 
     @output_statements.flatten!
 

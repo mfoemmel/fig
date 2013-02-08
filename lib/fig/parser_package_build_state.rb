@@ -148,17 +148,31 @@ class Fig::ParserPackageBuildState
     )
   end
 
-require 'ap'
   def new_include_file_statement(keyword_node, path_node, config_name_node)
-ap path_node
-ap config_name_node
+    path, config_name =
+      Fig::Statement::IncludeFile.validate_and_process_raw_path_and_config_name(
+        path_node.text_value,
+        config_name_node.nil? ? nil : config_name_node.text_value,
+      ) do
+        |description|
+
+        value_text = path_node.text_value
+        if ! config_name_node.nil?
+          value_text << ':'
+          value_text << config_name_node.text_value
+        end
+
+        raise Fig::PackageParseError.new(
+          %Q<Invalid include-file statement: "#{value_text}" #{description}#{node_location_description(path_node)}>
+        )
+      end
 
     return Fig::Statement::IncludeFile.new(
       node_location(keyword_node),
       @source_description,
-      path_node.text_value,
-      config_name_node.nil? ? nil : config_name_node.text_value,
-      @descriptor
+      path,
+      config_name,
+      @descriptor,
     )
   end
 

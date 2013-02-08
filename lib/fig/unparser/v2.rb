@@ -4,8 +4,8 @@ require 'fig/unparser/v1_base'
 module Fig; end
 module Fig::Unparser; end
 
-# Handles serializing of statements in the v1 grammar.
-class Fig::Unparser::V1
+# Handles serializing of statements in the v2 grammar.
+class Fig::Unparser::V2
   include Fig::Unparser
   include Fig::Unparser::V1Base
 
@@ -25,12 +25,31 @@ class Fig::Unparser::V1
   def grammar_version(statement)
     add_indent
 
-    @text << "grammar v1\n"
+    @text << "grammar v2\n"
+
+    return
+  end
+
+  def include_file(statement)
+    path = statement.path
+    quote = (path.include?(%q<'>) && ! path.include?(%q<">)) ? %q<"> : %q<'>
+
+    add_indent
+
+    @text << 'include-file '
+    @text << quote
+    @text << path.gsub('\\', ('\\' * 4)).gsub(quote, "\\\\#{quote}")
+    @text << quote
+    if ! statement.config_name.nil?
+      @text << ':'
+      @text << statement.config_name
+    end
+    @text << "\n"
 
     return
   end
 
   def grammar_description()
-    return 'v1'
+    return 'v2'
   end
 end

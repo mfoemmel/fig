@@ -1,3 +1,9 @@
+v1.xxxx
+
+  Bug fix:
+
+  - Unparsing of unglobbed asset paths containing single quotes was broken.
+
 v1.0.1.beta.2
 
   New features:

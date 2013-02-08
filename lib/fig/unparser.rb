@@ -20,9 +20,13 @@ module Fig::Unparser
     case version
     when 0
       return Fig::Unparser::V0, explanations
+    when 1
+      return Fig::Unparser::V1, explanations
+    when 2
+      return Fig::Unparser::V2, explanations
     end
 
-    return Fig::Unparser::V1, explanations
+    raise "Unexpected version #{version}."
   end
 
   def self.determine_version_and_unparse(
@@ -113,7 +117,7 @@ module Fig::Unparser
   end
 
   def command(statement)
-    raise NotImplementedError
+    raise NotImplementedError.new self
   end
 
   def configuration(configuration_statement)
@@ -144,7 +148,7 @@ module Fig::Unparser
   end
 
   def grammar_version(statement)
-    raise NotImplementedError
+    raise NotImplementedError.new self
   end
 
   def include(statement)
@@ -157,6 +161,10 @@ module Fig::Unparser
     @text << "\n"
 
     return
+  end
+
+  def include_file(statement)
+    raise NotImplementedError.new self
   end
 
   def override(statement)
@@ -186,7 +194,7 @@ module Fig::Unparser
   end
 
   def retrieve(statement)
-    raise NotImplementedError
+    raise NotImplementedError.new self
   end
 
   def set(statement)
@@ -202,13 +210,13 @@ module Fig::Unparser
   end
 
   def grammar_description
-    raise NotImplementedError
+    raise NotImplementedError.new self
   end
 
   private
 
   def asset(keyword, statement)
-    raise NotImplementedError
+    raise NotImplementedError.new self
   end
 
   def asset_path(statement)
@@ -220,7 +228,7 @@ module Fig::Unparser
   end
 
   def environment_variable(statement, keyword)
-    raise NotImplementedError
+    raise NotImplementedError.new self
   end
 
   def add_indent(indent_level = @indent_level)

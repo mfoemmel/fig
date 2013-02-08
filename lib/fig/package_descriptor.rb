@@ -6,7 +6,8 @@ module Fig; end
 class Fig::PackageDescriptor
   include Comparable
 
-  COMPONENT_PATTERN = / \A (?! [.]{1,2} $) [a-zA-Z0-9_.-]+ \z /x
+  UNBRACKETED_COMPONENT_PATTERN = / (?! [.]{1,2} $) [a-zA-Z0-9_.-]+ /x
+  COMPONENT_PATTERN = / \A #{UNBRACKETED_COMPONENT_PATTERN} \z /x
 
   attr_reader :name, :version, :config, :original_string, :description
 

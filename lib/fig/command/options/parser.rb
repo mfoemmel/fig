@@ -19,10 +19,7 @@ Running under Fig:
   fig [...] [DESCRIPTOR] --run-command-statement
 
 Publishing packages:
-  fig {--publish | --publish-local} DESCRIPTOR
-      [--resource PATH]      [--archive  PATH]
-      [--include DESCRIPTOR] [--override DESCRIPTOR]
-      [...]
+  fig {--publish | --publish-local} [--force] DESCRIPTOR [...]
 
 Querying:
   fig {-g | --get} VARIABLE                                  [DESCRIPTOR] [...]
@@ -33,6 +30,9 @@ Standard options (represented as "[...]" above):
       [--update | --update-if-missing]
       [--set    VARIABLE=VALUE]
       [--append VARIABLE=VALUE]
+      [--resource PATH]      [--archive  PATH]
+      [--include DESCRIPTOR] [--include-file PATH:CONFIG]
+      [--override DESCRIPTOR]
       [--file PATH] [--no-file]
 
 (--options for full option list; --help-long for everything)
@@ -47,13 +47,7 @@ Running under Fig:
 
 Publishing packages:
 
-  fig {--publish | --publish-local} DESCRIPTOR
-      [--resource       PATH]
-      [--archive        PATH]
-      [{-i | --include} DESCRIPTOR]
-      [--override       DESCRIPTOR]
-      [--force]
-      [...]
+  fig {--publish | --publish-local} [--force] DESCRIPTOR [...]
 
 Local repository maintenance:
 
@@ -82,6 +76,12 @@ Standard options (represented as "[...]" above):
 
       [{-s | --set}    VARIABLE=VALUE]
       [{-p | --append} VARIABLE=VALUE]
+
+      [--resource       PATH]
+      [--archive        PATH]
+      [{-i | --include} DESCRIPTOR]
+      [--include-file   PATH:CONFIG]
+      [--override       DESCRIPTOR]
 
       [--file PATH] [--no-file]
       [{-c | --config} CONFIG]

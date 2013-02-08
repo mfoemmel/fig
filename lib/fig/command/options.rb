@@ -452,19 +452,38 @@ class Fig::Command::Options
       STARTS_WITH_NON_HYPHEN,
       'include package/version:config specified in DESCRIPTOR in environment'
     ) do |descriptor_string|
-      statement =
-        Fig::Statement::Include.new(
-          nil,
-          '--include option',
-          Fig::Statement::Include.parse_descriptor(
-            descriptor_string,
-            :validation_context => ' given in a --include option'
-          ),
-          nil
-        )
+      statement = Fig::Statement::Include.new(
+        nil,
+        '--include option',
+        Fig::Statement::Include.parse_descriptor(
+          descriptor_string,
+          :validation_context => ' given in a --include option'
+        ),
+        nil
+      )
 
       # We've never allowed versionless includes from the command-line. Hooray!
       statement.complain_if_version_missing()
+
+      @environment_statements << statement
+    end
+
+    @parser.on(
+      '--include-file PATH:CONFIG',
+      STARTS_WITH_NON_HYPHEN,
+      'include package-definition-in-file:config in environment (incompatible with --publish)'
+    ) do |path_with_config|
+      path, config_name =
+        Fig::Statement::IncludeFile.parse_path_with_config(path_with_config) {
+          |message|
+
+          @parser.raise_invalid_argument(
+            '--include-file', path_with_config, message
+          )
+        }
+      statement = Fig::Statement::IncludeFile.new(
+        nil, '--include-file option', path, config_name, nil,
+      )
 
       @environment_statements << statement
     end
@@ -479,10 +498,9 @@ class Fig::Command::Options
           descriptor_string,
           :validation_context => ' given in a --override option'
         )
-      statement =
-        Fig::Statement::Override.new(
-          nil, '--override option', descriptor.name, descriptor.version
-        )
+      statement = Fig::Statement::Override.new(
+        nil, '--override option', descriptor.name, descriptor.version
+      )
 
       @environment_statements << statement
     end
