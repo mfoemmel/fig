@@ -49,6 +49,13 @@ describe Fig::Unparser::V1 do
           unparser.unparse([statement]).should ==
             %Q[<indent>#{keyword} 'chocolate\\\\pizza'\n]
         end
+
+        it %q<«chocolate'"pizza»> do
+          statement = statement_class.new(nil, nil, %q<chocolate'"pizza>, false)
+
+          unparser.unparse([statement]).should ==
+            %Q[<indent>#{keyword} 'chocolate\\'"pizza'\n]
+        end
       end
     end
   end
