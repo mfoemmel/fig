@@ -1,9 +1,9 @@
 # Code changes
 
 * `include-file`
-  * Handle escapes in input
-  * Command-line option
-  * Prohibit publish
+  * ~Handle escapes in input~
+  * ~Command-line option~
+  * ~Prohibit publish~
   * Unparse
   * Locate relative paths
   * Refactor Package object lookup in RuntimeEnvironment.

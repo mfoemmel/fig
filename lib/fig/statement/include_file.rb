@@ -1,5 +1,6 @@
 require 'fig/package_descriptor'
 require 'fig/statement'
+require 'fig/user_input_error'
 
 module Fig; end
 
@@ -76,7 +77,7 @@ class Fig::Statement::IncludeFile < Fig::Statement
   end
 
   def minimum_grammar_for_publishing()
-    raise 'Cannot publish an include-file statement.'
+    raise Fig::UserInputError.new 'Cannot publish an include-file statement.'
   end
 
   private

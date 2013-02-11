@@ -280,6 +280,36 @@ describe 'Fig' do
         err.should =~ %r<version required>i
         out.should == ''
       end
+
+      it %q<when given the --include-file option> do
+        out, err, exit_code = fig(
+          %w<--publish package/version --include-file whatever.fig>,
+          :fork => false,
+          :no_raise_on_error => true
+        )
+        err.should =~ %r< cannot .* include-file >ix
+        exit_code.should_not == 0
+        out.should == ''
+      end
+
+      it %q<a package with an include-file statement> do
+        input = <<-END
+          grammar v2
+          config default
+            include-file whatever.fig
+          end
+        END
+
+        out, err, exit_code = fig(
+          %w<--publish package/version>,
+          input,
+          :fork => false,
+          :no_raise_on_error => true
+        )
+        err.should =~ %r< cannot .* include-file >ix
+        exit_code.should_not == 0
+        out.should == ''
+      end
     end
 
     it %q<complains about command-line substitution of unreferenced packages> do
