@@ -28,18 +28,17 @@ class Fig::Repository
   REMOTE_VERSION_SUPPORTED  = 1
 
   def initialize(
-    os,
+    operating_system,
     local_repository_directory,
-    application_config,
-    publish_listeners,
-    check_include_versions
+    remote_repository_url,
+    parser,
+    publish_listeners
   )
-    @operating_system             = os
+    @operating_system             = operating_system
     @local_repository_directory   = local_repository_directory
-    @application_config           = application_config
+    @remote_repository_url        = remote_repository_url
+    @parser                       = parser
     @publish_listeners            = publish_listeners
-
-    @parser = Fig::Parser.new(application_config, check_include_versions)
 
     initialize_local_repository()
     reset_cached_data()
@@ -165,6 +164,8 @@ class Fig::Repository
 
   private
 
+  attr_reader :remote_repository_url
+
   def initialize_local_repository()
     FileUtils.mkdir_p(@local_repository_directory)
 
@@ -266,10 +267,6 @@ class Fig::Repository
     end
 
     return version_string.to_i()
-  end
-
-  def remote_repository_url()
-    return @application_config.remote_repository_url()
   end
 
   def should_update?(descriptor)

@@ -177,8 +177,12 @@ class Fig::Command
       @options.log_level()
     )
 
+    @parser = Fig::Parser.new(
+      @application_configuration, check_include_statements_versions?
+    )
+
     prepare_repository()
-    prepare_environment()
+    prepare_runtime_environment()
   end
 
   def set_up_update_lock()
@@ -229,9 +233,9 @@ class Fig::Command
     @repository = Fig::Repository.new(
       @operating_system,
       @options.home(),
-      @application_configuration,
+      @application_configuration.remote_repository_url,
+      @parser,
       @publish_listeners,
-      check_include_statements_versions?
     )
 
     @options.actions.each {|action| action.prepare_repository(@repository)}
@@ -239,7 +243,7 @@ class Fig::Command
     return
   end
 
-  def prepare_environment()
+  def prepare_runtime_environment()
     working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
     Fig::AtExit.add do
@@ -257,6 +261,7 @@ class Fig::Command
 
     @environment = Fig::RuntimeEnvironment.new(
       @repository,
+      @parser,
       @options.suppress_includes,
       environment_variables,
       working_directory_maintainer,

@@ -3,6 +3,7 @@ require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 require 'fig/environment_variables/case_sensitive'
 require 'fig/package'
 require 'fig/package_descriptor'
+require 'fig/parser'
 require 'fig/runtime_environment'
 require 'fig/statement/command'
 require 'fig/statement/configuration'
@@ -49,7 +50,8 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   environment =
     Fig::RuntimeEnvironment.new(
       nil,
-      nil,
+      Fig::Parser.new(nil, false),
+      false,
       Fig::EnvironmentVariables::CaseSensitive.new({'FOO' => 'bar'}),
       maintainer_double
     )

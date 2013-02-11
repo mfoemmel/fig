@@ -14,12 +14,14 @@ def create_local_repository()
   application_config.base_whitelisted_url = FIG_REMOTE_URL
   application_config.remote_repository_url = FIG_REMOTE_URL
 
+  parser = Fig::Parser.new(application_config, false)
+
   repository = Fig::Repository.new(
     Fig::OperatingSystem.new(nil),
     FIG_HOME,
-    application_config,
+    FIG_REMOTE_URL,
+    parser,
     [],   # publish listeners
-    false # check include statement versions
   )
   repository.update_if_missing
 

@@ -24,11 +24,13 @@ class Fig::RuntimeEnvironment
 
   def initialize(
     repository,
+    parser,
     suppress_includes,
     variables_override,
     working_directory_maintainer
   )
     @repository                   = repository
+    @parser                       = parser
     @suppress_includes            = suppress_includes
     @variables                    =
       variables_override || Fig::OperatingSystem.get_environment_variables()
