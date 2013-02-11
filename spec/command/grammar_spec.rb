@@ -8,7 +8,7 @@ describe 'Fig' do
       set_up_test_environment
     end
 
-    %w< 0 1 >.each do
+    %w< 0 1 2 >.each do
       |version|
 
       it %Q<for v#{version} is accepted> do
@@ -70,7 +70,7 @@ describe 'Fig' do
       END
     end
 
-    %w< 1 >.each do
+    %w< 1 2 >.each do
       |version|
 
       it %Q<from v#{version} grammar file input with a "default" config> do
