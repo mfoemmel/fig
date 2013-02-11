@@ -9,6 +9,7 @@ describe 'Fig' do
     FileUtils.mkdir_p sub_included
 
     write_file "#{sub_included}/leaf.fig", <<-END_PACKAGE
+      grammar v2
       config default
         set SUB_PACKAGE=default
         set SHOULD_BE_OVERRIDDEN='not overridden'
@@ -17,8 +18,13 @@ describe 'Fig' do
       config non-default
         set SUB_PACKAGE=non-default
       end
+
+      config not-used
+        set SHOULD_NOT_BE_SET='was set'
+      end
     END_PACKAGE
     write_file "#{base_included}/peer.fig", <<-END_PACKAGE
+      grammar v2
       config default
         set PEER='was set'
         # Note path relative to this file and not to CURRENT_DIRECTORY.
@@ -26,6 +32,7 @@ describe 'Fig' do
       end
     END_PACKAGE
     write_file "#{base_included}/base.fig", <<-END_PACKAGE
+      grammar v2
       config default
         include-file subdirectory/leaf.fig
         include-file 'peer.fig'
@@ -50,5 +57,6 @@ describe 'Fig' do
     out.should =~ /^PEER=was set$/
     out.should =~ /^SUB_PACKAGE=non-default$/
     out.should =~ /^SHOULD_BE_OVERRIDDEN=overridden$/
+    out.should_not =~ /^SHOULD_NOT_BE_SET=/
   end
 end

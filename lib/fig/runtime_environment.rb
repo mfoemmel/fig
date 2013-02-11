@@ -6,6 +6,7 @@ require 'fig/package'
 require 'fig/package_descriptor'
 require 'fig/repository_error'
 require 'fig/statement/include'
+require 'fig/statement/include_file'
 require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
@@ -35,7 +36,8 @@ class Fig::RuntimeEnvironment
     @variables                    =
       variables_override || Fig::OperatingSystem.get_environment_variables()
     @retrieves                    = {}
-    @packages                     = {}
+    @named_packages               = {}
+    @packages_from_files          = {}
     @working_directory_maintainer = working_directory_maintainer
   end
 
@@ -76,13 +78,13 @@ class Fig::RuntimeEnvironment
       )
     end
 
-    @packages[name] = package
+    @named_packages[name] = package
 
     return
   end
 
   def get_package(name)
-    return @packages[name]
+    return @named_packages[name]
   end
 
   def apply_config(package, config_name, backtrace)
@@ -158,6 +160,10 @@ class Fig::RuntimeEnvironment
       set_variable(package, statement, backtrace)
     when Fig::Statement::Include
       include_config(package, statement.descriptor, backtrace)
+    when Fig::Statement::IncludeFile
+      include_file_config(
+        package, statement.path, statement.config_name, backtrace
+      )
     when Fig::Statement::Override
       backtrace.add_override(statement)
     end
@@ -186,9 +192,6 @@ class Fig::RuntimeEnvironment
     # Because package application starts with the synthetic package for the
     # command-line, we can't really disable includes, full stop.  Instead, we
     # use the flag on the base package to break the chain of includes.
-    #
-    # Alternative approach: We could put a flag on synthetic include statements
-    # that says to always apply them.
     return if starting_package.base? && @suppress_includes == :all
 
     resolved_descriptor = nil
@@ -222,6 +225,24 @@ class Fig::RuntimeEnvironment
       package,
       resolved_descriptor.config || Fig::Package::DEFAULT_CONFIG,
       new_backtrace
+    )
+
+    return
+  end
+
+  def include_file_config(including_package, path, config_name, backtrace)
+    return if @suppress_includes
+
+    full_path = File.absolute_path(path, including_package.runtime_directory)
+    descriptor =
+      Fig::PackageDescriptor.new(nil, nil, nil, :description => full_path)
+
+    new_backtrace = Fig::IncludeBacktrace.new(backtrace, descriptor)
+    package =
+      package_for_file(including_package, full_path, descriptor, backtrace)
+
+    apply_config(
+      package, config_name || Fig::Package::DEFAULT_CONFIG, new_backtrace
     )
 
     return
@@ -286,7 +307,7 @@ class Fig::RuntimeEnvironment
         Fig::PackageDescriptor.new(name, version, nil)
       )
       package.backtrace = backtrace
-      @packages[name] = package
+      @named_packages[name] = package
     elsif version && version != package.version
       raise_repository_error(
         "Version mismatch for package #{name} (#{version} vs #{package.version}).",
@@ -294,6 +315,27 @@ class Fig::RuntimeEnvironment
         package
       )
     end
+
+    return package
+  end
+
+  def package_for_file(including_package, full_path, descriptor, backtrace)
+    package = @packages_from_files[full_path]
+    return package if package
+
+    if ! File.exist? full_path
+      raise_repository_error(
+        %Q<"#{full_path}" does not exist.>, backtrace, including_package
+      )
+    end
+
+    content = File.read full_path
+
+    package = @parser.parse_package(
+      descriptor, File.dirname(full_path), full_path, content
+    )
+
+    @packages_from_files[full_path] = package
 
     return package
   end
