@@ -26,14 +26,24 @@ class Fig::Package
   attr_accessor :backtrace
   attr_accessor :unparsed_text
 
-  def initialize(name, version, description, runtime_directory, statements)
+  def initialize(
+    name, version, description, runtime_directory, statements, synthetic
+  )
     @name                 = name
     @version              = version
     @description          = description
     @runtime_directory    = runtime_directory
     @statements           = statements
+    @synthetic            = synthetic
     @applied_config_names = []
     @backtrace            = nil
+  end
+
+  # Was this package (supposedly) created from something other than usual
+  # parsing?  (Note that some tests artificially create "non-synthetic"
+  # instances.)
+  def synthetic?
+    return @synthetic
   end
 
   # Is this the base package?
@@ -64,7 +74,7 @@ class Fig::Package
 
     message = %Q<There is no "#{config_description}" config.>
 
-    raise Fig::NoSuchPackageConfigError.new(message, descriptor)
+    raise Fig::NoSuchPackageConfigError.new(message, descriptor, self)
   end
 
   def <=>(other)

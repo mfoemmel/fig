@@ -68,7 +68,8 @@ class Fig::ParserPackageBuildState
       @descriptor.version,
       @descriptor.description,
       directory,
-      statement_objects
+      statement_objects,
+      false,
     )
   end
 

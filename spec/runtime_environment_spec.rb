@@ -30,7 +30,8 @@ def new_example_package(environment, name, extra_statements, variable_value)
       standard_package_version(name),
       'test',
       "#{name}-directory",
-      statements
+      statements,
+      false,
     )
 
   environment.register_package(package)
@@ -108,7 +109,8 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
           Fig::Package::DEFAULT_CONFIG,
           [command]
         )
-      ]
+      ],
+      false,
     )
   )
 
@@ -132,7 +134,12 @@ def substitute_command(command)
   environment = new_example_environment
   base_package =
     Fig::Package.new(
-      'test-package', 'test-version', 'test-description', 'test-directory', []
+      'test-package',
+      'test-version',
+      'test-description',
+      'test-directory',
+      [],
+      false,
     )
 
   tokenized_command = command.map {
@@ -163,7 +170,12 @@ def substitute_variable(variable_value, retrieve_vars = {})
   environment = new_example_environment(variable_value, retrieve_vars)
   base_package =
     Fig::Package.new(
-      'test-package', 'test-version', 'test-description', 'test-directory', []
+      'test-package',
+      'test-version',
+      'test-description',
+      'test-directory',
+      [],
+      false,
     )
 
   output = nil

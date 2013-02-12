@@ -86,7 +86,7 @@ class Fig::Command::PackageApplier
       )
 
     return Fig::Package.new(
-      nil, nil, 'command-line', '.', [configuration_statement]
+      nil, nil, 'command-line', '.', [configuration_statement], :is_synthetic
     )
   end
 
@@ -99,10 +99,23 @@ class Fig::Command::PackageApplier
     source = derive_exception_source()
 
     message = %Q<There's no "#{@base_config}" config#{source}.>
-    message += %q< Specify one that does like this: ">
-    message +=
-      Fig::PackageDescriptor.format(@descriptor.name, @descriptor.version, 'some_existing_config')
-    message += %q<".>
+    config_names = exception.package.config_names
+    if config_names.empty?
+      message += ' Actually, there are no configs.'
+    else
+      example_config =
+        config_names.size == 1 ? config_names[0] : 'some_existing_config'
+      message += %q< Specify one that does like this: ">
+      message += Fig::PackageDescriptor.format(
+        @descriptor.name, @descriptor.version, example_config,
+      )
+      message += %q<".>
+
+      if config_names.size > 1
+        message +=
+          %Q< The valid configs are "#{config_names.join('", "')}".>
+      end
+    end
 
     raise Fig::UserInputError.new(message)
   end
@@ -114,7 +127,12 @@ class Fig::Command::PackageApplier
     source = derive_exception_source()
     message =
       %Q<No config was specified and there's no "#{Fig::Package::DEFAULT_CONFIG}" config#{source}.>
-    config_names = @base_package.config_names()
+    append_config_names message, @base_package.config_names()
+
+    raise Fig::UserInputError.new(message)
+  end
+
+  def append_config_names(message, config_names)
     if config_names.size > 1
       message +=
         %Q< The valid configs are "#{config_names.join('", "')}".>
@@ -124,7 +142,7 @@ class Fig::Command::PackageApplier
       message += ' Actually, there are no configs.'
     end
 
-    raise Fig::UserInputError.new(message)
+    return
   end
 
   def check_no_such_package_exception_is_for_command_line_package(exception)

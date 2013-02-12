@@ -282,8 +282,15 @@ describe 'Fig' do
       end
 
       it %q<when given the --include-file option> do
+        write_file "#{CURRENT_DIRECTORY}/thingy.fig", 'config default end'
+
         out, err, exit_code = fig(
-          %w<--publish package/version --include-file whatever.fig>,
+          [
+            '--publish',
+            'package/version',
+            '--include-file',
+            "#{CURRENT_DIRECTORY}/thingy.fig",
+          ],
           :fork => false,
           :no_raise_on_error => true
         )
@@ -293,10 +300,12 @@ describe 'Fig' do
       end
 
       it %q<a package with an include-file statement> do
+        write_file "#{CURRENT_DIRECTORY}/thingy.fig", 'config default end'
+
         input = <<-END
           grammar v2
           config default
-            include-file whatever.fig
+            include-file #{CURRENT_DIRECTORY}/thingy.fig
           end
         END
 

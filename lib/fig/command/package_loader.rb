@@ -129,7 +129,8 @@ class Fig::Command::PackageLoader
             @base_config,
             []
           )
-        ]
+        ],
+        :is_synthetic,
       )
     )
 
