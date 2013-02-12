@@ -1,8 +1,38 @@
-v1.xxxx
+v1.1.1.beta.1
 
   Bug fix:
 
   - Unparsing of unglobbed asset paths containing single quotes was broken.
+
+  New features:
+
+  - It is now possible to use an unpublished package from within another via a
+    "include-file" statement/--include-file command-line option.
+
+    This is considered an experimental feature and its behavior has not been
+    set in stone yet; changes may happen without notice.
+
+    Using this statement requires grammar version 2.  The
+    statement/command-line option takes a single argument of a path to a
+    package definition file, optionally followed by a colon and a config name.
+    If the path requires quoting, the quotes go around the path and not the
+    config name; this allows for use of the default config in a file path
+    containing a colon.  Given an unpublished package in ./foo/bar/baz.fig,
+    your can use it in ./foo/bar.fig like so:
+
+      grammar v2
+      config default
+        include-file 'bar/baz.fig':some-config
+      end
+
+    Note that the path is relative to including package, not relative to the
+    current directory.
+
+    The included package will act like a regularly published package with the
+    exception that retrieves will be ignored because "[package]" substitution
+    won't work because the package does not have a name.
+
+    Packages that use include-file cannot be published.
 
 v1.1.0
 

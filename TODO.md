@@ -1,13 +1,5 @@
 # Code changes
 
-* `include-file`
-  * ~Handle escapes in input~
-  * ~Command-line option~
-  * ~Prohibit publish~
-  * Unparse
-  * Locate relative paths
-  * Refactor Package object lookup in RuntimeEnvironment.
-
 * Retrieve statements should validate their paths the same way that path statements do.
 * Produce nice error messages when packages contain file names that Windows can't deal with.
 * Periodically `ack '\bTODO:'` and fix what we can.
