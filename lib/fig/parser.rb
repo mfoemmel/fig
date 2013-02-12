@@ -147,6 +147,10 @@ class Fig::Parser
 
   def extend_source_description(directory, original_description)
     if original_description
+      if original_description.start_with? directory
+        return original_description
+      end
+
       extended = original_description
       if directory != '.'
         extended << " (#{directory})"

@@ -411,12 +411,19 @@ class Fig::RuntimeEnvironment
   )
     tokenized_value = statement.tokenized_value
     return tokenized_value.to_expanded_string { '@' } \
-      unless package && package.name
+      unless package && (package.name || ! (package.synthetic? || package.base?))
 
     variable_value =
       tokenized_value.to_expanded_string { package.runtime_directory }
 
     return variable_value if not @retrieves.member?(statement.name)
+
+    if ! package.name
+      Fig::Logging.warn \
+        "Retrieve of #{statement.name}=#{variable_value} ignored because the statement#{statement.position_string} is in an unnamed package."
+
+      return variable_value
+    end
 
     return retrieve_files(
       statement.name, variable_value, package, backtrace

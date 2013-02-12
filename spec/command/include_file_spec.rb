@@ -11,12 +11,12 @@ describe 'Fig' do
     write_file "#{sub_included}/leaf.fig", <<-END_PACKAGE
       grammar v2
       config default
-        set SUB_PACKAGE=default
+        set SUB_PACKAGE=@/default
         set SHOULD_BE_OVERRIDDEN='not overridden'
       end
 
       config non-default
-        set SUB_PACKAGE=non-default
+        set SUB_PACKAGE=@/non-default
       end
 
       config not-used
@@ -40,6 +40,13 @@ describe 'Fig' do
         set SHOULD_BE_OVERRIDDEN=overridden
       end
     END_PACKAGE
+    write_file "#{CURRENT_DIRECTORY}/test.fig", <<-END_PACKAGE
+      grammar v2
+      retrieve SUB_PACKAGE->somewhere
+      config default
+        include-file 'included/base.fig'
+      end
+    END_PACKAGE
 
     return
   end
@@ -47,16 +54,18 @@ describe 'Fig' do
   it 'handles include-file' do
     set_up_include_files
 
-    out, * = fig(
+    out, err, * = fig(
       [
-        '--include-file', "#{CURRENT_DIRECTORY}/included/base.fig",
+        '--file', "#{CURRENT_DIRECTORY}/test.fig",
+        '--update',
         '--list-variables',
       ],
       :fork => false,
     )
     out.should =~ /^PEER=was set$/
-    out.should =~ /^SUB_PACKAGE=non-default$/
+    out.should =~ %r<^SUB_PACKAGE=.*subdirectory/non-default$>
     out.should =~ /^SHOULD_BE_OVERRIDDEN=overridden$/
     out.should_not =~ /^SHOULD_NOT_BE_SET=/
+    err.should =~ /[Rr]etrieve.*SUB_PACKAGE.*ignored/
   end
 end
