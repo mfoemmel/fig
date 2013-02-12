@@ -289,7 +289,7 @@ describe 'Fig' do
             '--publish',
             'package/version',
             '--include-file',
-            "#{CURRENT_DIRECTORY}/thingy.fig",
+            "'#{CURRENT_DIRECTORY}/thingy.fig'",
           ],
           :fork => false,
           :no_raise_on_error => true
@@ -305,7 +305,7 @@ describe 'Fig' do
         input = <<-END
           grammar v2
           config default
-            include-file #{CURRENT_DIRECTORY}/thingy.fig
+            include-file '#{CURRENT_DIRECTORY}/thingy.fig'
           end
         END
 
