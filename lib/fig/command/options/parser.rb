@@ -60,6 +60,7 @@ Querying:
   fig --list-dependencies [...list options...]               [DESCRIPTOR] [...]
   fig --list-variables    [...list options...]               [DESCRIPTOR] [...]
   fig --list-configs                                         [DESCRIPTOR] [...]
+  fig --source-package FILE                                  [DESCRIPTOR] [...]
   fig --dump-package-definition-text                         [DESCRIPTOR] [...]
   fig --dump-package-definition-parsed                       [DESCRIPTOR] [...]
   fig --dump-package-definition-for-command-line             [DESCRIPTOR] [...]

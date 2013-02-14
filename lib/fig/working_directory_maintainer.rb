@@ -69,6 +69,18 @@ class Fig::WorkingDirectoryMaintainer
     return
   end
 
+  def find_package_version_for_file(file)
+    @package_metadata_by_name.each do |name, package_meta|
+      package_meta.each_file do |target|
+        if File.identical? file, target
+          return formatted_meta(package_meta)
+        end
+      end
+    end
+
+    return nil
+  end
+
   def prepare_for_shutdown(purged_unused_packages)
     if purged_unused_packages
       clean_up_unused_packages()

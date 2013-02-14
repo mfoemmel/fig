@@ -2,6 +2,19 @@ v1.1.1.beta.2
 
   New features:
 
+  - New --source-package option that will tell you what package a file was
+    retrieved from:
+
+      # Assuming a retrieve caused lib/libboost_timer.so to exist:
+      > fig --source-package lib/libboost_timer.so
+      boost/1.51.0.redhat6.gcc472
+
+      > fig --source-package lib
+      "lib" is a directory. Fig does not keep track of directories.
+
+      > fig --source-package some-local-file.txt
+      Don't know anything about "some-local-file.txt".
+
   - New --suppress-retrieves option that stops "retrieve" statements from
     firing, even if the --update* options are specified.  Useful if you want to
     do things like "fig --update package/version

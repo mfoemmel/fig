@@ -27,6 +27,7 @@ require 'fig/command/action/publish'
 require 'fig/command/action/publish_local'
 require 'fig/command/action/run_command_line'
 require 'fig/command/action/run_command_statement'
+require 'fig/command/action/source_package'
 require 'fig/command/action/update'
 require 'fig/command/action/update_if_missing'
 require 'fig/command/action/version'
@@ -53,15 +54,16 @@ class Fig::Command::Options
   attr_reader   :environment_statements
   attr_reader   :exit_code
   attr_reader   :figrc
+  attr_reader   :file_to_find_package_for
   attr_reader   :home
   attr_reader   :log_config
   attr_reader   :log_level
   attr_reader   :package_definition_file
   attr_reader   :parser
   attr_reader   :shell_command
-  attr_reader   :suppress_retrieves
   attr_reader   :suppress_cleanup_of_retrieves
   attr_reader   :suppress_includes
+  attr_reader   :suppress_retrieves
   attr_reader   :update_lock_response
   attr_reader   :variable_to_get
   attr_accessor :version_message
@@ -248,6 +250,15 @@ class Fig::Command::Options
     end
 
     set_up_listings()
+
+    @parser.on(
+      '--source-package FILE',
+      STARTS_WITH_NON_HYPHEN,
+      'print package FILE was retrieved from'
+    ) do |file_to_find_package_for|
+      set_base_action(Fig::Command::Action::SourcePackage)
+      @file_to_find_package_for = file_to_find_package_for
+    end
 
     @parser.on(
       '--dump-package-definition-text',

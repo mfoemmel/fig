@@ -69,6 +69,24 @@ describe 'Fig' do
         File.read("#{retrieve_directory}/prerequisite/another library").should ==
           'some other library'
       end
+
+      it 'and can tell you where they came from' do
+        input = <<-END
+          retrieve FOOPATH->retrieve/[package]
+          config default
+            include prerequisite/1.2.3
+          end
+        END
+        out, * = fig(
+          [
+            '--update-if-missing',
+            '--source-package', "#{retrieve_directory}/prerequisite/a library",
+          ],
+          input
+        )
+
+        out.should == 'prerequisite/1.2.3'
+      end
     end
 
     it 'retrieves resource that is a directory' do

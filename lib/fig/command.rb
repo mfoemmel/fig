@@ -70,6 +70,7 @@ class Fig::Command
       base_config(),
       @environment,
       @repository,
+      @working_directory_maintainer,
       @operating_system,
       @package_source_description,
       @package_loaded_from_path
@@ -130,6 +131,7 @@ class Fig::Command
       :base_config,
       :environment,
       :repository,
+      :working_directory_maintainer,
       :operating_system,
       :package_source_description,
       :package_loaded_from_path
@@ -244,10 +246,10 @@ class Fig::Command
   end
 
   def prepare_runtime_environment()
-    working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
+    @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
     Fig::AtExit.add do
-      working_directory_maintainer.prepare_for_shutdown(
+      @working_directory_maintainer.prepare_for_shutdown(
         @base_package                             &&
         retrieves_should_happen?                  &&
         ! @options.suppress_cleanup_of_retrieves
@@ -264,7 +266,7 @@ class Fig::Command
       @parser,
       @options.suppress_includes,
       environment_variables,
-      working_directory_maintainer,
+      @working_directory_maintainer,
     )
 
     Fig::AtExit.add { @environment.check_unused_retrieves() }
