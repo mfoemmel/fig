@@ -1,3 +1,13 @@
+v1.1.1.beta.2
+
+  New features:
+
+  - New --suppress-retrieves option that stops "retrieve" statements from
+    firing, even if the --update* options are specified.  Useful if you want to
+    do things like "fig --update package/version
+    --dump-package-definition-text" without clobbering anything in your current
+    directory.
+
 v1.1.1.beta.1
 
   Bug fix:

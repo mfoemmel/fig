@@ -424,6 +424,8 @@ class Fig::Command
   end
 
   def retrieves_should_happen?()
+    return false if @options.suppress_retrieves
+
     return @options.actions.any? {|action| action.retrieves_should_happen?}
   end
 

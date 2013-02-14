@@ -59,6 +59,7 @@ class Fig::Command::Options
   attr_reader   :package_definition_file
   attr_reader   :parser
   attr_reader   :shell_command
+  attr_reader   :suppress_retrieves
   attr_reader   :suppress_cleanup_of_retrieves
   attr_reader   :suppress_includes
   attr_reader   :update_lock_response
@@ -546,6 +547,13 @@ class Fig::Command::Options
       'check remote repo for updates only if package missing from $FIG_HOME'
     ) do
       set_update_action(Fig::Command::Action::UpdateIfMissing)
+    end
+
+    @parser.on(
+      '--suppress-retrieves',
+      %q<don't process retrieves, even if they would otherwise be active>,
+    ) do
+      @suppress_retrieves = true
     end
 
     @parser.on(

@@ -83,6 +83,9 @@ Standard options (represented as "[...]" above):
       [--include-file   PATH:CONFIG]
       [--override       DESCRIPTOR]
 
+      [--suppress-retrieves] [--suppress-cleanup-of-retrieves]
+      [--suppress-all-includes] [--suppress-cross-package-includes]
+
       [--file PATH] [--no-file]
       [{-c | --config} CONFIG]
 
