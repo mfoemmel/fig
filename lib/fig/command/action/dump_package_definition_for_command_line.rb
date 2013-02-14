@@ -31,11 +31,11 @@ class Fig::Command::Action::DumpPackageDefinitionForCommandLine
   end
 
   def register_base_package?()
-    return false
+    return nil # don't care
   end
 
   def apply_config?()
-    return false
+    return nil # don't care
   end
 
   def configure(options)
