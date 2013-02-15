@@ -124,6 +124,10 @@ class Fig::Command::Options
     return @force
   end
 
+  def suppress_vcs_comments_in_published_packages?()
+    return @suppress_vcs_comments_in_published_packages
+  end
+
   def short_help_message()
     return @parser.short_help
   end
@@ -364,6 +368,13 @@ class Fig::Command::Options
       'force-overwrite existing version of a package to the remote repo'
     ) do |force|
       @force = force
+    end
+
+    @parser.on(
+      '--suppress-vcs-comments-in-published-packages',
+      %q<don't attempt to identify version control information when publishing>
+    ) do |suppress|
+      @suppress_vcs_comments_in_published_packages = suppress
     end
 
     @parser.on('--clean', 'remove package from $FIG_HOME') do

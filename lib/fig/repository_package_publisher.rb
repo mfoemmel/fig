@@ -4,9 +4,9 @@ require 'socket'
 require 'sys/admin'
 require 'tmpdir'
 
-require 'fig/statement/synthetic_raw_text'
 require 'fig'
 require 'fig/at_exit'
+require 'fig/external_program'
 require 'fig/file_not_found_error'
 require 'fig/logging'
 require 'fig/package_cache'
@@ -19,6 +19,7 @@ require 'fig/repository_error'
 require 'fig/statement/archive'
 require 'fig/statement/grammar_version'
 require 'fig/statement/resource'
+require 'fig/statement/synthetic_raw_text'
 require 'fig/url'
 
 module Fig; end
@@ -26,6 +27,7 @@ module Fig; end
 # Handles package publishing for the Repository.
 class Fig::RepositoryPackagePublisher
   attr_writer :application_configuration
+  attr_writer :options
   attr_writer :operating_system
   attr_writer :publish_listeners
   attr_writer :descriptor
@@ -155,6 +157,7 @@ class Fig::RepositoryPackagePublisher
     @text_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
 
     add_environment_variables_to_package_metadata
+    add_version_control_to_package_metadata
 
     @text_assembler.add_header %Q<\n>
 
@@ -182,6 +185,31 @@ class Fig::RepositoryPackagePublisher
 
       @text_assembler.add_header %Q<#     #{variable}#{value}>
     end
+
+    return
+  end
+
+  def add_version_control_to_package_metadata()
+    return if @options.suppress_vcs_comments_in_published_packages?
+
+    add_subversion_url_to_package_metadata()
+
+    return
+  end
+
+  def add_subversion_url_to_package_metadata()
+    output, errors, result = Fig::ExternalProgram.capture %w<svn info>
+    if result && ! result.success?
+      Fig::Logging.debug %Q<Could not run "svn info": #{result}: #{errors}>
+      return
+    end
+    return if not output =~ /^URL: +(.*\S)\s*$/
+    url = $1
+
+    @text_assembler.add_header %q<#>
+    @text_assembler.add_header(
+      %Q<# Publish happened in a Subversion working directory from\n# #{url}.>
+    )
 
     return
   end

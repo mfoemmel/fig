@@ -234,6 +234,7 @@ class Fig::Command
   def prepare_repository()
     @repository = Fig::Repository.new(
       @application_configuration,
+      @options,
       @operating_system,
       @options.home(),
       @application_configuration.remote_repository_url,

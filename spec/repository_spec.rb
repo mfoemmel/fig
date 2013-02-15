@@ -1,6 +1,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/application_configuration'
+require 'fig/command/options'
 require 'fig/file_not_found_error'
 require 'fig/logging'
 require 'fig/package_descriptor'
@@ -18,6 +19,7 @@ def create_local_repository()
 
   repository = Fig::Repository.new(
     application_config,
+    Fig::Command::Options.new,
     Fig::OperatingSystem.new(nil),
     FIG_HOME,
     FIG_REMOTE_URL,
