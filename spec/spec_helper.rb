@@ -168,17 +168,7 @@ def _run_command_externally(command_line, input, options)
   err = nil
 
   full_command_line = BASE_FIG_COMMAND_LINE + command_line
-  result = Fig::ExternalProgram.popen(*full_command_line) do
-    |stdin, stdout, stderr|
-
-    if input
-      stdin.puts input
-      stdin.close
-    end
-
-    err = stderr.read
-    out = stdout.read
-  end
+  out, err, result = Fig::ExternalProgram.capture(full_command_line, input)
 
   exit_code   = result.nil? ? 0 : result.exitstatus
   exit_string = nil
