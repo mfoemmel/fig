@@ -168,17 +168,19 @@ class Fig::RepositoryPackagePublisher
     return if ! variables || variables.empty?
 
     @text_assembler.add_header %q<#>
-    @text_assembler.add_header %q<# Environment variables at time of publish:>
+    @text_assembler.add_header %q<# Values of some environment variables at time of publish:>
     @text_assembler.add_header %q<#>
     variables.each do
       |variable|
 
       value = ENV[variable]
       if value.nil?
-        value = %q/<unset>/
+        value = ' was unset.'
+      else
+        value = "=#{value}"
       end
 
-      @text_assembler.add_header %Q<#     #{variable}=#{value}>
+      @text_assembler.add_header %Q<#     #{variable}#{value}>
     end
 
     return
