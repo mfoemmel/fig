@@ -17,6 +17,7 @@ def create_local_repository()
   parser = Fig::Parser.new(application_config, false)
 
   repository = Fig::Repository.new(
+    application_config,
     Fig::OperatingSystem.new(nil),
     FIG_HOME,
     FIG_REMOTE_URL,

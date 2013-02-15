@@ -25,6 +25,7 @@ module Fig; end
 
 # Handles package publishing for the Repository.
 class Fig::RepositoryPackagePublisher
+  attr_writer :application_configuration
   attr_writer :operating_system
   attr_writer :publish_listeners
   attr_writer :descriptor
@@ -152,7 +153,33 @@ class Fig::RepositoryPackagePublisher
     @text_assembler.add_header %Q<#     Host: #{@publish_host}>
     @text_assembler.add_header %Q<#     Args: "#{ARGV.join %q[", "]}">
     @text_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
+
+    add_environment_variables_to_package_metadata
+
     @text_assembler.add_header %Q<\n>
+
+    return
+  end
+
+  def add_environment_variables_to_package_metadata()
+    variables = @application_configuration[
+      'environment variables to include in comments in published packages'
+    ]
+    return if ! variables || variables.empty?
+
+    @text_assembler.add_header %q<#>
+    @text_assembler.add_header %q<# Environment variables at time of publish:>
+    @text_assembler.add_header %q<#>
+    variables.each do
+      |variable|
+
+      value = ENV[variable]
+      if value.nil?
+        value = %q/<unset>/
+      end
+
+      @text_assembler.add_header %Q<#     #{variable}=#{value}>
+    end
 
     return
   end

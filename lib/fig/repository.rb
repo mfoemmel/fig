@@ -28,12 +28,14 @@ class Fig::Repository
   REMOTE_VERSION_SUPPORTED  = 1
 
   def initialize(
+    application_configuration,
     operating_system,
     local_repository_directory,
     remote_repository_url,
     parser,
     publish_listeners
   )
+    @application_configuration    = application_configuration
     @operating_system             = operating_system
     @local_repository_directory   = local_repository_directory
     @remote_repository_url        = remote_repository_url
@@ -133,6 +135,7 @@ class Fig::Repository
     end
 
     publisher = Fig::RepositoryPackagePublisher.new
+    publisher.application_configuration    = @application_configuration
     publisher.operating_system             = @operating_system
     publisher.publish_listeners            = @publish_listeners
     publisher.package_statements           = package_statements

@@ -1,3 +1,12 @@
+v1.1.1.beta.3
+
+  New features:
+
+  - Now looks in figrc for an array under the key "environment variables to
+    include in comments in published packages".  If present, the values of
+    those environment variables will, surprise, show up in the text of
+    published packages.
+
 v1.1.1.beta.2
 
   New features:
