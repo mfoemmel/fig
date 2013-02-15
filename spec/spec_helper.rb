@@ -164,9 +164,6 @@ def _run_command(command_line, input, options)
 end
 
 def _run_command_externally(command_line, input, options)
-  out = nil
-  err = nil
-
   full_command_line = BASE_FIG_COMMAND_LINE + command_line
   out, err, result = Fig::ExternalProgram.capture(full_command_line, input)
 
@@ -174,6 +171,14 @@ def _run_command_externally(command_line, input, options)
   exit_string = nil
   if result && ! result.success? && ! options[:no_raise_on_error]
     exit_string = result.to_s
+  end
+
+  # Hooray for Windows line endings!  Not.
+  if out
+    out.gsub!(/\r+\n/, "\n")
+  end
+  if err
+    err.gsub!(/\r+\n/, "\n")
   end
 
   return out, err, exit_code, exit_string
