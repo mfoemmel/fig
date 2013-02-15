@@ -18,6 +18,7 @@ require 'fileutils'
 require 'tmpdir'
 
 require 'fig/command'
+require 'fig/external_program'
 require 'fig/figrc'
 require 'fig/logging'
 require 'fig/repository'
@@ -52,34 +53,6 @@ ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
   File.expand_path(File.dirname(__FILE__) + '/..')
 
 Fig::Logging.initialize_post_configuration(nil, 'off', true)
-
-class Popen
-  def self.set_up_open3
-    require 'open3'
-    def self.popen(*cmd)
-      exit_code = nil
-
-      Open3.popen3(*cmd) { |stdin, stdout, stderr, wait_thread|
-        yield stdin, stdout, stderr
-
-        exit_code = wait_thread.value
-      }
-
-      return exit_code
-    end
-  end
-
-  if Fig::OperatingSystem.windows?
-    set_up_open3
-  else
-    require 'open4'
-    def self.popen(*cmd)
-      return Open4::popen4(*cmd) { |pid, stdin, stdout, stderr|
-        yield stdin, stdout, stderr
-      }
-    end
-  end
-end
 
 $fig_run_count = 0 # Nasty, nasty global.
 
@@ -195,7 +168,7 @@ def _run_command_externally(command_line, input, options)
   err = nil
 
   full_command_line = BASE_FIG_COMMAND_LINE + command_line
-  result = Popen.popen(*full_command_line) do
+  result = Fig::ExternalProgram.popen(*full_command_line) do
     |stdin, stdout, stderr|
 
     if input
