@@ -21,6 +21,7 @@ require 'fig/statement/grammar_version'
 require 'fig/statement/resource'
 require 'fig/statement/synthetic_raw_text'
 require 'fig/url'
+require 'fig/user_input_error'
 
 module Fig; end
 
@@ -198,11 +199,7 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_subversion_url_to_package_metadata()
-    output, errors, result = Fig::ExternalProgram.capture %w<svn info>
-    if result && ! result.success?
-      Fig::Logging.debug %Q<Could not run "svn info": #{result}: #{errors}>
-      return
-    end
+    output = get_subversion_working_directory_info
     return if not output =~ /^URL: +(.*\S)\s*$/
     url = $1
 
@@ -212,6 +209,38 @@ class Fig::RepositoryPackagePublisher
     )
 
     return
+  end
+
+  def get_subversion_working_directory_info()
+    executable = get_subversion_executable or return
+    command = [executable, 'info']
+    begin
+      output, errors, result = Fig::ExternalProgram.capture command
+    rescue Errno::ENOENT => error
+      raise Fig::UserInputError.new(
+        %Q<Could not run "#{command.join ' '}": #{error.message}. Set FIG_SVN_EXECUTABLE to the path to use or to the empty string to suppress Subversion support.>
+      )
+    end
+
+    if result && ! result.success?
+      Fig::Logging.debug(
+        %Q<Could not run "#{command.join ' '}": #{result}: #{errors}>
+      )
+
+      return
+    end
+
+    return output
+  end
+
+  def get_subversion_executable()
+    executable = ENV['FIG_SVN_EXECUTABLE']
+    if ! executable || executable.empty?
+      return if ENV.include? 'FIG_SVN_EXECUTABLE'
+      return 'svn'
+    end
+
+    return executable
   end
 
   # Deals with Archive and Resource statements.  It downloads any remote
