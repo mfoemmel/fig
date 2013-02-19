@@ -194,6 +194,7 @@ class Fig::RepositoryPackagePublisher
     return if @options.suppress_vcs_comments_in_published_packages?
 
     add_subversion_url_to_package_metadata()
+    add_git_url_to_package_metadata()
 
     return
   end
@@ -247,6 +248,29 @@ class Fig::RepositoryPackagePublisher
     end
 
     return executable
+  end
+
+  def add_git_url_to_package_metadata()
+    url = get_git_origin_url or return
+    url.strip!
+    return if url.empty?
+
+    @text_assembler.add_header %q<#>
+    @text_assembler.add_header(
+      %Q<# Publish happened in a Git working directory from\n# #{url}.>
+    )
+
+    return
+  end
+
+  def get_git_origin_url()
+    executable =
+      get_version_control_executable('FIG_GIT_EXECUTABLE', 'git') or return
+    return run_version_control_command(
+      [executable, 'config', '--get', 'remote.origin.url'],
+      'Git',
+      'FIG_GIT_EXECUTABLE'
+    )
   end
 
   # Deals with Archive and Resource statements.  It downloads any remote
