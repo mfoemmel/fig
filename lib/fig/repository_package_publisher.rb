@@ -212,13 +212,19 @@ class Fig::RepositoryPackagePublisher
   end
 
   def get_subversion_working_directory_info()
-    executable = get_subversion_executable or return
-    command = [executable, 'info']
+    executable =
+      get_version_control_executable('FIG_SVN_EXECUTABLE', 'svn') or return
+    return run_version_control_command(
+      [executable, 'info'], 'Subversion', 'FIG_SVN_EXECUTABLE'
+    )
+  end
+
+  def run_version_control_command(command, version_control_name, variable)
     begin
       output, errors, result = Fig::ExternalProgram.capture command
     rescue Errno::ENOENT => error
       raise Fig::UserInputError.new(
-        %Q<Could not run "#{command.join ' '}": #{error.message}. Set FIG_SVN_EXECUTABLE to the path to use or to the empty string to suppress Subversion support.>
+        %Q<Could not run "#{command.join ' '}": #{error.message}. Set #{variable} to the path to use or to the empty string to suppress #{version_control_name} support.>
       )
     end
 
@@ -233,11 +239,11 @@ class Fig::RepositoryPackagePublisher
     return output
   end
 
-  def get_subversion_executable()
-    executable = ENV['FIG_SVN_EXECUTABLE']
+  def get_version_control_executable(variable, default)
+    executable = ENV[variable]
     if ! executable || executable.empty?
-      return if ENV.include? 'FIG_SVN_EXECUTABLE'
-      return 'svn'
+      return if ENV.include? variable
+      return default
     end
 
     return executable
