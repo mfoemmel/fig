@@ -224,9 +224,10 @@ class Fig::RepositoryPackagePublisher
     begin
       output, errors, result = Fig::ExternalProgram.capture command
     rescue Errno::ENOENT => error
-      raise Fig::UserInputError.new(
-        %Q<Could not run "#{command.join ' '}": #{error.message}. Set #{variable} to the path to use or to the empty string to suppress #{version_control_name} support.>
+      Fig::Logging.warn(
+        %Q<Could not run "#{command.join ' '}": #{error.message}. Set #{variable} to the path to use for #{version_control_name} or to the empty string to suppress #{version_control_name} support.>
       )
+      return
     end
 
     if result && ! result.success?
