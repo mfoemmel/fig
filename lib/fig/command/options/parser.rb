@@ -95,6 +95,7 @@ Standard options (represented as "[...]" above):
       [--log-level LEVEL] [--log-config PATH]
       [--figrc PATH]      [--no-figrc]
 
+      [--suppress-vcs-comments-in-published-packages]
       [--suppress-warning-include-statement-missing-version]
 
 Information:
@@ -111,8 +112,13 @@ required or allowed is dependent upon what your are doing.
 
 Environment variables:
 
-  FIG_REMOTE_URL location of remote repository, required for remote operations
-  FIG_HOME       path to local repository, defaults to $HOME/.fighome
+  FIG_REMOTE_URL     location of remote repository, required for remote
+                     operations
+  FIG_HOME           path to local repository, defaults to $HOME/.fighome
+  FIG_SVN_EXECUTABLE path to svn executable, set to empty string to suppress
+                     use of Subversion
+  FIG_GIT_EXECUTABLE path to git executable, set to empty string to suppress
+                     use of Git
   END_FULL_USAGE
 
   def initialize()

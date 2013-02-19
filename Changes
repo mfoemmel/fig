@@ -7,6 +7,14 @@ v1.1.1.beta.3
     those environment variables will, surprise, show up in the text of
     published packages.
 
+  - When publishing, attempts to identify VCS (currently Subversion and Git)
+    URLs for the package and includes that information in comments in the
+    package.  This can be turned off via the
+    --suppress-vcs-comments-in-published-packages option.  The path to the VCS
+    programs can be controlled via the FIG_SVN_EXECUTABLE and
+    FIG_GIT_EXECUTABLE environment variables; individual VCS can be turned off
+    by setting the variable to the empty string.
+
 v1.1.1.beta.2
 
   New features:
