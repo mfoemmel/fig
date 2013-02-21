@@ -1,9 +1,15 @@
-v1.1.1.beta.3
+v1.1.1.beta.4
 
   Bug fix:
 
   - Deal with differences between return types of stat() from Net::SFTP and
     File.
+
+  Miscellaneous:
+
+  - Add -T as the short option for --dump-package-definition-text.
+
+  - Add -R as the short option for --suppress-retrieves.
 
 v1.1.1.beta.3
 

@@ -61,7 +61,7 @@ Querying:
   fig --list-variables    [...list options...]               [DESCRIPTOR] [...]
   fig --list-configs                                         [DESCRIPTOR] [...]
   fig --source-package FILE                                  [DESCRIPTOR] [...]
-  fig --dump-package-definition-text                         [DESCRIPTOR] [...]
+  fig {-T | --dump-package-definition-text}                  [DESCRIPTOR] [...]
   fig --dump-package-definition-parsed                       [DESCRIPTOR] [...]
   fig --dump-package-definition-for-command-line             [DESCRIPTOR] [...]
 
@@ -84,7 +84,7 @@ Standard options (represented as "[...]" above):
       [--include-file   PATH:CONFIG]
       [--override       DESCRIPTOR]
 
-      [--suppress-retrieves] [--suppress-cleanup-of-retrieves]
+      [-R | --suppress-retrieves] [--suppress-cleanup-of-retrieves]
       [--suppress-all-includes] [--suppress-cross-package-includes]
 
       [--file PATH] [--no-file]

@@ -265,7 +265,7 @@ class Fig::Command::Options
     end
 
     @parser.on(
-      '--dump-package-definition-text',
+      '-T', '--dump-package-definition-text',
       'emit the unparsed definition of the base package, if there is one'
     ) do
       set_base_action(Fig::Command::Action::DumpPackageDefinitionText)
@@ -572,7 +572,7 @@ class Fig::Command::Options
     end
 
     @parser.on(
-      '--suppress-retrieves',
+      '-R', '--suppress-retrieves',
       %q<don't process retrieves, even if they would otherwise be active>,
     ) do
       @suppress_retrieves = true
