@@ -1,5 +1,12 @@
 v1.1.1.beta.3
 
+  Bug fix:
+
+  - Deal with differences between return types of stat() from Net::SFTP and
+    File.
+
+v1.1.1.beta.3
+
   New features:
 
   - Now looks in figrc for an array under the key "environment variables to

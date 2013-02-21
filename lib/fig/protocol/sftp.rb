@@ -52,7 +52,7 @@ class Fig::Protocol::SFTP
     sftp_run(uri) do
       |connection|
 
-      return connection.stat!(uri.path).mtime <= ::File.mtime(path)
+      return connection.stat!(uri.path).mtime.to_f <= ::File.mtime(path).to_f
     end
 
     return nil
@@ -70,7 +70,7 @@ class Fig::Protocol::SFTP
         # when the remote path does not exist.
         stat = connection.stat!(uri.path)
 
-        if ::File.exist?(path) && stat.mtime <= ::File.mtime(path)
+        if ::File.exist?(path) && stat.mtime.to_f <= ::File.mtime(path).to_f
           Fig::Logging.debug "#{path} is up to date."
           return false
         else
