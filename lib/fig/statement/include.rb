@@ -8,7 +8,9 @@ module Fig; end
 # incorporation of the "default" configuration from that other package if no
 # ":configname" is specified.
 class Fig::Statement::Include < Fig::Statement
-  attr_reader :descriptor, :containing_package_descriptor
+  attr_reader :descriptor
+  attr_reader :included_package
+  attr_reader :containing_package_descriptor
 
   # Centralized definition of requirements for descriptors for include
   # statements.
@@ -16,10 +18,17 @@ class Fig::Statement::Include < Fig::Statement
     return Fig::PackageDescriptor.parse(raw_string, options)
   end
 
-  def initialize(line_column, source_description, descriptor, containing_package_descriptor)
+  def initialize(
+    line_column,
+    source_description,
+    descriptor,
+    included_package,  # For synthetic Package for command-line options.
+    containing_package_descriptor
+  )
     super(line_column, source_description)
 
     @descriptor                    = descriptor
+    @included_package              = included_package
     @containing_package_descriptor = containing_package_descriptor
   end
 
@@ -71,11 +80,11 @@ class Fig::Statement::Include < Fig::Statement
   end
 
   def minimum_grammar_for_emitting_input()
-    return [0]
+    return minimum_grammar
   end
 
   def minimum_grammar_for_publishing()
-    return [0]
+    return minimum_grammar
   end
 
   private
@@ -100,5 +109,13 @@ class Fig::Statement::Include < Fig::Statement
 
   def referenced_config_name()
     config_name() || Fig::Package::DEFAULT_CONFIG
+  end
+
+  def minimum_grammar()
+    if included_package
+      raise 'Cannot unparse synthetic include statement with directly referenced package.'
+    end
+
+    return [0]
   end
 end

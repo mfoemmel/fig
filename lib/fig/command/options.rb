@@ -482,6 +482,7 @@ class Fig::Command::Options
           descriptor_string,
           :validation_context => ' given in a --include option'
         ),
+        nil,
         nil
       )
 

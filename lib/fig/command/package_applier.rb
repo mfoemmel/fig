@@ -71,6 +71,7 @@ class Fig::Command::PackageApplier
           @base_config,
           :description => @base_package.description
         ),
+        @base_package,
         nil
       )
     end

@@ -93,6 +93,10 @@ class Fig::RuntimeEnvironment
       return
     end
 
+    Fig::Logging.debug(
+      "Applying #{package.to_descriptive_string_with_config config_name}."
+    )
+
     new_backtrace = backtrace ||
       Fig::IncludeBacktrace.new(
         nil,
@@ -104,11 +108,13 @@ class Fig::RuntimeEnvironment
         )
       )
 
-    config = package[config_name]
+    config = nil
+    begin
+      config = package[config_name]
+    rescue Fig::NoSuchPackageConfigError => error
+      raise_repository_error(error.message, new_backtrace, error.package)
+    end
 
-    Fig::Logging.debug(
-      "Applying #{package.to_descriptive_string_with_config config_name}."
-    )
     package.add_applied_config_name(config_name)
     config.statements.each do
       |statement|
@@ -160,7 +166,7 @@ class Fig::RuntimeEnvironment
     when Fig::Statement::Set
       set_variable(package, statement, backtrace)
     when Fig::Statement::Include
-      include_config(package, statement.descriptor, backtrace)
+      include_config(package, statement, backtrace)
     when Fig::Statement::IncludeFile
       include_file_config(
         package, statement.path, statement.config_name, backtrace
@@ -189,33 +195,45 @@ class Fig::RuntimeEnvironment
 
   private
 
-  def include_config(starting_package, descriptor, backtrace)
+  def include_config(starting_package, include_statement, backtrace)
     # Because package application starts with the synthetic package for the
     # command-line, we can't really disable includes, full stop.  Instead, we
     # use the flag on the base package to break the chain of includes.
     return if starting_package.base? && @suppress_includes == :all
 
+    descriptor = include_statement.descriptor
     resolved_descriptor = nil
+    package = nil
 
-    # Check to see if this include has been overridden.
-    if backtrace
-      override_package_name = descriptor.name || starting_package.name
-      override = backtrace.get_override(override_package_name)
-      if override
-        resolved_descriptor =
-          Fig::PackageDescriptor.new(
-            override_package_name, override, descriptor.config
-          )
+    if include_statement.included_package.nil?
+      # Check to see if this include has been overridden.
+      if (
+        backtrace and
+        override_package_name = descriptor.name || starting_package.name
+      )
+        override = backtrace.get_override(override_package_name)
+        if override
+          resolved_descriptor =
+            Fig::PackageDescriptor.new(
+              override_package_name, override, descriptor.config
+            )
+        end
       end
-    end
-    resolved_descriptor ||= descriptor
+      resolved_descriptor ||= descriptor
 
-    new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
-    package = lookup_package(
-      resolved_descriptor.name || starting_package.name,
-      resolved_descriptor.version,
-      new_backtrace
-    )
+      new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
+      if included_name = resolved_descriptor.name || starting_package.name
+        package = lookup_package(
+          included_name, resolved_descriptor.version, new_backtrace
+        )
+      else
+        package = starting_package
+      end
+    else
+      resolved_descriptor = descriptor
+      package = include_statement.included_package
+    end
+
 
     return if                                   \
           starting_package.base?                \

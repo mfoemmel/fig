@@ -15,7 +15,7 @@ describe 'Statement::Configuration' do
     override_a = Fig::Statement::Override.new(nil, nil, 'A', 'version')
 
     command = Fig::Statement::Command.new(nil, nil, %w< something to run >)
-    incorporate = Fig::Statement::Include.new(nil, nil, nil, nil)
+    incorporate = Fig::Statement::Include.new(nil, nil, nil, nil, nil)
 
     parsed_name, parsed_value =
       Fig::Statement::Path.parse_name_value 'name=value'

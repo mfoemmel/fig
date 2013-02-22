@@ -149,6 +149,7 @@ class Fig::ParserPackageBuildState
       node_location(keyword_node),
       @source_description,
       include_descriptor,
+      nil,
       @descriptor
     )
   end
