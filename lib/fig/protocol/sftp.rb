@@ -14,10 +14,14 @@ class Fig::Protocol::SFTP
   include Fig::Protocol
   include Fig::Protocol::NetRCEnabled
 
+  def initialize()
+    initialize_netrc
+  end
+
   def download_list(uri)
     package_versions = []
 
-    sftp_run(uri) do
+    sftp_run(uri, :prompt_for_login) do
       |connection|
 
       connection.dir.foreach uri.path do
@@ -48,8 +52,8 @@ class Fig::Protocol::SFTP
 
   # Determine whether we need to update something.  Returns nil to indicate
   # "don't know".
-  def path_up_to_date?(uri, path)
-    sftp_run(uri) do
+  def path_up_to_date?(uri, path, prompt_for_login)
+    sftp_run(uri, prompt_for_login) do
       |connection|
 
       return connection.stat!(uri.path).mtime.to_f <= ::File.mtime(path).to_f
@@ -60,8 +64,8 @@ class Fig::Protocol::SFTP
 
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
-  def download(uri, path)
-    sftp_run(uri) do
+  def download(uri, path, prompt_for_login)
+    sftp_run(uri, prompt_for_login) do
       |connection|
 
       begin
@@ -91,7 +95,7 @@ class Fig::Protocol::SFTP
   end
 
   def upload(local_file, uri)
-    sftp_run(uri) do
+    sftp_run(uri, :prompt_for_login) do
       |connection|
 
       ensure_directory_exists connection, ::File.dirname(uri.path)
@@ -103,19 +107,22 @@ class Fig::Protocol::SFTP
 
   private
 
-  def sftp_run(uri, &block)
+  def sftp_run(uri, prompt_for_login, &block)
     host = uri.host
 
-    load_authentication_for host
+    authentication = load_authentication_for host, prompt_for_login
+    if ! authentication
+      raise Fig::NetworkError.new "No authentication information for #{host}."
+    end
 
     begin
-      options = {:password => get_password}
+      options = {:password => authentication.password}
       port = uri.port
       if port
         options[:port] = port
       end
 
-      Net::SFTP.start(host, get_username, options, &block)
+      Net::SFTP.start(host, authentication.username, options, &block)
     rescue Net::SSH::Exception => error
       raise Fig::NetworkError.new error.message
     rescue Net::SFTP::Exception => error

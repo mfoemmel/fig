@@ -94,21 +94,21 @@ class Fig::OperatingSystem
 
   # Determine whether we need to update something.  Returns nil to indicate
   # "don't know".
-  def path_up_to_date?(url, path)
+  def path_up_to_date?(url, path, prompt_for_login)
     return false if ! File.exist? path
 
     protocol, uri = decode_protocol url
-    return protocol.path_up_to_date? uri, path
+    return protocol.path_up_to_date? uri, path, prompt_for_login
   end
 
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
-  def download(url, path)
+  def download(url, path, prompt_for_login)
     protocol, uri = decode_protocol url
 
     FileUtils.mkdir_p(File.dirname path)
 
-    return protocol.download uri, path
+    return protocol.download uri, path, prompt_for_login
   end
 
   # Returns the basename and full path to the download.
@@ -118,7 +118,7 @@ class Fig::OperatingSystem
     basename = CGI.unescape Fig::URL.parse(url).path.split('/').last
     path     = File.join(download_directory, basename)
 
-    download(url, path)
+    download(url, path, false)
 
     return basename, path
   end

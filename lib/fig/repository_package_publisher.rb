@@ -373,7 +373,7 @@ class Fig::RepositoryPackagePublisher
       asset_local = File.join(publish_temp_dir(), asset_name)
 
       begin
-        @operating_system.download(asset_statement.location, asset_local)
+        @operating_system.download(asset_statement.location, asset_local, false)
       rescue Fig::FileNotFoundError
         Fig::Logging.fatal "Could not download #{asset_statement.location}."
         raise Fig::RepositoryError.new

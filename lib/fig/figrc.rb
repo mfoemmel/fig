@@ -87,7 +87,7 @@ class Fig::FigRC
 
     repo_config_exists = nil
     begin
-      operating_system.download figrc_url, repo_figrc_path
+      operating_system.download figrc_url, repo_figrc_path, :prompt_for_login
       repo_config_exists = true
     rescue Fig::FileNotFoundError
       repo_config_exists = false

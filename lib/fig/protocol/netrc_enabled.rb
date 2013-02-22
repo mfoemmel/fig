@@ -10,33 +10,46 @@ module Fig::Protocol; end
 module Fig::Protocol::NetRCEnabled
   private
 
-  def get_username()
-    @username ||= HighLine.new.ask('Username: ') { |q| q.echo = true }
-    return @username
+  NetRCEntry = Struct.new :username, :password
+
+  def initialize_netrc()
+    @netrc_entries_by_host = {}
+
+    return
   end
 
-  def get_password()
-    @password ||= HighLine.new.ask('Password: ') { |q| q.echo = false }
-    return @password
-  end
+  def get_authentication_for(host, prompt_if_missing)
+    if @netrc_entries_by_host.include? host
+      return @netrc_entries_by_host[host]
+    end
 
-  def load_authentication_for(host)
-    return if @username || @password
-
-    @username ||= ENV['FIG_USERNAME']
-    @password ||= ENV['FIG_PASSWORD']
-    return if @username || @password
-
+    entry = nil
     begin
       login_data = Net::Netrc.locate host
       if login_data
-        @username = login_data.login
-        @password = login_data.password
+        entry = NetRCEntry.new login_data.login, login_data.password
+      elsif prompt_if_missing
+        entry = get_authentication_from_user(host)
       end
     rescue SecurityError => error
       raise Fig::UserInputError.new error.message
     end
 
-    return
+    @netrc_entries_by_host[host] = entry
+
+    return entry
+  end
+
+  def get_authentication_from_user(host)
+    username =
+      ENV['FIG_USERNAME'] ||
+      HighLine.new.ask("Username for #{host}: ") { |q| q.echo = true }
+    password =
+      ENV['FIG_PASSWORD'] ||
+      HighLine.new.ask("Password for #{username}@#{host}: ") {
+        |q| q.echo = false
+      }
+
+    return NetRCEntry.new username, password
   end
 end

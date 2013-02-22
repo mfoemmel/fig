@@ -17,11 +17,12 @@ class Fig::Protocol::FTP
 
   def initialize(login)
     @login = login
+    initialize_netrc
   end
 
   def download_list(uri)
     ftp = Net::FTP.new(uri.host)
-    ftp_login(ftp, uri.host)
+    ftp_login(ftp, uri.host, :prompt_for_login)
     ftp.chdir(uri.path)
     dirs = ftp.nlst
     ftp.close
@@ -31,10 +32,10 @@ class Fig::Protocol::FTP
 
   # Determine whether we need to update something.  Returns nil to indicate
   # "don't know".
-  def path_up_to_date?(uri, path)
+  def path_up_to_date?(uri, path, prompt_for_login)
     begin
       ftp = Net::FTP.new(uri.host)
-      ftp_login(ftp, uri.host)
+      ftp_login(ftp, uri.host, prompt_for_login)
 
       if ftp.mtime(uri.path) <= ::File.mtime(path)
         return true
@@ -52,10 +53,10 @@ class Fig::Protocol::FTP
 
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
-  def download(uri, path)
+  def download(uri, path, prompt_for_login)
     begin
       ftp = Net::FTP.new(uri.host)
-      ftp_login(ftp, uri.host)
+      ftp_login(ftp, uri.host, prompt_for_login)
 
       if ::File.exist?(path) && ftp.mtime(uri.path) <= ::File.mtime(path)
         Fig::Logging.debug "#{path} is up to date."
@@ -87,7 +88,7 @@ class Fig::Protocol::FTP
     # to, i.e. [1,2,3] - [2,3,4] = [1]
     remote_project_dirs = remote_publish_dirs - ftp_root_dirs
     Net::FTP.open(uri.host) do |ftp|
-      ftp_login(ftp, uri.host)
+      ftp_login(ftp, uri.host, :prompt_for_login)
       # Assume that the FIG_REMOTE_URL path exists.
       ftp.chdir(ftp_root_path)
       remote_project_dirs.each do |dir|
@@ -105,11 +106,15 @@ class Fig::Protocol::FTP
 
   private
 
-  def ftp_login(ftp, host)
+  def ftp_login(ftp, host, prompt_for_login)
     begin
       if @login
-        load_authentication_for host
-        ftp.login get_username, get_password
+        authentication = load_authentication_for host, prompt_for_login
+        if authentication
+          ftp.login authentication.username, authentication.password
+        else
+          ftp.login
+        end
       else
         ftp.login
       end
@@ -131,7 +136,7 @@ class Fig::Protocol::FTP
       threads << Thread.new do
         packages = all_packages[num]
         ftp = Net::FTP.new(uri.host)
-        ftp_login(ftp, uri.host)
+        ftp_login(ftp, uri.host, :prompt_for_login)
         ftp.chdir(uri.path)
         pos = num
         while pos < dirs.length

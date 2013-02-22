@@ -244,7 +244,9 @@ class Fig::Repository
       )
       local_version_file = File.join(temp_dir, "remote-#{VERSION_FILE_NAME}")
       begin
-        @operating_system.download(remote_version_file, local_version_file)
+        @operating_system.download(
+          remote_version_file, local_version_file, :prompt_for_login
+        )
       rescue Fig::FileNotFoundError
         # The download may create an empty file, so get rid of it.
         if File.exist?(local_version_file)
@@ -311,7 +313,9 @@ class Fig::Repository
     package_directory = local_directory_for_package(descriptor)
     local_fig_file    = fig_file_for_package_download(package_directory)
 
-    if @operating_system.path_up_to_date? remote_fig_file, local_fig_file
+    if @operating_system.path_up_to_date?(
+      remote_fig_file, local_fig_file, :prompt_for_login
+    )
       Fig::Logging.debug \
         "Skipping update of #{descriptor.to_string} because it looks like #{local_fig_file} is up-to-date."
       return
@@ -331,7 +335,9 @@ class Fig::Repository
       FileUtils.mkdir_p temporary_package
     end
 
-    return if ! @operating_system.download(remote_fig_file, temp_fig_file)
+    return if ! @operating_system.download(
+      remote_fig_file, temp_fig_file, :prompt_for_login
+    )
 
     package = read_package_from_directory(temporary_package, descriptor)
 

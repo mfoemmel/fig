@@ -15,7 +15,7 @@ class Fig::Protocol::HTTP
 
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
-  def download(uri, path)
+  def download(uri, path, prompt_for_login)
     log_download(uri, path)
     ::File.open(path, 'wb') do |file|
       file.binmode

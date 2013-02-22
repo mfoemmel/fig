@@ -28,7 +28,7 @@ class Fig::Protocol::File
 
   # Determine whether we need to update something.  Returns nil to indicate
   # "don't know".
-  def path_up_to_date?(uri, path)
+  def path_up_to_date?(uri, path, prompt_for_login)
     begin
       unescaped_path = CGI.unescape uri.path
       if ::File.mtime(unescaped_path) <= ::File.mtime(path)
@@ -43,7 +43,7 @@ class Fig::Protocol::File
 
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
-  def download(uri, path)
+  def download(uri, path, prompt_for_login)
     begin
       unescaped_path = CGI.unescape uri.path
       FileUtils.cp(unescaped_path, path)
