@@ -1,3 +1,4 @@
+require 'fig/not_yet_parsed_package'
 require 'fig/package_descriptor'
 require 'fig/parser'
 
@@ -79,6 +80,7 @@ class Fig::Command::PackageLoader
   def read_in_package_definition_file(config_file)
     if File.exist?(config_file)
       @package_loaded_from_path = config_file
+      @package_base_directory = File.dirname config_file
 
       return File.read(config_file)
     else
@@ -104,12 +106,17 @@ class Fig::Command::PackageLoader
       :source_description => source_description
     )
 
+    unparsed_package = Fig::NotYetParsedPackage.new
+    unparsed_package.descriptor         = descriptor
+    unparsed_package.working_directory  = '.'
+    unparsed_package.base_directory     = @package_base_directory || '.'
+    unparsed_package.source_description = source_description
+    unparsed_package.unparsed_text      = definition_text
+
     set_base_package(
       Fig::Parser.new(
         @application_configuration, :check_include_versions
-      ).parse_package(
-        descriptor, '.', source_description, definition_text
-      )
+      ).parse_package(unparsed_package)
     )
 
     return
@@ -118,10 +125,11 @@ class Fig::Command::PackageLoader
   def set_base_package_to_empty_synthetic_one()
     set_base_package(
       Fig::Package.new(
-        nil,
-        nil,
+        nil,  # Name
+        nil,  # Version
         'synthetic',
-        '.',
+        '.',  # Working
+        '.',  # Base
         [
           Fig::Statement::Configuration.new(
             nil,

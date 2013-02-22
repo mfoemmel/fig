@@ -2,6 +2,7 @@ require 'stringio'
 
 require 'fig/include_backtrace'
 require 'fig/logging'
+require 'fig/not_yet_parsed_package'
 require 'fig/package'
 require 'fig/package_descriptor'
 require 'fig/repository_error'
@@ -10,8 +11,8 @@ require 'fig/statement/include_file'
 require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
-require 'fig/user_input_error'
 require 'fig/unparser'
+require 'fig/user_input_error'
 
 module Fig; end
 
@@ -233,7 +234,8 @@ class Fig::RuntimeEnvironment
   def include_file_config(including_package, path, config_name, backtrace)
     return if @suppress_includes
 
-    full_path = File.absolute_path(path, including_package.runtime_directory)
+    full_path = File.absolute_path(path, including_package.base_directory)
+
     descriptor =
       Fig::PackageDescriptor.new(nil, nil, nil, :description => full_path)
 
@@ -331,9 +333,14 @@ class Fig::RuntimeEnvironment
 
     content = File.read full_path
 
-    package = @parser.parse_package(
-      descriptor, File.dirname(full_path), full_path, content
-    )
+    unparsed_package = Fig::NotYetParsedPackage.new
+    unparsed_package.descriptor         = descriptor
+    unparsed_package.working_directory  = unparsed_package.base_directory =
+      File.dirname(full_path)
+    unparsed_package.source_description = full_path
+    unparsed_package.unparsed_text      = content
+
+    package = @parser.parse_package unparsed_package
 
     @packages_from_files[full_path] = package
 

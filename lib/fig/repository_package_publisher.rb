@@ -9,6 +9,7 @@ require 'fig/at_exit'
 require 'fig/external_program'
 require 'fig/file_not_found_error'
 require 'fig/logging'
+require 'fig/not_yet_parsed_package'
 require 'fig/package_cache'
 require 'fig/package_definition_text_assembler'
 require 'fig/package_descriptor'
@@ -127,12 +128,15 @@ class Fig::RepositoryPackagePublisher
 
     published_package = nil
     begin
-      published_package = Fig::Parser.new(nil, false).parse_package(
-        @descriptor,
-        @runtime_for_package,
-        '<package to be published>',
-        file_content
-      )
+      unparsed_package = Fig::NotYetParsedPackage.new
+      unparsed_package.descriptor         = @descriptor
+      unparsed_package.working_directory  = unparsed_package.base_directory =
+        @runtime_for_package
+      unparsed_package.source_description = '<package to be published>'
+      unparsed_package.unparsed_text      = file_content
+
+      published_package =
+        Fig::Parser.new(nil, false).parse_package(unparsed_package)
     rescue Fig::PackageParseError => error
       raise \
         "Bug in code! Could not parse package definition to be published.\n" +

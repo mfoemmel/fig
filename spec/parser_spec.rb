@@ -2,6 +2,7 @@
 require File.expand_path(File.dirname(__FILE__) + '/spec_helper')
 
 require 'fig/application_configuration'
+require 'fig/not_yet_parsed_package'
 require 'fig/package_descriptor'
 require 'fig/package_parse_error'
 require 'fig/parser'
@@ -18,11 +19,17 @@ describe 'Parser' do
 
   def test_no_parse_exception(fig_input)
     application_configuration = new_configuration
+
+    unparsed_package = Fig::NotYetParsedPackage.new
+    unparsed_package.descriptor         =
+      Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
+    unparsed_package.working_directory  = unparsed_package.base_directory =
+      'foo_directory'
+    unparsed_package.source_description = 'source description'
+    unparsed_package.unparsed_text      = fig_input
+
     package = Fig::Parser.new(application_configuration, false).parse_package(
-      Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-      'foo_directory',
-      'source description',
-      fig_input
+      unparsed_package
     )
     # Got no exception.
 
@@ -32,12 +39,17 @@ describe 'Parser' do
   def test_error(fig_input, error_class, message_pattern)
     application_configuration = new_configuration
 
+    unparsed_package = Fig::NotYetParsedPackage.new
+    unparsed_package.descriptor         =
+      Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
+    unparsed_package.working_directory  = unparsed_package.base_directory =
+      'foo_directory'
+    unparsed_package.source_description = 'source description'
+    unparsed_package.unparsed_text      = fig_input
+
     expect {
       Fig::Parser.new(application_configuration, false).parse_package(
-        Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-        'foo_directory',
-        'source description',
-        fig_input
+        unparsed_package
       )
     }.to raise_error(error_class, message_pattern)
 
@@ -60,18 +72,21 @@ describe 'Parser' do
 
   describe 'base syntax' do
     it 'throws the correct exception on syntax error' do
-      fig_package=<<-END
+      application_configuration = new_configuration
+
+      unparsed_package = Fig::NotYetParsedPackage.new
+      unparsed_package.descriptor         =
+        Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
+      unparsed_package.working_directory  = unparsed_package.base_directory =
+        'foo_directory'
+      unparsed_package.source_description = 'source description'
+      unparsed_package.unparsed_text      = <<-END
         this is invalid syntax
       END
 
-      application_configuration = new_configuration
-
       expect {
         Fig::Parser.new(application_configuration, false).parse_package(
-          Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-          'foo_directory',
-          'source description',
-          fig_package
+          unparsed_package
         )
       }.to raise_error(
         Fig::PackageParseError
@@ -98,12 +113,17 @@ describe 'Parser' do
                   end
       FIG_PACKAGE
 
+      unparsed_package = Fig::NotYetParsedPackage.new
+      unparsed_package.descriptor         =
+        Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
+      unparsed_package.working_directory  = unparsed_package.base_directory =
+        'foo_directory'
+      unparsed_package.source_description = 'source description'
+      unparsed_package.unparsed_text      = fig_package
+
       application_configuration = new_configuration
       package = Fig::Parser.new(application_configuration, false).parse_package(
-        Fig::PackageDescriptor.new('package_name', 'version', nil),
-        'foo_directory',
-        'source description',
-        fig_package
+        unparsed_package
       )
 
       package.walk_statements do
@@ -140,11 +160,16 @@ describe 'Parser' do
       application_configuration = new_configuration
       application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
+      unparsed_package = Fig::NotYetParsedPackage.new
+      unparsed_package.descriptor         =
+        Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
+      unparsed_package.working_directory  = unparsed_package.base_directory =
+        'foo_directory'
+      unparsed_package.source_description = 'source description'
+      unparsed_package.unparsed_text      = fig_package
+
       package = Fig::Parser.new(application_configuration, false).parse_package(
-        Fig::PackageDescriptor.new('package_name', 'version', nil),
-        'foo_directory',
-        'source description',
-        fig_package
+        unparsed_package
       )
       package.should_not == nil
     end
@@ -158,14 +183,20 @@ describe 'Parser' do
       application_configuration = new_configuration
       application_configuration.push_dataset( { 'url whitelist' => 'http://svpsvn/' } )
 
+      unparsed_package = Fig::NotYetParsedPackage.new
+      unparsed_package.descriptor         =
+        Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
+      unparsed_package.working_directory  = unparsed_package.base_directory =
+        'foo_directory'
+      unparsed_package.source_description = 'source description'
+      unparsed_package.unparsed_text      = fig_package
+
       exception = nil
       begin
-        package = Fig::Parser.new(application_configuration, false).parse_package(
-          Fig::PackageDescriptor.new('package_name', '0.1.1', nil),
-          'foo_directory',
-          'source description',
-          fig_package
-        )
+        package =
+          Fig::Parser.new(application_configuration, false).parse_package(
+            unparsed_package
+          )
       rescue Fig::URLAccessDisallowedError => exception
       end
       exception.should_not == nil

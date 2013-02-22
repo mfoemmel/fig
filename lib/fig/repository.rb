@@ -8,6 +8,7 @@ require 'fig'
 require 'fig/at_exit'
 require 'fig/file_not_found_error'
 require 'fig/logging'
+require 'fig/not_yet_parsed_package'
 require 'fig/package_cache'
 require 'fig/package_descriptor'
 require 'fig/parser'
@@ -411,12 +412,14 @@ class Fig::Repository
     end
     content = File.read(file_name)
 
-    package = @parser.parse_package(
-      descriptor,
-      runtime_for_package(descriptor),
-      descriptor.to_string(),
-      content
-    )
+    unparsed_package = Fig::NotYetParsedPackage.new
+    unparsed_package.descriptor         = descriptor
+    unparsed_package.working_directory  = unparsed_package.base_directory =
+      runtime_for_package(descriptor)
+    unparsed_package.source_description = descriptor.to_string()
+    unparsed_package.unparsed_text      = content
+
+    package = @parser.parse_package(unparsed_package)
 
     @package_cache.add_package(package)
 

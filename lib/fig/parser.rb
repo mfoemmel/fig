@@ -23,18 +23,14 @@ class Fig::Parser
     @check_include_versions = check_include_versions
   end
 
-  def parse_package(descriptor, directory, source_description, unparsed_text)
-    version = get_grammar_version(
-      descriptor, directory, source_description, unparsed_text
-    )
+  def parse_package(unparsed_package)
+    version = get_grammar_version unparsed_package
 
     if version == 0
-      return parse_v0(descriptor, directory, source_description, unparsed_text)
+      return parse_v0 unparsed_package
     end
 
-    return parse_v1_or_later(
-      version, descriptor, directory, source_description, unparsed_text
-    )
+    return parse_v1_or_later version, unparsed_package
   end
 
   private
@@ -47,21 +43,24 @@ class Fig::Parser
   # TODO: Remove this once stablized.
   @@seen_v2 = false
 
-  def get_grammar_version(
-    descriptor, directory, source_description, unparsed_text
-  )
+  def get_grammar_version(unparsed_package)
     version_parser = Fig::Grammar::VersionIdentificationParser.new()
 
-    extended_description =
-      extend_source_description(directory, source_description)
+    extended_description = unparsed_package.extended_source_description
 
-    result = version_parser.parse(unparsed_text)
+    result = version_parser.parse(unparsed_package.unparsed_text)
     if result.nil?
-      raise_parse_error(version_parser, unparsed_text, extended_description)
+      raise_parse_error(
+        version_parser,
+        unparsed_package.unparsed_text,
+        extended_description
+      )
     end
 
     statement = result.get_grammar_version(
-      Fig::ParserPackageBuildState.new(nil, descriptor, extended_description)
+      Fig::ParserPackageBuildState.new(
+        nil, unparsed_package.descriptor, extended_description
+      )
     )
     return 0 if not statement
 
@@ -81,85 +80,49 @@ class Fig::Parser
     return version
   end
 
-  def parse_v0(descriptor, directory, source_description, unparsed_text)
-    stripped_text = unparsed_text.gsub(/#.*$/, '') # Blech.
+  def parse_v0(unparsed_package)
+    stripped_text = unparsed_package.unparsed_text.gsub(/#.*$/, '') # Blech.
 
     v0_parser = Fig::Grammar::V0Parser.new
 
-    return drive_treetop_parser(
-      v0_parser,
-      descriptor,
-      directory,
-      source_description,
-      unparsed_text,
-      stripped_text
-    )
+    return drive_treetop_parser(v0_parser, unparsed_package, stripped_text)
   end
 
-  def parse_v1_or_later(
-    version, descriptor, directory, source_description, unparsed_text
-  )
+  def parse_v1_or_later(version, unparsed_package)
     parser = PARSER_CLASS[version].new
 
     return drive_treetop_parser(
       parser,
-      descriptor,
-      directory,
-      source_description,
-      unparsed_text,
-      unparsed_text
+      unparsed_package,
+      unparsed_package.unparsed_text
     )
   end
 
   def drive_treetop_parser(
-    parser,
-    descriptor,
-    directory,
-    source_description,
-    unparsed_text, # Ugh. V0 strips comments via regex.
-    cleaned_text
+    parser, unparsed_package, cleaned_text # Ugh. V0 strips comments via regex.
   )
     # Extra space at the end because most of the rules in the grammar require
     # trailing whitespace.
     result = parser.parse(cleaned_text + ' ')
 
-    extended_description =
-      extend_source_description(directory, source_description)
+    extended_description = unparsed_package.extended_source_description
 
     if result.nil?
       raise_parse_error(parser, cleaned_text, extended_description)
     end
 
     package = result.to_package(
-      directory,
+      unparsed_package,
       Fig::ParserPackageBuildState.new(
-        parser.version, descriptor, extended_description
+        parser.version, unparsed_package.descriptor, extended_description
       )
     )
-    package.unparsed_text = unparsed_text
 
-    check_for_bad_urls(package, descriptor)
+    check_for_bad_urls(package, unparsed_package.descriptor)
     check_for_multiple_command_statements(package)
     check_for_missing_versions_on_include_statements(package)
 
     return package
-  end
-
-  def extend_source_description(directory, original_description)
-    if original_description
-      if original_description.start_with? directory
-        return original_description
-      end
-
-      extended = original_description
-      if directory != '.'
-        extended << " (#{directory})"
-      end
-
-      return extended
-    end
-
-    return directory
   end
 
   def raise_parse_error(treetop_parser, text, extended_description)

@@ -86,7 +86,13 @@ class Fig::Command::PackageApplier
       )
 
     return Fig::Package.new(
-      nil, nil, 'command-line', '.', [configuration_statement], :is_synthetic
+      nil,  # Name
+      nil,  # Version
+      'command-line',
+      '.',  # Working
+      '.',  # Base
+      [configuration_statement],
+      :is_synthetic
     )
   end
 

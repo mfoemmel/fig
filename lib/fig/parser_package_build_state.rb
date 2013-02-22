@@ -44,7 +44,7 @@ class Fig::ParserPackageBuildState
     )
   end
 
-  def new_package_statement(directory, grammar_node, statement_nodes)
+  def new_package_statement(unparsed_package, grammar_node, statement_nodes)
     grammar_statement = nil
     if grammar_node && ! grammar_node.empty?
       grammar_statement = grammar_node.to_package_statement(self)
@@ -63,14 +63,18 @@ class Fig::ParserPackageBuildState
       statement_objects << node.to_package_statement(self)
     end
 
-    return Fig::Package.new(
+    package = Fig::Package.new(
       @descriptor.name,
       @descriptor.version,
       @descriptor.description,
-      directory,
+      unparsed_package.working_directory,
+      unparsed_package.base_directory,
       statement_objects,
       false,
     )
+    package.unparsed_text = unparsed_package.unparsed_text
+
+    return package
   end
 
   def new_grammar_version_statement(keyword_node, version_node)

@@ -27,9 +27,9 @@ module Fig
         statements:(package_statement*)
         optional_ws
         {
-          def to_package(directory, build_state)
+          def to_package(unparsed_package, build_state)
             return build_state.new_package_statement(
-              directory, grammar_version, statements
+              unparsed_package, grammar_version, statements
             )
           end
         }

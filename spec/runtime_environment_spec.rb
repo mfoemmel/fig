@@ -30,6 +30,7 @@ def new_example_package(environment, name, extra_statements, variable_value)
       standard_package_version(name),
       'test',
       "#{name}-directory",
+      "#{name}-directory",
       statements,
       false,
     )
@@ -101,7 +102,7 @@ def new_example_environment(variable_value = 'whatever', retrieve_vars = {})
   )
   environment.register_package(
     Fig::Package.new(
-      'has_command', 'version', 'test', 'directory',
+      'has_command', 'version', 'test', 'directory', 'directory',
       [
         Fig::Statement::Configuration.new(
           nil,
@@ -138,6 +139,7 @@ def substitute_command(command)
       'test-version',
       'test-description',
       'test-directory',
+      'test-directory',
       [],
       false,
     )
@@ -173,6 +175,7 @@ def substitute_variable(variable_value, retrieve_vars = {})
       'test-package',
       'test-version',
       'test-description',
+      'test-directory',
       'test-directory',
       [],
       false,
