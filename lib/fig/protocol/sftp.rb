@@ -110,7 +110,7 @@ class Fig::Protocol::SFTP
   def sftp_run(uri, prompt_for_login, &block)
     host = uri.host
 
-    authentication = load_authentication_for host, prompt_for_login
+    authentication = get_authentication_for host, prompt_for_login
     if ! authentication
       raise Fig::NetworkError.new "No authentication information for #{host}."
     end

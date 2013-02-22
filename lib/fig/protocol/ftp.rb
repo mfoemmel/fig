@@ -109,7 +109,7 @@ class Fig::Protocol::FTP
   def ftp_login(ftp, host, prompt_for_login)
     begin
       if @login
-        authentication = load_authentication_for host, prompt_for_login
+        authentication = get_authentication_for host, prompt_for_login
         if authentication
           ftp.login authentication.username, authentication.password
         else
