@@ -1,3 +1,5 @@
+require 'stringio'
+
 require 'fig/operating_system'
 
 module Fig; end
