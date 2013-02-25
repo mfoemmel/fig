@@ -201,39 +201,8 @@ class Fig::RuntimeEnvironment
     # use the flag on the base package to break the chain of includes.
     return if starting_package.base? && @suppress_includes == :all
 
-    descriptor = include_statement.descriptor
-    resolved_descriptor = nil
-    package = nil
-
-    if include_statement.included_package.nil?
-      # Check to see if this include has been overridden.
-      if (
-        backtrace and
-        override_package_name = descriptor.name || starting_package.name
-      )
-        override = backtrace.get_override(override_package_name)
-        if override
-          resolved_descriptor =
-            Fig::PackageDescriptor.new(
-              override_package_name, override, descriptor.config
-            )
-        end
-      end
-      resolved_descriptor ||= descriptor
-
-      new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
-      if included_name = resolved_descriptor.name || starting_package.name
-        package = lookup_package(
-          included_name, resolved_descriptor.version, new_backtrace
-        )
-      else
-        package = starting_package
-      end
-    else
-      resolved_descriptor = descriptor
-      package = include_statement.included_package
-    end
-
+    package, resolved_descriptor, new_backtrace =
+      determine_included_package starting_package, include_statement, backtrace
 
     return if                                   \
           starting_package.base?                \
@@ -247,6 +216,47 @@ class Fig::RuntimeEnvironment
     )
 
     return
+  end
+
+  def determine_included_package(starting_package, include_statement, backtrace)
+    descriptor = include_statement.descriptor
+
+    if ! include_statement.included_package.nil?
+      return \
+        include_statement.included_package,
+        descriptor,
+        Fig::IncludeBacktrace.new(backtrace, descriptor)
+    end
+
+    resolved_descriptor = nil
+
+    # Check to see if this include has been overridden.
+    if (
+      backtrace and
+      override_package_name = descriptor.name || starting_package.name
+    )
+      override = backtrace.get_override(override_package_name)
+      if override
+        resolved_descriptor =
+          Fig::PackageDescriptor.new(
+            override_package_name, override, descriptor.config
+          )
+      end
+    end
+    resolved_descriptor ||= descriptor
+
+    new_backtrace = Fig::IncludeBacktrace.new(backtrace, resolved_descriptor)
+    package = nil
+
+    if included_name = resolved_descriptor.name || starting_package.name
+      package = lookup_package(
+        included_name, resolved_descriptor.version, new_backtrace
+      )
+    else
+      package = starting_package
+    end
+
+    return package, resolved_descriptor, new_backtrace
   end
 
   def include_file_config(including_package, path, config_name, backtrace)
