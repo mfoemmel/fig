@@ -7,9 +7,12 @@ v1.1.1.beta.5
 
   Miscellaneous:
 
-  - Login behavior change for FTP with --login and for SFTP: Will not attempt
-    to use login credentials from FIG_USERNAME/FIG_PASSWORD or prompting for
-    asset URLs.  Credentials in ~/.netrc will continue to be used.
+  - Fig now depends upon the open4 gem.
+
+  - Login behavior change for FTP with --login and for SFTP: Fig will not
+    attempt to use login credentials from FIG_USERNAME/FIG_PASSWORD or use
+    prompting for asset URLs.  Credentials in ~/.netrc will continue to be
+    used.
 
 v1.1.1.beta.4
 
