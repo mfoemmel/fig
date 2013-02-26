@@ -66,9 +66,9 @@ class Fig::PackageDescriptor
   #                                      most likely the result of invoking
   #                                      Fig::Statement.position_description().
   def initialize(name, version, config, options = {})
-    @name            = name
-    @version         = version
-    @config          = config
+    @name            = translate_component(name)
+    @version         = translate_component(version)
+    @config          = translate_component(config)
     @original_string = options[:original_string]
     @description     = options[:description]
 
@@ -94,6 +94,12 @@ class Fig::PackageDescriptor
   end
 
   private
+
+  def translate_component(value)
+    return if value.nil?
+    return if value.empty?
+    return value
+  end
 
   def validate_component(
     value, name, presence_requirement_symbol, options
