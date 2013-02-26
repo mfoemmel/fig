@@ -1,39 +1,11 @@
-v1.1.1.beta.6
+v1.2.0
 
-  Bug fix:
+  Bug fixes:
 
-  - Change in beta 5 broke include stack traces.
-
-v1.1.1.beta.5
-
-  Bug fix:
-
-  - Fix "include :config-with-no-package" in packages referenced by
-    "include-file".
-
-  Miscellaneous:
-
-  - Fig now depends upon the open4 gem.
-
-  - Login behavior change for FTP with --login and for SFTP: Fig will not
-    attempt to use login credentials from FIG_USERNAME/FIG_PASSWORD or use
-    prompting for asset URLs.  Credentials in ~/.netrc will continue to be
-    used.
-
-v1.1.1.beta.4
-
-  Bug fix:
+  - Unparsing of unglobbed asset paths containing single quotes was broken.
 
   - Deal with differences between return types of stat() from Net::SFTP and
     File.
-
-  Miscellaneous:
-
-  - Add -T as the short option for --dump-package-definition-text.
-
-  - Add -R as the short option for --suppress-retrieves.
-
-v1.1.1.beta.3
 
   New features:
 
@@ -49,10 +21,6 @@ v1.1.1.beta.3
     programs can be controlled via the FIG_SVN_EXECUTABLE and
     FIG_GIT_EXECUTABLE environment variables; individual VCS can be turned off
     by setting the variable to the empty string.
-
-v1.1.1.beta.2
-
-  New features:
 
   - New --source-package option that will tell you what package a file was
     retrieved from:
@@ -73,27 +41,20 @@ v1.1.1.beta.2
     --dump-package-definition-text" without clobbering anything in your current
     directory.
 
-v1.1.1.beta.1
-
-  Bug fix:
-
-  - Unparsing of unglobbed asset paths containing single quotes was broken.
-
-  New features:
-
   - It is now possible to use an unpublished package from within another via a
     "include-file" statement/--include-file command-line option.
 
     This is considered an experimental feature and its behavior has not been
-    set in stone yet; changes may happen without notice.
+    set in stone yet; changes may happen without notice.  Comments on its
+    behavior, especially in terms of assets and of retrieves are welcome.
 
     Using this statement requires grammar version 2.  The
     statement/command-line option takes a single argument of a path to a
     package definition file, optionally followed by a colon and a config name.
     If the path requires quoting, the quotes go around the path and not the
     config name; this allows for use of the default config in a file path
-    containing a colon.  Given an unpublished package in ./foo/bar/baz.fig,
-    your can use it in ./foo/bar.fig like so:
+    containing a colon, e.g. MS Windows absolute paths.  Given an unpublished
+    package in ./foo/bar/baz.fig, your can use it in ./foo/bar.fig like so:
 
       grammar v2
       config default
@@ -108,6 +69,28 @@ v1.1.1.beta.1
     won't work because the package does not have a name.
 
     Packages that use include-file cannot be published.
+
+  Miscellaneous:
+
+  - Fig now depends upon the open4 gem.
+
+  - Login behavior change for FTP with --login and for SFTP: Fig will not
+    attempt to use login credentials from FIG_USERNAME/FIG_PASSWORD or use
+    prompting for asset URLs.  Credentials in ~/.netrc will continue to be
+    used.
+
+  - Add -T as the short option for --dump-package-definition-text.
+
+  - Add -R as the short option for --suppress-retrieves.
+
+v1.1.1.beta.6
+v1.1.1.beta.5
+v1.1.1.beta.4
+v1.1.1.beta.3
+v1.1.1.beta.2
+v1.1.1.beta.1
+
+  - Test releases.
 
 v1.1.0
 
