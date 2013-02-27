@@ -197,13 +197,13 @@ class Fig::RepositoryPackagePublisher
   def add_version_control_to_package_metadata()
     return if @options.suppress_vcs_comments_in_published_packages?
 
-    add_subversion_url_to_package_metadata()
-    add_git_url_to_package_metadata()
+    add_subversion_metadata_to_package_metadata()
+    add_git_metadata_to_package_metadata()
 
     return
   end
 
-  def add_subversion_url_to_package_metadata()
+  def add_subversion_metadata_to_package_metadata()
     output = get_subversion_working_directory_info
     return if not output =~ /^URL: +(.*\S)\s*$/
     url = $1
@@ -260,14 +260,27 @@ class Fig::RepositoryPackagePublisher
     return executable
   end
 
-  def add_git_url_to_package_metadata()
+  def add_git_metadata_to_package_metadata()
     url = get_git_origin_url or return
     url.strip!
     return if url.empty?
 
+    branch = get_git_branch
+    if branch.nil?
+      branch = ''
+    else
+      branch = ", branch #{branch}"
+    end
+    sha1 = get_git_sha1
+    if sha1.nil?
+      sha1 = ''
+    else
+      sha1 = ",\n# SHA1 #{sha1}"
+    end
+
     @text_assembler.add_header %q<#>
     @text_assembler.add_header(
-      %Q<# Publish happened in a Git working directory from\n# #{url}.>
+      %Q<# Publish happened in a Git working directory from\n# #{url}#{branch}#{sha1}.>
     )
 
     return
@@ -281,6 +294,36 @@ class Fig::RepositoryPackagePublisher
       'Git',
       'FIG_GIT_EXECUTABLE'
     )
+  end
+
+  def get_git_branch()
+    executable =
+      get_version_control_executable('FIG_GIT_EXECUTABLE', 'git') or return
+    reference = run_version_control_command(
+      [executable, 'rev-parse', '--abbrev-ref=strict', 'HEAD'],
+      'Git',
+      'FIG_GIT_EXECUTABLE'
+    )
+    return if reference.nil?
+
+    reference.strip!
+    return if reference.empty?
+
+    return reference
+  end
+
+  def get_git_sha1()
+    executable =
+      get_version_control_executable('FIG_GIT_EXECUTABLE', 'git') or return
+    reference = run_version_control_command(
+      [executable, 'rev-parse', 'HEAD'], 'Git', 'FIG_GIT_EXECUTABLE'
+    )
+    return if reference.nil?
+
+    reference.strip!
+    return if reference.empty?
+
+    return reference
   end
 
   # Deals with Archive and Resource statements.  It downloads any remote

@@ -9,6 +9,8 @@ v1.2.1
     require an additional FIG_SVNVERSION_EXECUTABLE environment variable and it
     seems better to keep things simpler by avoiding that.
 
+    For Git, it includes the current branch and SHA1.
+
 v1.2.0
 
   Bug fixes:
