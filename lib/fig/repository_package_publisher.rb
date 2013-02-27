@@ -208,9 +208,14 @@ class Fig::RepositoryPackagePublisher
     return if not output =~ /^URL: +(.*\S)\s*$/
     url = $1
 
+    revision = ''
+    if output =~ /^Revision: +(\S+)\s*$/
+      revision = ", revision #{$1}"
+    end
+
     @text_assembler.add_header %q<#>
     @text_assembler.add_header(
-      %Q<# Publish happened in a Subversion working directory from\n# #{url}.>
+      %Q<# Publish happened in a Subversion working directory from\n# #{url}#{revision}.>
     )
 
     return

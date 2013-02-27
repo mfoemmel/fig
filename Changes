@@ -1,3 +1,14 @@
+v1.2.1
+
+  Miscellaneous:
+
+  - Publishing now includes VCS revision information.
+
+    For Subversion, this is from the "Revision: " in the output of "svn info".
+    It might be better to use the output of "svnversion", but this would
+    require an additional FIG_SVNVERSION_EXECUTABLE environment variable and it
+    seems better to keep things simpler by avoiding that.
+
 v1.2.0
 
   Bug fixes:
