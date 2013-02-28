@@ -5,6 +5,10 @@ v1.2.1.beta.2
   - In the change to not use the environment variables/prompting for assets,
     ~/.netrc gained priority over the environment variables again. Fixed.
 
+  Backwards incompatibility:
+
+  - If you specify one of FIG_USERNAME/FIG_PASSWORD, you must specify both.
+
 v1.2.1.beta.1
 
   Miscellaneous:
