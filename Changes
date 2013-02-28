@@ -1,3 +1,10 @@
+v1.2.1.beta.2
+
+  Bug fixes:
+
+  - In the change to not use the environment variables/prompting for assets,
+    ~/.netrc gained priority over the environment variables again. Fixed.
+
 v1.2.1.beta.1
 
   Miscellaneous:
