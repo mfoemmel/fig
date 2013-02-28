@@ -244,9 +244,9 @@ class Fig::OperatingSystem
 
   def shell_exec(command)
     if Fig::OperatingSystem.windows?
-      plain_exec [ ENV['ComSpec'], '/c', command ]
+      plain_exec [ ENV['ComSpec'],            '/c', command ]
     else
-      plain_exec [ ENV['SHELL'],   '-c', command ]
+      plain_exec [ ENV['SHELL'] || '/bin/sh', '-c', command ]
     end
   end
 
