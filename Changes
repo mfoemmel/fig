@@ -11,6 +11,12 @@ v1.2.1.beta.2
 
   - Newlines are allowed in command-line options.
 
+  New feature:
+
+  - New --publish-comment option that allows you to put a comment at the top of
+    published packages.  Works regardless of whether the package definition
+    comes from a file or other command-line options.
+
 v1.2.1.beta.1
 
   Miscellaneous:

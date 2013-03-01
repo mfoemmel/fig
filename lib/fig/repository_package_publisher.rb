@@ -147,6 +147,8 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_package_metadata_comments()
+    add_publish_comment
+
     @text_assembler.add_header(
       %Q<# Publishing information for #{@descriptor.to_string()}:>
     )
@@ -159,7 +161,7 @@ class Fig::RepositoryPackagePublisher
     @text_assembler.add_header %Q<#     User: #{@publish_login}>
     @text_assembler.add_header %Q<#     Host: #{@publish_host}>
 
-    sanitized_argv = ARGV.map {|arg| arg.sub "\n", '\\n'}
+    sanitized_argv = ARGV.map {|arg| arg.gsub "\n", '\\n'}
     @text_assembler.add_header %Q<#     Args: "#{sanitized_argv.join %q[", "]}">
 
     @text_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
@@ -168,6 +170,17 @@ class Fig::RepositoryPackagePublisher
     add_version_control_to_package_metadata
 
     @text_assembler.add_header %Q<\n>
+
+    return
+  end
+
+  def add_publish_comment
+    return if ! @options.publish_comment
+
+    comment = @options.publish_comment.strip.gsub /[ \t]*\n/, "\n# "
+    @text_assembler.add_header %Q<# #{comment}>
+    @text_assembler.add_header %q<#>
+    @text_assembler.add_header %q<#>
 
     return
   end

@@ -344,13 +344,22 @@ describe 'Fig' do
         end
 
         it 'publishes with --no-file' do
-          fig(
-            [
-              %w<foo/1.2.3 --publish --no-file --set>,
-              "VARIABLE=MULTILINE\nVALUE"
-            ]
-          )
+          fig(%w<foo/1.2.3 --publish --set VARIABLE=VALUE --no-file>)
         end
+      end
+
+      it 'includes the publish comment' do
+        fig(
+          [
+            %w<--publish comment/1.2.3 --set VARIABLE=VALUE --publish-comment>,
+            "\n  not indented  \t\n    indented\nnot indented  \n\n",
+          ]
+        )
+
+        out, * = fig(%w<--dump-package-definition-text comment/1.2.3>)
+        out.should be_start_with(
+          "# not indented\n#     indented\n# not indented\n#\n#\n# Publishing information"
+        )
       end
     end
 

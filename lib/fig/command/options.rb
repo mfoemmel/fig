@@ -60,6 +60,7 @@ class Fig::Command::Options
   attr_reader   :log_level
   attr_reader   :package_definition_file
   attr_reader   :parser
+  attr_reader   :publish_comment
   attr_reader   :shell_command
   attr_reader   :suppress_cleanup_of_retrieves
   attr_reader   :suppress_includes
@@ -360,6 +361,14 @@ class Fig::Command::Options
       '--publish-local', 'install package only in $FIG_HOME'
     ) do |publish_local|
       set_base_action(Fig::Command::Action::PublishLocal)
+    end
+
+    @parser.on(
+      '--publish-comment COMMENT',
+      STARTS_WITH_NON_HYPHEN,
+      'comment to include in published package'
+    ) do |comment|
+      @publish_comment = comment
     end
 
     @force = nil
@@ -754,16 +763,18 @@ class Fig::Command::Options
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-all-configs.'
         )
-      elsif @base_action.list_dependencies?
-        raise Fig::Command::OptionError.new(
-          %q<It doesn't make much sense to suppress dependencies when attempting to list them.>
-        )
-      elsif @base_action.publish?
-        # Don't want to support broken publishes (though versionless includes
-        # are pretty broken).
-        raise Fig::Command::OptionError.new(
-          'Cannot use --suppress-all-includes/--suppress-cross-package-includes when publishing.'
-        )
+      elsif @base_action
+        if @base_action.list_dependencies?
+          raise Fig::Command::OptionError.new(
+            %q<It doesn't make much sense to suppress dependencies when attempting to list them.>
+          )
+        elsif @base_action.publish?
+          # Don't want to support broken publishes (though versionless includes
+          # are pretty broken).
+          raise Fig::Command::OptionError.new(
+            'Cannot use --suppress-all-includes/--suppress-cross-package-includes when publishing.'
+          )
+        end
       end
     elsif list_tree?
       validate_list_option '--list-tree'
@@ -776,6 +787,12 @@ class Fig::Command::Options
     if list_tree? && graphviz?
       raise Fig::Command::OptionError.new(
         'Cannot use --list-tree and --graphviz at the same time.'
+      )
+    end
+
+    if @publish_comment && (! @base_action || ! @base_action.publish?)
+      raise Fig::Command::OptionError.new(
+        'Cannot use --publish-comment when not publishing.'
       )
     end
 

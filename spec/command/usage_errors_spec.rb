@@ -246,6 +246,17 @@ describe 'Fig' do
       out.should == ''
     end
 
+    it %q<prints error when --publish-comment is specified when not publishing> do
+      out, err, exit_code = fig(
+        %w<--publish-comment whatever>,
+        :fork => false,
+        :no_raise_on_error => true
+      )
+      exit_code.should_not == 0
+      err.should =~ %r<cannot use --publish-comment when not publishing>i
+      out.should == ''
+    end
+
     describe %q<refuses to publish> do
       it %q<a package named "_meta"> do
         out, err, exit_code =
