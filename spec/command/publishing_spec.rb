@@ -349,16 +349,25 @@ describe 'Fig' do
       end
 
       it 'includes the publish comment' do
+        # Windows get newlines in command-line wrong, so we can't test that
+        # part of the value handling there.
+        comment = Fig::OperatingSystem.windows? ? "   comment  \t" :
+          "\n  not indented  \t\n    indented\nnot indented  \n\n"
+
         fig(
           [
             %w<--publish comment/1.2.3 --set VARIABLE=VALUE --publish-comment>,
-            "\n  not indented  \t\n    indented\nnot indented  \n\n",
+            comment
           ]
         )
 
         out, * = fig(%w<--dump-package-definition-text comment/1.2.3>)
+
+        expected = Fig::OperatingSystem.windows? ? 'comment' :
+          "not indented\n#     indented\n# not indented"
+
         out.should be_start_with(
-          "# not indented\n#     indented\n# not indented\n#\n#\n# Publishing information"
+          "# #{expected}\n#\n#\n# Publishing information"
         )
       end
     end
