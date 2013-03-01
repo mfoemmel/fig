@@ -1,3 +1,7 @@
+v1.2.1.beta.3
+
+  - Test suite was broken on Windows.
+
 v1.2.1.beta.2
 
   Backwards incompatibility:
