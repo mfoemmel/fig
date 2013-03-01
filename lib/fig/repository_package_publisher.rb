@@ -158,7 +158,10 @@ class Fig::RepositoryPackagePublisher
 
     @text_assembler.add_header %Q<#     User: #{@publish_login}>
     @text_assembler.add_header %Q<#     Host: #{@publish_host}>
-    @text_assembler.add_header %Q<#     Args: "#{ARGV.join %q[", "]}">
+
+    sanitized_argv = ARGV.map {|arg| arg.sub "\n", '\\n'}
+    @text_assembler.add_header %Q<#     Args: "#{sanitized_argv.join %q[", "]}">
+
     @text_assembler.add_header %Q<#     Fig:  v#{Fig::VERSION}>
 
     add_environment_variables_to_package_metadata

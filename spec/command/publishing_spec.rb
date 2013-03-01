@@ -344,7 +344,12 @@ describe 'Fig' do
         end
 
         it 'publishes with --no-file' do
-          fig(%w<foo/1.2.3 --publish --set VARIABLE=VALUE --no-file>)
+          fig(
+            [
+              %w<foo/1.2.3 --publish --no-file --set>,
+              "VARIABLE=MULTILINE\nVALUE"
+            ]
+          )
         end
       end
     end

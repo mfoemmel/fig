@@ -164,7 +164,7 @@ class Fig::Command::Options
   # Note that OptionParser insists that the regex match the entire value, not
   # just matches the regex in general.  In effect, OptionParser is wrapping the
   # regex with "\A" and "\z".
-  STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >x
+  STARTS_WITH_NON_HYPHEN = %r< \A [^-] .* >xm
 
   def list_all_configs?()
     return @list_all_configs
