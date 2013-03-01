@@ -17,6 +17,16 @@ v1.2.1.beta.2
     published packages.  Works regardless of whether the package definition
     comes from a file or other command-line options.
 
+      > fig --publish package/version --publish-comment $'This package is\n    awesome!' ...
+
+      > fig --dump-package-definition-text package/version
+      # This package is
+      #     awesome!
+      #
+      #
+      # Publishing information for package/version:
+      ...
+
 v1.2.1.beta.1
 
   Miscellaneous:
