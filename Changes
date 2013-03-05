@@ -1,8 +1,4 @@
-v1.2.1.beta.3
-
-  - Test suite was broken on Windows.
-
-v1.2.1.beta.2
+v1.3.0
 
   Backwards incompatibility:
 
@@ -31,8 +27,6 @@ v1.2.1.beta.2
       # Publishing information for package/version:
       ...
 
-v1.2.1.beta.1
-
   Miscellaneous:
 
   - Publishing now includes VCS revision information.
@@ -43,6 +37,12 @@ v1.2.1.beta.1
     seems better to keep things simpler by avoiding that.
 
     For Git, it includes the current branch and SHA1.
+
+v1.2.1.beta.3
+v1.2.1.beta.2
+v1.2.1.beta.1
+
+  - Test releases.
 
 v1.2.0
 
