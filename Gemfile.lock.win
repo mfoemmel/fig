@@ -34,9 +34,6 @@ GEM
       multi_json (~> 1.0)
       simplecov-html (~> 0.7.1)
     simplecov-html (0.7.1)
-    sys-admin (1.5.6)
-    sys-admin (1.5.6-x86-mingw32)
-      win32-security (>= 0.1.2)
     treetop (1.4.11)
       polyglot
       polyglot (>= 0.3.1)
@@ -72,7 +69,6 @@ DEPENDENCIES
   rspec-mocks (>= 2.7.0)
   simplecov (>= 0.6.2)
   simplecov-html (>= 0.5.3)
-  sys-admin (>= 1.5.6)
   treetop (>= 1.4.2)
   win32-security (= 0.1.4)
   windows-pr (= 1.2.2)

@@ -1,3 +1,9 @@
+v1.3.1.beta.1
+
+  Miscellaneous:
+
+  - No longer depends upon the sys-admin gem.
+
 v1.3.0
 
   Backwards incompatibility:

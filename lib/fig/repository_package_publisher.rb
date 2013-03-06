@@ -1,7 +1,7 @@
 require 'fileutils'
+require 'etc'
 require 'set'
 require 'socket'
-require 'sys/admin'
 require 'tmpdir'
 
 require 'fig'
@@ -85,7 +85,7 @@ class Fig::RepositoryPackagePublisher
 
   def derive_publish_metadata()
     @publish_time  = Time.now()
-    @publish_login = Sys::Admin.get_login()
+    @publish_login = Etc.getlogin()
     @publish_host  = Socket.gethostname()
 
     return

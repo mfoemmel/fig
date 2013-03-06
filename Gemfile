@@ -26,7 +26,6 @@ gem 'net-netrc',         '>= 0.2.2'
 gem 'net-sftp',          '>= 2.0.4'
 gem 'net-ssh',           '>= 2.0.15'
 gem 'rdoc',              '>= 3.12'
-gem 'sys-admin',         '>= 1.5.6'
 gem 'treetop',           '>= 1.4.2'
 
 group :development do
