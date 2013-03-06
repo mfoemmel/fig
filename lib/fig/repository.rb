@@ -1,7 +1,6 @@
 require 'fileutils'
 require 'set'
 require 'socket'
-require 'sys/admin'
 require 'tmpdir'
 
 require 'fig'
