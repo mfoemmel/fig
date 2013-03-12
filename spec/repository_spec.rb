@@ -75,6 +75,8 @@ describe 'Repository' do
       repository.stub(:install_package) do
         raise Fig::FileNotFoundError.new('test FileNotFoundError', 'fake path')
       end
+      # Evil knowledge of implementation:
+      repository.instance_variable_set(:@updating_package_definition, true)
 
       Fig::Logging.should_receive(:fatal).with(
         /package.*package-name.*not found/i
