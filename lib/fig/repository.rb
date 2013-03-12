@@ -293,8 +293,13 @@ class Fig::Repository
     begin
       install_package(descriptor, temp_dir)
     rescue Fig::FileNotFoundError => error
-      Fig::Logging.fatal \
-        "Package #{descriptor.to_string} not found in remote repository. (Was looking for #{error.path}.)"
+      if @updating_package_definition
+        Fig::Logging.fatal \
+          "Package #{descriptor.to_string} not found in remote repository. (Was looking for #{error.path}.)"
+      else
+        Fig::Logging.fatal \
+          "Part of package #{descriptor.to_string} was not downloadable. (Was attempting to get #{error.path}.)"
+      end
 
       raise Fig::RepositoryError.new
     rescue StandardError => exception
@@ -335,11 +340,13 @@ class Fig::Repository
       FileUtils.mkdir_p temporary_package
     end
 
+    @updating_package_definition = true
     return if ! @operating_system.download(
       remote_fig_file, temp_fig_file, :prompt_for_login
     )
 
     package = read_package_from_directory(temporary_package, descriptor)
+    @updating_package_definition = false
 
     remote_package_directory = remote_directory_for_package(descriptor)
     package.archive_locations.each do
