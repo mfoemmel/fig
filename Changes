@@ -1,3 +1,11 @@
+v1.4.1.beta.1
+
+  Miscellaneous:
+
+  - json gem dependency is now 1.7.7.  Needed for Ruby v2 and whatever issue
+    TeamCity was having with versions later than 1.6.5 a year ago does not
+    appear to exist with 1.7.7.
+
 v1.4.0
 
   Miscellaneous:
