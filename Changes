@@ -1,10 +1,14 @@
-v1.3.1.beta.1
+v1.4.0
 
   Miscellaneous:
 
   - Small clarification in error message when failing to download an asset.
 
   - No longer depends upon the sys-admin gem.
+
+v1.3.1.beta.1
+
+  - Test release.
 
 v1.3.0
 
