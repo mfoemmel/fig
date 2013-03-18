@@ -18,7 +18,7 @@ ruby RUBY_VERSION
 # All environments
 gem 'colorize',          '>= 0.5.8'
 gem 'highline',          '>= 1.6.2'
-gem 'json',              '= 1.6.5' # Pinned due to TeamCity issues.
+gem 'json',              '>= 1.7.7'
 gem 'libarchive-static', '>= 1.0.0'
 gem 'log4r',             '>= 1.1.5'
 gem 'open4',             '>= 1.0.1'
