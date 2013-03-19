@@ -1,4 +1,4 @@
-v1.4.1.beta.1
+v1.4.1.beta.1 - 2013/x/x
 
   Miscellaneous:
 
@@ -6,7 +6,8 @@ v1.4.1.beta.1
     TeamCity was having with versions later than 1.6.5 a year ago does not
     appear to exist with 1.7.7.
 
-v1.4.0
+
+v1.4.0 - 2013/3/18
 
   Miscellaneous:
 
@@ -14,11 +15,13 @@ v1.4.0
 
   - No longer depends upon the sys-admin gem.
 
-v1.3.1.beta.1
+
+v1.3.1.beta.1 - 2013/3/13
 
   - Test release.
 
-v1.3.0
+
+v1.3.0 - 2013/3/5
 
   Backwards incompatibility:
 
@@ -58,13 +61,15 @@ v1.3.0
 
     For Git, it includes the current branch and SHA1.
 
-v1.2.1.beta.3
-v1.2.1.beta.2
-v1.2.1.beta.1
+
+v1.2.1.beta.3 - 2013/3/1
+v1.2.1.beta.2 - 2013/3/1
+v1.2.1.beta.1 - 2013/2/27
 
   - Test releases.
 
-v1.2.0
+
+v1.2.0 - 2013/2/26
 
   Bug fixes:
 
@@ -149,16 +154,18 @@ v1.2.0
 
   - Add -R as the short option for --suppress-retrieves.
 
-v1.1.1.beta.6
-v1.1.1.beta.5
-v1.1.1.beta.4
-v1.1.1.beta.3
-v1.1.1.beta.2
-v1.1.1.beta.1
+
+v1.1.1.beta.6 - 2013/2/25
+v1.1.1.beta.5 - 2013/2/25
+v1.1.1.beta.4 - 2013/2/21
+v1.1.1.beta.3 - 2013/2/19
+v1.1.1.beta.2 - 2013/2/14
+v1.1.1.beta.1 - 2013/2/12
 
   - Test releases.
 
-v1.1.0
+
+v1.1.0 - 2013/2/11
 
   Backwards incompatibilities:
 
@@ -196,12 +203,14 @@ v1.1.0
     anonymous SFTP.  Thus, the use of the --login option is superfluous with
     SFTP.
 
-v1.0.1.beta.2
+
+v1.0.1.beta.2 - 2013/2/6
 v1.0.1.beta.1
 
   - Test releases.
 
-v1.0.0
+
+v1.0.0 - 2013/1/2
 
   New features:
 
@@ -243,11 +252,13 @@ v1.0.0
     you wish to toggle between multiple configurations rapidly without waiting
     for file shuffling.
 
-v0.2.6.beta.1
 
-  - Test release
+v0.2.6.beta.1 - 2012/12/18
 
-v0.2.5
+  - Test release.
+
+
+v0.2.5 - 2012/12/13
 
   Backwards incompatibilities:
 
@@ -279,11 +290,13 @@ v0.2.5
     the packages, meaning that there's a smaller chance of different assets
     clobbering each other and of packages getting corrupted.
 
-v0.2.4.beta.1
 
-  - Test release
+v0.2.4.beta.1 - 2012/12/11
 
-v0.2.3
+  - Test release.
+
+
+v0.2.3 - 2012/12/11
 
   Backwards incompatibilities:
 
@@ -327,13 +340,15 @@ v0.2.3
 
   - Other error message clarifications.
 
-v0.2.2.beta.3
-v0.2.2.beta.2
-v0.2.2.beta.1
+
+v0.2.2.beta.3 - 2012/12/7
+v0.2.2.beta.2 - 2012/12/7
+v0.2.2.beta.1 - 2012/12/6
 
   - Test releases
 
-v0.2.1
+
+v0.2.1 - 2012/11/5
 
   Backwards incompatibilities:
 
@@ -415,12 +430,14 @@ v0.2.1
 
   - Fewer stack traces with network errors.
 
-v0.2.0.beta.2
-v0.2.0.beta.1
 
-  - Test releases
+v0.2.0.beta.2 - 2012/10/24
+v0.2.0.beta.1 - 2012/10/12
 
-v0.1.81
+  - Test releases.
+
+
+v0.1.81 - 2012/9/25
 
   Backwards incompatibilities:
 
@@ -441,11 +458,13 @@ v0.1.81
     with space characters.  This should make what is run and what is in a
     package definition file match most people's expectations.
 
-v0.1.80.beta.1
 
-  - Test release
+v0.1.80.beta.1 - 2012/9/20
 
-v0.1.79
+  - Test release.
+
+
+v0.1.79 - 2012/9/13
 
   Backwards incompatibilities:
 
@@ -497,12 +516,14 @@ v0.1.79
     Actually, updates handle failed downloads better in general and don't
     delete local copies of packages.
 
-v0.1.78.beta.2
-v0.1.78.beta.1
 
-  - Test releases
+v0.1.78.beta.2 - 2012/9/11
+v0.1.78.beta.1 - 2012/8/31
 
-v0.1.77
+  - Test releases.
+
+
+v0.1.77 - 2012/8/15
 
   Bug fixes:
 
@@ -542,7 +563,7 @@ v0.1.77
     update, even though the regular files would not.
 
 
-v0.1.76
+v0.1.76 - 2012/8/7
 
   New features:
 
@@ -550,7 +571,8 @@ v0.1.76
     formatting (and no trailing newline in the output).  Useful for programatic
     access to the fig version.
 
-v0.1.75
+
+v0.1.75 - 2012/8/1
 
   Backwards incompatibilities:
 
@@ -619,13 +641,15 @@ v0.1.75
         set variable=value
       end
 
-v0.1.74.beta.3
-v0.1.74.beta.2
-v0.1.74.beta.1
 
-  - Test releases
+v0.1.74.beta.3 - 2012/7/27
+v0.1.74.beta.2 - 2012/7/27
+v0.1.74.beta.1 - 2012/7/27
 
-v0.1.73
+  - Test releases.
+
+
+v0.1.73 - 2012/7/12
 
   Backwards incompatibilities:
 
@@ -640,12 +664,14 @@ v0.1.73
 
   - Crash when --command-extra-args was specified without a package descriptor.
 
+
 v0.1.72.beta.2
 v0.1.72.beta.1
 
   - Test releases
 
-v0.1.71
+
+v0.1.71 - 2012/6/25
 
   Backwards incompatibilities:
 
@@ -686,11 +712,13 @@ v0.1.71
   - Loading an overridden package version that had one config include another
     config of the same package could cause problems in some circumstances.
 
+
 v0.1.70.beta.1
 
-  - Test release
+  - Test release.
 
-v0.1.69
+
+v0.1.69 - 2012/6/20
 
   Backwards incompatibilities:
 
@@ -747,12 +775,14 @@ v0.1.69
   - Skips retrieving directories and files to themselves.  (Tragic accident of
     retrieving "." onto itself resulted in a corrupted git repo.)
 
+
 v0.1.68.beta.2
 v0.1.68.beta.1
 
   - Test releases
 
-v0.1.67
+
+v0.1.67 - 2012/6/7
 
   Backwards incompatibilities:
 
@@ -776,12 +806,14 @@ v0.1.67
   - Better error reporting for failed installations and package version
     conflicts.
 
+
 v0.1.66.beta.2
 v0.1.66.beta.1
 
   - Test releases
 
-v0.1.65
+
+v0.1.65 - 2012/5/21
 
   Bug fixes:
 
@@ -794,7 +826,8 @@ v0.1.65
 
         set FOO=blah
 
-v0.1.64
+
+v0.1.64 - 2012/5/21
 
   Backwards incompatibilities:
 
@@ -938,19 +971,22 @@ v0.1.64
       will be slower.  On the other hand, you won't have a lot of stuff from
       "foo" hanging around that shouldn't be there.
 
+
 v0.1.63.beta.2
 v0.1.63.beta.1
 
   - Test releases
 
-v0.1.62
+
+v0.1.62 - 2012/4/2
 
   Bug fixes:
 
   - Fixed stack trace when encountering conflicting dependency package
     versions.
 
-v0.1.61
+
+v0.1.61 - 2012/3/29
 
   New features:
 
@@ -966,12 +1002,14 @@ v0.1.61
 
   - Removed dependency on the 'ftp' gem.
 
+
 v0.1.60.alpha.2
 v0.1.60.alpha.1
 
   - Test releases
 
-v0.1.59
+
+v0.1.59 - 2012/3/9
 
   Backwards incompatibilities:
 
@@ -1045,26 +1083,31 @@ v0.1.59
     Ruby code.  This shouldn't be an issue because the Treetop grammar has
     already restricted it this way; this is just a check from the Ruby side.
 
+
 v0.1.58.beta.1
 v0.1.58.alpha.2
 v0.1.58.alpha.1
 
   - Test releases
 
-v0.1.57
+
+v0.1.57 - 2012/2/13
 
   - Logging output now goes to stderr by default, instead of stdout.
 
-v0.1.56.alpha
+
+v0.1.56.alpha - 2012/2/13
 
   - Test release
 
-v0.1.55
+
+v0.1.55 - 2012/1/25
 
   - "include" of another package without specifying a version is now a warning
     about its ability to work is dependent upon include ordering.
 
-v0.1.54
+
+v0.1.54 - 2012/1/25
 
   - Emits an error when you've got an "include" of another package without
     specifying the version.  It used to be the case that you could leave the
@@ -1072,11 +1115,13 @@ v0.1.54
     the depended upon package published.  Which meant that you'd have to
     --force the publication of the "current" version.
 
-v0.1.53
+
+v0.1.53 - 2012/1/24
 
   - Fix bug in doing "fig -u" when the remote repository has a figrc file.
 
-v0.1.52
+
+v0.1.52 - 2012/1/23
 
   Notice:
 
@@ -1165,7 +1210,8 @@ v0.1.52
     versions of the same package if different configurations depend upon
     different versions.
 
-v0.1.51
+
+v0.1.51 - 2012/1/3
 
   - You can now set an environment variable to the empty string with "set".
 
@@ -1173,15 +1219,18 @@ v0.1.51
     causing Fig to attempt to retrieve libs intended for publish. (The bug
     was introduced in 0.1.49, in commit aa3f3ab6c7, while fixing another bug).
 
-v0.1.50
+
+v0.1.50 - 2011/12/5
 
   - Trying to get releases via rake to work properly for multiple platforms.
 
-v0.1.49
+
+v0.1.49 - 2011/12/2
 
   - Finalizing figrc name for URL whitelist.
 
-v0.1.47-48
+
+v0.1.47-48 - 2011/11/16
 
   - Exception, regex, and test refactoring.
 
@@ -1197,14 +1246,15 @@ v0.1.47-48
 
   - Implemented @ escaping in variables.
 
-v0.1.46
+
+v0.1.46 - 2011/11/15
 
   - Rakefile improvements.
 
   - Fixing broken reference to Fig::Logging in environment.rb.
 
 
-v0.1.43-0.1.45
+v0.1.43-0.1.45 - 2011/11/15
 
   - Rakefile improvements.
 
@@ -1212,7 +1262,8 @@ v0.1.43-0.1.45
 
   - Complains if it has nothing to do.
 
-v0.1.42
+
+v0.1.42 - 2011/11/15
 
   - Fig::Package refactoring.
 
@@ -1220,7 +1271,7 @@ v0.1.42
 
   - Testing no longer requires ssh.
 
-  - Implemented whitelist chceking after parse.
+  - Implemented whitelist checking after parse.
 
   - Simplify character classes in grammar, slight grammar refactoring.
 
@@ -1231,7 +1282,7 @@ v0.1.42
   - Tests emits std(out|err) on failure, for ease in debugging test failures.
 
 
-v0.1.41
+v0.1.41 - 2011/11/10
 
   - Release cleanup
 
