@@ -1,0 +1,37 @@
+# Reusable parts of Treetop (http://treetop.rubyforge.org/) grammar for package
+# definitions in v2 format.
+
+require 'treetop'
+
+module Fig
+  module Grammar
+    grammar V2Base
+      rule include_file
+        statement_start:'include-file'
+        ws_or_comment+
+        path:file_path
+        config:(':' config_name:config_name)?
+        {
+          def to_config_statement(build_state)
+            config_name = nil
+            if config.respond_to? :config_name
+              config_name = config.config_name
+            end
+
+            return build_state.new_include_file_statement(
+              statement_start, path, config_name
+            )
+          end
+        }
+      end
+
+      rule file_path
+        # This is like quoted_or_bare_string, but disallows unquoted colons so
+        # that we can differentiate config names.
+        '"' ( [^"\\] / '\\' . )* '"' /
+        "'" ( [^'\\] / '\\' . )* "'" /
+        [^\s#:]+
+      end
+    end
+  end
+end
