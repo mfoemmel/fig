@@ -148,6 +148,10 @@ module Fig::Unparser
     return
   end
 
+  def desired_install_path(statement)
+    raise NotImplementedError.new self
+  end
+
   def grammar_version(statement)
     raise NotImplementedError.new self
   end
@@ -208,6 +212,10 @@ module Fig::Unparser
     @text << statement.text
 
     return
+  end
+
+  def use_desired_install_paths(statement)
+    raise NotImplementedError.new self
   end
 
   def grammar_description

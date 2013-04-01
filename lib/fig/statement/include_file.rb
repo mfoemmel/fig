@@ -1,5 +1,6 @@
 require 'fig/package_descriptor'
 require 'fig/statement'
+require 'fig/string_tokenizer'
 require 'fig/user_input_error'
 
 module Fig; end

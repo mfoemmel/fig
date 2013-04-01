@@ -1,3 +1,4 @@
+require 'fig/statement/desired_install_path'
 require 'fig/statement/grammar_version'
 require 'fig/unparser'
 require 'fig/unparser/v0'
@@ -45,6 +46,14 @@ class Fig::PackageDefinitionTextAssembler
 
   def asset_input_statements()
     return @input_statements.select { |statement| statement.is_asset? }
+  end
+
+  def input_desired_install_path_statement()
+    return (
+      @input_statements.select {
+        |statement| statement.is_a? Fig::Statement::DesiredInstallPath
+      }
+    ).first
   end
 
   # Argument can be a single string or an array of strings

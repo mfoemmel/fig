@@ -48,6 +48,21 @@ describe 'Fig' do
         end
       end
 
+      it %q<complains when desired-install-path points to a relative path> do
+        input = <<-END
+          grammar v3
+          resource #{FIG_FILE_GUARANTEED_TO_EXIST}
+          desired-install-path some/relative/path
+          config default end
+        END
+
+        out, err, exit_code =
+            fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
+
+        err.should =~ /desired-install-path.*specifies a relative path/i
+        exit_code.should_not == 0
+      end
+
       %w< archive resource >.each do
         |asset_type|
 

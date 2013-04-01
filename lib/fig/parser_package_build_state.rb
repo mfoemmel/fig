@@ -4,6 +4,7 @@ require 'fig/statement'
 require 'fig/statement/archive'
 require 'fig/statement/command'
 require 'fig/statement/configuration'
+require 'fig/statement/desired_install_path'
 require 'fig/statement/grammar_version'
 require 'fig/statement/include'
 require 'fig/statement/include_file'
@@ -12,6 +13,8 @@ require 'fig/statement/path'
 require 'fig/statement/resource'
 require 'fig/statement/retrieve'
 require 'fig/statement/set'
+require 'fig/statement/use_desired_install_paths'
+require 'fig/string_tokenizer'
 
 module Fig; end
 
@@ -122,6 +125,23 @@ class Fig::ParserPackageBuildState
     )
   end
 
+  def new_desired_install_path_statement(keyword_node, path_node)
+    path_text = path_node.text_value
+    tokenized_path = Fig::StringTokenizer.new.tokenize(path_text) do
+      |description|
+
+      raise Fig::PackageParseError.new(
+        %Q<Invalid desired-install-path statement: "#{path_text}" #{description}#{node_location_description(path_node)}>
+      )
+    end
+
+    return Fig::Statement::DesiredInstallPath.new(
+      node_location(keyword_node),
+      @source_description,
+      tokenized_path.to_expanded_string,
+    )
+  end
+
   def new_configuration_statement(keyword_node, name_node, statements)
     statement_objects = statements.elements.map do
       |statement|
@@ -134,6 +154,12 @@ class Fig::ParserPackageBuildState
       @source_description,
       name_node.text_value,
       statement_objects
+    )
+  end
+
+  def new_use_desired_install_paths_statement(keyword_node)
+    return Fig::Statement::UseDesiredInstallPaths.new(
+      node_location(keyword_node), @source_description,
     )
   end
 

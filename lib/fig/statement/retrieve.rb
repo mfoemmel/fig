@@ -22,12 +22,7 @@ class Fig::Statement::Retrieve < Fig::Statement
     @tokenized_path = tokenized_path
 
     path = tokenized_path.to_escaped_string
-    # Yeah, it's not cross-platform, but File doesn't have an #absolute? method
-    # and this is better than nothing.
-    if (
-          path =~ %r< ^ [\\/] >x \
-      ||  Fig::OperatingSystem.windows? && path =~ %r< ^ [a-z] : >xi
-    )
+    if Fig::OperatingSystem.absolute? path
       Fig::Logging.warn(
         %Q<The retrieve path "#{path}"#{position_string()} looks like it is intended to be absolute; retrieve paths are always treated as relative.>
       )

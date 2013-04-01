@@ -34,6 +34,13 @@ class Fig::OperatingSystem
     ! Fig::OperatingSystem.windows?
   end
 
+  def self.absolute?(path)
+    return (
+          path =~ %r< ^ [\\/] >x \
+      ||  Fig::OperatingSystem.windows? && path =~ %r< ^ [a-z] : >xi
+    )
+  end
+
   def self.file_name_illegal_characters()
     if Fig::OperatingSystem.windows?
       return WINDOWS_FILE_NAME_ILLEGAL_CHARACTERS
@@ -228,7 +235,7 @@ class Fig::OperatingSystem
           rescue Archive::Error => exception
             # Nice how the error message doesn't include any information about
             # what was having the problem.
-            message = exception.message.sub /^Extract archive failed: /, ''
+            message = exception.message.sub(/^Extract archive failed: /, '')
             new_exception =
               Fig::RepositoryError.new(
                 "Could not extract #{entry.pathname} from #{archive_path}: #{message}"

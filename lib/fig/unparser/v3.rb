@@ -32,6 +32,29 @@ class Fig::Unparser::V3
     return
   end
 
+  def desired_install_path(statement)
+    path = statement.path
+    quote = (path.include?(%q<'>) && ! path.include?(%q<">)) ? %q<"> : %q<'>
+
+    add_indent
+
+    @text << 'desired-install-path '
+    @text << quote
+    @text << path.gsub('\\', ('\\' * 4)).gsub(quote, "\\\\#{quote}")
+    @text << quote
+    @text << "\n"
+
+    return
+  end
+
+  def use_desired_install_paths(statement)
+    add_indent
+
+    @text << "use-desired-install-paths\n"
+
+    return
+  end
+
   def grammar_description()
     return 'v3'
   end

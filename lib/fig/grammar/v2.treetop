@@ -32,6 +32,10 @@ module Fig
         }
       end
 
+      rule package_statement
+        archive / resource / retrieve / config
+      end
+
       rule config_statement
         override / include / include_file / command / path / set
       end

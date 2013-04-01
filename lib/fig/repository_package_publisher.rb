@@ -10,6 +10,7 @@ require 'fig/external_program'
 require 'fig/file_not_found_error'
 require 'fig/logging'
 require 'fig/not_yet_parsed_package'
+require 'fig/operating_system'
 require 'fig/package_cache'
 require 'fig/package_definition_text_assembler'
 require 'fig/package_descriptor'
@@ -56,6 +57,7 @@ class Fig::RepositoryPackagePublisher
 
   def publish_package()
     derive_publish_metadata()
+    validate_desired_install_path()
     validate_asset_names()
 
     temp_dir = publish_temp_dir()
@@ -91,6 +93,18 @@ class Fig::RepositoryPackagePublisher
     return
   end
 
+  def validate_desired_install_path()
+    if statement = @text_assembler.input_desired_install_path_statement
+      if ! Fig::OperatingSystem.absolute? statement.path
+        Fig::Logging.fatal \
+          %Q<The "desired-install-path" statement#{statement.position_string} specifies a relative path. Destination paths must be absolute.>
+        raise Fig::RepositoryError.new
+      end
+    end
+
+    return
+  end
+
   def validate_asset_names()
     asset_statements = @text_assembler.asset_input_statements
 
@@ -103,6 +117,7 @@ class Fig::RepositoryPackagePublisher
         if asset_name == Fig::Repository::RESOURCES_FILE
           Fig::Logging.fatal \
             %Q<You cannot have an asset with the name "#{Fig::Repository::RESOURCES_FILE}"#{statement.position_string()} due to Fig implementation details.>
+          raise Fig::RepositoryError.new
         end
 
         if asset_names.include?(asset_name)
@@ -177,7 +192,7 @@ class Fig::RepositoryPackagePublisher
   def add_publish_comment
     return if ! @options.publish_comment
 
-    comment = @options.publish_comment.strip.gsub /[ \t]*\n/, "\n# "
+    comment = @options.publish_comment.strip.gsub(/[ \t]*\n/, "\n# ")
     @text_assembler.add_header %Q<# #{comment}>
     @text_assembler.add_header %q<#>
     @text_assembler.add_header %q<#>

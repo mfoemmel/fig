@@ -1,15 +1,20 @@
 require 'set'
 
-require 'fig/grammar/version_identification'
+require 'fig/grammar_monkey_patches'
 require 'fig/grammar/v0'
 require 'fig/grammar/v1'
 require 'fig/grammar/v2'
 require 'fig/grammar/v3'
-require 'fig/grammar_monkey_patches'
+require 'fig/grammar/version_identification'
 require 'fig/logging'
 require 'fig/package_parse_error'
 require 'fig/parser_package_build_state'
 require 'fig/statement'
+require 'fig/statement/command'
+require 'fig/statement/configuration'
+require 'fig/statement/desired_install_path'
+require 'fig/statement/include'
+require 'fig/statement/use_desired_install_paths'
 require 'fig/url'
 require 'fig/url_access_disallowed_error'
 require 'fig/user_input_error'
@@ -128,7 +133,9 @@ class Fig::Parser
     )
 
     check_for_bad_urls(package, unparsed_package.descriptor)
+    check_desired_install_path_statements(package)
     check_for_multiple_command_statements(package)
+    check_for_multiple_use_desired_install_paths_statements(package)
     check_for_missing_versions_on_include_statements(package)
 
     return package
@@ -171,18 +178,60 @@ class Fig::Parser
     return
   end
 
+  def check_desired_install_path_statements(package)
+    install_path_statements =
+      package.statements.select {
+        |statement| statement.is_a? Fig::Statement::DesiredInstallPath
+      }
+
+    if install_path_statements.size > 1
+      raise Fig::PackageParseError.new(
+        %Q<Found a second "desired-install-path" statement#{install_path_statements[1].position_string}.>
+      )
+    end
+    if install_path_statements.size > 0
+      asset_statements =
+        package.statements.select { |statement| statement.is_asset?  }
+      if asset_statements.empty?
+        raise Fig::PackageParseError.new(
+          "There is no point to desired-install-path when there are no asset statements#{install_path_statements[0].position_string}."
+        )
+      end
+    end
+
+    return
+  end
+
   def check_for_multiple_command_statements(package)
     command_processed = false
     package.walk_statements do |statement|
-      if statement.is_a?(Fig::Statement::Command)
+      if statement.is_a? Fig::Statement::Command
         if command_processed == true
           raise Fig::PackageParseError.new(
-            %Q<Found a second "command" statement within a "config" block#{statement.position_string()}.>
+            %Q<Found a second "command" statement within a "config" block#{statement.position_string}.>
           )
         end
         command_processed = true
-      elsif statement.is_a?(Fig::Statement::Configuration)
+      elsif statement.is_a? Fig::Statement::Configuration
         command_processed = false
+      end
+    end
+
+    return
+  end
+
+  def check_for_multiple_use_desired_install_paths_statements(package)
+    use_desired_install_paths_processed = false
+    package.walk_statements do |statement|
+      if statement.is_a? Fig::Statement::UseDesiredInstallPaths
+        if use_desired_install_paths_processed == true
+          raise Fig::PackageParseError.new(
+            %Q<Found a second "use-desired-install-paths" statement within a "config" block#{statement.position_string}.>
+          )
+        end
+        use_desired_install_paths_processed = true
+      elsif statement.is_a? Fig::Statement::Configuration
+        use_desired_install_paths_processed = false
       end
     end
 

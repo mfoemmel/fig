@@ -212,7 +212,7 @@ describe 'Parser' do
 
       command_terminator = version.to_i == 0 ? '' : ' end'
       describe %Q<in the v#{version} grammar> do
-        it 'reject multiple commands in config file' do
+        it 'reject multiple commands in package definition' do
           input = <<-"END_PACKAGE"
             grammar v#{version}
             config default
@@ -384,6 +384,84 @@ describe 'Parser' do
           end
         end
       end
+    end
+  end
+
+  describe 'desired-install-path statements' do
+    it 'reject multiple statements in package definition' do
+      input = <<-"END_PACKAGE"
+        grammar v3
+
+        desired-install-path /some/path
+        desired-install-path "/some other/path"
+
+        resource #{FIG_FILE_GUARANTEED_TO_EXIST}
+      END_PACKAGE
+
+      test_user_input_error(
+        input,
+        /found a second "desired-install-path" statement/i
+      )
+    end
+
+    it 'complain when there are no assets' do
+      input = <<-'END_PACKAGE'
+        grammar v3
+
+        desired-install-path /some/path
+      END_PACKAGE
+
+      test_user_input_error(
+        input,
+        /there is no point to desired-install-path when there are no asset statements/i
+      )
+    end
+  end
+
+  describe 'use-desired-install-paths statements' do
+    it 'reject multiple statements in package definition' do
+      input = <<-'END_PACKAGE'
+        grammar v3
+        config default
+          use-desired-install-paths
+          use-desired-install-paths
+        end
+      END_PACKAGE
+
+      test_user_input_error(
+        input,
+        /found a second "use-desired-install-paths" statement within a "config" block/i
+      )
+    end
+
+    it 'accept multiple configs, each with a single statement' do
+      test_no_parse_exception(<<-'END_PACKAGE')
+        grammar v3
+        config default
+          use-desired-install-paths
+        end
+        config another
+          use-desired-install-paths
+        end
+      END_PACKAGE
+    end
+
+    it 'reject multiple configs where one has multiple statements' do
+      input = <<-'END_PACKAGE'
+        grammar v3
+        config default
+          use-desired-install-paths
+        end
+        config another
+          use-desired-install-paths
+          use-desired-install-paths
+        end
+      END_PACKAGE
+
+      test_user_input_error(
+        input,
+        /found a second "use-desired-install-paths" statement within a "config" block/i
+      )
     end
   end
 end

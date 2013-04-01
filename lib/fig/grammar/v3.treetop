@@ -30,8 +30,40 @@ module Fig
         }
       end
 
+      rule package_statement
+        archive / resource / retrieve / desired_install_path / config
+      end
+
       rule config_statement
-        override / include / include_file / command / path / set
+        override / include / include_file / command / path / set /
+        use_desired_install_paths
+      end
+
+      rule desired_install_path
+        statement_start:'desired-install-path'
+        ws_or_comment+
+        path:quoted_or_bare_string
+        {
+          def to_package_statement(build_state)
+            return build_state.new_desired_install_path_statement(
+              statement_start, path
+            )
+          end
+        }
+      end
+
+      rule use_desired_install_paths
+        statement_start:'use-desired-install-paths'
+        # Treetop ellipsis (see
+        # http://treetop.rubyforge.org/syntactic_recognition.html.)
+        ''
+        {
+          def to_config_statement(build_state)
+            return build_state.new_use_desired_install_paths_statement(
+              statement_start
+            )
+          end
+        }
       end
     end
   end

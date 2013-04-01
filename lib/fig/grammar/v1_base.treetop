@@ -26,10 +26,6 @@ module Fig
         }
       end
 
-      rule package_statement
-        archive / resource / retrieve / config
-      end
-
       rule archive
         statement_start:'archive'
         ws_or_comment+
