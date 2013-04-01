@@ -24,6 +24,8 @@ module Fig::Unparser
       return Fig::Unparser::V1, explanations
     when 2
       return Fig::Unparser::V2, explanations
+    when 3
+      return Fig::Unparser::V3, explanations
     end
 
     raise "Unexpected version #{version}."
@@ -46,7 +48,6 @@ module Fig::Unparser
     all_statements = gather_all_statements statements
 
     if emit_as_input_or_to_be_published_values == :emit_as_input
-      versions = []
       return all_statements.map {
         |statement|
 
