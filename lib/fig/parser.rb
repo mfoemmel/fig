@@ -4,6 +4,7 @@ require 'fig/grammar/version_identification'
 require 'fig/grammar/v0'
 require 'fig/grammar/v1'
 require 'fig/grammar/v2'
+require 'fig/grammar/v3'
 require 'fig/grammar_monkey_patches'
 require 'fig/logging'
 require 'fig/package_parse_error'
@@ -38,10 +39,12 @@ class Fig::Parser
   PARSER_CLASS = {
     1 => Fig::Grammar::V1Parser,
     2 => Fig::Grammar::V2Parser,
+    3 => Fig::Grammar::V3Parser,
   }
 
   # TODO: Remove this once stablized.
   @@seen_v2 = false
+  @@seen_v3 = false
 
   def get_grammar_version(unparsed_package)
     version_parser = Fig::Grammar::VersionIdentificationParser.new()
@@ -65,7 +68,7 @@ class Fig::Parser
     return 0 if not statement
 
     version = statement.version
-    if version > 2
+    if version > 3
       raise Fig::PackageParseError.new(
         %Q<Don't know how to parse grammar version #{version}#{statement.position_string()}.>
       )
@@ -74,6 +77,12 @@ class Fig::Parser
       @@seen_v2 = true
       Fig::Logging.info(
         'Encountered v2 grammar.  This is experimental and subject to change without notice.'
+      )
+    end
+    if version == 3 && ! @@seen_v3
+      @@seen_v3 = true
+      Fig::Logging.info(
+        'Encountered v3 grammar.  This is experimental and subject to change without notice.'
       )
     end
 

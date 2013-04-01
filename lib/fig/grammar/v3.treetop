@@ -1,0 +1,38 @@
+# Treetop (http://treetop.rubyforge.org/) grammar for package definitions in v3
+# format.
+
+require 'treetop'
+
+require 'fig/grammar/base'
+require 'fig/grammar/v1_base'
+require 'fig/grammar/v2_base'
+require 'fig/grammar/version'
+
+module Fig
+  module Grammar
+    grammar V3
+      include Fig::Grammar::Base
+      include Fig::Grammar::Version
+      include Fig::Grammar::V1Base
+      include Fig::Grammar::V2Base
+
+      rule package
+        optional_ws_or_comment
+        grammar_version:grammar_version?
+        statements:(package_statement_with_ws*)
+        optional_ws_or_comment
+        {
+          def to_package(unparsed_package, build_state)
+            return build_state.new_package_statement(
+              unparsed_package, grammar_version, statements
+            )
+          end
+        }
+      end
+
+      rule config_statement
+        override / include / include_file / command / path / set
+      end
+    end
+  end
+end

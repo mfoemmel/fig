@@ -5,6 +5,7 @@
 require 'fig/grammar/v0'
 require 'fig/grammar/v1'
 require 'fig/grammar/v2'
+require 'fig/grammar/v3'
 
 module Fig; end
 module Fig::Grammar; end
@@ -24,5 +25,11 @@ end
 class Fig::Grammar::V2Parser
   def version()
     return 2
+  end
+end
+
+class Fig::Grammar::V3Parser
+  def version()
+    return 3
   end
 end
