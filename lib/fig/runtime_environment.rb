@@ -130,7 +130,7 @@ class Fig::RuntimeEnvironment
 
     expanded_command_line =
       command_line.map {
-        |argument| expand_command_line_argument(argument, base_package)
+        |argument| expand_command_line_argument(argument, package)
       }
 
     @variables.with_environment { yield expanded_command_line }

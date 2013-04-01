@@ -1,5 +1,9 @@
 v1.4.1.beta.1 - 2013/x/x
 
+  Bug fix:
+
+  - "@" substitution in the command-line was using the incorrect package.
+
   Miscellaneous:
 
   - json gem dependency is now 1.7.7.  Needed for Ruby v2 and whatever issue
