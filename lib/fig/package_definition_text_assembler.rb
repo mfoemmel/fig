@@ -1,10 +1,10 @@
-require 'fig/statement/desired_install_path'
-require 'fig/statement/grammar_version'
 require 'fig/deparser'
 require 'fig/deparser/v0'
 require 'fig/deparser/v1'
 require 'fig/deparser/v2'
 require 'fig/deparser/v3'
+require 'fig/statement/desired_install_path'
+require 'fig/statement/grammar_version'
 
 module Fig; end
 

@@ -2,9 +2,9 @@
 
 require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
+require 'fig/deparser/v1'
 require 'fig/statement/archive'
 require 'fig/statement/resource'
-require 'fig/deparser/v1'
 
 describe Fig::Deparser::V1 do
   let(:deparser) {

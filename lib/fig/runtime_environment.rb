@@ -1,5 +1,6 @@
 require 'stringio'
 
+require 'fig/deparser'
 require 'fig/include_backtrace'
 require 'fig/logging'
 require 'fig/not_yet_parsed_package'
@@ -11,7 +12,6 @@ require 'fig/statement/include_file'
 require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
-require 'fig/deparser'
 require 'fig/user_input_error'
 
 module Fig; end
