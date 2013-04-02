@@ -57,8 +57,7 @@ class Fig::Command::Action::DumpPackageDefinitionForCommandLine
       )
     ]
 
-
-    unparsed, explanations = text_assembler.assemble_package_definition
+    unparsed, * = text_assembler.assemble_package_definition
     print unparsed
 
     return EXIT_SUCCESS

@@ -4,7 +4,7 @@ module Fig; end
 class Fig::NotYetParsedPackage
   attr_accessor :descriptor
   attr_accessor :working_directory
-  attr_accessor :base_directory
+  attr_accessor :include_file_base_directory
   attr_accessor :source_description
   attr_accessor :unparsed_text
 

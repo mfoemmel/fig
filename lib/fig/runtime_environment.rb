@@ -262,7 +262,8 @@ class Fig::RuntimeEnvironment
   def include_file_config(including_package, path, config_name, backtrace)
     return if @suppress_includes
 
-    full_path = File.absolute_path(path, including_package.base_directory)
+    full_path =
+      File.absolute_path(path, including_package.include_file_base_directory)
 
     descriptor =
       Fig::PackageDescriptor.new(nil, nil, nil, :description => full_path)
@@ -363,7 +364,8 @@ class Fig::RuntimeEnvironment
 
     unparsed_package = Fig::NotYetParsedPackage.new
     unparsed_package.descriptor         = descriptor
-    unparsed_package.working_directory  = unparsed_package.base_directory =
+    unparsed_package.working_directory  =
+      unparsed_package.include_file_base_directory =
       File.dirname(full_path)
     unparsed_package.source_description = full_path
     unparsed_package.unparsed_text      = content

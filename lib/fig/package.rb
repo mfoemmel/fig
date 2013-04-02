@@ -22,7 +22,7 @@ class Fig::Package
   attr_reader   :version
   attr_reader   :description
   attr_reader   :runtime_directory
-  attr_reader   :base_directory
+  attr_reader   :include_file_base_directory
   attr_reader   :statements
   attr_accessor :backtrace
   attr_accessor :unparsed_text
@@ -32,19 +32,19 @@ class Fig::Package
     version,
     description,
     runtime_directory,
-    base_directory,
+    include_file_base_directory,
     statements,
     synthetic
   )
-    @name                 = name
-    @version              = version
-    @description          = description
-    @runtime_directory    = runtime_directory
-    @base_directory       = base_directory
-    @statements           = statements
-    @synthetic            = synthetic
-    @applied_config_names = []
-    @backtrace            = nil
+    @name                         = name
+    @version                      = version
+    @description                  = description
+    @runtime_directory            = runtime_directory
+    @include_file_base_directory  = include_file_base_directory
+    @statements                   = statements
+    @synthetic                    = synthetic
+    @applied_config_names         = []
+    @backtrace                    = nil
   end
 
   # Was this package (supposedly) created from something other than usual
