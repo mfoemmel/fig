@@ -23,7 +23,8 @@ describe 'Parser' do
     unparsed_package = Fig::NotYetParsedPackage.new
     unparsed_package.descriptor         =
       Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
-    unparsed_package.working_directory  = unparsed_package.base_directory =
+    unparsed_package.working_directory  =
+      unparsed_package.include_file_base_directory =
       'foo_directory'
     unparsed_package.source_description = 'source description'
     unparsed_package.unparsed_text      = fig_input
@@ -42,7 +43,8 @@ describe 'Parser' do
     unparsed_package = Fig::NotYetParsedPackage.new
     unparsed_package.descriptor         =
       Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
-    unparsed_package.working_directory  = unparsed_package.base_directory =
+    unparsed_package.working_directory  =
+      unparsed_package.include_file_base_directory =
       'foo_directory'
     unparsed_package.source_description = 'source description'
     unparsed_package.unparsed_text      = fig_input
@@ -77,7 +79,8 @@ describe 'Parser' do
       unparsed_package = Fig::NotYetParsedPackage.new
       unparsed_package.descriptor         =
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
-      unparsed_package.working_directory  = unparsed_package.base_directory =
+      unparsed_package.working_directory  =
+        unparsed_package.include_file_base_directory =
         'foo_directory'
       unparsed_package.source_description = 'source description'
       unparsed_package.unparsed_text      = <<-END
@@ -116,7 +119,8 @@ describe 'Parser' do
       unparsed_package = Fig::NotYetParsedPackage.new
       unparsed_package.descriptor         =
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
-      unparsed_package.working_directory  = unparsed_package.base_directory =
+      unparsed_package.working_directory  =
+        unparsed_package.include_file_base_directory =
         'foo_directory'
       unparsed_package.source_description = 'source description'
       unparsed_package.unparsed_text      = fig_package
@@ -163,7 +167,8 @@ describe 'Parser' do
       unparsed_package = Fig::NotYetParsedPackage.new
       unparsed_package.descriptor         =
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
-      unparsed_package.working_directory  = unparsed_package.base_directory =
+      unparsed_package.working_directory  =
+        unparsed_package.include_file_base_directory =
         'foo_directory'
       unparsed_package.source_description = 'source description'
       unparsed_package.unparsed_text      = fig_package
@@ -186,7 +191,8 @@ describe 'Parser' do
       unparsed_package = Fig::NotYetParsedPackage.new
       unparsed_package.descriptor         =
         Fig::PackageDescriptor.new('package_name', '0.1.1', nil)
-      unparsed_package.working_directory  = unparsed_package.base_directory =
+      unparsed_package.working_directory  =
+        unparsed_package.include_file_base_directory =
         'foo_directory'
       unparsed_package.source_description = 'source description'
       unparsed_package.unparsed_text      = fig_package
