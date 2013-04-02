@@ -178,7 +178,7 @@ class Fig::RepositoryPackagePublisher
   def add_publish_comment
     return if ! @options.publish_comment
 
-    comment = @options.publish_comment.strip.gsub /[ \t]*\n/, "\n# "
+    comment = @options.publish_comment.strip.gsub(/[ \t]*\n/, "\n# ")
     @text_assembler.add_header %Q<# #{comment}>
     @text_assembler.add_header %q<#>
     @text_assembler.add_header %q<#>

@@ -149,7 +149,7 @@ class Fig::Package
   def walk_statements(&block)
     @statements.each do |statement|
       yield statement
-      statement.walk_statements &block
+      statement.walk_statements(&block)
     end
 
     return

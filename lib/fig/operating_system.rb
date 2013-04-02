@@ -228,7 +228,7 @@ class Fig::OperatingSystem
           rescue Archive::Error => exception
             # Nice how the error message doesn't include any information about
             # what was having the problem.
-            message = exception.message.sub /^Extract archive failed: /, ''
+            message = exception.message.sub(/^Extract archive failed: /, '')
             new_exception =
               Fig::RepositoryError.new(
                 "Could not extract #{entry.pathname} from #{archive_path}: #{message}"
