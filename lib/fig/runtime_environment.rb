@@ -11,7 +11,7 @@ require 'fig/statement/include_file'
 require 'fig/statement/override'
 require 'fig/statement/path'
 require 'fig/statement/set'
-require 'fig/unparser'
+require 'fig/deparser'
 require 'fig/user_input_error'
 
 module Fig; end
@@ -184,7 +184,7 @@ class Fig::RuntimeEnvironment
 
       statement = @retrieves[name]
       if statement.loaded_but_not_referenced?
-        text, * = Fig::Unparser.determine_version_and_unparse(
+        text, * = Fig::Deparser.determine_version_and_deparse(
           [statement], :emit_as_input
         )
         Fig::Logging.warn \

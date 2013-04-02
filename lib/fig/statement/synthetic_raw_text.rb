@@ -16,8 +16,8 @@ class Fig::Statement::SyntheticRawText < Fig::Statement
     return nil
   end
 
-  def unparse_as_version(unparser)
-    return unparser.synthetic_raw_text(self)
+  def deparse_as_version(deparser)
+    return deparser.synthetic_raw_text(self)
   end
 
   def minimum_grammar_for_emitting_input()

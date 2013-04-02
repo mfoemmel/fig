@@ -1,8 +1,8 @@
 module Fig; end
-module Fig::Unparser; end
+module Fig::Deparser; end
 
 # Handles serializing of statements in the v1 grammar.
-module Fig::Unparser::V1Base
+module Fig::Deparser::V1Base
   def command(statement)
     add_indent
     @text << %Q<command\n>

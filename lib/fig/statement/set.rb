@@ -35,8 +35,8 @@ class Fig::Statement::Set < Fig::Statement
     return true
   end
 
-  def unparse_as_version(unparser)
-    return unparser.set(self)
+  def deparse_as_version(deparser)
+    return deparser.set(self)
   end
 
   private

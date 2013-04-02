@@ -1,13 +1,15 @@
-require 'fig/unparser'
-require 'fig/unparser/v1_base'
+require 'fig/deparser'
+require 'fig/deparser/v1_base'
+require 'fig/deparser/v2_base'
 
 module Fig; end
-module Fig::Unparser; end
+module Fig::Deparser; end
 
-# Handles serializing of statements in the v1 grammar.
-class Fig::Unparser::V1
-  include Fig::Unparser
-  include Fig::Unparser::V1Base
+# Handles serializing of statements in the v2 grammar.
+class Fig::Deparser::V2
+  include Fig::Deparser
+  include Fig::Deparser::V1Base
+  include Fig::Deparser::V2Base
 
   def initialize(
     emit_as_input_or_to_be_published_values,
@@ -25,12 +27,12 @@ class Fig::Unparser::V1
   def grammar_version(statement)
     add_indent
 
-    @text << "grammar v1\n"
+    @text << "grammar v2\n"
 
     return
   end
 
   def grammar_description()
-    return 'v1'
+    return 'v2'
   end
 end

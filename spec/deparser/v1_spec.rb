@@ -4,14 +4,14 @@ require File.expand_path(File.dirname(__FILE__) + '/../spec_helper')
 
 require 'fig/statement/archive'
 require 'fig/statement/resource'
-require 'fig/unparser/v1'
+require 'fig/deparser/v1'
 
-describe Fig::Unparser::V1 do
-  let(:unparser) {
-    Fig::Unparser::V1.new :emit_as_input, '<indent>', 1
+describe Fig::Deparser::V1 do
+  let(:deparser) {
+    Fig::Deparser::V1.new :emit_as_input, '<indent>', 1
   }
 
-  describe 'unparses' do
+  describe 'deparses' do
     {
       Fig::Statement::Archive  => 'archive',
       Fig::Statement::Resource => 'resource',
@@ -23,7 +23,7 @@ describe Fig::Unparser::V1 do
           statement =
             statement_class.new(nil, nil, 'chocolate*pizza', :glob_if_not_url)
 
-          unparser.unparse([statement]).should ==
+          deparser.deparse([statement]).should ==
             %Q[<indent>#{keyword} "chocolate*pizza"\n]
         end
 
@@ -31,7 +31,7 @@ describe Fig::Unparser::V1 do
           statement =
             statement_class.new(nil, nil, 'chocolate*pizza', false)
 
-          unparser.unparse([statement]).should ==
+          deparser.deparse([statement]).should ==
             %Q[<indent>#{keyword} 'chocolate*pizza'\n]
         end
 
@@ -39,21 +39,21 @@ describe Fig::Unparser::V1 do
           statement =
             statement_class.new(nil, nil, 'chocolate\\pizza', :glob_if_not_url)
 
-          unparser.unparse([statement]).should ==
+          deparser.deparse([statement]).should ==
             %Q[<indent>#{keyword} "chocolate\\\\pizza"\n]
         end
 
         it %q<«chocolate\\pizza» without globbing> do
           statement = statement_class.new(nil, nil, 'chocolate\\pizza', false)
 
-          unparser.unparse([statement]).should ==
+          deparser.deparse([statement]).should ==
             %Q[<indent>#{keyword} 'chocolate\\\\pizza'\n]
         end
 
         it %q<«chocolate'"pizza»> do
           statement = statement_class.new(nil, nil, %q<chocolate'"pizza>, false)
 
-          unparser.unparse([statement]).should ==
+          deparser.deparse([statement]).should ==
             %Q[<indent>#{keyword} 'chocolate\\'"pizza'\n]
         end
       end

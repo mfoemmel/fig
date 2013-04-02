@@ -32,7 +32,7 @@ class Fig::Statement::Resource < Fig::Statement
     return nil
   end
 
-  def unparse_as_version(unparser)
-    return unparser.resource(self)
+  def deparse_as_version(deparser)
+    return deparser.resource(self)
   end
 end

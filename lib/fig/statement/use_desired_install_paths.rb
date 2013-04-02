@@ -12,8 +12,8 @@ class Fig::Statement::UseDesiredInstallPaths < Fig::Statement
     return 'use-desired-install-paths'
   end
 
-  def unparse_as_version(unparser)
-    return unparser.use_desired_install_paths(self)
+  def deparse_as_version(deparser)
+    return deparser.use_desired_install_paths(self)
   end
 
   def minimum_grammar_for_emitting_input()

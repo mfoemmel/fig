@@ -53,8 +53,8 @@ class Fig::Statement::Retrieve < Fig::Statement
     @referenced = yea_or_nay
   end
 
-  def unparse_as_version(unparser)
-    return unparser.retrieve(self)
+  def deparse_as_version(deparser)
+    return deparser.retrieve(self)
   end
 
   def minimum_grammar_for_emitting_input()

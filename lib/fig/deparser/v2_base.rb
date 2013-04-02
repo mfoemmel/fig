@@ -1,8 +1,8 @@
 module Fig; end
-module Fig::Unparser; end
+module Fig::Deparser; end
 
 # Handles serializing of statements in the v2 grammar.
-module Fig::Unparser::V2Base
+module Fig::Deparser::V2Base
   def include_file(statement)
     path = statement.path
     quote = (path.include?(%q<'>) && ! path.include?(%q<">)) ? %q<"> : %q<'>

@@ -69,8 +69,8 @@ class Fig::Statement::IncludeFile < Fig::Statement
     return 'include-file'
   end
 
-  def unparse_as_version(unparser)
-    return unparser.include_file(self)
+  def deparse_as_version(deparser)
+    return deparser.include_file(self)
   end
 
   def minimum_grammar_for_emitting_input()
