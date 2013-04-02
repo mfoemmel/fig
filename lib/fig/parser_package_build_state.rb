@@ -68,7 +68,7 @@ class Fig::ParserPackageBuildState
       @descriptor.version,
       @descriptor.description,
       unparsed_package.working_directory,
-      unparsed_package.base_directory,
+      unparsed_package.include_file_base_directory,
       statement_objects,
       false,
     )

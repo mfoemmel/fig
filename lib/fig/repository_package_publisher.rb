@@ -130,7 +130,8 @@ class Fig::RepositoryPackagePublisher
     begin
       unparsed_package = Fig::NotYetParsedPackage.new
       unparsed_package.descriptor         = @descriptor
-      unparsed_package.working_directory  = unparsed_package.base_directory =
+      unparsed_package.working_directory  =
+        unparsed_package.include_file_base_directory =
         @runtime_for_package
       unparsed_package.source_description = '<package to be published>'
       unparsed_package.unparsed_text      = file_content

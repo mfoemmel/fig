@@ -80,7 +80,7 @@ class Fig::Command::PackageLoader
   def read_in_package_definition_file(config_file)
     if File.exist?(config_file)
       @package_loaded_from_path = config_file
-      @package_base_directory = File.dirname config_file
+      @package_include_file_base_directory = File.dirname config_file
 
       return File.read(config_file)
     else
@@ -107,11 +107,12 @@ class Fig::Command::PackageLoader
     )
 
     unparsed_package = Fig::NotYetParsedPackage.new
-    unparsed_package.descriptor         = descriptor
-    unparsed_package.working_directory  = '.'
-    unparsed_package.base_directory     = @package_base_directory || '.'
-    unparsed_package.source_description = source_description
-    unparsed_package.unparsed_text      = definition_text
+    unparsed_package.descriptor                   = descriptor
+    unparsed_package.working_directory            = '.'
+    unparsed_package.include_file_base_directory  =
+      @package_include_file_base_directory || '.'
+    unparsed_package.source_description           = source_description
+    unparsed_package.unparsed_text                = definition_text
 
     set_base_package(
       Fig::Parser.new(
