@@ -10,7 +10,7 @@ class Fig::NotYetParsedPackage
 
   def extended_source_description()
     if source_description
-      if source_description.start_with? working_directory
+      if source_description.include? working_directory
         return source_description
       end
 
