@@ -1,10 +1,10 @@
 # Note: we very specifically do not require the files containing the
-# Unparser classes in order to avoid circular dependencies.
+# Deparser classes in order to avoid circular dependencies.
 
 module Fig; end
 
-module Fig::Unparser
-  # Determine the class of Unparser necessary for a set of Statements; the
+module Fig::Deparser
+  # Determine the class of Deparser necessary for a set of Statements; the
   # parameter can be a single statement or multiple.  Returns both the class
   # and a list of explanations of why the class was picked.
   def self.class_for_statements(
@@ -19,25 +19,25 @@ module Fig::Unparser
 
     case version
     when 0
-      return Fig::Unparser::V0, explanations
+      return Fig::Deparser::V0, explanations
     when 1
-      return Fig::Unparser::V1, explanations
+      return Fig::Deparser::V1, explanations
     when 2
-      return Fig::Unparser::V2, explanations
+      return Fig::Deparser::V2, explanations
     end
 
     raise "Unexpected version #{version}."
   end
 
-  def self.determine_version_and_unparse(
+  def self.determine_version_and_deparse(
     statements, emit_as_input_or_to_be_published_values
   )
-    unparser_class, explanations = self.class_for_statements(
+    deparser_class, explanations = self.class_for_statements(
       statements, emit_as_input_or_to_be_published_values
     )
-    unparser = unparser_class.new emit_as_input_or_to_be_published_values
+    deparser = deparser_class.new emit_as_input_or_to_be_published_values
 
-    return (unparser.unparse [statements].flatten), explanations
+    return (deparser.deparse [statements].flatten), explanations
   end
 
   private
@@ -94,13 +94,13 @@ module Fig::Unparser
 
   public
 
-  def unparse(statements)
+  def deparse(statements)
     # It's double dispatch time!
 
     @text         = ''
     @indent_level = @initial_indent_level
 
-    statements.each { |statement| statement.unparse_as_version(self) }
+    statements.each { |statement| statement.deparse_as_version(self) }
 
     text          = @text
     @text         = nil
@@ -134,7 +134,7 @@ module Fig::Unparser
       configuration_statement.statements.each do
         |statement|
 
-        statement.unparse_as_version(self)
+        statement.deparse_as_version(self)
       end
     ensure
       @indent_level -= 1

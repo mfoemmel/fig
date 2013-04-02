@@ -47,7 +47,7 @@ class Fig::Statement
     return
   end
 
-  def unparse_as_version(unparser)
+  def deparse_as_version(deparser)
     raise NotImplementedError.new self.class.name
   end
 

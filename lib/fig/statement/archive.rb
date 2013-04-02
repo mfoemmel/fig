@@ -25,7 +25,7 @@ class Fig::Statement::Archive < Fig::Statement
     return standard_asset_name()
   end
 
-  def unparse_as_version(unparser)
-    return unparser.archive(self)
+  def deparse_as_version(deparser)
+    return deparser.archive(self)
   end
 end

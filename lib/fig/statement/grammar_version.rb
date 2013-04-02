@@ -16,8 +16,8 @@ class Fig::Statement::GrammarVersion < Fig::Statement
     return 'grammar'
   end
 
-  def unparse_as_version(unparser)
-    return unparser.grammar_version(self)
+  def deparse_as_version(deparser)
+    return deparser.grammar_version(self)
   end
 
   def minimum_grammar_for_emitting_input()

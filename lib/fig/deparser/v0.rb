@@ -1,11 +1,11 @@
-require 'fig/unparser'
+require 'fig/deparser'
 
 module Fig; end
-module Fig::Unparser; end
+module Fig::Deparser; end
 
 # Handles serializing of statements in the v0 grammar.
-class Fig::Unparser::V0
-  include Fig::Unparser
+class Fig::Deparser::V0
+  include Fig::Deparser
 
   def initialize(
     emit_as_input_or_to_be_published_values,

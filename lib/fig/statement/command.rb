@@ -26,8 +26,8 @@ class Fig::Statement::Command < Fig::Statement
     return 'command'
   end
 
-  def unparse_as_version(unparser)
-    return unparser.command(self)
+  def deparse_as_version(deparser)
+    return deparser.command(self)
   end
 
   def minimum_grammar_for_emitting_input()

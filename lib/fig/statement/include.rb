@@ -75,8 +75,8 @@ class Fig::Statement::Include < Fig::Statement
     )
   end
 
-  def unparse_as_version(unparser)
-    return unparser.include(self)
+  def deparse_as_version(deparser)
+    return deparser.include(self)
   end
 
   def minimum_grammar_for_emitting_input()
@@ -113,7 +113,7 @@ class Fig::Statement::Include < Fig::Statement
 
   def minimum_grammar()
     if included_package
-      raise 'Cannot unparse synthetic include statement with directly referenced package.'
+      raise 'Cannot deparse synthetic include statement with directly referenced package.'
     end
 
     return [0]
