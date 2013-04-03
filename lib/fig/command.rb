@@ -297,6 +297,13 @@ class Fig::Command
       applier.register_package_with_environment()
     end
     if apply_config
+      if (
+        apply_base_config &&
+        @base_package[base_config].use_desired_install_paths_statement
+      )
+        @parser.use_desired_install_paths = true
+      end
+
       applier.apply_config_to_environment(! apply_base_config)
     end
 

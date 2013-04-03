@@ -1,6 +1,7 @@
 require 'fig/statement'
 require 'fig/statement/command'
 require 'fig/statement/synthetic_raw_text'
+require 'fig/statement/use_desired_install_paths'
 
 module Fig; end
 
@@ -33,7 +34,13 @@ class Fig::Statement::Configuration < Fig::Statement
 
   def command_statement
     return statements.find do
-      |statement| statement.is_a?(Fig::Statement::Command)
+      |statement| statement.is_a? Fig::Statement::Command
+    end
+  end
+
+  def use_desired_install_paths_statement
+    return statements.find do
+      |statement| statement.is_a? Fig::Statement::UseDesiredInstallPaths
     end
   end
 

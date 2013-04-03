@@ -1,3 +1,4 @@
+require 'fig/logging'
 require 'fig/package'
 require 'fig/package_parse_error'
 require 'fig/statement'
@@ -20,10 +21,13 @@ module Fig; end
 
 # The state of a Package while it is being built by a Parser.
 class Fig::ParserPackageBuildState
-  def initialize(grammar_version, descriptor, source_description)
-    @grammar_version    = grammar_version
-    @descriptor         = descriptor
-    @source_description = source_description
+  def initialize(
+    grammar_version, descriptor, source_description, use_desired_install_paths
+  )
+    @grammar_version            = grammar_version
+    @descriptor                 = descriptor
+    @source_description         = source_description
+    @use_desired_install_paths  = use_desired_install_paths
   end
 
   def node_location(node)
@@ -48,30 +52,17 @@ class Fig::ParserPackageBuildState
   end
 
   def new_package_statement(unparsed_package, grammar_node, statement_nodes)
-    grammar_statement = nil
-    if grammar_node && ! grammar_node.empty?
-      grammar_statement = grammar_node.to_package_statement(self)
-    else
-      grammar_statement = Fig::Statement::GrammarVersion.new(
-        nil,
-        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
-        0 # Grammar version
-      )
-    end
-    statement_objects = [grammar_statement]
-
-    statement_nodes.elements.each do
-      |node|
-
-      statement_objects << node.to_package_statement(self)
-    end
+    statement_objects =
+      convert_nodes_to_statement_objects(grammar_node, statement_nodes)
+    working_directory, include_file_base_directory =
+      derive_directories_for_package(unparsed_package, statement_objects)
 
     package = Fig::Package.new(
       @descriptor.name,
       @descriptor.version,
       @descriptor.description,
-      unparsed_package.working_directory,
-      unparsed_package.include_file_base_directory,
+      working_directory,
+      include_file_base_directory,
       statement_objects,
       false,
     )
@@ -275,6 +266,61 @@ class Fig::ParserPackageBuildState
   end
 
   private
+
+  def convert_nodes_to_statement_objects(grammar_node, statement_nodes)
+    grammar_statement = nil
+    if grammar_node && ! grammar_node.empty?
+      grammar_statement = grammar_node.to_package_statement(self)
+    else
+      grammar_statement = Fig::Statement::GrammarVersion.new(
+        nil,
+        %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
+        0 # Grammar version
+      )
+    end
+    statement_objects = [grammar_statement]
+
+    statement_nodes.elements.each do
+      |node|
+
+      statement_objects << node.to_package_statement(self)
+    end
+
+    return statement_objects
+  end
+
+  def derive_directories_for_package(unparsed_package, statement_objects)
+    # Don't worry about multiple, that will be checked later.  We just care
+    # whether there is one.
+    install_path_statement =
+      (
+        statement_objects.select {
+          |statement| statement.is_a? Fig::Statement::DesiredInstallPath
+        }
+      ).first
+    if ! install_path_statement || ! @use_desired_install_paths
+      if ! @use_desired_install_paths && install_path_statement
+        Fig::Logging.warn(
+          "#{@descriptor.to_string} has a desired-install-path statement#{install_path_statement.position_string}, but installation to absolute paths is not permitted by a use-desired-install-paths statement in the base config."
+        )
+      end
+
+      return [
+        unparsed_package.working_directory,
+        unparsed_package.include_file_base_directory
+      ]
+    end
+
+    include_file_base_directory = install_path_statement.path
+    if (
+      unparsed_package.working_directory            !=
+      unparsed_package.include_file_base_directory
+    )
+      include_file_base_directory = unparsed_package.include_file_base_directory
+    end
+
+    return [install_path_statement.path, include_file_base_directory]
+  end
 
   def raise_invalid_value_parse_error(
     keyword_node, value_node, value_name, description

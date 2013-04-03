@@ -123,7 +123,7 @@ class Fig::Repository
 
     @package_cache.remove_package(descriptor.name, descriptor.version)
 
-    nuke_package descriptor
+    nuke_package nil, descriptor
 
     return
   end
@@ -146,7 +146,8 @@ class Fig::Repository
     publisher.source_package               = source_package
     publisher.was_forced                   = was_forced
     publisher.base_temp_dir                = base_temp_dir
-    publisher.runtime_for_package          = runtime_for_package(descriptor)
+    publisher.runtime_for_package          =
+      default_runtime_for_package(descriptor)
     publisher.local_directory_for_package  =
       local_directory_for_package(descriptor)
     publisher.remote_directory_for_package =
@@ -329,16 +330,9 @@ class Fig::Repository
     temporary_package = File.join temporary_directory, 'packages'
     temporary_runtime = File.join temporary_directory, 'runtime'
     temp_fig_file   = fig_file_for_package_download(temporary_package)
-
-    FileUtils.rm_rf temporary_directory
-    if File.exist? package_directory
-      FileUtils.mkdir_p File.dirname(temporary_package)
-      FileUtils.cp_r(
-        package_directory, temporary_package, :preserve => true
-      )
-    else
-      FileUtils.mkdir_p temporary_package
-    end
+    set_up_package_download_directories(
+      temporary_directory, temporary_package, package_directory
+    )
 
     @updating_package_definition = true
     return if ! @operating_system.download(
@@ -348,42 +342,14 @@ class Fig::Repository
     package = read_package_from_directory(temporary_package, descriptor)
     @updating_package_definition = false
 
-    remote_package_directory = remote_directory_for_package(descriptor)
-    package.archive_locations.each do
-      |archive_location|
+    download_assets(package, descriptor, temporary_package, temporary_runtime)
 
-      if not Fig::URL.is_url?(archive_location)
-        archive_location = Fig::URL.append_path_components(
-          remote_package_directory, [archive_location]
-        )
-      end
-      @operating_system.download_and_unpack_archive(
-        archive_location, temporary_package, temporary_runtime
-      )
-    end
-    package.resource_locations.each do
-      |resource_location|
-
-      if not Fig::URL.is_url?(resource_location)
-        resource_location = Fig::URL.append_path_components(
-          remote_package_directory, [resource_location]
-        )
-      end
-
-      basename, path =
-        @operating_system.download_resource(
-          resource_location, temporary_package
-        )
-
-      @operating_system.copy path, File.join(temporary_runtime, basename)
-    end
-
-    nuke_package descriptor
+    nuke_package package, descriptor
 
     FileUtils.mkdir_p File.dirname(package_directory)
     FileUtils.mv temporary_package, package_directory
 
-    runtime_directory = runtime_for_package(descriptor)
+    runtime_directory = package.runtime_directory
     if File.exists? temporary_runtime
       FileUtils.mkdir_p File.dirname(runtime_directory)
       FileUtils.mv temporary_runtime, runtime_directory
@@ -422,7 +388,7 @@ class Fig::Repository
     unparsed_package.descriptor         = descriptor
     unparsed_package.working_directory  =
       unparsed_package.include_file_base_directory =
-      runtime_for_package(descriptor)
+      default_runtime_for_package(descriptor)
     unparsed_package.source_description = descriptor.to_string()
     unparsed_package.unparsed_text      = content
 
@@ -431,6 +397,56 @@ class Fig::Repository
     @package_cache.add_package(package)
 
     return package
+  end
+
+  def set_up_package_download_directories(
+    temporary_directory, temporary_package, package_directory
+  )
+    FileUtils.rm_rf temporary_directory
+    if File.exist? package_directory
+      FileUtils.mkdir_p File.dirname(temporary_package)
+      FileUtils.cp_r(
+        package_directory, temporary_package, :preserve => true
+      )
+    else
+      FileUtils.mkdir_p temporary_package
+    end
+
+    return
+  end
+
+  def download_assets(package, descriptor, temporary_package, temporary_runtime)
+    remote_package_directory = remote_directory_for_package(descriptor)
+    package.archive_locations.each do
+      |archive_location|
+
+      if not Fig::URL.is_url?(archive_location)
+        archive_location = Fig::URL.append_path_components(
+          remote_package_directory, [archive_location]
+        )
+      end
+      @operating_system.download_and_unpack_archive(
+        archive_location, temporary_package, temporary_runtime
+      )
+    end
+    package.resource_locations.each do
+      |resource_location|
+
+      if not Fig::URL.is_url?(resource_location)
+        resource_location = Fig::URL.append_path_components(
+          remote_package_directory, [resource_location]
+        )
+      end
+
+      basename, path =
+        @operating_system.download_resource(
+          resource_location, temporary_package
+        )
+
+      @operating_system.copy path, File.join(temporary_runtime, basename)
+    end
+
+    return
   end
 
   def remote_fig_file_for_package(descriptor)
@@ -459,7 +475,7 @@ class Fig::Repository
     )
   end
 
-  def runtime_for_package(descriptor)
+  def default_runtime_for_package(descriptor)
     return File.join(
       package_runtime_directory, descriptor.name, descriptor.version
     )
@@ -482,8 +498,13 @@ class Fig::Repository
     not File.exist?(local_fig_file_for_package(descriptor))
   end
 
-  def nuke_package(descriptor)
-    FileUtils.rm_rf runtime_for_package(descriptor)
+  def nuke_package(package, descriptor)
+    if package
+      FileUtils.rm_rf package.runtime_directory
+    else
+      FileUtils.rm_rf runtime_for_package(descriptor)
+    end
+
     FileUtils.rm_rf local_directory_for_package(descriptor)
 
     return

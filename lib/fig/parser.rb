@@ -24,6 +24,8 @@ module Fig; end
 # Parses .fig files (wrapping the Treetop-generated parser object) and deals
 # with a few restrictions on them.
 class Fig::Parser
+  attr_accessor :use_desired_install_paths
+
   def initialize(application_config, check_include_versions)
     @application_config     = application_config
     @check_include_versions = check_include_versions
@@ -67,7 +69,10 @@ class Fig::Parser
 
     statement = result.get_grammar_version(
       Fig::ParserPackageBuildState.new(
-        nil, unparsed_package.descriptor, extended_description
+        nil,
+        unparsed_package.descriptor,
+        extended_description,
+        use_desired_install_paths
       )
     )
     return 0 if not statement
@@ -128,7 +133,10 @@ class Fig::Parser
     package = result.to_package(
       unparsed_package,
       Fig::ParserPackageBuildState.new(
-        parser.version, unparsed_package.descriptor, extended_description
+        parser.version,
+        unparsed_package.descriptor,
+        extended_description,
+        use_desired_install_paths
       )
     )
 
