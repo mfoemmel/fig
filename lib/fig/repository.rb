@@ -502,7 +502,7 @@ class Fig::Repository
     if package
       FileUtils.rm_rf package.runtime_directory
     else
-      FileUtils.rm_rf runtime_for_package(descriptor)
+      FileUtils.rm_rf default_runtime_for_package(descriptor)
     end
 
     FileUtils.rm_rf local_directory_for_package(descriptor)
