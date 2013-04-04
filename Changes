@@ -1,10 +1,14 @@
-v1.4.1.beta.1 - 2013/x/x
+v1.4.1.beta.1 - 2013/4/4
 
   Bug fix:
 
   - "@" substitution in the command-line was using the incorrect package.
 
   Miscellaneous:
+
+  - No longer even reads $PWD/.fig/retrieve if retrieves aren't going to
+    happen.  Should solve race conditions with other fig processes doing
+    updates.
 
   - json gem dependency is now 1.7.7.  Needed for Ruby v2 and whatever issue
     TeamCity was having with versions later than 1.6.5 a year ago does not

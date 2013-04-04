@@ -248,14 +248,14 @@ class Fig::Command
   end
 
   def prepare_runtime_environment()
-    @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
+    if retrieves_should_happen?
+      @working_directory_maintainer = Fig::WorkingDirectoryMaintainer.new('.')
 
-    Fig::AtExit.add do
-      @working_directory_maintainer.prepare_for_shutdown(
-        @base_package                             &&
-        retrieves_should_happen?                  &&
-        ! @options.suppress_cleanup_of_retrieves
-      )
+      Fig::AtExit.add do
+        @working_directory_maintainer.prepare_for_shutdown(
+          @base_package && ! @options.suppress_cleanup_of_retrieves
+        )
+      end
     end
 
     environment_variables = nil
