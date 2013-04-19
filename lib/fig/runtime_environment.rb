@@ -178,7 +178,7 @@ class Fig::RuntimeEnvironment
     return
   end
 
-  def check_unused_retrieves()
+  def check_for_unused_retrieves()
     @retrieves.keys().sort().each do
       |name|
 

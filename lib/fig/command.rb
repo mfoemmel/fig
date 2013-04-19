@@ -167,6 +167,15 @@ class Fig::Command
     return ! suppressed_warnings.include?('include statement missing version')
   end
 
+  def check_for_unused_retrieves?()
+    return false if @options.suppress_warning_unused_retrieve?
+
+    suppressed_warnings = @application_configuration['suppress warnings']
+    return true if not suppressed_warnings
+
+    return ! suppressed_warnings.include?('unused retrieve')
+  end
+
   def configure()
     set_up_update_lock()
 
@@ -271,7 +280,9 @@ class Fig::Command
       @working_directory_maintainer,
     )
 
-    Fig::AtExit.add { @environment.check_unused_retrieves() }
+    if check_for_unused_retrieves?
+      Fig::AtExit.add { @environment.check_for_unused_retrieves }
+    end
 
     return
   end

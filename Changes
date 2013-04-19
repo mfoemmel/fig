@@ -1,3 +1,16 @@
+v1.5.1.beta.1 - 2013/4/19
+
+  New feature:
+
+  - New --suppress-warning-unused-retrieve option to turn off warnings for
+    retrieves that were enabled but which weren't triggered.  Can also be
+    specified in app configuration (e.g. ~/.figrc) as an entry in the "suppress
+    warnings" array:
+
+      {
+        "suppress warnings": ["unused retrieve"]
+      }
+
 v1.5.0 - 2013/4/8
 
   Bug fix:

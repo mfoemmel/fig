@@ -153,6 +153,10 @@ class Fig::Command::Options
     return @suppress_warning_include_statement_missing_version
   end
 
+  def suppress_warning_unused_retrieve?()
+    return @suppress_warning_unused_retrieve
+  end
+
   private
 
   EXTRA_OPTIONS_DESCRIPTION = <<-'END_DESCRIPTION'
@@ -651,9 +655,16 @@ class Fig::Command::Options
 
     @parser.on(
       '--suppress-warning-include-statement-missing-version',
-      %q<don't complain about "include package" without a version>
+      %q<don't complain about an include statement without a version>
     ) do
       @suppress_warning_include_statement_missing_version = true
+    end
+
+    @parser.on(
+      '--suppress-warning-unused-retrieve',
+      %q<don't complain about a retrieve statement that isn't used>
+    ) do
+      @suppress_warning_unused_retrieve = true
     end
 
     return
