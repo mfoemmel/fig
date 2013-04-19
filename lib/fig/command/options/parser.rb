@@ -97,6 +97,7 @@ Standard options (represented as "[...]" above):
 
       [--suppress-vcs-comments-in-published-packages]
       [--suppress-warning-include-statement-missing-version]
+      [--suppress-warning-unused-retrieve]
 
 Information:
 
