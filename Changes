@@ -1,4 +1,4 @@
-v1.5.1.beta.1 - 2013/4/19
+v1.6.0 - 2013/4/22
 
   New feature:
 
@@ -10,6 +10,10 @@ v1.5.1.beta.1 - 2013/4/19
       {
         "suppress warnings": ["unused retrieve"]
       }
+
+v1.5.1.beta.1 - 2013/4/19
+
+  - Test release.
 
 v1.5.0 - 2013/4/8
 
