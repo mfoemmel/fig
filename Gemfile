@@ -17,24 +17,21 @@ ruby RUBY_VERSION
 
 # All environments
 gem 'colorize',          '>= 0.5.8'
-gem 'highline',          '>= 1.6.2'
-gem 'json',              '>= 1.7.7'
+gem 'highline',          '>= 1.6.19'
+gem 'json',              '>= 1.8'
 gem 'libarchive-static', '>= 1.0.0'
 gem 'log4r',             '>= 1.1.5'
-gem 'open4',             '>= 1.0.1'
 gem 'net-netrc',         '>= 0.2.2'
-gem 'net-sftp',          '>= 2.0.4'
-gem 'net-ssh',           '>= 2.0.15'
-gem 'rdoc',              '>= 3.12'
-gem 'treetop',           '>= 1.4.2'
+gem 'net-sftp',          '>= 2.1.2'
+gem 'net-ssh',           '>= 2.6.7'
+gem 'open4',             '>= 1.0.1'
+gem 'rdoc',              '>= 4'
+gem 'treetop',           '>= 1.4.14'
 
 group :development do
   gem 'bundler',            '>= 1.0.15'
   gem 'rake',               '>= 0.8.7'
   gem 'rspec',              '~> 2'
-  gem 'rspec-core',         '>= 2.7.1'
-  gem 'rspec-expectations', '>= 2.7.0'
-  gem 'rspec-mocks',        '>= 2.7.0'
   gem 'simplecov',          '>= 0.6.2'
   gem 'simplecov-html',     '>= 0.5.3'
 end
