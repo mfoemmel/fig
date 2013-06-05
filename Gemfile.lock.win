@@ -35,6 +35,7 @@ GEM
     treetop (1.4.14)
       polyglot
       polyglot (>= 0.3.1)
+    win32-api (1.4.8)
     win32-api (1.4.8-x86-mingw32)
     win32-security (0.1.4)
       windows-pr (>= 1.2.2)
@@ -65,3 +66,5 @@ DEPENDENCIES
   simplecov (>= 0.6.2)
   simplecov-html (>= 0.5.3)
   treetop (>= 1.4.14)
+  win32-security (= 0.1.4)
+  windows-pr (= 1.2.2)
