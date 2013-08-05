@@ -306,7 +306,7 @@ describe 'Fig' do
         out, err, exit_code =
           fig [], input, :no_raise_on_error => true, :fork => false
         err.should =~
-          /value of path variable VARIABLE.*contains.*x#{Regexp.quote character}x/
+          /value of path variable VARIABLE.*contains.*"#{Regexp.quote character}"/
         out.should == ''
         exit_code.should_not == 0
       end

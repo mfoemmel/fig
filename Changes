@@ -1,3 +1,10 @@
+v1.8.0 - 2013/8/6
+
+  Bug fixes:
+
+  - The error message for invalid characters in path statements didn't
+    correctly show the bad character in question.
+
 v1.7.0 - 2013/6/5
 
   Miscellaneous:

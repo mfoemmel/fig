@@ -33,7 +33,7 @@ class Fig::Statement::Path < Fig::Statement
     base_v0_value_validation(variable, raw_value, &error_block)
 
     if raw_value =~ /([;:<>|])/
-      yield %Q<The value of path variable #{variable} (#{raw_value}) contains a "#{raw_value}" character.>
+      yield %Q<The value of path variable #{variable} (#{raw_value}) contains a "#{$1}" character.>
       return
     end
 
