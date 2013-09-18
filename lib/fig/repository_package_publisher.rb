@@ -269,7 +269,7 @@ class Fig::RepositoryPackagePublisher
 
   def get_version_control_executable(variable, default)
     executable = ENV[variable]
-    if ! executable || executable.empty?
+    if ! executable || executable.empty? || executable =~ /\A\s*\z/
       return if ENV.include? variable
       return default
     end
