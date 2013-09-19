@@ -180,26 +180,14 @@ class Fig::OperatingSystem
     Dir.chdir(directory) { FileUtils.mv(from, to, :force => true) }
   end
 
-  # Expects files_to_archive as an Array of filenames.
-  def create_archive(archive_name, files_to_archive)
+  # Expects paths_to_archive as an Array of paths.
+  def create_archive(archive_name, paths_to_archive)
     # TODO: Need to verify files_to_archive exists.
     ::Archive.write_open_filename(
       archive_name, ::Archive::COMPRESSION_GZIP, ::Archive::FORMAT_TAR
     ) do |writer|
-      files_to_archive.each do |file_name|
-        writer.new_entry do |entry|
-          entry.copy_lstat(file_name)
-          entry.pathname = file_name
-          if entry.symbolic_link?
-            linked = File.readlink(file_name)
-            entry.symlink = linked
-          end
-          writer.write_header(entry)
-
-          if entry.regular?
-            writer.write_data(open(file_name) {|f| f.binmode; f.read })
-          end
-        end
+      paths_to_archive.each do |path|
+        add_path_to_archive(path, writer)
       end
     end
   end
@@ -282,6 +270,32 @@ class Fig::OperatingSystem
     raise_unknown_protocol(url) if protocol.nil?
 
     return protocol, uri
+  end
+
+  def add_path_to_archive(path, archive_writer)
+    children = []
+    archive_writer.new_entry do |entry|
+      entry.copy_lstat(path)
+      entry.pathname = path
+      if entry.symbolic_link?
+        linked = File.readlink(path)
+        entry.symlink = linked
+      end
+      archive_writer.write_header(entry)
+
+      if entry.regular?
+        archive_writer.write_data(open(path) {|f| f.binmode; f.read })
+      elsif entry.directory?
+        children = Dir.entries(path) - ['.', '..']
+      end
+    end
+
+    children.each do
+      |child|
+      add_path_to_archive(File.join(path, child), archive_writer)
+    end
+
+    return
   end
 
   def check_archive_entry_for_windows(entry, archive_path)
