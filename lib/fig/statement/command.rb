@@ -7,7 +7,6 @@ module Fig; end
 class Fig::Statement::Command < Fig::Statement
   attr_reader :command
 
-
   def self.validate_and_process_escapes_in_argument(
     command_line_argument, &block
   )
@@ -67,7 +66,7 @@ class Fig::Statement::Command < Fig::Statement
         lambda {
           |subexpression, error_block|
 
-          Fig::TokenizedString::Token.new :package_path, subexpression[1..-1]
+          Fig::TokenizedString::Token.new :package_path, subexpression
         }
     }
   ]

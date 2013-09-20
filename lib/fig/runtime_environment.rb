@@ -521,7 +521,7 @@ class Fig::RuntimeEnvironment
     return argument.to_expanded_string() do
       |token|
 
-      package_name = token.raw_value
+      package_name = token.raw_value[1..-1]
       package = nil
       if package_name.empty?
         package = starting_package
