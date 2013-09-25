@@ -1,16 +1,19 @@
-v1.9.1.beta.2 - 2013/09/20
+v1.10.0 - 2013/09/25
 
   Bug fixes:
 
   - Command statements were not being correctly published if they contained "@"
     signs.
 
-v1.9.1.beta.1 - 2013/09/19
-
   Miscellaneous:
 
   - Resource statements that refer to directories will now pull in the full
     directory contents instead of just the directory itself.
+
+v1.9.1.beta.2 - 2013/09/20
+v1.9.1.beta.1 - 2013/09/19
+
+  - Test releases.
 
 v1.9.0 - 2013/09/19
 
