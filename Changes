@@ -1,3 +1,9 @@
+v1.x.x - 2013/09/xx
+
+  Bug fixes:
+
+  - Fix crash with quoted command-lines.
+
 v1.10.0 - 2013/09/25
 
   Bug fixes:
