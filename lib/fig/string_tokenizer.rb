@@ -41,7 +41,7 @@ class Fig::StringTokenizer
   # Returns the TokenizedString; if there was a parse error, then the return
   # value will be nil (and the block will have been invoked).
   def tokenize(string, &error_block)
-    @string        = string.clone
+    @string        = string.dup
     @error_block   = error_block
     @single_quoted = nil
     @segments      = []
