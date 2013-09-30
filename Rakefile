@@ -46,6 +46,7 @@ def main()
       'Fig is a utility for configuring environments and managing dependencies across a team of developers.'
     gemspec.description =
       "Fig is a utility for configuring environments and managing dependencies across a team of developers. Given a list of packages and a command to run, Fig builds environment variables named in those packages (e.g., CLASSPATH), then executes the command in that environment. The caller's environment is not affected."
+    gemspec.license     = 'BSD'
 
     add_dependencies(gemspec) # From inc/build_utilities above.
 
