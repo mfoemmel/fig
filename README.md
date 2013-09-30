@@ -42,4 +42,4 @@ Community
 Copyright
 =========
 
-Copyright (c) 2009-2012 Matthew Foemmel. See LICENSE for details.
+Copyright (c) 2009-2013 Matthew Foemmel. See LICENSE for details.
