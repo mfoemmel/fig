@@ -9,7 +9,8 @@ class Fig::Command; end
 class Fig::Command::PackageLoader
   attr_reader :package_loaded_from_path
 
-  DEFAULT_FIG_FILE = 'package.fig'
+  DEFAULT_PACKAGE_FILE = 'package.fig'
+  DEFAULT_APPLICATION_FILE = 'application.fig'
 
   def initialize(
     application_configuration,
@@ -65,10 +66,14 @@ class Fig::Command::PackageLoader
 
       return $stdin.read
     elsif @package_definition_file.nil?
-      if File.exist?(DEFAULT_FIG_FILE)
-        @package_loaded_from_path = DEFAULT_FIG_FILE
+      if File.exist?(DEFAULT_PACKAGE_FILE)
+        @package_loaded_from_path = DEFAULT_PACKAGE_FILE
+      elsif File.exist?(DEFAULT_APPLICATION_FILE)
+        @package_loaded_from_path = DEFAULT_APPLICATION_FILE
+      end
 
-        return File.read(DEFAULT_FIG_FILE)
+      if @package_loaded_from_path
+        return File.read(@package_loaded_from_path)
       end
     else
       return read_in_package_definition_file(@package_definition_file)

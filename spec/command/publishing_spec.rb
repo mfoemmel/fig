@@ -322,7 +322,7 @@ describe 'Fig' do
       describe 'with both a package.fig file in the current directory and an environment variable option' do
         before(:each) do
           write_file(
-            "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+            "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}",
             <<-END_PACKAGE_DOT_FIG
               config default
               end

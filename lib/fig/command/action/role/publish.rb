@@ -97,11 +97,13 @@ module Fig::Command::Action::Role::Publish
       message << ') and --set/--append options.'
 
       if @execution_context.package_source_description ==
-        Fig::Command::PackageLoader::DEFAULT_FIG_FILE
+        Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE ||
+        @execution_context.package_source_description ==
+        Fig::Command::PackageLoader::DEFAULT_APPLICATION_FILE ||
 
         message << "\n\n"
         message << 'You can avoid loading '
-        message << Fig::Command::PackageLoader::DEFAULT_FIG_FILE
+        message << @execution_context.package_source_description
         message << ' by using the --no-file option.'
       end
 

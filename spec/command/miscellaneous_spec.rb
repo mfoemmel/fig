@@ -38,15 +38,21 @@ describe 'Fig' do
     end
   end
 
-  it 'ignores package.fig with the --no-file option' do
-    dot_fig_file =
-      "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}"
-    write_file(dot_fig_file, <<-END)
-      config default
-        set FOO=BAR
-      end
-    END
-    fig(%w<--no-file --get FOO>)[0].should == ''
+  [
+    Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE,
+    Fig::Command::PackageLoader::DEFAULT_APPLICATION_FILE,
+  ].each do
+    |file_name|
+
+    it "ignores #{file_name} with the --no-file option" do
+      dot_fig_file = "#{FIG_SPEC_BASE_DIRECTORY}/#{file_name}"
+      write_file(dot_fig_file, <<-END)
+        config default
+          set FOO=BAR
+        end
+      END
+      fig(%w<--no-file --get FOO>)[0].should == ''
+    end
   end
 
   it 'complains about conflicting package versions' do

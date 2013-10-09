@@ -1,3 +1,12 @@
+v1.11.1.beta.1 - 2013/10/09
+
+  Miscellaneous:
+
+  - Now looks for "application.fig" in the current directory after looking for
+    "package.fig".  There's no semantic difference, but it provides for an
+    idiom for things which are "client" packages which will never be published,
+    but just for pulling down dependencies.
+
 v1.11.0 - 2013/09/25
 
   Bug fixes:

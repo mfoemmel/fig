@@ -185,7 +185,7 @@ end
 def create_package_dot_fig(package_name, config = nil)
   config = config ? config = ':' + config : ''
 
-  File.open "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}", 'w' do
+  File.open "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}", 'w' do
     |handle|
     handle.print <<-END
       config default
@@ -410,7 +410,7 @@ def set_up_packages_with_overrides
 end
 
 def remove_any_package_dot_fig
-  FileUtils.rm_rf "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}"
+  FileUtils.rm_rf "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}"
 
   return
 end
@@ -828,7 +828,7 @@ describe 'Fig' do
         it %q<lists only the configs in a package.fig and not all configs in dependencies> do
           set_up_multiple_config_repository
 
-          File.open "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}", 'w' do
+          File.open "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}", 'w' do
             |handle|
             handle.print <<-END
               config machineA
@@ -943,7 +943,7 @@ describe 'Fig' do
 
       fig(%w<--publish prerequisite/1.2.3>, input_prerequisite)
 
-      File.open "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}", 'w' do
+      File.open "#{CURRENT_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}", 'w' do
         |handle|
         handle.print <<-END
           config default

@@ -33,7 +33,7 @@ describe 'Fig' do
         describe %q<there is a package.fig file> do
           it %q<with no command statement> do
             write_file(
-              "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+              "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}",
               <<-END_PACKAGE_DOT_FIG
                 config default
                 end
@@ -49,7 +49,7 @@ describe 'Fig' do
 
           it %q<with a command statement> do
             write_file(
-              "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_FIG_FILE}",
+              "#{FIG_SPEC_BASE_DIRECTORY}/#{Fig::Command::PackageLoader::DEFAULT_PACKAGE_FILE}",
               <<-END_PACKAGE_DOT_FIG
                 config default
                   command "echo foo"
