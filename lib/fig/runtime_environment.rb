@@ -198,16 +198,18 @@ class Fig::RuntimeEnvironment
   def include_config(starting_package, include_statement, backtrace)
     # Because package application starts with the synthetic package for the
     # command-line, we can't really disable includes, full stop.  Instead, we
-    # use the flag on the base package to break the chain of includes.
-    return if starting_package.base? && @suppress_includes == :all
+    # use the fact that the synthetic package hands the Statement::Include the
+    # base Package object instead of a descriptor.
+    return if
+      include_statement.included_package.nil? && @suppress_includes == :all
 
     package, resolved_descriptor, new_backtrace =
       determine_included_package starting_package, include_statement, backtrace
 
-    return if                                   \
-          starting_package.base?                \
-      &&  @suppress_includes == :cross_package  \
-      &&  package != starting_package
+    return if
+          @suppress_includes == :cross_package \
+      &&  package != starting_package          \
+      &&  package != include_statement.included_package
 
     apply_config(
       package,
