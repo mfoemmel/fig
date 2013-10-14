@@ -1,11 +1,9 @@
-v1.11.1.beta.2 - 2013/10/11
+v1.12.0 - 2013/10/14
 
   Bug fixes:
 
   - The --suppress-*-includes options didn't affect --include options.  Thanks
     to Peter Royal for the report.
-
-v1.11.1.beta.1 - 2013/10/09
 
   Miscellaneous:
 
@@ -13,6 +11,11 @@ v1.11.1.beta.1 - 2013/10/09
     "package.fig".  There's no semantic difference, but it provides for an
     idiom for things which are "client" packages which will never be published,
     but just for pulling down dependencies.
+
+v1.11.1.beta.2 - 2013/10/11
+v1.11.1.beta.1 - 2013/10/09
+
+  - Test releases.
 
 v1.11.0 - 2013/09/25
 
