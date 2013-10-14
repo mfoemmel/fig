@@ -433,7 +433,7 @@ class Fig::Command::Options
     end
 
     @parser.on(
-      '--no-file', 'ignore package.fig file in current directory'
+      '--no-file', 'ignore package.fig/application.fig file in current directory'
     ) do
       set_package_definition_file(:none)
     end
