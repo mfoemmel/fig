@@ -34,7 +34,7 @@ class Fig::Command::Action::ListRemote
 
     if packages.empty?
       if $stdout.tty?
-        puts 'No local packages exist.'
+        puts 'No remote packages exist.'
       end
     else
       packages.sort.each {|item| puts item}
