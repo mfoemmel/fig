@@ -37,6 +37,10 @@ class Fig::Protocol::FTP
       ftp = Net::FTP.new(uri.host)
       ftp_login(ftp, uri.host, prompt_for_login)
 
+      if ftp.size(uri.path) != ::File.size(path)
+        return false
+      end
+
       if ftp.mtime(uri.path) <= ::File.mtime(path)
         return true
       end

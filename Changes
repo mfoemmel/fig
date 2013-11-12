@@ -5,6 +5,9 @@ v1.x.x - 2013/x/x
   - Incorrect message when the remote repository was empty when using
     --list-remote.
 
+  - The "up-to-date" check for files accessed via ftp, file, and sftp URLs now
+    includes a size check.
+
 v1.12.0 - 2013/10/14
 
   Bug fixes:

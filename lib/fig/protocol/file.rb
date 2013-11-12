@@ -31,6 +31,10 @@ class Fig::Protocol::File
   def path_up_to_date?(uri, path, prompt_for_login)
     begin
       unescaped_path = CGI.unescape uri.path
+      if ::File.size(unescaped_path) != ::File.size(path)
+        return false
+      end
+
       if ::File.mtime(unescaped_path) <= ::File.mtime(path)
         return true
       end

@@ -70,10 +70,6 @@ class Fig::OperatingSystem
     Dir.entries(dir) - ['.', '..']
   end
 
-  def mtime(path)
-    File.mtime(path)
-  end
-
   def write(path, content)
     File.open(path, 'wb') { |f| f.binmode; f << content }
   end

@@ -56,7 +56,12 @@ class Fig::Protocol::SFTP
     sftp_run(uri, prompt_for_login) do
       |connection|
 
-      return connection.stat!(uri.path).mtime.to_f <= ::File.mtime(path).to_f
+      stat_attributes = connection.stat!(uri.path)
+      if stat_attributes.size != ::File.size(path)
+        return false
+      end
+
+      return stat_attributes.mtime.to_f <= ::File.mtime(path).to_f
     end
 
     return nil
