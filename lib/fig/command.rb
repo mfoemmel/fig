@@ -197,8 +197,6 @@ class Fig::Command
   end
 
   def set_up_update_lock()
-    return if @options.actions.none? {|action| action.modifies_repository?}
-
     update_lock_response = @options.update_lock_response
     return if update_lock_response == :ignore
 

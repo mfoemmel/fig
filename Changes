@@ -1,6 +1,10 @@
-v1.x.x - 2013/x/x
+v1.12.1.beta.1 - 2013/11/12
 
   Bug fixes:
+
+  - Now, modulo the value of the --update-lock-response option, always locks
+    FIG_HOME.  This is to avoid corruption of the local copy of the remote
+    repository's figrc.
 
   - Incorrect message when the remote repository was empty when using
     --list-remote.
