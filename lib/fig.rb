@@ -1,3 +1,3 @@
 module Fig
-  VERSION = '1.12.1.beta.1'
+  VERSION = '1.13.0'
 end
