@@ -7,25 +7,59 @@ require 'fig/protocol'
 module Fig; end
 module Fig::Protocol; end
 
-# File transfers for the local filesystem.
+# File transfers using external ssh and scp programs
 class Fig::Protocol::SSH
   include Fig::Protocol
 
-  def logged_system(cmd)
-    Fig::Logging.debug "system: #{cmd}"
-    out = `#{cmd} 2>&1`.strip
-    if $?.exitstatus != 0
-      Fig::Logging.debug "  Error: #{out}"
-      return nil
+  # Execute command on remote host with external ssh program
+  def ssh(host, command)
+    ssh_command = ['ssh', '-n', host, command]
+    begin
+      output, errors, result = Fig::ExternalProgram.capture ssh_command
+    rescue Errno::ENOENT => error
+      Fig::Logging.warn(
+        %Q<Could not run "#{ssh_command.join ' '}": #{error.message}.>
+      )
+      return
     end
-    return out
+
+    if result && ! result.success?
+      Fig::Logging.debug(
+        %Q<Could not run "#{ssh_command.join ' '}": #{result}: #{errors}>
+      )
+      return
+    end
+
+    return output
+  end
+
+  # Use external scp program to copy a file
+  def scp(from, to)
+    command = ['scp', from, to]
+    begin
+      output, errors, result = Fig::ExternalProgram.capture command
+    rescue Errno::ENOENT => error
+      Fig::Logging.warn(
+        %Q<Could not run "#{command.join ' '}": #{error.message}.>
+      )
+      return
+    end
+
+    if result && ! result.success?
+      Fig::Logging.debug(
+        %Q<Could not run "#{command.join ' '}": #{result}: #{errors}>
+      )
+      return
+    end
+
+    return output
   end
 
   def download_list(uri)
     packages = []
     unescaped_path = CGI.unescape uri.path
 
-    ls = logged_system("ssh #{uri.host} \"find '#{unescaped_path}'\"")
+    ls = ssh(uri.host, "find '#{unescaped_path}'")
     if ls.nil?
       return packages
     end
@@ -40,9 +74,9 @@ class Fig::Protocol::SSH
   def path_up_to_date?(uri, path, prompt_for_login)
     unescaped_path = CGI.unescape uri.path
 
-    size_mtime = logged_system("ssh #{uri.host} \"stat --format='%s %Z' '#{unescaped_path}'\"")
+    size_mtime = ssh(uri.host, "stat --format='%s %Z' '#{unescaped_path}'")
     if size_mtime.nil?
-      raise Fig::FileNotFoundError.new "Error, see --log-level=debug for details.", uri
+      raise Fig::FileNotFoundError.new "Unable to get size and mtime for remote path #{path}", uri
     end
 
     remote_size, remote_mtime = size_mtime.split
@@ -65,8 +99,8 @@ class Fig::Protocol::SSH
   def download(uri, path, prompt_for_login)
     unescaped_path = CGI.unescape uri.path
 
-    if logged_system("scp '#{uri.host}:#{unescaped_path}' '#{path}'").nil?
-      raise Fig::FileNotFoundError.new "Error, see --log-level=debug for details.", uri
+    if scp("#{uri.host}:#{unescaped_path}", path).nil?
+      raise Fig::FileNotFoundError.new "Unable to copy remote file to #{path}", uri
     end
 
     return true
@@ -75,12 +109,12 @@ class Fig::Protocol::SSH
   def upload(local_file, uri)
     unescaped_path = CGI.unescape uri.path
 
-    if logged_system("ssh #{uri.host} \"mkdir -p '#{::File.dirname(unescaped_path)}'").nil?
-      raise Fig::FileNotFoundError.new "Error, see --log-level=debug for details.", uri
+    if ssh(uri.host, "mkdir -p '#{::File.dirname(unescaped_path)}'").nil?
+      raise Fig::FileNotFoundError.new "Unable to create directory on remote", uri
     end
 
-    if logged_system("scp '#{local_file}' '#{uri.host}:#{unescaped_path}'").nil?
-      raise Fig::FileNotFoundError.new "Error, see --log-level=debug for details.", uri
+    if scp(local_file, "#{uri.host}:#{unescaped_path}").nil?
+      raise Fig::FileNotFoundError.new "Unable to copy #{local_file} to remote", uri
     end
 
     return
