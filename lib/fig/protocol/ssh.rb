@@ -15,7 +15,7 @@ class Fig::Protocol::SSH
     packages = []
     unescaped_path = CGI.unescape uri.path
 
-    ls = ssh(uri.host, 'find', unescaped_path) {
+    ls = ssh(uri.host, 'find', unescaped_path, '-type', 'd') {
       |error_message|
 
       raise Fig::NetworkError.new error_message
@@ -31,7 +31,7 @@ class Fig::Protocol::SSH
   def path_up_to_date?(uri, path, prompt_for_login)
     unescaped_path = CGI.unescape uri.path
 
-    size_mtime = ssh(uri.host, 'stat', '--format=%s %Z', unescaped_path) {
+    size_mtime = ssh(uri.host, 'stat', '--format="%s %Z"', unescaped_path) {
       |error_message|
 
       raise Fig::NetworkError.new(
@@ -58,6 +58,17 @@ class Fig::Protocol::SSH
   # exists and is already up-to-date.
   def download(uri, path, prompt_for_login)
     unescaped_path = CGI.unescape uri.path
+
+    exists = remote_path_exists(uri.host, unescaped_path) {
+      |error_message|
+
+      raise Fig::NetworkError.new(
+        "Unable to determine whether #{uri} exists: #{error_message}",
+      )
+    }
+    if not exists
+      raise Fig::FileNotFoundError.new "#{uri} doesn't exist.", uri
+    end
 
     scp("#{uri.host}:#{unescaped_path}", path) {
       |error_message|
@@ -112,6 +123,23 @@ class Fig::Protocol::SSH
     end
 
     return output
+  end
+
+  def remote_path_exists(host, path, &error_block)
+    ssh_command = ['ssh', '-n', host, 'test', '-e', path]
+    begin
+      *, result = Fig::ExternalProgram.capture ssh_command
+    rescue Errno::ENOENT => error
+      yield %Q<Could not run "#{ssh_command.join ' '}": #{error.message}.>
+
+      return
+    end
+
+    if result && ! result.success?
+      return false
+    end
+
+    return true
   end
 
   # Use external scp program to copy a file.
