@@ -19,7 +19,14 @@ class Fig::Protocol::File
     return packages if ! ::File.exist?(unescaped_path)
 
     ls = ''
-    Find.find(unescaped_path) { |file| ls << file.to_s; ls << "\n" }
+    Find.find(unescaped_path) {
+      |file|
+
+      if FileTest.directory? file
+        ls << file.to_s
+        ls << "\n"
+      end
+    }
 
     strip_paths_for_list(ls, packages, unescaped_path)
 
