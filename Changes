@@ -1,16 +1,15 @@
-v1.13.1.beta.2 - 2014/1/31
-
-  Bug fixes:
-
-  - Proper existence testing of remote files prior to downloading via SCP.
-
-v1.13.1.beta.1 - 2014/1/30
+v1.14.0 - 2014/2/10
 
   New features:
 
   - The return of SSH support, thanks to Alexey Klimkin.  Note that this uses
     external "ssh" and "scp" commands locally and expects to be able to run
     "find", GNU "stat", and "mkdir" remotely.
+
+v1.13.1.beta.2 - 2014/1/31
+v1.13.1.beta.1 - 2014/1/30
+
+  - Test releases.
 
 v1.13.0 - 2013/12/3
 
