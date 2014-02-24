@@ -1,9 +1,9 @@
-v1.15.0 - 2014/2/x
+v1.15.0 - 2014/2/24
 
   Miscellaneous:
 
-  - When using sftp:, warns if it looks like we're about to run into the bug
-    reported at https://github.com/net-ssh/net-sftp/issues/27.  This does
+  - When using sftp: URIs, warns if it looks like we're about to run into the
+    bug reported at https://github.com/net-ssh/net-sftp/issues/27.  This does
     nothing to actually work around the bug, but at least gives you a clue as
     to what is going on.
 
