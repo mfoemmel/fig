@@ -67,6 +67,9 @@ class Fig::Protocol::SFTP
     return nil
   end
 
+  # See https://github.com/net-ssh/net-sftp/issues/27
+  NET_SFTP_ISSUE_27_SIZE = 4294049792
+
   # Returns whether the file was not downloaded because the file already
   # exists and is already up-to-date.
   def download(uri, path, prompt_for_login)
@@ -82,12 +85,18 @@ class Fig::Protocol::SFTP
         if ::File.exist?(path) && stat.mtime.to_f <= ::File.mtime(path).to_f
           Fig::Logging.debug "#{path} is up to date."
           return false
-        else
-          log_download uri, path
-          connection.download! uri.path, path
-
-          return true
         end
+
+        if stat.size >= NET_SFTP_ISSUE_27_SIZE
+          Fig::Logging.warn(
+            "#{uri} is #{stat.size} bytes in size, which is likely to trigger a Net::SFTP bug (https://github.com/net-ssh/net-sftp/issues/27). Fig may hang. If so, you will need to kill the process and switch file transfer protocols or figure out a way to repackage with smaller files."
+          )
+        end
+
+        log_download uri, path
+        connection.download! uri.path, path
+
+        return true
       rescue Net::SFTP::StatusException => error
         if error.code == Net::SFTP::Constants::StatusCodes::FX_NO_SUCH_FILE
           raise Fig::FileNotFoundError.new(error.message, uri)
