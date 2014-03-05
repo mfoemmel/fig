@@ -85,10 +85,17 @@ class Fig::RepositoryPackagePublisher
 
   def derive_publish_metadata()
     @publish_time  = Time.now()
-    @publish_login = Etc.getlogin()
+    @publish_login = derive_login()
     @publish_host  = Socket.gethostname()
 
     return
+  end
+
+  def derive_login()
+    return ENV['LOGNAME'] if ENV['LOGNAME']
+    return ENV['USER'] if ENV['USER']
+
+    return Etc.getlogin()
   end
 
   def validate_asset_names()
