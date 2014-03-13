@@ -92,8 +92,11 @@ class Fig::RepositoryPackagePublisher
   end
 
   def derive_login()
-    return ENV['LOGNAME'] if ENV['LOGNAME']
-    return ENV['USER'] if ENV['USER']
+    # Etc.getpwuid() returns nil on Windows, but Etc.getlogin() will return the
+    # wrong result on some systems if you su(1) to a different user.
+    if password_entry = Etc.getpwuid() and password_entry.name
+      return password_entry.name
+    end
 
     return Etc.getlogin()
   end
