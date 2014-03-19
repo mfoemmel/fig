@@ -1,16 +1,14 @@
-v1.15.1.beta.2 - 2014/3/13
+v1.16.0 - 2014/3/19
 
   Miscellaneous:
 
-  - Use a different workaround for utmp files: getpwuid(3).
+  - Work around broken utmp files by using getpwuid(3) to get the current user
+    before falling back on getlogin(3).
 
+v1.15.1.beta.2 - 2014/3/13
 v1.15.1.beta.1 - 2014/3/5
 
-  Miscellaneous:
-
-  - Work around broken utmp files by looking at the LOGNAME and USER
-    environment variables to get the current user before falling back on
-    getlogin(3).
+  - Test releases.
 
 v1.15.0 - 2014/2/24
 
