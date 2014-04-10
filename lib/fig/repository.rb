@@ -480,6 +480,10 @@ class Fig::Repository
     )
   end
 
+  # Note that we use a temporary directory within the repository so that we
+  # don't need to worry about crossing file-system boundaries.  If we stored
+  # things in /tmp, we couldn't do true file moves, just copies and deletes,
+  # and there would be race conditions and other not-fun things to worry about.
   def base_temp_dir()
     File.join(@local_repository_directory, 'tmp')
   end
