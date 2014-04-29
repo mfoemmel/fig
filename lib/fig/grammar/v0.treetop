@@ -8,6 +8,8 @@
 #     command-line equivalents.
 #   * Treetop parse errors are pretty inscrutable at times and we can make
 #     error messages clearer by validating a lot of the terminals ourselves.
+#
+#     Just say "NO!" to PEG parsers.
 
 require 'treetop'
 

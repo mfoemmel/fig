@@ -25,6 +25,8 @@ module Fig; end
 # Main program
 class Fig::Command
   def run_fig(argv, options = nil)
+    @suppress_further_error_messages = false
+
     begin
       @options = options || Fig::Command::Options.new()
       @options.process_command_line(argv)
@@ -100,6 +102,8 @@ class Fig::Command
     rescue Fig::UserInputError => error
       log_error_message(error)
     end
+
+    @suppress_further_error_messages = true
 
     return Fig::Command::Action::EXIT_FAILURE
   end
@@ -279,7 +283,11 @@ class Fig::Command
     )
 
     if check_for_unused_retrieves?
-      Fig::AtExit.add { @environment.check_for_unused_retrieves }
+      Fig::AtExit.add {
+        if ! @suppress_further_error_messages
+          @environment.check_for_unused_retrieves
+        end
+      }
     end
 
     return
