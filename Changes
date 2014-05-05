@@ -1,8 +1,12 @@
-v1.16.1.beta.1 - 2014/4/29
+v1.17.0 - 2014/5/5
 
   Miscellaneous:
 
   - Unused retrieve warnings are suppressed when other errors occur.
+
+v1.16.1.beta.1 - 2014/4/29
+
+  - Test release.
 
 v1.16.0 - 2014/3/19
 
