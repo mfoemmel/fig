@@ -52,7 +52,7 @@ ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
 ENV['FIG_COVERAGE_ROOT_DIRECTORY'] =
   File.expand_path(File.dirname(__FILE__) + '/..')
 
-Fig::Logging.initialize_post_configuration(nil, 'off', true)
+Fig::Logging.initialize_post_configuration(nil, false, 'off', true)
 
 $fig_run_count = 0 # Nasty, nasty global.
 

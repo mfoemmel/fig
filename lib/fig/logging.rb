@@ -25,16 +25,17 @@ module Fig::Logging
     'all'   => Log4r::ALL
   }
 
-  def self.initialize_pre_configuration(log_level = nil)
+  def self.initialize_pre_configuration(log_to_stdout, log_level)
     log_level ||= 'info'
 
     assign_log_level(@@logger, log_level)
-    setup_default_outputter(@@logger)
+    setup_default_outputter(@@logger, log_to_stdout)
   end
 
   def self.initialize_post_configuration(
-    config_file = nil,
-    log_level = nil,
+    config_file,
+    log_to_stdout,
+    log_level,
     suppress_default_configuration = false
   )
     if config_file
@@ -64,7 +65,7 @@ module Fig::Logging
 
     if not config_file and not suppress_default_configuration
       assign_log_level(@@logger, 'info')
-      setup_default_outputter(@@logger)
+      setup_default_outputter(@@logger, log_to_stdout)
     end
 
     assign_log_level(@@logger, log_level)
@@ -124,8 +125,13 @@ module Fig::Logging
     return
   end
 
-  def self.setup_default_outputter(logger)
-    outputter = Fig::Log4r::Outputter.new('fig stderr', $stderr)
+  def self.setup_default_outputter(logger, log_to_stdout)
+    if log_to_stdout
+      outputter = Fig::Log4r::Outputter.new('fig stdout', $stdout)
+    else
+      outputter = Fig::Log4r::Outputter.new('fig stderr', $stderr)
+    end
+
     logger.add outputter
     outputter.formatter = Log4r::PatternFormatter.new :pattern => '%M'
 

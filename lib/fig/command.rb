@@ -39,7 +39,9 @@ class Fig::Command
       return @options.exit_code
     end
 
-    Fig::Logging.initialize_pre_configuration(@options.log_level())
+    Fig::Logging.initialize_pre_configuration(
+      @options.log_to_stdout(), @options.log_level(),
+    )
 
     actions = @options.actions()
     if actions.empty?
@@ -189,6 +191,7 @@ class Fig::Command
 
     Fig::Logging.initialize_post_configuration(
       @options.log_config() || @application_configuration['log configuration'],
+      @options.log_to_stdout(),
       @options.log_level()
     )
 

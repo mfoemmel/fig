@@ -1,3 +1,12 @@
+v1.18.0 - 2014/7/1
+
+  New features:
+
+  - New --log-to-stdout option that, surprise, sends log output to standard
+    output instead of standard error.  Can't be used with --log-config, but,
+    then, you can get log output to go whereever you want with a configuration
+    file.  ;]
+
 v1.17.0 - 2014/5/5
 
   Miscellaneous:

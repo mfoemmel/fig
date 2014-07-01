@@ -57,6 +57,7 @@ class Fig::Command::Options
   attr_reader   :file_to_find_package_for
   attr_reader   :home
   attr_reader   :log_config
+  attr_reader   :log_to_stdout
   attr_reader   :log_level
   attr_reader   :package_definition_file
   attr_reader   :parser
@@ -630,6 +631,12 @@ class Fig::Command::Options
       @log_config = path
     end
 
+    @parser.on(
+      '--log-to-stdout', 'write log output to stdout instead of stderr',
+    ) do
+      @log_to_stdout = true
+    end
+
     level_list = LOG_LEVELS.join(', ')
     @parser.on(
       '--log-level LEVEL',
@@ -804,6 +811,12 @@ class Fig::Command::Options
     if @publish_comment && (! @base_action || ! @base_action.publish?)
       raise Fig::Command::OptionError.new(
         'Cannot use --publish-comment when not publishing.'
+      )
+    end
+
+    if @log_to_stdout && @log_config
+      raise Fig::Command::OptionError.new(
+        'Cannot use --log-to-stdout and --log-config at the same time.'
       )
     end
 
