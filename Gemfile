@@ -19,7 +19,7 @@ ruby RUBY_VERSION
 gem 'colorize',          '>= 0.5.8'
 gem 'highline',          '>= 1.6.19'
 gem 'json',              '>= 1.8'
-gem 'libarchive-static', '>= 1.0.0'
+gem 'libarchive-static', '>= 1.0.5'
 gem 'log4r',             '>= 1.1.5'
 gem 'net-netrc',         '>= 0.2.2'
 gem 'net-sftp',          '>= 2.1.2'

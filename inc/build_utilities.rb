@@ -8,7 +8,7 @@ def add_dependencies(gemspec)
   gemspec.add_dependency 'colorize',          '>= 0.5.8'
   gemspec.add_dependency 'highline',          '>= 1.6.19'
   gemspec.add_dependency 'json',              '>= 1.8'
-  gemspec.add_dependency 'libarchive-static', '>= 1.0.0'
+  gemspec.add_dependency 'libarchive-static', '>= 1.0.5'
   gemspec.add_dependency 'log4r',             '>= 1.1.5'
   gemspec.add_dependency 'net-netrc',         '>= 0.2.2'
   gemspec.add_dependency 'net-sftp',          '>= 2.1.2'
