@@ -230,7 +230,8 @@ class Fig::Command
       ENV['FIG_REMOTE_URL'],
       @operating_system,
       @options.home,
-      @options.no_figrc?
+      @options.no_figrc?,
+      @options.no_remote_figrc?
     )
 
     if \

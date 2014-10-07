@@ -19,7 +19,8 @@ class Fig::FigRC
     specified_repository_url,
     operating_system,
     fig_home,
-    disable_figrc = false
+    disable_figrc = false,
+    disable_remote_figrc = false
   )
     configuration = Fig::ApplicationConfiguration.new()
 
@@ -34,7 +35,7 @@ class Fig::FigRC
 
     handle_repository_configuration(
       configuration, repository_url, operating_system, fig_home
-    )
+    ) if not disable_remote_figrc
 
     return configuration
   end

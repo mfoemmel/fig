@@ -150,6 +150,10 @@ class Fig::Command::Options
     return @no_figrc
   end
 
+  def no_remote_figrc?()
+    return @no_remote_figrc
+  end
+
   def suppress_warning_include_statement_missing_version?()
     return @suppress_warning_include_statement_missing_version
   end
@@ -622,6 +626,9 @@ class Fig::Command::Options
     end
 
     @parser.on('--no-figrc', 'ignore ~/.figrc') { @no_figrc = true }
+    @parser.on('--no-remote-figrc', 'ignore $FIG_REMOTE_URL/_meta/figrc') {
+      @no_remote_figrc = true
+    }
 
     @parser.on(
       '--log-config PATH',
