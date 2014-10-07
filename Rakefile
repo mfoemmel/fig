@@ -53,6 +53,7 @@ def main()
 
     gemspec.files = FileList[
       * %w<
+        BUGS.md
         Changes
         bin/*
         lib/**/*

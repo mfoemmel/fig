@@ -19,7 +19,6 @@
 # Documentation
 
 * Describe retrieve behavior in the presence of symlinks.
-* Document application configuration (the "Configuration" page in the wiki).
 
 # Paranoia / things to think about
 
