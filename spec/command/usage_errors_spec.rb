@@ -352,18 +352,50 @@ describe 'Fig' do
       end
     end
 
-    it %q<prints error when FIG_REMOTE_URL is not defined> do
-      begin
-        ENV.delete('FIG_REMOTE_URL')
+    describe %q<prints error when attempting a remote operation and FIG_REMOTE_URL is> do
+      it %q<not defined> do
+        begin
+          ENV.delete('FIG_REMOTE_URL')
 
-        out, err, exit_code =
-          fig %w<--list-remote>, :fork => false, :no_raise_on_error => true
+          out, err, exit_code =
+            fig %w<--list-remote>, :fork => false, :no_raise_on_error => true
 
-        err.should =~ %r<FIG_REMOTE_URL>
-        out.should == ''
-        exit_code.should_not == 0
-      ensure
-        ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+          err.should =~ %r<FIG_REMOTE_URL>
+          out.should == ''
+          exit_code.should_not == 0
+        ensure
+          ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+        end
+      end
+
+      it %q<empty> do
+        begin
+          ENV['FIG_REMOTE_URL'] = ''
+
+          out, err, exit_code =
+            fig %w<--list-remote>, :fork => false, :no_raise_on_error => true
+
+          err.should =~ %r<FIG_REMOTE_URL>
+          out.should == ''
+          exit_code.should_not == 0
+        ensure
+          ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+        end
+      end
+
+      it %q<all whitespace> do
+        begin
+          ENV['FIG_REMOTE_URL'] = " \n\t"
+
+          out, err, exit_code =
+            fig %w<--list-remote>, :fork => false, :no_raise_on_error => true
+
+          err.should =~ %r<FIG_REMOTE_URL>
+          out.should == ''
+          exit_code.should_not == 0
+        ensure
+          ENV['FIG_REMOTE_URL'] = FIG_REMOTE_URL
+        end
       end
     end
   end
