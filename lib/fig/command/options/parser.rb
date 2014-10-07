@@ -93,7 +93,7 @@ Standard options (represented as "[...]" above):
       [-l | --login]
 
       [--log-level LEVEL] [--log-config PATH | --log-to-stdout]
-      [--figrc PATH]      [--no-figrc]
+      [--figrc PATH]      [--no-figrc] [--no-remote-figrc]
 
       [--suppress-vcs-comments-in-published-packages]
       [--suppress-warning-include-statement-missing-version]
