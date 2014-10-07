@@ -75,6 +75,16 @@ describe 'FigRC' do
     configuration['foo'].should == nil
   end
 
+  it 'handles no override, repository specified as the empty string' do
+    configuration = invoke_find nil, ''
+    configuration['foo'].should == nil
+  end
+
+  it 'handles no override, repository specified as whitespace' do
+    configuration = invoke_find nil, " \n\t"
+    configuration['foo'].should == nil
+  end
+
   it 'handles no repository config and no override specified, and config does NOT exist on server' do
     configuration = invoke_find nil, 'file:///does_not_exist/'
     configuration['foo'].should == nil

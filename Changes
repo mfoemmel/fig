@@ -4,6 +4,9 @@ v1.20.0 - 2014/10/7
 
   - New --no-remote-figrc option that suppresses looking at
     $FIG_REMOTE_URL/_meta/figrc.
+  - Treats an empty FIG_REMOTE_URL as equivalent to it being unset.  This
+    allows temporary disabling remote access by invoking it like
+    "FIG_REMOTE_URL= fig <... whatever...>".
 
 v1.19.0 - 2014/9/26
 

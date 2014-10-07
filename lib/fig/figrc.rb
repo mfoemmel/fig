@@ -72,9 +72,15 @@ class Fig::FigRC
   end
 
   def self.derive_repository_url(specified_repository_url, configuration)
-    return specified_repository_url if specified_repository_url
+    if specified_repository_url.nil?
+      return configuration['default FIG_REMOTE_URL']
+    end
 
-    return configuration['default FIG_REMOTE_URL']
+    if specified_repository_url.empty? || specified_repository_url =~ /\A\s*\z/
+      return nil
+    end
+
+    return specified_repository_url
   end
 
   def self.handle_repository_configuration(
