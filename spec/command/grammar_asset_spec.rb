@@ -11,7 +11,7 @@ require 'fig/operating_system'
 def test_published_asset_with_url_with_symbol(
   asset_type, symbol, quote, version
 )
-  file_name     = "with#{symbol}symbol"
+  file_name     = "with#{symbol}symbol.zip"
   escaped_file  = CGI.escape file_name
   quoted_url    =
     "#{quote}file://#{CURRENT_DIRECTORY}/#{escaped_file}#{quote}"
@@ -85,7 +85,7 @@ end
 def test_published_asset_with_file_with_symbol(
   asset_type, symbol, quote, version
 )
-  file_name   = "with#{symbol}symbol"
+  file_name   = "with#{symbol}symbol.zip"
   quoted_name = "#{quote}#{file_name}#{quote}"
 
   it %Q<with file «#{quoted_name}»> do
@@ -176,10 +176,10 @@ describe 'Fig' do
         |quote|
 
         begin
-          value = "#{quote}nothing-special#{quote}"
+          value = "#{quote}nothing-special.zip#{quote}"
 
           it %Q<with file «#{value}»> do
-            write_file "#{CURRENT_DIRECTORY}/nothing-special", ''
+            write_file "#{CURRENT_DIRECTORY}/nothing-special.zip", ''
 
             fig(
               [%w< --publish foo/1.2.3 --set x=y >, "--#{asset_type}", value],
@@ -259,10 +259,10 @@ describe 'Fig' do
         |quote|
 
         begin
-          value = "#{quote}nothing-special#{quote}"
+          value = "#{quote}nothing-special.zip#{quote}"
 
           it %Q<with file «#{value}»> do
-            write_file "#{CURRENT_DIRECTORY}/nothing-special", ''
+            write_file "#{CURRENT_DIRECTORY}/nothing-special.zip", ''
 
             input = <<-"END"
               grammar v1

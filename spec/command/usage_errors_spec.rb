@@ -330,6 +330,33 @@ describe 'Fig' do
         exit_code.should_not == 0
         out.should == ''
       end
+
+      it %q<a package with an archive of unknown type> do
+        archive_file = 'unknown.archive-type'
+        write_file "#{CURRENT_DIRECTORY}/#{archive_file}", ''
+
+        input = <<-END
+          grammar v0
+
+          archive #{archive_file}
+
+          config default
+          end
+        END
+
+        out, err, exit_code = fig(
+          %w<--publish package/version>,
+          input,
+          :fork => false,
+          :no_raise_on_error => true
+        )
+
+        err.should =~ %r< \b #{ Regexp.escape(archive_file) } \b >ix
+        err.should =~ %r< \b unknown [ ] archive [ ] type \b >ix
+
+        exit_code.should_not == 0
+        out.should == ''
+      end
     end
 
     it %q<complains about command-line substitution of unreferenced packages> do

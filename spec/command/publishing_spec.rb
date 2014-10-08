@@ -25,17 +25,17 @@ describe 'Fig' do
         out, err, exit_code =
             fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
 
-        err.should =~ /multiple archives/
+        err.should =~ /multiple assets/
         err.should =~ /duplicate-archive\.tar\.gz/
         exit_code.should_not == 0
       end
 
-      it 'complains when archives are named the same as the resources tarball' do
-        %w< archive resource >.each do
-          |statement_type|
+      %w< archive resource >.each do
+        |asset_type|
 
+        it "complains when #{asset_type}s refer to a URL with a base name the same as the resources tarball" do
           input = <<-END
-            #{statement_type} http://some-host/#{Fig::Repository::RESOURCES_FILE}
+            #{asset_type} http://some-host/#{Fig::Repository::RESOURCES_FILE}
             config default end
           END
 
@@ -46,10 +46,6 @@ describe 'Fig' do
             /cannot have an asset with the name "#{Regexp.escape(Fig::Repository::RESOURCES_FILE)}"/
           exit_code.should_not == 0
         end
-      end
-
-      %w< archive resource >.each do
-        |asset_type|
 
         it "complains when #{asset_type}s refer to non-existent local paths" do
           out, err, exit_code =
@@ -57,7 +53,7 @@ describe 'Fig' do
               [
                 %w<--publish foo/1.2.3>,
                 "--#{asset_type}",
-                'does not exist',
+                'does not exist.zip',
                 %w<--set VARIABLE=VALUE>
               ].flatten,
               :no_raise_on_error => true
@@ -67,6 +63,24 @@ describe 'Fig' do
           err.should =~ /\bdoes not exist\b/
           exit_code.should_not == 0
         end
+      end
+
+      it "complains when globbing for archives picks up a file with the same as the resources tarball" do
+        write_file(
+          "#{CURRENT_DIRECTORY}/#{Fig::Repository::RESOURCES_FILE}", ''
+        )
+
+        input = <<-END
+          archive *
+          config default end
+        END
+
+        out, err, exit_code =
+            fig(%w<--publish foo/1.2.3>, input, :no_raise_on_error => true)
+
+        err.should =~
+          /cannot have an asset with the name "#{Regexp.escape(Fig::Repository::RESOURCES_FILE)}"/
+        exit_code.should_not == 0
       end
 
       it 'publishes to remote repository' do

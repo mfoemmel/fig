@@ -56,14 +56,16 @@ class Fig::RepositoryPackagePublisher
 
   def publish_package()
     derive_publish_metadata()
-    validate_asset_names()
 
     temp_dir = publish_temp_dir()
     @operating_system.delete_and_recreate_directory(temp_dir)
-    @operating_system.delete_and_recreate_directory(@local_directory_for_package)
+    @operating_system.delete_and_recreate_directory(
+      @local_directory_for_package
+    )
 
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
-    content, published_package = derive_definition_file
+    content, published_package =
+      derive_definition_file_and_create_resource_archive
     @operating_system.write(fig_file, content)
 
     publish_package_contents
@@ -101,34 +103,11 @@ class Fig::RepositoryPackagePublisher
     return Etc.getlogin()
   end
 
-  def validate_asset_names()
-    asset_statements = @text_assembler.asset_input_statements
-
-    asset_names = Set.new()
-    asset_statements.each do
-      |statement|
-
-      asset_name = statement.asset_name()
-      if not asset_name.nil?
-        if asset_name == Fig::Repository::RESOURCES_FILE
-          Fig::Logging.fatal \
-            %Q<You cannot have an asset with the name "#{Fig::Repository::RESOURCES_FILE}"#{statement.position_string()} due to Fig implementation details.>
-        end
-
-        if asset_names.include?(asset_name)
-          Fig::Logging.fatal \
-            %Q<Found multiple archives with the name "#{asset_name}"#{statement.position_string()}. If these were allowed, archives would overwrite each other.>
-          raise Fig::RepositoryError.new
-        else
-          asset_names.add(asset_name)
-        end
-      end
-    end
-  end
-
-  def derive_definition_file()
+  def derive_definition_file_and_create_resource_archive()
     add_package_metadata_comments()
-    add_output_statements_and_create_resource_archive()
+    assemble_output_statements_and_accumulate_assets()
+    validate_asset_names()
+    create_resource_archive()
     add_unparsed_text()
 
     file_content, explanations = @text_assembler.assemble_package_definition()
@@ -136,7 +115,7 @@ class Fig::RepositoryPackagePublisher
       explanations.each {|explanation| Fig::Logging.info explanation}
     end
 
-    published_package = nil
+    to_be_published_package = nil
     begin
       unparsed_package = Fig::NotYetParsedPackage.new
       unparsed_package.descriptor         = @descriptor
@@ -146,7 +125,7 @@ class Fig::RepositoryPackagePublisher
       unparsed_package.source_description = '<package to be published>'
       unparsed_package.unparsed_text      = file_content
 
-      published_package =
+      to_be_published_package =
         Fig::Parser.new(nil, false).parse_package(unparsed_package)
     rescue Fig::PackageParseError => error
       raise \
@@ -154,7 +133,7 @@ class Fig::RepositoryPackagePublisher
         "#{error}\n\nGenerated contents:\n#{file_content}"
     end
 
-    return file_content, published_package
+    return file_content, to_be_published_package
   end
 
   def add_package_metadata_comments()
@@ -353,19 +332,9 @@ class Fig::RepositoryPackagePublisher
     return reference
   end
 
-  # Deals with Archive and Resource statements.  It downloads any remote
-  # files (those where the statement references a URL as opposed to a local
-  # file) and then copies all files into the local repository and the remote
-  # repository (if not a local-only publish).
-  def add_output_statements_and_create_resource_archive()
-    assemble_output_statements()
-    create_resource_archive()
-
-    return
-  end
-
-  def assemble_output_statements()
-    @resource_paths = []
+  def assemble_output_statements_and_accumulate_assets()
+    @local_resource_paths = []
+    @asset_names_with_associated_input_statements = {}
 
     @text_assembler.input_statements.each do
       |statement|
@@ -382,39 +351,121 @@ class Fig::RepositoryPackagePublisher
 
   def add_asset_to_output_statements(asset_statement)
     if Fig::URL.is_url? asset_statement.location
-      @text_assembler.add_output asset_statement
+      add_output_asset_statement_based_upon_input_statement(
+        asset_statement, asset_statement
+      )
     elsif asset_statement.is_a? Fig::Statement::Archive
       if asset_statement.requires_globbing?
         expand_globs_from( [asset_statement.location] ).each do
           |file|
 
-          @text_assembler.add_output(
+          add_output_asset_statement_based_upon_input_statement(
             Fig::Statement::Archive.new(
               nil,
               %Q<[synthetic statement created in #{__FILE__} line #{__LINE__}]>,
               file,
               false # No globbing
-            )
+            ),
+            asset_statement
           )
         end
       else
-        @text_assembler.add_output asset_statement
+        add_output_asset_statement_based_upon_input_statement(
+          asset_statement, asset_statement
+        )
       end
     elsif asset_statement.requires_globbing?
-      @resource_paths.concat expand_globs_from( [asset_statement.location] )
+      @local_resource_paths.concat expand_globs_from(
+        [asset_statement.location]
+      )
     else
-      @resource_paths << asset_statement.location
+      @local_resource_paths << asset_statement.location
     end
 
     return
   end
 
+  def add_output_asset_statement_based_upon_input_statement(
+    output_statement, input_statement
+  )
+    @text_assembler.add_output output_statement
+
+    asset_name = output_statement.asset_name
+
+    input_statements =
+      @asset_names_with_associated_input_statements[asset_name]
+    if input_statements.nil?
+      input_statements = []
+
+      @asset_names_with_associated_input_statements[asset_name] =
+        input_statements
+    end
+
+    input_statements << input_statement
+
+    return
+  end
+
+  def validate_asset_names()
+    found_problem = false
+
+    @asset_names_with_associated_input_statements.keys.sort.each do
+      |asset_name|
+
+      statements = @asset_names_with_associated_input_statements[asset_name]
+
+      if asset_name == Fig::Repository::RESOURCES_FILE
+        Fig::Logging.fatal \
+          %Q<You cannot have an asset with the name "#{Fig::Repository::RESOURCES_FILE}"#{collective_position_string(statements)} due to Fig implementation details.>
+        found_problem = true
+      end
+
+      archive_statements =
+        statements.select { |s| s.is_a? Fig::Statement::Archive }
+      if (
+            not archive_statements.empty? \
+        and not (
+              asset_name =~ /\.tar\.gz$/    \
+          or  asset_name =~ /\.tgz$/        \
+          or  asset_name =~ /\.tar\.bz2$/   \
+          or  asset_name =~ /\.zip$/
+        )
+      )
+        Fig::Logging.fatal \
+          %Q<Unknown archive type "#{asset_name}"#{collective_position_string(archive_statements)}.>
+        found_problem = true
+      end
+
+      if statements.size > 1
+        Fig::Logging.fatal \
+          %Q<Found multiple assets with the name "#{asset_name}"#{collective_position_string(statements)}. If these were allowed, assets would overwrite each other.>
+        found_problem = true
+      end
+    end
+
+    if found_problem
+        raise Fig::RepositoryError.new
+    end
+  end
+
+  def collective_position_string(statements)
+    return (
+      statements.map {
+        |statement|
+
+        position_string = statement.position_string
+
+        position_string.empty? ? '<unknown>' : position_string.strip
+      }
+    ).join(', ')
+  end
+
   def create_resource_archive()
-    if @resource_paths.size > 0
-      check_asset_paths(@resource_paths)
+    if @local_resource_paths.size > 0
+      check_asset_paths(@local_resource_paths)
 
       file = File.join publish_temp_dir, Fig::Repository::RESOURCES_FILE
-      @operating_system.create_archive(file, @resource_paths)
+      @operating_system.create_archive(file, @local_resource_paths)
       Fig::AtExit.add { FileUtils.rm_f(file) }
 
       @text_assembler.add_output(
