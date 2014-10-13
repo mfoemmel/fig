@@ -1,4 +1,4 @@
-v1.20.1.beta.1 - 2014/10/8
+v1.21.0 - 2014/10/13
 
   Bug fixes:
 
@@ -6,6 +6,10 @@ v1.20.1.beta.1 - 2014/10/8
     before.  Also, archive names are checked for extraction support prior to
     writing to remote repository.  (Yes, that's the archive /names/ and not the
     archive /files/.)
+
+v1.20.1.beta.1 - 2014/10/8
+
+  - Test release.
 
 v1.20.0 - 2014/10/7
 
