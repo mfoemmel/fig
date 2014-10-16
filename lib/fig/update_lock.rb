@@ -12,7 +12,11 @@ class Fig::UpdateLock
   end
 
   def close()
-    @lock.close
+    begin
+      @lock.close
+    rescue IOError => error
+      # Don't care if it's already closed.
+    end
 
     return
   end
