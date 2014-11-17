@@ -164,6 +164,12 @@ Environment variables:
     return
   end
 
+  def separator(string)
+    @parser.separator string
+
+    return
+  end
+
   def on_tail(*arguments, &block)
     switch_array = make_switch_array(arguments, block)
 

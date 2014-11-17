@@ -165,6 +165,8 @@ class Fig::Command::Options
   private
 
   EXTRA_OPTIONS_DESCRIPTION = <<-'END_DESCRIPTION'
+
+Running commands:
         --                           end of Fig options; anything after this is used as a command to run
         --command-extra-args         end of Fig options; anything after this is appended to the end of a
                                      "command" statement in a "config" block.
@@ -223,143 +225,110 @@ class Fig::Command::Options
     set_up_asset_statements()
     set_up_queries()
     set_up_program_configuration()
+    set_up_help()
 
     return
   end
 
-  def set_up_queries()
-    @parser.on_tail(
-      '-?', '-h', '--help', 'display short usage summary'
-    ) do
-      set_base_action(Fig::Command::Action::Help)
-    end
-    @parser.on_tail(
-      '--help-long', 'display full usage'
-    ) do
-      set_base_action(Fig::Command::Action::HelpLong)
-    end
-    @parser.on_tail(
-      '--options', 'just list Fig options'
-    ) do
-      set_base_action(Fig::Command::Action::Options)
-    end
+  FILE_OPTION_VALUE_PATTERN =
+    %r<
+      \A
+      (?:
+          -         # Solely a hyphen, to allow for stdin
+        | [^-] .*   # or anything not starting with a hyphen.
+      )
+      \z
+    >x
 
-    @parser.on_tail('-v', '--version', 'print Fig version') do
-      set_base_action(Fig::Command::Action::Version)
-    end
-    @parser.on_tail(
-      '--version-plain', 'print Fig version without embellishment (no newline)'
-    ) do
-      set_base_action(Fig::Command::Action::VersionPlain)
-    end
+  def set_up_package_definition()
+    @parser.separator 'Package definition:'
 
     @parser.on(
-      '-g',
-      '--get VARIABLE',
+      '-c',
+      '--config CONFIG',
       STARTS_WITH_NON_HYPHEN,
-      'print value of environment variable VARIABLE'
-    ) do |variable_to_get|
-      set_base_action(Fig::Command::Action::Get)
-      @variable_to_get = variable_to_get
-    end
-
-    set_up_listings()
-
-    @parser.on(
-      '--source-package FILE',
-      STARTS_WITH_NON_HYPHEN,
-      'print package FILE was retrieved from'
-    ) do |file_to_find_package_for|
-      set_base_action(Fig::Command::Action::SourcePackage)
-      @file_to_find_package_for = file_to_find_package_for
+      %q<apply configuration CONFIG, default is "default">
+    ) do |config|
+      @config = config
     end
 
     @parser.on(
-      '-T', '--dump-package-definition-text',
-      'emit the unparsed definition of the base package, if there is one'
-    ) do
-      set_base_action(Fig::Command::Action::DumpPackageDefinitionText)
+      '--file FILE',
+      FILE_OPTION_VALUE_PATTERN,
+      %q<read package definition FILE. Use '-' for stdin. See also --no-file>
+    ) do |path|
+      set_package_definition_file(path)
     end
+
     @parser.on(
-      '--dump-package-definition-parsed',
-      'emit the parsed definition of the base package'
+      '--no-file', 'ignore package.fig/application.fig file in current directory'
     ) do
-      set_base_action(Fig::Command::Action::DumpPackageDefinitionParsed)
+      set_package_definition_file(:none)
     end
+
     @parser.on(
-      '--dump-package-definition-for-command-line',
-      'emit the synthetic package for the other options (--set/--archive/etc.)'
+      '--suppress-all-includes', %q<don't process include statements>,
     ) do
-      set_base_action(Fig::Command::Action::DumpPackageDefinitionForCommandLine)
+      set_suppress_includes(:all)
+    end
+
+    @parser.on(
+      '--suppress-cross-package-includes',
+      %q<don't process includes of configs from other packages>,
+    ) do
+      set_suppress_includes(:cross_package)
     end
 
     return
   end
 
-  def set_up_listings()
-    option_mapping = {
-      :local_packages => [
-        ['--list-local', '--list', 'list packages in $FIG_HOME'],
-        Fig::Command::Action::ListLocal
-      ],
+  def set_up_remote_repository_access()
+    @parser.separator ''
+    @parser.separator 'Remote repository access:'
 
-      :configs => [
-        ['--list-configs', 'list configurations'],
-        Fig::Command::Action::ListConfigs
-      ],
-
-      :dependencies => [
-        ['--list-dependencies', 'list package dependencies, recursively'],
-        Fig::Command::Action::ListDependencies
-      ],
-
-      :variables => [
-        [
-          '--list-variables',
-          'list all variables defined/used by package and its dependencies'
-        ],
-        Fig::Command::Action::ListVariables
-      ],
-
-      :remote_packages => [
-        ['--list-remote', 'list packages in remote repo'],
-        Fig::Command::Action::ListRemote
-      ],
-    }
-
-    option_mapping.each_pair do
-      | type, specification_action_class |
-
-      specification, action_class = *specification_action_class
-      @parser.on(*specification) do
-        set_base_action(action_class)
-      end
+    @parser.on(
+      '-u',
+      '--update',
+      'check remote repo for updates, download to $FIG_HOME and process retrieves'
+    ) do
+      set_update_action(Fig::Command::Action::Update)
     end
 
     @parser.on(
-      '--list-tree', 'for listings, output a tree instead of a list'
+      '-m',
+      '--update-if-missing',
+      'check remote repo for updates only if package missing from $FIG_HOME'
     ) do
-      @list_tree = true
+      set_update_action(Fig::Command::Action::UpdateIfMissing)
     end
 
     @parser.on(
-      '--graphviz',
-      'for listings, output DOT (http://graphviz.org/content/dot-language)'
+      '-R', '--suppress-retrieves',
+      %q<don't process retrieves, even if they would otherwise be active>,
     ) do
-      @graphviz = true
+      @suppress_retrieves = true
     end
 
     @parser.on(
-      '--list-all-configs',
-      'for listings, follow all configurations of the base package'
+      '--suppress-cleanup-of-retrieves',
+      %q<don't delete files from unreferenced retrieves>,
     ) do
-      @list_all_configs = true
+      @suppress_cleanup_of_retrieves = true
+    end
+
+    @parser.on(
+      '-l', '--login', 'login to FTP repo as a non-anonymous user'
+    ) do
+      @login = true
     end
 
     return
   end
 
   def set_up_commands()
+    @parser.separator ''
+    @parser.separator 'Commands:'
+
     @parser.on(
       '--publish', 'install package in $FIG_HOME and in remote repo'
     ) do |publish|
@@ -409,57 +378,10 @@ class Fig::Command::Options
     return
   end
 
-  FILE_OPTION_VALUE_PATTERN =
-    %r<
-      \A
-      (?:
-          -         # Solely a hyphen, to allow for stdin
-        | [^-] .*   # or anything not starting with a hyphen.
-      )
-      \z
-    >x
-
-  def set_up_package_definition()
-    @parser.on(
-      '-c',
-      '--config CONFIG',
-      STARTS_WITH_NON_HYPHEN,
-      %q<apply configuration CONFIG, default is "default">
-    ) do |config|
-      @config = config
-    end
-
-    @parser.on(
-      '--file FILE',
-      FILE_OPTION_VALUE_PATTERN,
-      %q<read package definition FILE. Use '-' for stdin. See also --no-file>
-    ) do |path|
-      set_package_definition_file(path)
-    end
-
-    @parser.on(
-      '--no-file', 'ignore package.fig/application.fig file in current directory'
-    ) do
-      set_package_definition_file(:none)
-    end
-
-    @parser.on(
-      '--suppress-all-includes', %q<don't process include statements>,
-    ) do
-      set_suppress_includes(:all)
-    end
-
-    @parser.on(
-      '--suppress-cross-package-includes',
-      %q<don't process includes of configs from other packages>,
-    ) do
-      set_suppress_includes(:cross_package)
-    end
-
-    return
-  end
-
   def set_up_environment_statements()
+    @parser.separator ''
+    @parser.separator 'Environment variable statement equivalents:'
+
     @environment_statements = []
     @parser.on(
       '-p',
@@ -486,6 +408,9 @@ class Fig::Command::Options
     @parser.add_argument_description(
       %w<-s --set>, %q<The value of this option must look like "NAME=VALUE".>
     )
+
+    @parser.separator ''
+    @parser.separator 'Package includes and overrides:'
 
     @parser.on(
       '-i',
@@ -551,6 +476,9 @@ class Fig::Command::Options
   end
 
   def set_up_asset_statements()
+    @parser.separator ''
+    @parser.separator 'Asset statement equivalents:'
+
     @asset_statements = []
     @parser.on(
       '--archive PATH',
@@ -573,41 +501,114 @@ class Fig::Command::Options
     return
   end
 
-  def set_up_remote_repository_access()
+  def set_up_queries()
+    @parser.separator ''
+    @parser.separator 'Querying:'
+
     @parser.on(
-      '-u',
-      '--update',
-      'check remote repo for updates, download to $FIG_HOME and process retrieves'
-    ) do
-      set_update_action(Fig::Command::Action::Update)
+      '-g',
+      '--get VARIABLE',
+      STARTS_WITH_NON_HYPHEN,
+      'print value of environment variable VARIABLE'
+    ) do |variable_to_get|
+      set_base_action(Fig::Command::Action::Get)
+      @variable_to_get = variable_to_get
     end
 
     @parser.on(
-      '-m',
-      '--update-if-missing',
-      'check remote repo for updates only if package missing from $FIG_HOME'
-    ) do
-      set_update_action(Fig::Command::Action::UpdateIfMissing)
+      '--source-package FILE',
+      STARTS_WITH_NON_HYPHEN,
+      'print package FILE was retrieved from'
+    ) do |file_to_find_package_for|
+      set_base_action(Fig::Command::Action::SourcePackage)
+      @file_to_find_package_for = file_to_find_package_for
     end
 
     @parser.on(
-      '-R', '--suppress-retrieves',
-      %q<don't process retrieves, even if they would otherwise be active>,
+      '-T', '--dump-package-definition-text',
+      'emit the unparsed definition of the base package, if there is one'
     ) do
-      @suppress_retrieves = true
+      set_base_action(Fig::Command::Action::DumpPackageDefinitionText)
+    end
+    @parser.on(
+      '--dump-package-definition-parsed',
+      'emit the parsed definition of the base package'
+    ) do
+      set_base_action(Fig::Command::Action::DumpPackageDefinitionParsed)
+    end
+    @parser.on(
+      '--dump-package-definition-for-command-line',
+      'emit the synthetic package for the other options (--set/--archive/etc.)'
+    ) do
+      set_base_action(Fig::Command::Action::DumpPackageDefinitionForCommandLine)
+    end
+
+    set_up_listings()
+
+    return
+  end
+
+  def set_up_listings()
+    @parser.separator ''
+    @parser.separator 'Listings:'
+
+    option_mapping = {
+      :local_packages => [
+        ['--list-local', '--list', 'list packages in $FIG_HOME'],
+        Fig::Command::Action::ListLocal
+      ],
+
+      :configs => [
+        ['--list-configs', 'list configurations'],
+        Fig::Command::Action::ListConfigs
+      ],
+
+      :dependencies => [
+        ['--list-dependencies', 'list package dependencies, recursively'],
+        Fig::Command::Action::ListDependencies
+      ],
+
+      :variables => [
+        [
+          '--list-variables',
+          'list all variables defined/used by package and its dependencies'
+        ],
+        Fig::Command::Action::ListVariables
+      ],
+
+      :remote_packages => [
+        ['--list-remote', 'list packages in remote repo'],
+        Fig::Command::Action::ListRemote
+      ],
+    }
+
+    option_mapping.each_pair do
+      | type, specification_action_class |
+
+      specification, action_class = *specification_action_class
+      @parser.on(*specification) do
+        set_base_action(action_class)
+      end
     end
 
     @parser.on(
-      '--suppress-cleanup-of-retrieves',
-      %q<don't delete files from unreferenced retrieves>,
+      '--list-tree', 'for listings, output a tree instead of a list'
     ) do
-      @suppress_cleanup_of_retrieves = true
+      @list_tree = true
     end
 
     @parser.on(
-      '-l', '--login', 'login to FTP repo as a non-anonymous user'
+      '--graphviz',
+      'for listings, output DOT (http://graphviz.org/content/dot-language)'
     ) do
-      @login = true
+      @graphviz = true
+    end
+
+    @parser.on(
+      '--list-all-configs',
+      'for listings, follow all configurations of the base package'
+    ) do
+      @list_all_configs = true
     end
 
     return
@@ -617,6 +618,9 @@ class Fig::Command::Options
   LOG_ALIASES = { 'warning' => 'warn' }
 
   def set_up_program_configuration()
+    @parser.separator ''
+    @parser.separator 'Fig configuration:'
+
     @parser.on(
       '--figrc PATH',
       STARTS_WITH_NON_HYPHEN,
@@ -682,6 +686,36 @@ class Fig::Command::Options
     end
 
     return
+  end
+
+  def set_up_help()
+    @parser.separator ''
+    @parser.separator 'Help:'
+
+    @parser.on(
+      '-?', '-h', '--help', 'display short usage summary'
+    ) do
+      set_base_action(Fig::Command::Action::Help)
+    end
+    @parser.on(
+      '--help-long', 'display full usage'
+    ) do
+      set_base_action(Fig::Command::Action::HelpLong)
+    end
+    @parser.on(
+      '--options', 'just list Fig options'
+    ) do
+      set_base_action(Fig::Command::Action::Options)
+    end
+
+    @parser.on('-v', '--version', 'print Fig version') do
+      set_base_action(Fig::Command::Action::Version)
+    end
+    @parser.on(
+      '--version-plain', 'print Fig version without embellishment (no newline)'
+    ) do
+      set_base_action(Fig::Command::Action::VersionPlain)
+    end
   end
 
   def set_base_action(action_class)
