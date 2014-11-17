@@ -333,6 +333,40 @@ describe 'Fig' do
         out.should == ''
       end
 
+      it %q<--publish-local cleans up after prior local publishes of the same package version> do
+        a_file_unpublished = "#{CURRENT_DIRECTORY}/a-file.txt"
+        write_file(a_file_unpublished, '')
+
+        input = <<-END
+          resource a-file.txt
+
+          config default end
+        END
+
+        fig(%w<--publish-local foo/1.2.3>, input)
+
+        a_file_published = "#{FIG_HOME}/runtime/foo/1.2.3/a-file.txt"
+        fail unless File.exists? a_file_published
+
+        File.unlink a_file_unpublished
+
+        another_file_unpublished = "#{CURRENT_DIRECTORY}/another-file.txt"
+        write_file(another_file_unpublished, '')
+
+        input = <<-END
+          resource another-file.txt
+
+          config default end
+        END
+
+        fig(%w<--publish-local foo/1.2.3>, input)
+
+        another_file_published =
+          "#{FIG_HOME}/runtime/foo/1.2.3/another-file.txt"
+        fail unless File.exists? another_file_published
+        fail if File.exists? a_file_published # This is the real test.
+      end
+
       describe 'with both a package.fig file in the current directory and an environment variable option' do
         before(:each) do
           write_file(

@@ -1,5 +1,10 @@
 v1.xx - 2014/xx/xx
 
+  Bug fixes:
+
+  - Republishing a package did not clean out no-longer-extant files from the
+    runtime directory.
+
   Miscellaneous:
 
   - Eliminate stack trace when releasing repository lock after exec error.

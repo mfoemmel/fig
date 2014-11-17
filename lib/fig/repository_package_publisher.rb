@@ -62,6 +62,7 @@ class Fig::RepositoryPackagePublisher
     @operating_system.delete_and_recreate_directory(
       @local_directory_for_package
     )
+    @operating_system.delete_and_recreate_directory(@runtime_for_package)
 
     fig_file = File.join(temp_dir, Fig::Repository::PACKAGE_FILE_IN_REPO)
     content, published_package =
