@@ -28,8 +28,7 @@ Querying:
 
 Standard options (represented as "[...]" above):
       [--update | --update-if-missing]
-      [--set    VARIABLE=VALUE]
-      [--append VARIABLE=VALUE]
+      [--set VARIABLE=VALUE] [--add VARIABLE=VALUE]
       [--resource PATH]      [--archive  PATH]
       [--include DESCRIPTOR] [--include-file PATH:CONFIG]
       [--override DESCRIPTOR]
@@ -75,8 +74,8 @@ Standard options (represented as "[...]" above):
       [-u | --update | -m | --update-if-missing]
       --update-lock-response {wait | fail | ignore}
 
-      [{-s | --set}    VARIABLE=VALUE]
-      [{-p | --append} VARIABLE=VALUE]
+      [{-s | --set}            VARIABLE=VALUE]
+      [{-p | --add | --append} VARIABLE=VALUE]
 
       [--resource       PATH]
       [--archive        PATH]

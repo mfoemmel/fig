@@ -61,10 +61,10 @@ describe 'Command::Options' do
 
   describe %q<complains if a value isn't given to> do
     [
-      %w< get >,                          # Queries
-      %w< set append include override >,  # Environment
-      %w< archive resource >,             # Package contents
-      %w< file config log-level figrc >   # Configuration
+      %w< get >,                              # Queries
+      %w< set add append include override >,  # Environment
+      %w< archive resource >,                 # Package contents
+      %w< file config log-level figrc >       # Configuration
     ].flatten.each do
       |option_name|
 
@@ -124,20 +124,24 @@ describe 'Command::Options' do
     end
   end
 
-  describe '--append' do
-    check_environment_variable_option('append')
+  %w< append add >.each do
+    |option_name|
 
-    it 'complains if there is no variable value' do
-      expect_invalid_value_error('append', 'whatever=')
-    end
+    describe "--#{option_name}" do
+      check_environment_variable_option(option_name)
 
-    %w[ ; : < > | ].each do
-      |character|
+      it 'complains if there is no variable value' do
+        expect_invalid_value_error(option_name, 'whatever=')
+      end
 
-      # Need to check this because they are not allowed in the v0 grammar.
-      it %Q<allows a variable value containing "#{character}"> do
-        new_options( ['--append', "variable=#{character}"] )
-        # no exception
+      %w[ ; : < > | ].each do
+        |character|
+
+        # Need to check this because they are not allowed in the v0 grammar.
+        it %Q<allows a variable value containing "#{character}"> do
+          new_options( ["--#{option_name}", "variable=#{character}"] )
+          # no exception
+        end
       end
     end
   end

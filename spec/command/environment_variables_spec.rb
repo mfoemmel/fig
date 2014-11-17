@@ -29,7 +29,12 @@ describe 'Fig' do
       fig(%w<--get FOO>, input)[0].should == 'BAR'
     end
 
-    it 'appends variable from command line' do
+    it 'appends variable from command line with --add' do
+      fig(%w<--add PATH=foo --get PATH>).should ==
+        ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
+    end
+
+    it 'appends variable from command line with --append' do
       fig(%w<--append PATH=foo --get PATH>).should ==
         ["foo#{File::PATH_SEPARATOR}#{ENV['PATH']}", '', 0]
     end

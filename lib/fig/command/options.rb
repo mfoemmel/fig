@@ -395,6 +395,17 @@ Running commands:
     @parser.add_argument_description(
       %w<-p --append>, %q<The value of this option must look like "NAME=VALUE".>
     )
+    @parser.on(
+      '--add VARIABLE=VALUE',
+      STARTS_WITH_NON_HYPHEN,
+      'prepend VALUE to PATH-like environment variable VARIABLE (synonym for --append)'
+    ) do |name_value|
+      @environment_statements <<
+        new_variable_statement('--add', name_value, Fig::Statement::Path)
+    end
+    @parser.add_argument_description(
+      %w<--add>, %q<The value of this option must look like "NAME=VALUE".>
+    )
 
     @parser.on(
       '-s',

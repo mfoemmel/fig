@@ -5,6 +5,11 @@ v1.xx - 2014/xx/xx
   - Republishing a package did not clean out no-longer-extant files from the
     runtime directory.
 
+  New feature:
+
+  - New --add synonym for the --append option.  A slight fix for the misnomer
+    that the latter option is.
+
   Miscellaneous:
 
   - Include file size in checks for whether a local file is up-to-date for
