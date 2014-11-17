@@ -165,7 +165,11 @@ class Fig::OperatingSystem
         end
       end
     else
-      if ! File.exist?(target) || File.mtime(source) != File.mtime(target)
+      if (
+            ! File.exist?(target)                     \
+        ||  File.mtime(source) != File.mtime(target)  \
+        ||  File.size(source) != File.size(target)
+      )
         Fig::Logging.info "#{msg} #{target}" if msg
         FileUtils.mkdir_p(File.dirname(target))
         FileUtils.cp(source, target)

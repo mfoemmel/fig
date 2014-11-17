@@ -7,6 +7,8 @@ v1.xx - 2014/xx/xx
 
   Miscellaneous:
 
+  - Include file size in checks for whether a local file is up-to-date for
+    copying.
   - Eliminate stack trace when releasing repository lock after exec error.
 
 v1.21.0 - 2014/10/13
