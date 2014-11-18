@@ -1,3 +1,12 @@
+v1.21.1.beta.2 - 2014/11/18
+
+  New feature:
+
+  - Given the existence of the --add option, there's no reason for path
+    statements in published packages to use "append", so they now use "add".
+    Yes, this is shifting one confusing bit of Fig for a slight complication,
+    but the complication already existed.
+
 v1.21.1.beta.1 - 2014/11/17
 
   Bug fixes:

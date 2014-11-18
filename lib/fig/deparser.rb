@@ -179,9 +179,7 @@ module Fig::Deparser
   end
 
   def path(statement)
-    # I'd really like to change this to "add", but because the command-line
-    # option is "--append", I'm not going to.
-    environment_variable(statement, 'append')
+    environment_variable(statement, 'add')
 
     return
   end

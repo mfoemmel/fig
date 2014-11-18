@@ -171,8 +171,8 @@ describe 'Fig' do
       end
     end
 
-    describe 'for --append' do
-      it_behaves_like 'environment variable option', 'append'
+    describe 'for --add' do
+      it_behaves_like 'environment variable option', 'add'
 
       ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS.each do
         |character|
@@ -188,7 +188,7 @@ describe 'Fig' do
 
           out, * = check_published_grammar_version(1)
 
-          out.should =~ / \b append \s+ VARIABLE='#{Regexp.quote character}' /x
+          out.should =~ / \b add \s+ VARIABLE='#{Regexp.quote character}' /x
         end
       end
     end
@@ -266,8 +266,8 @@ describe 'Fig' do
       end
     end
 
-    describe 'for append statement in v1 grammar' do
-      it_behaves_like 'environment variable statement', 'append'
+    describe 'for add statement in v1 grammar' do
+      it_behaves_like 'environment variable statement', 'add'
 
       ILLEGAL_CHARACTERS_IN_V0_PATH_STATEMENTS.each do
         |character|
@@ -276,11 +276,11 @@ describe 'Fig' do
           out, * = check_published_grammar_version(1, <<-"END_INPUT")
             grammar v1
             config default
-              append VARIABLE=#{character}
+              add VARIABLE=#{character}
             end
           END_INPUT
 
-          out.should =~ / \b append \s+ VARIABLE='#{Regexp.quote character}' /x
+          out.should =~ / \b add \s+ VARIABLE='#{Regexp.quote character}' /x
         end
       end
     end
