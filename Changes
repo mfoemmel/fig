@@ -1,23 +1,18 @@
-v1.21.1.beta.2 - 2014/11/18
+v1.22.0 - 2014/11/20
 
-  New feature:
+  New features:
 
+  - New --add synonym for the --append option.  A slight fix for the misnomer
+    that the latter option is.
   - Given the existence of the --add option, there's no reason for path
     statements in published packages to use "append", so they now use "add".
     Yes, this is shifting one confusing bit of Fig for a slight complication,
     but the complication already existed.
 
-v1.21.1.beta.1 - 2014/11/17
-
   Bug fixes:
 
   - Republishing a package did not clean out no-longer-extant files from the
     runtime directory.
-
-  New feature:
-
-  - New --add synonym for the --append option.  A slight fix for the misnomer
-    that the latter option is.
 
   Miscellaneous:
 
@@ -27,6 +22,11 @@ v1.21.1.beta.1 - 2014/11/17
     broken up into sections.
   - Stack trace no longer emitted when releasing repository lock after exec
     error.
+
+v1.21.1.beta.2 - 2014/11/18
+v1.21.1.beta.1 - 2014/11/17
+
+  - Test releases.
 
 v1.21.0 - 2014/10/13
 
