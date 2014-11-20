@@ -370,7 +370,7 @@ Running commands:
 
     @parser.on(
       '--run-command-statement',
-      'run the command in even in package definition file (i.e. no descriptor)'
+      'run the command in package definition file (i.e. with no package descriptor specified)'
     ) do
       set_base_action(Fig::Command::Action::RunCommandStatement)
     end
@@ -561,7 +561,7 @@ Running commands:
 
   def set_up_listings()
     @parser.separator ''
-    @parser.separator 'Listings:'
+    @parser.separator 'Querying repository contents:'
 
     option_mapping = {
       :local_packages => [
@@ -569,6 +569,25 @@ Running commands:
         Fig::Command::Action::ListLocal
       ],
 
+      :remote_packages => [
+        ['--list-remote', 'list packages in remote repository'],
+        Fig::Command::Action::ListRemote
+      ],
+    }
+
+    option_mapping.each_pair do
+      | type, specification_action_class |
+
+      specification, action_class = *specification_action_class
+      @parser.on(*specification) do
+        set_base_action(action_class)
+      end
+    end
+
+    @parser.separator ''
+    @parser.separator 'Querying package data:'
+
+    option_mapping = {
       :configs => [
         ['--list-configs', 'list configurations'],
         Fig::Command::Action::ListConfigs
@@ -585,11 +604,6 @@ Running commands:
           'list all variables defined/used by package and its dependencies'
         ],
         Fig::Command::Action::ListVariables
-      ],
-
-      :remote_packages => [
-        ['--list-remote', 'list packages in remote repo'],
-        Fig::Command::Action::ListRemote
       ],
     }
 
