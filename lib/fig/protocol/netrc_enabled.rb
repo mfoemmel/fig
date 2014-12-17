@@ -1,6 +1,7 @@
 require 'highline'
 require 'net/netrc'
 
+require 'fig/logging'
 require 'fig/user_input_error'
 
 module Fig; end
@@ -67,11 +68,23 @@ module Fig::Protocol::NetRCEnabled
   end
 
   def get_authentication_from_user(host)
-    username = HighLine.new.ask("Username for #{host}: ") { |q| q.echo = true }
-    password = HighLine.new.ask("Password for #{username}@#{host}: ") {
-      |q| q.echo = false
-    }
+    # This defaults to true, but Net::SSH::Prompt turns it off.  Unfortunately,
+    # this causes HighLine to barf when there's no input on STDIN, e.g. when
+    # running on a continuous integration server.
+    HighLine.track_eof = true
 
-    return NetRCEntry.new username, password
+    begin
+      username =
+        HighLine.new.ask("Username for #{host}: ") { |q| q.echo = true }
+      password = HighLine.new.ask("Password for #{username}@#{host}: ") {
+        |q| q.echo = false
+      }
+
+      return NetRCEntry.new username, password
+    rescue EOFError => error
+      Fig::Logging.debug(error)
+
+      return nil
+    end
   end
 end

@@ -1,5 +1,11 @@
 v1.xx.xx - xxxx/xx/xx
 
+  Bug fixes:
+
+  - Net::SSH::Prompt turns off HighLine's EOF detection.  We turn it back on
+    because, otherwise, prompting for credentials barfs when there's no input
+    available from STDIN, e.g. on a continuous integration server.
+
   Miscellaneous:
 
   - More tweaks of --options and --help-long output.
