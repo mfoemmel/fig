@@ -16,7 +16,7 @@ syntax keyword figKeyword
   \ path
   \ set
 
-syntax match figComment "#.*" contains=figTodos
+syntax match figComment "#.*" contains=figTodo
 
 highlight default link figTodo      Todo
 highlight default link figKeyword   Keyword
