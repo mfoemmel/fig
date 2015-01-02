@@ -1,10 +1,4 @@
-v1.xx - 2015/01/xx
-
-  Miscellaneous:
-
-  - A rudimentary Vim plugin has been added to the repository.
-
-v1.22.1.beta.1 - 2014/12/17
+v1.23.0 - 2015/01/02
 
   Bug fixes:
 
@@ -16,6 +10,14 @@ v1.22.1.beta.1 - 2014/12/17
 
   - More tweaks of --options and --help-long output.
   - Upgraded dependencies.
+  - A rudimentary Vim plugin has been added to the repository with syntax
+    highlighting of comments and keywords.  See
+    https://github.com/mfoemmel/fig/blob/master/support/vim/README.md for more.
+    Those with better VimL knowledge encouraged to submit improvements.
+
+v1.22.1.beta.1 - 2014/12/17
+
+  - Test release.
 
 v1.22.0 - 2014/11/20
 
