@@ -1,3 +1,12 @@
+v1.24.0 - 2015/01/xx
+
+  New feature:
+
+  - New --publish-comment-file option similar to the --publish-comment option
+    that allows you to put a comment at the top of published packages.  Instead
+    of specifying the comment as the argument, specify the path to a file that
+    will be pulled in and added.
+
 v1.23.0 - 2015/01/02
 
   Bug fixes:

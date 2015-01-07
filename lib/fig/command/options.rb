@@ -62,6 +62,7 @@ class Fig::Command::Options
   attr_reader   :package_definition_file
   attr_reader   :parser
   attr_reader   :publish_comment
+  attr_reader   :publish_comment_path
   attr_reader   :shell_command
   attr_reader   :suppress_cleanup_of_retrieves
   attr_reader   :suppress_includes
@@ -347,6 +348,14 @@ Running commands:
       'comment to include in published package'
     ) do |comment|
       @publish_comment = comment
+    end
+
+    @parser.on(
+      '--publish-comment-file PATH',
+      STARTS_WITH_NON_HYPHEN,
+      'file to include as a comment in published package'
+    ) do |path|
+      @publish_comment_path = path
     end
 
     @force = nil
@@ -877,6 +886,12 @@ Running commands:
     if @publish_comment && (! @base_action || ! @base_action.publish?)
       raise Fig::Command::OptionError.new(
         'Cannot use --publish-comment when not publishing.'
+      )
+    end
+
+    if @publish_comment_path && (! @base_action || ! @base_action.publish?)
+      raise Fig::Command::OptionError.new(
+        'Cannot use --publish-comment-file when not publishing.'
       )
     end
 

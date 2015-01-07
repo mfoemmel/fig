@@ -22,7 +22,6 @@ require 'fig/statement/grammar_version'
 require 'fig/statement/resource'
 require 'fig/statement/synthetic_raw_text'
 require 'fig/url'
-require 'fig/user_input_error'
 
 module Fig; end
 
@@ -166,11 +165,34 @@ class Fig::RepositoryPackagePublisher
   end
 
   def add_publish_comment
-    return if ! @options.publish_comment
+    return if not @options.publish_comment and not @options.publish_comment_path
 
-    comment = @options.publish_comment.strip.gsub(/[ \t]*\n/, "\n# ")
-    @text_assembler.add_header %Q<# #{comment}>
-    @text_assembler.add_header %q<#>
+    if @options.publish_comment
+      comment = @options.publish_comment.strip.gsub(/[ \t]*\n/, "\n# ")
+      @text_assembler.add_header %Q<# #{comment}>
+      @text_assembler.add_header %q<#>
+    end
+
+    if @options.publish_comment_path
+      begin
+        comment =
+          IO.read(@options.publish_comment_path).strip.gsub(/[ \t]*\n/, "\n# ")
+      rescue Errno::ENOENT
+        Fig::Logging.fatal(
+          %Q<Comment file "#{@options.publish_comment_path}" does not exist.>
+        )
+        raise Fig::RepositoryError.new
+      rescue Errno::EACCES
+        Fig::Logging.fatal(
+          %Q<Could not read comment file "#{@options.publish_comment_path}".>
+        )
+        raise Fig::RepositoryError.new
+      end
+
+      @text_assembler.add_header %Q<# #{comment}>
+      @text_assembler.add_header %q<#>
+    end
+
     @text_assembler.add_header %q<#>
 
     return
