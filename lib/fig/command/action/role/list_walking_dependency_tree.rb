@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'set'
 
 require 'fig/include_backtrace'

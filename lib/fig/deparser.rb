@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # Note: we very specifically do not require the files containing the
 # Deparser classes in order to avoid circular dependencies.
 

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig'
 require 'fig/command'
 require 'fig/command/action'

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'net/ftp'
 
 require 'fig/file_not_found_error'

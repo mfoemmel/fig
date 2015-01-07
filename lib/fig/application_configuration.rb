@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Fig; end
 
 # Configuration for the Fig program, as opposed to a config in a package.

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # To build fig for ruby 1.8.7 on windows please see the README for instructions.
 # It is not possible to do from the rake file anymore.
 

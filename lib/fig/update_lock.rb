@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fileutils'
 
 require 'fig/user_input_error'

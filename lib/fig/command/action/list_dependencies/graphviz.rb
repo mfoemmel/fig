@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/command/action'
 require 'fig/command/action/role/list_as_graphviz'
 require 'fig/command/action/role/list_base_config'

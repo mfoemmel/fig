@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'colorize'
 require 'log4r/logger'
 require 'log4r/outputter/iooutputter'

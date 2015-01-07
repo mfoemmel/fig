@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/statement'
 require 'fig/string_tokenizer'
 require 'fig/tokenized_string/token'

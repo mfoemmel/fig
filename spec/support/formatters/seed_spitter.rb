@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'rspec/core/formatters/documentation_formatter'
 
 class SeedSpitter < RSpec::Core::Formatters::DocumentationFormatter

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/deparser'
 require 'fig/deparser/v0'
 require 'fig/deparser/v1'

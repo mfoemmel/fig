@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'set'
 
 module  Fig; end

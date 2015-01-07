@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Fig; end
 
 # This exists because standard Kernel#at_exit blocks don't get run before

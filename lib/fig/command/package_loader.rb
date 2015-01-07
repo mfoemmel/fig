@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/not_yet_parsed_package'
 require 'fig/package_descriptor'
 require 'fig/parser'

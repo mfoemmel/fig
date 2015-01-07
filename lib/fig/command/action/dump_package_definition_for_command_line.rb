@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/command/action'
 require 'fig/command/action/role/has_no_sub_action'
 require 'fig/package_definition_text_assembler'

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'net/sftp'
 
 require 'fig/logging'

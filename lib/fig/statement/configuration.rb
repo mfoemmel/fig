@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/statement'
 require 'fig/statement/command'
 require 'fig/statement/synthetic_raw_text'

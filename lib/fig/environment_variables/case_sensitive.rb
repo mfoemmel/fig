@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/environment_variables'
 
 module Fig; end;

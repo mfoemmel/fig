@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Fig; end
 
 # Metadata about a package definition file that hasn't been read yet.

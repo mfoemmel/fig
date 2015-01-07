@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # Don't know what the idiomatic Ruby is for the situation where one wants to be
 # able to pull the dependencies from one Rakefile into another is, but here's
 # one way to do it.

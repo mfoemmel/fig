@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/package_descriptor_parse_error'
 
 module Fig; end

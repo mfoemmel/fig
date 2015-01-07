@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'cgi'
 require 'fileutils'
 # Must specify absolute path of ::Archive when using

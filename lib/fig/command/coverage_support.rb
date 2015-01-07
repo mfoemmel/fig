@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # This is not a normal module/class.  It contains code to be run by bin/fig and
 # bin/fig-debug when doing coverage.
 

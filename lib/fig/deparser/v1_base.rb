@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Fig; end
 module Fig::Deparser; end
 

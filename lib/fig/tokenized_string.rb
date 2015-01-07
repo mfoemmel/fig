@@ -1,3 +1,5 @@
+# coding: utf-8
+
 module Fig; end
 
 class Fig::TokenizedString

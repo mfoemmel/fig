@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/command/action/clean'
 require 'fig/command/action/dump_package_definition_for_command_line'
 require 'fig/command/action/dump_package_definition_parsed'

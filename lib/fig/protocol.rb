@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/logging'
 require 'fig/network_error'
 

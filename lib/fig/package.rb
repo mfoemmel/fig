@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/logging'
 require 'fig/no_such_package_config_error'
 require 'fig/package_descriptor'

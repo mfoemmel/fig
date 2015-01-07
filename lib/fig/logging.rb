@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'log4r'
 require 'log4r/configurator'
 require 'log4r/yamlconfigurator'

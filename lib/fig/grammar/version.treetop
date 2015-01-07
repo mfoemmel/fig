@@ -1,3 +1,5 @@
+# coding: utf-8
+
 # Treetop (http://treetop.rubyforge.org/) grammar for statement for declaring
 # package definition versions.
 #

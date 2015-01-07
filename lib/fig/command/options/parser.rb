@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'optparse'
 
 require 'fig/command/option_error'

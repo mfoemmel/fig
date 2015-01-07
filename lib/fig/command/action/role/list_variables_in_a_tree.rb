@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/command/action'
 require 'fig/statement/path'
 require 'fig/statement/set'

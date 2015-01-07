@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/command/package_loader'
 require 'fig/package'
 require 'fig/statement/configuration'

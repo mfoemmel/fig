@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/package'
 require 'fig/package_parse_error'
 require 'fig/statement'

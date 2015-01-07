@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'fig/command/action'
 require 'fig/command/action/role/list_base_config'
 require 'fig/command/action/role/list_dependencies_flat'

@@ -1,3 +1,5 @@
+# coding: utf-8
+
 require 'cgi'
 
 module  Fig; end
