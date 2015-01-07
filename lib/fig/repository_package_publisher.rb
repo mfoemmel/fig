@@ -177,8 +177,10 @@ class Fig::RepositoryPackagePublisher
 
     if @options.publish_comment_path
       begin
-        comment =
-          IO.read(@options.publish_comment_path).strip.gsub(/[ \t]*\n/, "\n# ")
+        comment = IO.read(
+          @options.publish_comment_path, :external_encoding => Encoding::UTF_8,
+        )
+        comment = comment.strip.gsub(/[ \t]*\n/, "\n# ")
       rescue Errno::ENOENT
         Fig::Logging.fatal(
           %Q<Comment file "#{@options.publish_comment_path}" does not exist.>
