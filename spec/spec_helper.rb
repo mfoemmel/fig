@@ -38,15 +38,22 @@ FIG_REMOTE_URL    = %Q<file://#{FIG_REMOTE_DIR}>
 
 FIG_DIRECTORY     ||= File.expand_path(File.dirname(__FILE__)) + '/../bin'
 FIG_COMMAND_CLASS ||= Fig::Command
-FIG_PROGRAM       ||=
-    %Q<#{FIG_DIRECTORY}/fig#{ENV['FIG_SPEC_DEBUG'] ? '-debug' : ''}>
+FIG_PROGRAM       ||= ENV['FIG_SPEC_DEBUG']                         \
+    ? 'exit Fig::Command.new.run_fig ARGV'                          \
+    : 'exit Fig::Command.new.run_fig_with_exception_handling ARGV'
 
 # Needed for testing of resources.
 FIG_FILE_GUARANTEED_TO_EXIST =
   File.expand_path(CURRENT_DIRECTORY + '/file-guaranteed-to-exist')
 
 RUBY_EXE              ||= RbConfig.ruby
-BASE_FIG_COMMAND_LINE ||= [RUBY_EXE, FIG_PROGRAM]
+BASE_FIG_COMMAND_LINE ||= [
+  RUBY_EXE,
+  '--encoding', 'UTF-8',
+  '-r', "#{FIG_DIRECTORY}/../lib/fig/command/initialization.rb",
+  '-e', FIG_PROGRAM,
+  '--',
+]
 
 ENV['HOME']           = USER_HOME
 ENV['FIG_HOME']       = FIG_HOME
