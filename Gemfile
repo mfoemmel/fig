@@ -24,7 +24,6 @@ gem 'log4r',             '>= 1.1.5'
 gem 'net-netrc',         '>= 0.2.2'
 gem 'net-sftp',          '>= 2.1.2'
 gem 'net-ssh',           '>= 2.6.7'
-gem 'open4',             '>= 1.0.1'
 gem 'rdoc',              '>= 4'
 gem 'treetop',           '>= 1.4.14'
 

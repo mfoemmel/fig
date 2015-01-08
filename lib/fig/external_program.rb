@@ -7,34 +7,34 @@ require 'fig/operating_system'
 module Fig; end
 
 class Fig::ExternalProgram
-  def self.set_up_open3
-    require 'open3'
-    def self.popen(*cmd)
-      exit_code = nil
+  def self.popen(*cmd)
+    exit_code = nil
 
-      Open3.popen3(*cmd) {
-        |stdin, stdout, stderr, wait_thread|
+    options = {}
+    stdin_read, stdin_write = IO.pipe Encoding::UTF_8
+    options[:in] = stdin_read
+    stdin_write.sync = true
 
-        yield stdin, stdout, stderr
+    stdout_read, stdout_write = IO.pipe Encoding::UTF_8
+    options[:out] = stdout_write
 
-        exit_code = wait_thread.value
-      }
+    stderr_read, stderr_write = IO.pipe Encoding::UTF_8
+    options[:err] = stderr_write
 
-      return exit_code
+    popen_run(
+      cmd,
+      options,
+      [stdin_read, stdout_write, stderr_write],
+      [stdin_write, stdout_read, stderr_read],
+    ) do
+      |stdin, stdout, stderr, wait_thread|
+
+      yield stdin, stdout, stderr
+
+      exit_code = wait_thread.value
     end
-  end
 
-  if Fig::OperatingSystem.windows?
-    set_up_open3
-  else
-    require 'open4'
-    def self.popen(*cmd)
-      return Open4::popen4(*cmd) {
-        |pid, stdin, stdout, stderr|
-
-        yield stdin, stdout, stderr
-      }
-    end
+    return exit_code
   end
 
   def self.capture(command_line, input = nil)
@@ -74,5 +74,24 @@ class Fig::ExternalProgram
     end
 
     return output, errors, result
+  end
+
+  private
+
+  # Stolen from open3.rb
+  def self.popen_run(cmd, opts, child_io, parent_io)
+    pid = spawn(*cmd, opts)
+    wait_thr = Process.detach(pid)
+    child_io.each {|io| io.close }
+    result = [*parent_io, wait_thr]
+    if defined? yield
+      begin
+        return yield(*result)
+      ensure
+        parent_io.each{|io| io.close unless io.closed?}
+        wait_thr.join
+      end
+    end
+    result
   end
 end
