@@ -26,7 +26,7 @@ class Fig::Command::Action::Version
   end
 
   def execute()
-    puts @version_message || File.basename($0) + ' v' + Fig::VERSION
+    puts @version_message || 'fig v' + Fig::VERSION
 
     return EXIT_SUCCESS
   end

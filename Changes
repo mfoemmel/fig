@@ -1,4 +1,4 @@
-v1.24.0 - 2015/01/07
+v1.24.0 - 2015/01/xx
 
   New feature:
 
@@ -6,6 +6,10 @@ v1.24.0 - 2015/01/07
     that allows you to put a comment at the top of published packages.  Instead
     of specifying the comment as the argument, specify the path to a file that
     will be pulled in and added.
+
+  Miscellaneous:
+
+  - I/O now uses UTF-8 for encoding.
 
 v1.23.0 - 2015/01/02
 

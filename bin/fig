@@ -1,21 +1,81 @@
-#!/usr/bin/env ruby
-# coding: utf-8
+#!/usr/bin/env bash
 
-( [1, 9, 2] <=> ( RUBY_VERSION.split(".").collect {|x| x.to_i} ) ) <= 0 or
-  abort "Ruby v1.9.2 is required; this is v#{RUBY_VERSION}."
+function emit-stack-trace {
+    local -i x
+    local -i stack_frames="${#FUNCNAME[@]}"
 
-if ENV['FIG_COVERAGE']
-  require File.expand_path(
-    File.join(
-      File.dirname(__FILE__), %w< .. lib fig command coverage_support.rb >
-    )
-  )
-end
+    {
+        echo "ERROR in ${FUNCNAME[1]}() at ${BASH_SOURCE[1]}:${BASH_LINENO[0]}"
 
-$LOAD_PATH << File.expand_path(File.join(File.dirname(__FILE__), %w< .. lib > ))
+        for (( x=2; x < stack_frames; x++ ))
+        do
+            echo "called by ${FUNCNAME[x]}() at ${BASH_SOURCE[x]}:${BASH_LINENO[x - 1]}"
+        done
+    } >&2
+} # end emit-stack-trace()
 
-require 'rubygems'
+function strict-errors {
+    set -o errexit
+    set -o errtrace
 
-require 'fig/command'
+    trap emit-stack-trace ERR
+} # end strict-errors()
 
-exit Fig::Command.new.run_fig_with_exception_handling ARGV
+function loose-errors {
+    set +o errexit
+    set +o errtrace
+
+    trap - ERR
+} # end loose-errors()
+
+
+strict-errors
+
+
+# "dirname $0" does not work if we were invoked via a symlink, so we've got to
+# go through this fun.  See http://mywiki.wooledge.org/BashFAQ/028
+if readlink -e /dev/null &>/dev/null
+then
+    # GNU readlink(1)
+    self="$(readlink -e "${BASH_SOURCE[0]}")"
+else
+    # BSD readlink(1)
+    loose-errors
+    self="${BASH_SOURCE[0]}"
+    if [[ ! $self =~ ^/ ]]
+    then
+        if [[ $self =~ / ]]
+        then
+            self="$PWD/$self"
+        else
+            echo 'Could not determine base directory for Fig.' >&2
+            exit 1
+        fi
+    fi
+
+    self_link="$(! readlink -n "$self")"
+    while [[ -n $self_link ]]
+    do
+        if [[ ! $self_link =~ ^/ ]]
+        then
+            self_link="$(dirname "$self")/$self_link"
+        fi
+
+        self="$self_link"
+        self_link="$(! readlink -n "$self")"
+    done
+    strict-errors
+fi
+
+fig_dir=$(dirname "$self")
+
+
+# No longer strict on errors; let Ruby code determine how this script exits.
+loose-errors
+
+
+exec ruby                                                               \
+    --encoding UTF-8                                                    \
+    -r "$fig_dir/../lib/fig/command/initialization.rb"                  \
+    -e 'exit Fig::Command.new.run_fig_with_exception_handling ARGV'     \
+    -- "$@"
