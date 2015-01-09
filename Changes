@@ -1,4 +1,4 @@
-v1.24.0 - 2015/01/xx
+v1.23.1.beta.1 - 2015/01/09
 
   New feature:
 
@@ -9,7 +9,7 @@ v1.24.0 - 2015/01/xx
 
   Miscellaneous:
 
-  - I/O now uses UTF-8 for encoding.
+  - All I/O now done using UTF-8 as the encoding.
   - No longer uses the open4 gem.
 
 v1.23.0 - 2015/01/02
