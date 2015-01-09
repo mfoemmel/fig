@@ -2,7 +2,7 @@
 
 require 'stringio'
 
-require 'fig/operating_system'
+require 'fig/user_input_error'
 
 module Fig; end
 
@@ -11,14 +11,14 @@ class Fig::ExternalProgram
     exit_code = nil
 
     options = {}
-    stdin_read, stdin_write = IO.pipe Encoding::UTF_8
+    stdin_read, stdin_write = IO.pipe Encoding::UTF_8, Encoding::UTF_8
     options[:in] = stdin_read
     stdin_write.sync = true
 
-    stdout_read, stdout_write = IO.pipe Encoding::UTF_8
+    stdout_read, stdout_write = IO.pipe Encoding::UTF_8, Encoding::UTF_8
     options[:out] = stdout_write
 
-    stderr_read, stderr_write = IO.pipe Encoding::UTF_8
+    stderr_read, stderr_write = IO.pipe Encoding::UTF_8, Encoding::UTF_8
     options[:err] = stderr_write
 
     popen_run(
@@ -58,6 +58,9 @@ class Fig::ExternalProgram
           |handle|
 
           begin
+            # #readpartial() is busted in that it is returning a byte array in
+            # a String with a bogus Encoding, even though the bytes may not be
+            # valid in the Encoding.
             input_to_output[handle] << handle.readpartial(4096)
           rescue EOFError
             input_to_output.delete handle
@@ -66,14 +69,10 @@ class Fig::ExternalProgram
       end
     end
 
-    if ! output.nil?
-      output = output.string
-    end
-    if ! errors.nil?
-      errors = errors.string
-    end
+    output_string = string_io_byte_array_to_utf8_string output
+    errors_string = string_io_byte_array_to_utf8_string errors
 
-    return output, errors, result
+    return output_string, errors_string, result
   end
 
   private
@@ -93,5 +92,20 @@ class Fig::ExternalProgram
       end
     end
     result
+  end
+
+  # There appears to be no way to convert from a byte array to a UTF-8 string
+  # cleanly, with a report of where things are wrong.
+  def self.string_io_byte_array_to_utf8_string(string_io)
+    string = string_io.string
+    string.force_encoding(Encoding::UTF_8)
+    if ! string.valid_encoding?
+      # Seriously lame, uninformative error message, but, hopefully, this is
+      # rare and I don't think I can spend the time to gather the information
+      # to make this better right now.
+      raise UserInputError.new 'Got invalid UTF-8 input.'
+    end
+
+    return string
   end
 end

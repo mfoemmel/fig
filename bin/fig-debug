@@ -77,7 +77,8 @@ loose-errors
 # Identical to regular fig, but doesn't use exception handling so you can see
 # stack traces.
 exec ruby                                                               \
-    --encoding UTF-8                                                    \
+    --external-encoding UTF-8                                           \
+    --internal-encoding UTF-8                                           \
     -r "$fig_dir/../lib/fig/command/initialization.rb"                  \
     -e 'exit Fig::Command.new.run_fig ARGV'                             \
     -- "$@"

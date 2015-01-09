@@ -75,7 +75,8 @@ loose-errors
 
 
 exec ruby                                                               \
-    --encoding UTF-8                                                    \
+    --external-encoding UTF-8                                           \
+    --internal-encoding UTF-8                                           \
     -r "$fig_dir/../lib/fig/command/initialization.rb"                  \
     -e 'exit Fig::Command.new.run_fig_with_exception_handling ARGV'     \
     -- "$@"

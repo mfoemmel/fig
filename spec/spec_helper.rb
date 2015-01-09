@@ -49,7 +49,8 @@ FIG_FILE_GUARANTEED_TO_EXIST =
 RUBY_EXE              ||= RbConfig.ruby
 BASE_FIG_COMMAND_LINE ||= [
   RUBY_EXE,
-  '--encoding', 'UTF-8',
+  '--external-encoding', 'UTF-8',
+  '--internal-encoding', 'UTF-8',
   '-r', "#{FIG_DIRECTORY}/../lib/fig/command/initialization.rb",
   '-e', FIG_PROGRAM,
   '--',
