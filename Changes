@@ -1,3 +1,10 @@
+v1.xx.xx - 2015/xx/xx
+
+  Miscellaneous:
+
+  - Small tweaks to --publish-comment and --publish-comment-file handling to
+    remove some trailing whitespace when there are blank lines in the input.
+
 v1.24.0 - 2015/01/13
 
   New feature:

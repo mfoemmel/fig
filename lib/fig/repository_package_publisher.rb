@@ -170,7 +170,8 @@ class Fig::RepositoryPackagePublisher
     return if not @options.publish_comment and not @options.publish_comment_path
 
     if @options.publish_comment
-      comment = @options.publish_comment.strip.gsub(/[ \t]*\n/, "\n# ")
+      comment = @options.publish_comment
+      comment = comment.strip.gsub(/[ \t]*\n/, "\n# ").gsub(/^#[ ]+\n/, "#\n")
       @text_assembler.add_header %Q<# #{comment}>
       @text_assembler.add_header %q<#>
     end
@@ -180,7 +181,7 @@ class Fig::RepositoryPackagePublisher
         comment = IO.read(
           @options.publish_comment_path, :external_encoding => Encoding::UTF_8,
         )
-        comment = comment.strip.gsub(/[ \t]*\n/, "\n# ")
+        comment = comment.strip.gsub(/[ \t]*\n/, "\n# ").gsub(/^#[ ]+\n/, "#\n")
       rescue Errno::ENOENT
         Fig::Logging.fatal(
           %Q<Comment file "#{@options.publish_comment_path}" does not exist.>

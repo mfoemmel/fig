@@ -402,7 +402,7 @@ describe 'Fig' do
         # Windows get newlines in command-line wrong, so we can't test that
         # part of the value handling there.
         comment = Fig::OperatingSystem.windows? ? "   comment  \t" :
-          "\n  not indented  \t\n    indented\nnot indented  \n\n"
+          "\n  not indented  \t\n\n    indented\n\nnot indented  \n\n"
 
         fig(
           [
@@ -414,8 +414,9 @@ describe 'Fig' do
         out, * = fig(%w<--dump-package-definition-text comment/1.2.3>)
 
         expected = Fig::OperatingSystem.windows? ? 'comment' :
-          "not indented\n#     indented\n# not indented"
+          "not indented\n#\n#     indented\n#\n# not indented"
 
+File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FILE__}:#{__LINE__}" }
         out.should be_start_with(
           "# #{expected}\n#\n#\n# Publishing information"
         )
@@ -423,7 +424,7 @@ describe 'Fig' do
 
       it 'includes the publish comment specified in a file' do
         file = "#{CURRENT_DIRECTORY}/comment.txt"
-        comment = "\n  not indented  \t\n    indented\nnot indented  \n\n"
+        comment = "\n  not indented  \t\n\n    indented\n\nnot indented  \n\n"
         write_file(file, comment)
 
         fig(
@@ -439,8 +440,9 @@ describe 'Fig' do
 
         out, * = fig(%w<--dump-package-definition-text comment-from-file/1.2.3>)
 
-        expected = "not indented\n#     indented\n# not indented"
+        expected = "not indented\n#\n#     indented\n#\n# not indented"
 
+File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FILE__}:#{__LINE__}" }
         out.should be_start_with(
           "# #{expected}\n#\n#\n# Publishing information"
         )
@@ -448,7 +450,7 @@ describe 'Fig' do
 
       it 'includes the publish comment specified in a file and on the command-line' do
         file = "#{CURRENT_DIRECTORY}/comment.txt"
-        write_file(file, '«comment from file»')
+        write_file(file, "«comment\n\nfrom\n\nfile»")
 
         fig(
           [
@@ -470,7 +472,7 @@ describe 'Fig' do
           >
         )
 
-        expected = "«comment from command-line»\n#\n# «comment from file»"
+        expected = "«comment\n#\n# from\n#\n# command-line»\n#\n# «comment from file»"
 
         out.should be_start_with(
           "# #{expected}\n#\n#\n# Publishing information"
