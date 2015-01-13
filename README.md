@@ -39,7 +39,13 @@ Community
 
 [Fig Mailing List](http://groups.google.com/group/fig-user)
 
+Extensions for other tools
+==========================
+
+These live in the `support` directory within the repository.  For example,
+there's a Vim plugin in `support/vim`.
+
 Copyright
 =========
 
-Copyright (c) 2009-2013 Matthew Foemmel. See LICENSE for details.
+Copyright (c) 2009-2015 Matthew Foemmel. See LICENSE for details.
