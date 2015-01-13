@@ -416,7 +416,6 @@ describe 'Fig' do
         expected = Fig::OperatingSystem.windows? ? 'comment' :
           "not indented\n#\n#     indented\n#\n# not indented"
 
-File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FILE__}:#{__LINE__}" }
         out.should be_start_with(
           "# #{expected}\n#\n#\n# Publishing information"
         )
@@ -442,7 +441,6 @@ File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FIL
 
         expected = "not indented\n#\n#     indented\n#\n# not indented"
 
-File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FILE__}:#{__LINE__}" }
         out.should be_start_with(
           "# #{expected}\n#\n#\n# Publishing information"
         )
@@ -450,7 +448,7 @@ File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FIL
 
       it 'includes the publish comment specified in a file and on the command-line' do
         file = "#{CURRENT_DIRECTORY}/comment.txt"
-        write_file(file, "«comment\n\nfrom\n\nfile»")
+        write_file(file, "«comment from file»")
 
         fig(
           [
@@ -472,7 +470,7 @@ File.open('/dev/tty', 'w') { |h| h.puts "\e[33;1mout = |||#{out}|||\e[0m #{__FIL
           >
         )
 
-        expected = "«comment\n#\n# from\n#\n# command-line»\n#\n# «comment from file»"
+        expected = "«comment from command-line»\n#\n# «comment from file»"
 
         out.should be_start_with(
           "# #{expected}\n#\n#\n# Publishing information"
