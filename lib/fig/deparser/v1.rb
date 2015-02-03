@@ -27,7 +27,7 @@ class Fig::Deparser::V1
   def grammar_version(statement)
     add_indent
 
-    @text << "grammar v1\n"
+    @text << "grammar v1\n\n"
 
     return
   end

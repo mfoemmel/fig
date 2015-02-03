@@ -5,6 +5,9 @@ v1.xx.xx - 2015/xx/xx
   - Small tweaks to --publish-comment and --publish-comment-file handling to
     remove some trailing whitespace when there are blank lines in the input.
 
+  - A blank line is added after grammar statements in published packages in
+    order to seperate them from other statements.
+
 v1.24.0 - 2015/01/13
 
   New feature:

@@ -36,7 +36,7 @@ class Fig::Deparser::V0
     add_indent
 
     # Comment out so that older clients don't have issues.
-    @text << "# grammar v0\n"
+    @text << "# grammar v0\n\n"
 
     return
   end
