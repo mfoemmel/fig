@@ -17,6 +17,8 @@ require 'fig/command/action/list_dependencies/json'
 require 'fig/command/action/list_dependencies/json_all_configs'
 require 'fig/command/action/list_dependencies/tree'
 require 'fig/command/action/list_dependencies/tree_all_configs'
+require 'fig/command/action/list_dependencies/yaml'
+require 'fig/command/action/list_dependencies/yaml_all_configs'
 require 'fig/command/action/list_local'
 require 'fig/command/action/list_remote'
 require 'fig/command/action/list_variables'
@@ -28,6 +30,8 @@ require 'fig/command/action/list_variables/json'
 require 'fig/command/action/list_variables/json_all_configs'
 require 'fig/command/action/list_variables/tree'
 require 'fig/command/action/list_variables/tree_all_configs'
+require 'fig/command/action/list_variables/yaml'
+require 'fig/command/action/list_variables/yaml_all_configs'
 require 'fig/command/action/options'
 require 'fig/command/action/publish'
 require 'fig/command/action/publish_local'
@@ -195,6 +199,10 @@ Running commands:
 
   def list_json?()
     return @list_json
+  end
+
+  def list_yaml?()
+    return @list_yaml
   end
 
   def graphviz?()
@@ -642,9 +650,15 @@ Running commands:
     end
 
     @parser.on(
-      '--list-json', 'for listings, output JSON instead of a list'
+      '--list-json', 'for listings, output JSON (http://json.org)'
     ) do
       @list_json = true
+    end
+
+    @parser.on(
+      '--list-yaml', 'for listings, output YAML (http://yaml.org)'
+    ) do
+      @list_yaml = true
     end
 
     @parser.on(
@@ -864,6 +878,10 @@ Running commands:
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-json.'
         )
+      elsif list_yaml?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-yaml.'
+        )
       elsif graphviz?
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --graphviz.'
@@ -889,6 +907,8 @@ Running commands:
       validate_list_option '--list-tree'
     elsif list_json?
       validate_list_option '--list-json'
+    elsif list_yaml?
+      validate_list_option '--list-yaml'
     elsif graphviz?
       validate_list_option '--graphviz'
     elsif list_all_configs?
@@ -900,16 +920,30 @@ Running commands:
         raise Fig::Command::OptionError.new(
           'Cannot use --list-tree and --graphviz at the same time.'
         )
-      end
-      if list_json?
+      elsif list_json?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --list-tree and --list-json at the same time.'
+        )
+      elsif list_yaml?
         raise Fig::Command::OptionError.new(
           'Cannot use --list-tree and --list-json at the same time.'
         )
       end
     end
-    if graphviz? and list_json?
+    if graphviz?
+      if list_json?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --graphviz and --list-json at the same time.'
+        )
+      elsif list_yaml?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --graphviz and --list-yaml at the same time.'
+        )
+      end
+    end
+    if list_json? and list_yaml?
       raise Fig::Command::OptionError.new(
-        'Cannot use --graphviz and --list-json at the same time.'
+        'Cannot use --list-json and --list-yaml at the same time.'
       )
     end
 
@@ -957,6 +991,8 @@ Running commands:
         sub_action_name = list_all_configs? ? :TreeAllConfigs : :Tree
       elsif list_json?
         sub_action_name = list_all_configs? ? :JSONAllConfigs : :JSON
+      elsif list_yaml?
+        sub_action_name = list_all_configs? ? :YAMLAllConfigs : :YAML
       elsif graphviz?
         sub_action_name = list_all_configs? ? :GraphvizAllConfigs : :Graphviz
       elsif list_all_configs?

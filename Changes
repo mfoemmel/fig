@@ -12,11 +12,15 @@ v1.xx.xx - 2015/xx/xx
 
   New features:
 
+  - New --list-yaml option to get --list-dependencies and --list-variables to
+    emit their data as YAML (http://yaml.org).
+
   - New --list-json option to get --list-dependencies and --list-variables to
     emit their data as JSON (http://json.org).  Note that JSON isn't exactly
     ideal for representing the directed acyclic graph that even a mildly
     complicated set of dependencies can result in and you can end up with large
-    amounts of duplicate data in the output.
+    amounts of duplicate data in the output.  If you can handle parsing YAML,
+    you are probably better off with that.
 
   Miscellaneous:
 

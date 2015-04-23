@@ -30,7 +30,7 @@ module Fig::Command::Action::Role::ListVariablesFromDataStructure
     hash       = new_package_config_hash package, config_name
     statements = variable_statements package, config_name
     if not statements.empty?
-      hash[:variables] = statements
+      hash['variables'] = statements
     end
 
     return hash
@@ -52,9 +52,9 @@ module Fig::Command::Action::Role::ListVariablesFromDataStructure
 
   def hash_for_variable_statement(statement)
     return {
-      :type  => statement.statement_type,
-      :name  => statement.name,
-      :value => statement.tokenized_value.to_escaped_string,
+      'type'  => statement.statement_type,
+      'name'  => statement.name,
+      'value' => statement.tokenized_value.to_escaped_string,
     }
   end
 end

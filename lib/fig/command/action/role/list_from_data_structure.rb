@@ -46,8 +46,8 @@ module Fig::Command::Action::Role::ListFromDataStructure
         visited << edge
 
         including_hash = @package_configs[including_package][including_config]
-        including_hash[:dependencies] ||= []
-        including_hash[:dependencies] <<
+        including_hash['dependencies'] ||= []
+        including_hash['dependencies'] <<
           @package_configs[included_package][included_config]
       end
     end
@@ -75,15 +75,15 @@ module Fig::Command::Action::Role::ListFromDataStructure
     hash = {}
 
     if package.name
-      hash[:name] = package.name
+      hash['name'] = package.name
     end
     if package.version
-      hash[:version] = package.version
+      hash['version'] = package.version
     end
     if package.description
-      hash[:description] = package.description
+      hash['description'] = package.description
     end
-    hash[:config] = config_name
+    hash['config'] = config_name
 
     return hash
   end
