@@ -13,6 +13,8 @@ require 'fig/command/action/list_dependencies/all_configs'
 require 'fig/command/action/list_dependencies/default'
 require 'fig/command/action/list_dependencies/graphviz'
 require 'fig/command/action/list_dependencies/graphviz_all_configs'
+require 'fig/command/action/list_dependencies/json'
+require 'fig/command/action/list_dependencies/json_all_configs'
 require 'fig/command/action/list_dependencies/tree'
 require 'fig/command/action/list_dependencies/tree_all_configs'
 require 'fig/command/action/list_local'
@@ -22,6 +24,8 @@ require 'fig/command/action/list_variables/all_configs'
 require 'fig/command/action/list_variables/default'
 require 'fig/command/action/list_variables/graphviz'
 require 'fig/command/action/list_variables/graphviz_all_configs'
+require 'fig/command/action/list_variables/json'
+require 'fig/command/action/list_variables/json_all_configs'
 require 'fig/command/action/list_variables/tree'
 require 'fig/command/action/list_variables/tree_all_configs'
 require 'fig/command/action/options'
@@ -187,6 +191,10 @@ Running commands:
 
   def list_tree?()
     return @list_tree
+  end
+
+  def list_json?()
+    return @list_json
   end
 
   def graphviz?()
@@ -634,6 +642,12 @@ Running commands:
     end
 
     @parser.on(
+      '--list-json', 'for listings, output JSON instead of a list'
+    ) do
+      @list_json = true
+    end
+
+    @parser.on(
       '--graphviz',
       'for listings, output DOT (http://graphviz.org/content/dot-language)'
     ) do
@@ -840,21 +854,21 @@ Running commands:
 
   def validate()
     if suppress_includes
+      # Not conceptually incompatible, just not implemented (would need to
+      # handle in command/action/role/list_*)
       if list_tree?
-        # Not conceptually incompatible, just not implemented (would need to
-        # handle in command/action/role/list_*)
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-tree.'
         )
+      elsif list_json?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-json.'
+        )
       elsif graphviz?
-        # Not conceptually incompatible, just not implemented (would need to
-        # handle in command/action/role/list_*)
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --graphviz.'
         )
       elsif list_all_configs?
-        # Not conceptually incompatible, just not implemented (would need to
-        # handle in command/action/role/list_*)
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-all-configs.'
         )
@@ -873,15 +887,29 @@ Running commands:
       end
     elsif list_tree?
       validate_list_option '--list-tree'
+    elsif list_json?
+      validate_list_option '--list-json'
     elsif graphviz?
       validate_list_option '--graphviz'
     elsif list_all_configs?
       validate_list_option '--list-all-configs'
     end
 
-    if list_tree? && graphviz?
+    if list_tree?
+      if graphviz?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --list-tree and --graphviz at the same time.'
+        )
+      end
+      if list_json?
+        raise Fig::Command::OptionError.new(
+          'Cannot use --list-tree and --list-json at the same time.'
+        )
+      end
+    end
+    if graphviz? and list_json?
       raise Fig::Command::OptionError.new(
-        'Cannot use --list-tree and --graphviz at the same time.'
+        'Cannot use --graphviz and --list-json at the same time.'
       )
     end
 
@@ -907,7 +935,10 @@ Running commands:
   end
 
   def validate_list_option(option)
-    if ! @base_action.list_dependencies? && ! @base_action.list_variables?
+    if (
+          ! @base_action \
+      ||  ! @base_action.list_dependencies? && ! @base_action.list_variables?
+    )
       raise Fig::Command::OptionError.new(
         %Q<The #{option} option isn't useful without --list-dependencies/--list-variables.>
       )
@@ -924,6 +955,8 @@ Running commands:
       sub_action_name = :Default
       if list_tree?
         sub_action_name = list_all_configs? ? :TreeAllConfigs : :Tree
+      elsif list_json?
+        sub_action_name = list_all_configs? ? :JSONAllConfigs : :JSON
       elsif graphviz?
         sub_action_name = list_all_configs? ? :GraphvizAllConfigs : :Graphviz
       elsif list_all_configs?

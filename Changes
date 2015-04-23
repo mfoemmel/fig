@@ -1,5 +1,23 @@
 v1.xx.xx - 2015/xx/xx
 
+  Announcement:
+
+  - This is the final version that will support Ruby 1.9.x.  The next version
+    will require Ruby 2.0.0.
+
+  Bug fix:
+
+  - No longer crashes when using --graphviz, --list-tree, or --list-all-configs
+    without any other options.  Thanks to Matt Godbolt for the report.
+
+  New features:
+
+  - New --list-json option to get --list-dependencies and --list-variables to
+    emit their data as JSON (http://json.org).  Note that JSON isn't exactly
+    ideal for representing the directed acyclic graph that even a mildly
+    complicated set of dependencies can result in and you can end up with large
+    amounts of duplicate data in the output.
+
   Miscellaneous:
 
   - Small tweaks to --publish-comment and --publish-comment-file handling to
