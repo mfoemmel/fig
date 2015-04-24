@@ -68,7 +68,7 @@ Querying:
 
 List options (represented as "[...list options...]" above):
 
-      [--list-tree | --graphviz]
+      [--list-tree | --list-json | --list-yaml | --graphviz]
       [--list-all-configs]
 
 Standard options (represented as "[...]" above):
