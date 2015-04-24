@@ -1,3 +1,10 @@
+v1.24.1.beta.2 - 2015/04/xx
+
+  Miscellaneous:
+
+  - Renamed --list-yaml & --list-json to --yaml & --json to make them more
+    consistent with the existing --graphviz.
+
 v1.24.1.beta.1 - 2015/04/23
 
   Announcement:

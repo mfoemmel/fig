@@ -21,6 +21,6 @@ class Fig::Command::Action::ListVariables::JSON
   include Fig::Command::Action::Role::ListWalkingDependencyTree
 
   def options()
-    return %w<--list-variables --list-json>
+    return %w<--list-variables --json>
   end
 end

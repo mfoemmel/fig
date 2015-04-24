@@ -197,12 +197,12 @@ Running commands:
     return @list_tree
   end
 
-  def list_json?()
-    return @list_json
+  def json?()
+    return @json
   end
 
-  def list_yaml?()
-    return @list_yaml
+  def yaml?()
+    return @yaml
   end
 
   def graphviz?()
@@ -650,15 +650,15 @@ Running commands:
     end
 
     @parser.on(
-      '--list-json', 'for listings, output JSON (http://json.org)'
+      '--json', 'for listings, output JSON (http://json.org)'
     ) do
-      @list_json = true
+      @json = true
     end
 
     @parser.on(
-      '--list-yaml', 'for listings, output YAML (http://yaml.org)'
+      '--yaml', 'for listings, output YAML (http://yaml.org)'
     ) do
-      @list_yaml = true
+      @yaml = true
     end
 
     @parser.on(
@@ -874,13 +874,13 @@ Running commands:
         raise Fig::Command::OptionError.new(
           'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-tree.'
         )
-      elsif list_json?
+      elsif json?
         raise Fig::Command::OptionError.new(
-          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-json.'
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --json.'
         )
-      elsif list_yaml?
+      elsif yaml?
         raise Fig::Command::OptionError.new(
-          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --list-yaml.'
+          'Cannot use --suppress-all-includes/--suppress-cross-package-includes with --yaml.'
         )
       elsif graphviz?
         raise Fig::Command::OptionError.new(
@@ -905,10 +905,10 @@ Running commands:
       end
     elsif list_tree?
       validate_list_option '--list-tree'
-    elsif list_json?
-      validate_list_option '--list-json'
-    elsif list_yaml?
-      validate_list_option '--list-yaml'
+    elsif json?
+      validate_list_option '--json'
+    elsif yaml?
+      validate_list_option '--yaml'
     elsif graphviz?
       validate_list_option '--graphviz'
     elsif list_all_configs?
@@ -920,30 +920,30 @@ Running commands:
         raise Fig::Command::OptionError.new(
           'Cannot use --list-tree and --graphviz at the same time.'
         )
-      elsif list_json?
+      elsif json?
         raise Fig::Command::OptionError.new(
-          'Cannot use --list-tree and --list-json at the same time.'
+          'Cannot use --list-tree and --json at the same time.'
         )
-      elsif list_yaml?
+      elsif yaml?
         raise Fig::Command::OptionError.new(
-          'Cannot use --list-tree and --list-json at the same time.'
+          'Cannot use --list-tree and --json at the same time.'
         )
       end
     end
     if graphviz?
-      if list_json?
+      if json?
         raise Fig::Command::OptionError.new(
-          'Cannot use --graphviz and --list-json at the same time.'
+          'Cannot use --graphviz and --json at the same time.'
         )
-      elsif list_yaml?
+      elsif yaml?
         raise Fig::Command::OptionError.new(
-          'Cannot use --graphviz and --list-yaml at the same time.'
+          'Cannot use --graphviz and --yaml at the same time.'
         )
       end
     end
-    if list_json? and list_yaml?
+    if json? and yaml?
       raise Fig::Command::OptionError.new(
-        'Cannot use --list-json and --list-yaml at the same time.'
+        'Cannot use --json and --yaml at the same time.'
       )
     end
 
@@ -989,9 +989,9 @@ Running commands:
       sub_action_name = :Default
       if list_tree?
         sub_action_name = list_all_configs? ? :TreeAllConfigs : :Tree
-      elsif list_json?
+      elsif json?
         sub_action_name = list_all_configs? ? :JSONAllConfigs : :JSON
-      elsif list_yaml?
+      elsif yaml?
         sub_action_name = list_all_configs? ? :YAMLAllConfigs : :YAML
       elsif graphviz?
         sub_action_name = list_all_configs? ? :GraphvizAllConfigs : :Graphviz

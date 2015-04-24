@@ -21,6 +21,6 @@ class Fig::Command::Action::ListVariables::YAML
   include Fig::Command::Action::Role::ListWalkingDependencyTree
 
   def options()
-    return %w<--list-variables --list-yaml>
+    return %w<--list-variables --yaml>
   end
 end

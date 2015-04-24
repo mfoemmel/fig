@@ -21,7 +21,7 @@ class Fig::Command::Action::ListDependencies::YAML
   include Fig::Command::Action::Role::ListWalkingDependencyTree
 
   def options()
-    return %w<--list-dependencies --list-yaml>
+    return %w<--list-dependencies --yaml>
   end
 
   def descriptor_requirement()

@@ -21,7 +21,7 @@ class Fig::Command::Action::ListDependencies::JSONAllConfigs
   include Fig::Command::Action::Role::ListWalkingDependencyTree
 
   def options()
-    return %w<--list-dependencies --list-json --list-all-configs>
+    return %w<--list-dependencies --json --list-all-configs>
   end
 
   def descriptor_requirement()
