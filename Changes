@@ -1,4 +1,8 @@
-v1.24.1.beta.2 - 2015/04/xx
+v1.24.1.beta.2 - 2015/04/24
+
+  Bug fix:
+
+  - Fixed crash when combining --list-all-configs with JSON and YAML output.
 
   Miscellaneous:
 

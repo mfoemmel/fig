@@ -21,14 +21,15 @@ module Fig::Command::Action::Role::ListFromDataStructure
       base_package, base_configs, include_gather, &package_gather
     )
 
+    base_id = package_id base_package
     if base_configs.size > 1
-      @object_to_be_serialized = @package_configs[base_package].keys.collect do
+      @object_to_be_serialized = @package_configs[base_id].keys.collect do
         |config_name|
 
-        @package_configs[base_package][config_name]
+        @package_configs[base_id][config_name]
       end
     else
-      @object_to_be_serialized = @package_configs[base_package][base_configs[0]]
+      @object_to_be_serialized = @package_configs[base_id][base_configs[0]]
     end
   end
 
@@ -45,10 +46,13 @@ module Fig::Command::Action::Role::ListFromDataStructure
       if ! visited.include? edge
         visited << edge
 
-        including_hash = @package_configs[including_package][including_config]
+        included_id    = package_id included_package
+        including_id   = package_id including_package
+        including_hash = @package_configs[including_id][including_config]
+
         including_hash['dependencies'] ||= []
         including_hash['dependencies'] <<
-          @package_configs[included_package][included_config]
+          @package_configs[included_id][included_config]
       end
     end
   end
@@ -64,9 +68,9 @@ module Fig::Command::Action::Role::ListFromDataStructure
       if ! visited.include? name
         visited << name
 
-        @package_configs[package] ||= {}
-        @package_configs[package][config_name] =
-          node_content package, config_name
+        id = package_id package
+        @package_configs[id] ||= {}
+        @package_configs[id][config_name] = node_content package, config_name
       end
     end
   end
@@ -86,5 +90,9 @@ module Fig::Command::Action::Role::ListFromDataStructure
     hash['config'] = config_name
 
     return hash
+  end
+
+  def package_id(package)
+    return package.name || "description: #{package.description}"
   end
 end
