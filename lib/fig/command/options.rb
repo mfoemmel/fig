@@ -916,19 +916,10 @@ Running commands:
     end
 
     if list_tree?
-      if graphviz?
-        raise Fig::Command::OptionError.new(
-          'Cannot use --list-tree and --graphviz at the same time.'
-        )
-      elsif json?
-        raise Fig::Command::OptionError.new(
-          'Cannot use --list-tree and --json at the same time.'
-        )
-      elsif yaml?
-        raise Fig::Command::OptionError.new(
-          'Cannot use --list-tree and --json at the same time.'
-        )
-      end
+      validate_list_options_with_nodes('--list-tree')
+    end
+    if list_all_configs?
+      validate_list_options_with_nodes('--list-all-configs')
     end
     if graphviz?
       if json?
@@ -975,6 +966,24 @@ Running commands:
     )
       raise Fig::Command::OptionError.new(
         %Q<The #{option} option isn't useful without --list-dependencies/--list-variables.>
+      )
+    end
+
+    return
+  end
+
+  def validate_list_options_with_nodes(conflicting_option)
+    if graphviz?
+      raise Fig::Command::OptionError.new(
+        "Cannot use #{conflicting_option} and --graphviz at the same time."
+      )
+    elsif json?
+      raise Fig::Command::OptionError.new(
+        "Cannot use #{conflicting_option} and --json at the same time."
+      )
+    elsif yaml?
+      raise Fig::Command::OptionError.new(
+        "Cannot use #{conflicting_option} and --json at the same time."
       )
     end
 
