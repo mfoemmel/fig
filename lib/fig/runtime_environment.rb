@@ -28,19 +28,18 @@ class Fig::RuntimeEnvironment
 
   def initialize(
     repository,
-    parser,
+    non_repository_packages,
     suppress_includes,
     variables_override,
     working_directory_maintainer
   )
     @repository                   = repository
-    @parser                       = parser
+    @non_repository_packages      = non_repository_packages
     @suppress_includes            = suppress_includes
     @variables                    =
       variables_override || Fig::OperatingSystem.get_environment_variables()
     @retrieves                    = {}
     @named_packages               = {}
-    @packages_from_files          = {}
     @working_directory_maintainer = working_directory_maintainer
   end
 
@@ -274,8 +273,7 @@ class Fig::RuntimeEnvironment
       Fig::PackageDescriptor.new(nil, nil, nil, :file_path => full_path)
 
     new_backtrace = Fig::IncludeBacktrace.new(backtrace, descriptor)
-    package =
-      package_for_file(including_package, full_path, descriptor, backtrace)
+    package = package_for_file(including_package, full_path, backtrace)
 
     apply_config(
       package, config_name || Fig::Package::DEFAULT_CONFIG, new_backtrace
@@ -355,31 +353,14 @@ class Fig::RuntimeEnvironment
     return package
   end
 
-  def package_for_file(including_package, full_path, descriptor, backtrace)
-    package = @packages_from_files[full_path]
-    return package if package
-
-    if ! File.exist? full_path
-      raise_repository_error(
-        %Q<"#{full_path}" does not exist.>, backtrace, including_package
-      )
+  def package_for_file(including_package, full_path, backtrace)
+    if package = @non_repository_packages[full_path]
+      return package
     end
 
-    content = File.read full_path
-
-    unparsed_package = Fig::NotYetParsedPackage.new
-    unparsed_package.descriptor         = descriptor
-    unparsed_package.working_directory  =
-      unparsed_package.include_file_base_directory =
-      File.dirname(full_path)
-    unparsed_package.source_description = full_path
-    unparsed_package.unparsed_text      = content
-
-    package = @parser.parse_package unparsed_package
-
-    @packages_from_files[full_path] = package
-
-    return package
+    raise_repository_error(
+      %Q<"#{full_path}" does not exist.>, backtrace, including_package
+    )
   end
 
   def determine_package_for_execution(base_package, base_config, descriptor)

@@ -11,6 +11,7 @@ require 'fig/command/package_applier'
 require 'fig/command/package_loader'
 require 'fig/figrc'
 require 'fig/logging'
+require 'fig/non_repository_packages'
 require 'fig/operating_system'
 require 'fig/package'
 require 'fig/parser'
@@ -76,6 +77,7 @@ class Fig::Command
       base_config(),
       @environment,
       @repository,
+      @non_repository_packages,
       @working_directory_maintainer,
       @operating_system,
       @package_source_description,
@@ -139,6 +141,7 @@ class Fig::Command
       :base_config,
       :environment,
       :repository,
+      :non_repository_packages,
       :working_directory_maintainer,
       :operating_system,
       :package_source_description,
@@ -202,6 +205,9 @@ class Fig::Command
     )
 
     prepare_repository()
+
+    @non_repository_packages = Fig::NonRepositoryPackages.new @parser
+
     prepare_runtime_environment()
   end
 
@@ -282,7 +288,7 @@ class Fig::Command
 
     @environment = Fig::RuntimeEnvironment.new(
       @repository,
-      @parser,
+      @non_repository_packages,
       @options.suppress_includes,
       environment_variables,
       @working_directory_maintainer,
