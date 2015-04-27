@@ -22,6 +22,7 @@ class Fig::Package
 
   attr_reader   :name
   attr_reader   :version
+  attr_reader   :file_path
   attr_reader   :description
   attr_reader   :runtime_directory
   attr_reader   :include_file_base_directory
@@ -32,6 +33,7 @@ class Fig::Package
   def initialize(
     name,
     version,
+    file_path,
     description,
     runtime_directory,
     include_file_base_directory,
@@ -40,6 +42,7 @@ class Fig::Package
   )
     @name                         = name
     @version                      = version
+    @file_path                    = file_path
     @description                  = description
     @runtime_directory            = runtime_directory
     @include_file_base_directory  = include_file_base_directory
@@ -68,12 +71,20 @@ class Fig::Package
   end
 
   def [](config_name)
-    @statements.each do |stmt|
-      return stmt if stmt.is_a?(Fig::Statement::Configuration) && stmt.name == config_name
+    @statements.each do
+      |statement|
+
+      return statement if
+            statement.is_a?(Fig::Statement::Configuration) \
+        &&  statement.name == config_name
     end
 
     descriptor = Fig::PackageDescriptor.new(
-      @name, @version, config_name, :description => @description
+      @name,
+      @version,
+      config_name,
+      :file_path   => @file_path,
+      :description => @description
     )
     config_description = nil
     if @name.nil? and @version.nil?

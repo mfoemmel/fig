@@ -93,9 +93,9 @@ module Fig::Command::Action::Role::Publish
   end
 
   def derive_publish_statements_from_environment_statements
-    if @execution_context.package_loaded_from_path
+    if @execution_context.package_load_path_description
       message = 'Cannot publish based upon both a package definition file ('
-      message << @execution_context.package_loaded_from_path
+      message << @execution_context.package_load_path_description
       message << ') and --set/--append options.'
 
       if @execution_context.package_source_description ==

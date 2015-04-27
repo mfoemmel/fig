@@ -68,6 +68,7 @@ class Fig::ParserPackageBuildState
     package = Fig::Package.new(
       @descriptor.name,
       @descriptor.version,
+      @descriptor.file_path,
       @descriptor.description,
       unparsed_package.working_directory,
       unparsed_package.include_file_base_directory,

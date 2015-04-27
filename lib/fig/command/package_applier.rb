@@ -71,6 +71,7 @@ class Fig::Command::PackageApplier
           @base_package.name(),
           @base_package.version(),
           @base_config,
+          :file_path => @base_package.file_path,
           :description => @base_package.description
         ),
         @base_package,
@@ -91,6 +92,7 @@ class Fig::Command::PackageApplier
     return Fig::Package.new(
       nil,  # Name
       nil,  # Version
+      nil,  # File path
       'command-line',
       '.',  # Working
       '.',  # Base

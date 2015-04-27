@@ -106,6 +106,7 @@ class Fig::RuntimeEnvironment
           package.name,
           package.version,
           config_name,
+          :file_path   => package.file_path,
           :description => package.description
         )
       )
@@ -270,7 +271,7 @@ class Fig::RuntimeEnvironment
       File.absolute_path(path, including_package.include_file_base_directory)
 
     descriptor =
-      Fig::PackageDescriptor.new(nil, nil, nil, :description => full_path)
+      Fig::PackageDescriptor.new(nil, nil, nil, :file_path => full_path)
 
     new_backtrace = Fig::IncludeBacktrace.new(backtrace, descriptor)
     package =
@@ -395,7 +396,11 @@ class Fig::RuntimeEnvironment
         Fig::IncludeBacktrace.new(
           nil,
           Fig::PackageDescriptor.new(
-            package_name, descriptor.version, config_name
+            package_name,
+            descriptor.version,
+            config_name,
+            :file_path   => descriptor.file_path,
+            :description => descriptor.description
           )
         )
       )

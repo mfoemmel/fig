@@ -9,7 +9,7 @@ class Fig::Command; end
 
 # Loads the base package.
 class Fig::Command::PackageLoader
-  attr_reader :package_loaded_from_path
+  attr_reader :package_load_path_description
 
   DEFAULT_PACKAGE_FILE = 'package.fig'
   DEFAULT_APPLICATION_FILE = 'application.fig'
@@ -47,8 +47,8 @@ class Fig::Command::PackageLoader
   end
 
   def package_source_description()
-    if @package_loaded_from_path
-      return @package_loaded_from_path
+    if @package_load_path_description
+      return @package_load_path_description
     elsif @descriptor
       return Fig::PackageDescriptor.format(
         @descriptor.name, @descriptor.version, nil
@@ -64,18 +64,20 @@ class Fig::Command::PackageLoader
     if @package_definition_file == :none
       return nil
     elsif @package_definition_file == '-'
-      @package_loaded_from_path = '<standard input>'
+      @package_load_path_description = '<standard input>'
 
       return $stdin.read
     elsif @package_definition_file.nil?
       if File.exist?(DEFAULT_PACKAGE_FILE)
-        @package_loaded_from_path = DEFAULT_PACKAGE_FILE
+        @package_load_path_description = DEFAULT_PACKAGE_FILE
+        @package_load_path             = DEFAULT_PACKAGE_FILE
       elsif File.exist?(DEFAULT_APPLICATION_FILE)
-        @package_loaded_from_path = DEFAULT_APPLICATION_FILE
+        @package_load_path_description = DEFAULT_APPLICATION_FILE
+        @package_load_path             = DEFAULT_APPLICATION_FILE
       end
 
-      if @package_loaded_from_path
-        return File.read(@package_loaded_from_path)
+      if @package_load_path
+        return File.read(@package_load_path)
       end
     else
       return read_in_package_definition_file(@package_definition_file)
@@ -86,7 +88,8 @@ class Fig::Command::PackageLoader
 
   def read_in_package_definition_file(config_file)
     if File.exist?(config_file)
-      @package_loaded_from_path = config_file
+      @package_load_path_description       = config_file
+      @package_load_path                   = config_file
       @package_include_file_base_directory = File.dirname config_file
 
       return File.read(config_file)
@@ -109,7 +112,8 @@ class Fig::Command::PackageLoader
       nil,
       nil,
       nil,
-      :description => source_description,
+      :file_path          => @package_load_path,
+      :description        => @package_load_path ? nil : source_description,
       :source_description => source_description
     )
 
@@ -135,6 +139,7 @@ class Fig::Command::PackageLoader
       Fig::Package.new(
         nil,  # Name
         nil,  # Version
+        nil,  # File path
         'synthetic',
         '.',  # Working
         '.',  # Base

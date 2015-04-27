@@ -11,7 +11,12 @@ class Fig::PackageDescriptor
   UNBRACKETED_COMPONENT_PATTERN = / (?! [.]{1,2} $) [a-zA-Z0-9_.-]+ /x
   COMPONENT_PATTERN = / \A #{UNBRACKETED_COMPONENT_PATTERN} \z /x
 
-  attr_reader :name, :version, :config, :original_string, :description
+  attr_reader :name
+  attr_reader :version
+  attr_reader :config
+  attr_reader :original_string
+  attr_reader :file_path
+  attr_reader :description
 
   def self.format(
     name, version, config, use_default_config = false, description = nil
@@ -59,6 +64,9 @@ class Fig::PackageDescriptor
   #   :version                        => { :required | :forbidden }
   #   :config                         => { :required | :forbidden }
   #   :original_string                => the unparsed form
+  #   :file_path                      => if this is for a file outside of the
+  #                                      repository and not synthetic, the
+  #                                      source of the package
   #   :description                    => meta-information, if this is for a
   #                                      synthetic package
   #   :require_at_least_one_component => should we have at least one of
@@ -72,6 +80,7 @@ class Fig::PackageDescriptor
     @version         = translate_component(version)
     @config          = translate_component(config)
     @original_string = options[:original_string]
+    @file_path       = options[:file_path]
     @description     = options[:description]
 
     validate_component name,    'name',    :name,    options
@@ -81,19 +90,20 @@ class Fig::PackageDescriptor
   end
 
   # Specifically not named :to_s because it doesn't act like that should.
-  def to_string(use_default_config = false, use_description = false)
+  def to_string(use_default_config = false, use_file_or_description = false)
     return Fig::PackageDescriptor.format(
       @name,
       @version,
       @config,
       use_default_config,
-      use_description ? @description : nil
+      use_file_or_description ? @file_path ? @file_path : @description : nil
     )
   end
 
   def <=>(other)
     return to_string() <=> other.to_string()
   end
+
 
   private
 
@@ -157,6 +167,21 @@ class Fig::PackageDescriptor
         "Must specify at least one of name, version, and config#{standard_exception_suffix(options)}",
         @original_string
       )
+    end
+
+    name_alternate_count = 0
+    if @name
+      name_alternate_count += 1
+    end
+    if @file_path
+      name_alternate_count += 1
+    end
+    if @description
+      name_alternate_count += 1
+    end
+
+    if name_alternate_count > 1
+      raise "Bug! More than one of name, file, and description provided! Name: #{@name}, File: #{@file}, Description: #{@description}"
     end
 
     return
