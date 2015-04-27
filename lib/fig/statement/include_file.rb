@@ -70,6 +70,10 @@ class Fig::Statement::IncludeFile < Fig::Statement
     return 'include-file'
   end
 
+  def full_path_relative_to(including_package)
+    return File.expand_path(path, including_package.include_file_base_directory)
+  end
+
   def deparse_as_version(deparser)
     return deparser.include_file(self)
   end

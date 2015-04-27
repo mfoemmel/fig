@@ -5,6 +5,8 @@ require 'fig/no_such_package_config_error'
 require 'fig/package_descriptor'
 require 'fig/statement/archive'
 require 'fig/statement/configuration'
+require 'fig/statement/include'
+require 'fig/statement/include_file'
 require 'fig/statement/resource'
 require 'fig/statement/retrieve'
 
@@ -150,6 +152,12 @@ class Fig::Package
 
       if statement.is_a?(Fig::Statement::Include)
         descriptors << statement.resolved_dependency_descriptor(self, backtrace)
+      elsif statement.is_a?(Fig::Statement::IncludeFile)
+        full_path = statement.full_path_relative_to self
+
+        descriptors << Fig::PackageDescriptor.new(
+          nil, nil, nil, :file_path => full_path
+        )
       elsif statement.is_a?(Fig::Statement::Override)
         backtrace.add_override(statement)
       end

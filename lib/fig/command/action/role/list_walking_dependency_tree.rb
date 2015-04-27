@@ -73,6 +73,7 @@ module Fig::Command::Action::Role::ListWalkingDependencyTree
 
       if depth < 1
         @execution_context.repository.reset_cached_data
+        @execution_context.non_repository_packages.reset_cached_data
       end
 
       package_block.call base_package, config_name, depth
@@ -86,7 +87,7 @@ module Fig::Command::Action::Role::ListWalkingDependencyTree
 
         do_walk_dependency_tree(
           package,
-          [descriptor.config],
+          [descriptor.config || Fig::Package::DEFAULT_CONFIG],
           new_backtrace,
           depth + 1,
           include_block,
@@ -121,6 +122,8 @@ module Fig::Command::Action::Role::ListWalkingDependencyTree
       return @execution_context.repository.get_package(
         descriptor, :allow_any_version
       )
+    elsif descriptor.file_path
+      return @execution_context.non_repository_packages[descriptor.file_path]
     end
 
     return base_package

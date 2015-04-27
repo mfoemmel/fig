@@ -170,9 +170,7 @@ class Fig::RuntimeEnvironment
     when Fig::Statement::Include
       include_config(package, statement, backtrace)
     when Fig::Statement::IncludeFile
-      include_file_config(
-        package, statement.path, statement.config_name, backtrace
-      )
+      include_file_config(package, statement, backtrace)
     when Fig::Statement::Override
       backtrace.add_override(statement)
     end
@@ -263,17 +261,17 @@ class Fig::RuntimeEnvironment
     return package, resolved_descriptor, new_backtrace
   end
 
-  def include_file_config(including_package, path, config_name, backtrace)
+  def include_file_config(including_package, include_file_statement, backtrace)
     return if @suppress_includes
 
-    full_path =
-      File.absolute_path(path, including_package.include_file_base_directory)
+    full_path = include_file_statement.full_path_relative_to including_package
 
     descriptor =
       Fig::PackageDescriptor.new(nil, nil, nil, :file_path => full_path)
 
     new_backtrace = Fig::IncludeBacktrace.new(backtrace, descriptor)
-    package = package_for_file(including_package, full_path, backtrace)
+    package       = package_for_file(including_package, full_path, backtrace)
+    config_name   = include_file_statement.config_name
 
     apply_config(
       package, config_name || Fig::Package::DEFAULT_CONFIG, new_backtrace
@@ -355,6 +353,8 @@ class Fig::RuntimeEnvironment
 
   def package_for_file(including_package, full_path, backtrace)
     if package = @non_repository_packages[full_path]
+      package.backtrace = backtrace
+
       return package
     end
 
