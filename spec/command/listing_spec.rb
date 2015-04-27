@@ -698,7 +698,7 @@ describe 'Fig' do
           create_package_dot_fig_with_single_dependency
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>
+            [package.fig]
                 prerequisite/1.2.3
           END_EXPECTED_OUTPUT
 
@@ -738,7 +738,7 @@ describe 'Fig' do
           create_package_dot_fig_with_all_dependencies
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>
+            [package.fig]
                 depends-on-everything/1.2.3
                     depends-on-everything/1.2.3:everything
                         prerequisite/1.2.3
@@ -780,7 +780,7 @@ describe 'Fig' do
           create_package_dot_fig('no-dependencies')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>
+            [package.fig]
                 no-dependencies/1.2.3
           END_EXPECTED_OUTPUT
 
@@ -845,7 +845,7 @@ describe 'Fig' do
           end
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>:machineA
+            [package.fig]:machineA
                 departments/1.2.3:marketing
                     database/1.2.3:postgresql
                         operatingsystem/3.4.5:ubuntu
@@ -856,7 +856,7 @@ describe 'Fig' do
                         operatingsystem/1.2.3:windows
                     database/1.2.3:sqlserver
                         operatingsystem/1.2.3:windows
-            <unpublished>:machineB
+            [package.fig]:machineB
                 departments/1.2.3:facilities
                     web/1.2.3:lighttpd
                         operatingsystem/3.4.5:ubuntu
@@ -1190,7 +1190,7 @@ describe 'Fig' do
           create_package_dot_fig('E')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>
+            [package.fig]
             '---E/1.2.3
           END_EXPECTED_OUTPUT
 
@@ -1274,7 +1274,7 @@ describe 'Fig' do
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>
+            [package.fig]
             '---A/1.2.3
                 |   A_BOTH_CONFIGS                    = default
                 |   A_DEFAULT                         = BAR
@@ -1363,7 +1363,7 @@ describe 'Fig' do
           create_package_dot_fig('E')
 
           expected = clean_expected(<<-END_EXPECTED_OUTPUT)
-            <unpublished>
+            [package.fig]
             '---E/1.2.3
           END_EXPECTED_OUTPUT
 
@@ -1453,7 +1453,7 @@ describe 'Fig' do
           create_package_dot_fig('A')
 
           expected = clean_expected(<<-'END_EXPECTED_OUTPUT')
-            <unpublished>
+            [package.fig]
             '---A/1.2.3
                 |   A_BOTH_CONFIGS                    = default
                 |   A_DEFAULT                         = BAR

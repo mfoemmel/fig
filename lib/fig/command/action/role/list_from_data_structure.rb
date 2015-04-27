@@ -84,6 +84,9 @@ module Fig::Command::Action::Role::ListFromDataStructure
     if package.version
       hash['version'] = package.version
     end
+    if package.file_path
+      hash['file'] = package.file_path
+    end
     if package.description
       hash['description'] = package.description
     end

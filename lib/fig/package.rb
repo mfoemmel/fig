@@ -168,8 +168,18 @@ class Fig::Package
     return
   end
 
+  def name_or_file_or_description
+    return @name if @name
+
+    if @file_path
+      return "[#{@file_path}]"
+    end
+
+    return @description
+  end
+
   def to_s
-    name    = @name || UNPUBLISHED
+    name    = name_or_file_or_description
     version = @version || '<empty>'
     return Fig::PackageDescriptor.format(name, version, nil)
   end
@@ -177,7 +187,7 @@ class Fig::Package
   def to_s_with_config(config_name)
     displayed_config = config_name == DEFAULT_CONFIG ? nil : config_name
     return Fig::PackageDescriptor.format(
-      name || UNPUBLISHED, version, displayed_config
+      name_or_file_or_description, version, displayed_config
     )
   end
 
@@ -188,9 +198,8 @@ class Fig::Package
     )
   end
 
-  private
 
-  UNPUBLISHED     = '<unpublished>'
+  private
 
   def compare_components(mine, others)
     if mine.nil?
