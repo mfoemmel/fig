@@ -96,6 +96,14 @@ module Fig::Command::Action::Role::ListFromDataStructure
   end
 
   def package_id(package)
-    return package.name || "description: #{package.description}"
+    if package.name
+      return package.to_s
+    end
+
+    if file = package.file_path
+      return "file: #{file}"
+    end
+
+    return "description: #{package.description}"
   end
 end
