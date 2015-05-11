@@ -1,12 +1,29 @@
-v1.24.1.beta.3 - 2015/04/27
+v1.25.0 - 2015/05/11
+
+  Announcement:
+
+  - This is the final version that will support Ruby 1.9.x.  The next version
+    will require Ruby 2.0.0.
 
   Bug fixes:
 
-  - Fixed potential package version data collapsing in --yaml and --json
-    output.
-
   - The --list-dependencies and --list-variables options now work with packages
     brought in via an include-file statement.
+
+  - No longer crashes when using --graphviz, --list-tree, or --list-all-configs
+    without any other options.  Thanks to Matt Godbolt for the report.
+
+  New features:
+
+  - New --yaml option to get --list-dependencies and --list-variables to emit
+    their data as YAML (http://yaml.org).
+
+  - New --json option to get --list-dependencies and --list-variables to emit
+    their data as JSON (http://json.org).  Note that JSON isn't exactly ideal
+    for representing the directed acyclic graph that even a mildly complicated
+    set of dependencies can result in and you can end up with large amounts
+    of duplicate data in the output.  If you can handle parsing YAML, you are
+    probably better off with that.
 
   Miscellaneous:
 
@@ -16,48 +33,17 @@ v1.24.1.beta.3 - 2015/04/27
 
   - Display file names instead of "<unpublished>" for unnamed packages.
 
-v1.24.1.beta.2 - 2015/04/24
-
-  Bug fix:
-
-  - Fixed crash when combining --list-all-configs with JSON and YAML output.
-
-  Miscellaneous:
-
-  - Renamed --list-yaml & --list-json to --yaml & --json to make them more
-    consistent with the existing --graphviz.
-
-v1.24.1.beta.1 - 2015/04/23
-
-  Announcement:
-
-  - This is the final version that will support Ruby 1.9.x.  The next version
-    will require Ruby 2.0.0.
-
-  Bug fix:
-
-  - No longer crashes when using --graphviz, --list-tree, or --list-all-configs
-    without any other options.  Thanks to Matt Godbolt for the report.
-
-  New features:
-
-  - New --list-yaml option to get --list-dependencies and --list-variables to
-    emit their data as YAML (http://yaml.org).
-
-  - New --list-json option to get --list-dependencies and --list-variables to
-    emit their data as JSON (http://json.org).  Note that JSON isn't exactly
-    ideal for representing the directed acyclic graph that even a mildly
-    complicated set of dependencies can result in and you can end up with large
-    amounts of duplicate data in the output.  If you can handle parsing YAML,
-    you are probably better off with that.
-
-  Miscellaneous:
-
   - Small tweaks to --publish-comment and --publish-comment-file handling to
     remove some trailing whitespace when there are blank lines in the input.
 
   - A blank line is added after grammar statements in published packages in
     order to seperate them from other statements.
+
+v1.24.1.beta.3 - 2015/04/27
+v1.24.1.beta.2 - 2015/04/24
+v1.24.1.beta.1 - 2015/04/23
+
+  - Test releases.
 
 v1.24.0 - 2015/01/13
 
