@@ -4,6 +4,7 @@ require 'fileutils'
 require 'set'
 require 'socket'
 require 'tmpdir'
+require 'lockfile'
 
 require 'fig'
 require 'fig/at_exit'
@@ -114,7 +115,16 @@ class Fig::Repository
     if should_update?(descriptor)
       check_remote_repository_format()
 
-      update_package(descriptor)
+      lock_directory = @options.home
+      lock_path = lock_directory + '/lock'
+      FileUtils.mkdir_p(lock_directory)
+
+      Lockfile.new(lock_path) do
+        # check again in case the package is already available
+        package = @package_cache.get_package(descriptor.name, descriptor.version)
+        return package if package
+        update_package(descriptor)
+      end
     end
 
     return read_local_package(descriptor)

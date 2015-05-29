@@ -19,7 +19,6 @@ require 'fig/repository'
 require 'fig/repository_error'
 require 'fig/runtime_environment'
 require 'fig/statement/configuration'
-require 'fig/update_lock'
 require 'fig/user_input_error'
 require 'fig/working_directory_maintainer'
 
@@ -188,8 +187,6 @@ class Fig::Command
   end
 
   def configure()
-    set_up_update_lock()
-
     @operating_system = Fig::OperatingSystem.new(@options.login?)
 
     set_up_application_configuration()
@@ -209,27 +206,6 @@ class Fig::Command
     @non_repository_packages = Fig::NonRepositoryPackages.new @parser
 
     prepare_runtime_environment()
-  end
-
-  def set_up_update_lock()
-    update_lock_response = @options.update_lock_response
-    return if update_lock_response == :ignore
-
-    if Fig::OperatingSystem.windows?
-      if ! update_lock_response.nil?
-        Fig::Logging.warn('At present, locking is not supported on Windows.')
-      end
-
-      return
-    end
-
-    @update_lock = Fig::UpdateLock.new(@options.home, update_lock_response)
-
-    # *sigh* Ruby 1.8 doesn't support close_on_exec(), so we've got to ensure
-    # this stuff on our own.
-    Fig::AtExit.add { @update_lock.close }
-
-    return
   end
 
   def set_up_application_configuration()
