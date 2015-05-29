@@ -115,19 +115,49 @@ class Fig::Repository
     if should_update?(descriptor)
       check_remote_repository_format()
 
-      lock_directory = @options.home
-      lock_path = lock_directory + '/lock'
-      FileUtils.mkdir_p(lock_directory)
+      response = @options.update_lock_response || :wait
 
-      Lockfile.new(lock_path) do
-        # check again in case the package is already available
-        package = @package_cache.get_package(descriptor.name, descriptor.version)
-        return package if package
+      if response == :ignore
         update_package(descriptor)
+      else
+        lock_directory = @options.home
+        lock_path = lock_directory + '/lock'
+        FileUtils.mkdir_p(lock_directory)
+
+        lockfile_args = {}
+        if response == :fail
+          lockfile_args[:retries] = 0
+          lockfile_args[:poll_retries] = 1
+        end
+
+        begin
+          Lockfile.new(lock_path, lockfile_args) do
+            # check again in case the package is already available
+            package = @package_cache.get_package(descriptor.name, descriptor.version)
+            return package if package
+            update_package(descriptor)
+          end
+        rescue Lockfile::MaxTriesLockError
+          raise_lock_usage_error(lock_directory)
+        end
       end
     end
 
     return read_local_package(descriptor)
+  end
+
+  def raise_lock_usage_error(lock_directory)
+    raise Fig::UserInputError.new(<<-END_MESSAGE)
+Cannot update while another instance of Fig is updating #{lock_directory}.
+
+You can tell Fig to wait for update with
+
+    fig --update --update-lock-response wait ...
+
+or you can throw caution to the wind with
+
+    fig --update --update-lock-response ignore ...
+    END_MESSAGE
   end
 
   def clean(descriptor)
