@@ -1,7 +1,7 @@
 # coding: utf-8
 
-( [1, 9, 2] <=> ( RUBY_VERSION.split(".").collect {|x| x.to_i} ) ) <= 0 or
-  abort "Ruby v1.9.2 is required; this is v#{RUBY_VERSION}."
+( [2, 0, 0] <=> ( RUBY_VERSION.split(".").collect {|x| x.to_i} ) ) <= 0 or
+  abort "Ruby v2.0.0 is required; this is v#{RUBY_VERSION}."
 
 $LOAD_PATH.unshift(File.dirname(__FILE__))
 $LOAD_PATH.unshift(File.join(File.dirname(__FILE__), '..', 'lib'))

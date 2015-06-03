@@ -1,7 +1,7 @@
 # Code changes
 
 * Retrieve statements should validate their paths the same way that path statements do.
-* Require Ruby v1.9.3 and fix those bits that work around earlier versions.  (Run "`ack -Q 1.9.3`".)
+* Fix bits of code that that work around pre-Ruby v2 versions.  (Run "`ack -Q 1.9.3`".)
 * Produce nice error messages when packages contain file names that Windows can't deal with.
 * Periodically `ack '\bTODO:'` and fix what we can.
 

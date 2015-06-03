@@ -24,7 +24,7 @@ def add_dependencies(gemspec)
   gemspec.add_development_dependency 'simplecov',       '>= 0.6.2'
   gemspec.add_development_dependency 'simplecov-html',  '>= 0.5.3'
 
-  gemspec.required_ruby_version = '>= 1.9.2'
+  gemspec.required_ruby_version = '>= 2.0.0'
 
   return
 end
