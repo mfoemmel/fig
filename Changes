@@ -12,6 +12,10 @@ v1.25.1.beta.1 - 2015/xx/xx
     use something later than v2.0, though; the test suite on MRI v2.0.0 takes
     almost twice as long to run as it does on MRI v2.2.0.
 
+  - Now looks for ./.fig on startup and complains if it exists and it isn't a
+    directory in order to prevent problems with naughty users running from
+    within a repository.
+
 v1.25.0 - 2015/05/11
 
   Announcement:

@@ -7,6 +7,7 @@ require 'fig/logging/colorizable'
 require 'fig/package_descriptor'
 require 'fig/repository_error'
 require 'fig/working_directory_metadata'
+require 'fig/user_input_error'
 
 module Fig; end
 
@@ -20,6 +21,16 @@ class Fig::WorkingDirectoryMaintainer
     @base_dir = base_dir
     @package_metadata_by_name = {}
     @local_fig_data_directory = File.join(@base_dir, '.fig')
+
+    if (
+          File.exist?(@local_fig_data_directory)        \
+      &&  ! File.directory?(@local_fig_data_directory)
+    )
+      raise Fig::UserInputError.new(
+        %Q<"#{@local_fig_data_directory}" exists and it isn't a directory. Are you running inside a repository?>
+      )
+    end
+
     @metadata_file = File.join(@local_fig_data_directory, 'retrieve')
 
     if File.exist?(@metadata_file)
