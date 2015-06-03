@@ -21,7 +21,9 @@ module Fig::Command::Action
   end
 
   def options()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   # Is this a special Action that should just be run on its own without looking
@@ -32,7 +34,9 @@ module Fig::Command::Action
   end
 
   def descriptor_requirement()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def allow_both_descriptor_and_file?()
@@ -46,7 +50,9 @@ module Fig::Command::Action
   end
 
   def modifies_repository?()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def prepare_repository(repository)
@@ -54,7 +60,9 @@ module Fig::Command::Action
   end
 
   def load_base_package?()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def base_package_can_come_from_descriptor?()
@@ -63,17 +71,23 @@ module Fig::Command::Action
 
   # true, false, or nil if don't care.
   def register_base_package?()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   # true, false, or nil if don't care.
   def apply_config?()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   # true, false, or nil if don't care.
   def apply_base_config?()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def remote_operation_necessary?()
@@ -116,6 +130,8 @@ module Fig::Command::Action
   end
 
   def execute()
-    raise NotImplementedError
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 end

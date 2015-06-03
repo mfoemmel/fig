@@ -118,7 +118,9 @@ module Fig::Deparser
   end
 
   def command(statement)
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def configuration(configuration_statement)
@@ -149,7 +151,9 @@ module Fig::Deparser
   end
 
   def grammar_version(statement)
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def include(statement)
@@ -165,7 +169,9 @@ module Fig::Deparser
   end
 
   def include_file(statement)
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def override(statement)
@@ -193,7 +199,9 @@ module Fig::Deparser
   end
 
   def retrieve(statement)
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def set(statement)
@@ -209,13 +217,17 @@ module Fig::Deparser
   end
 
   def grammar_description
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   private
 
   def asset(keyword, statement)
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def asset_path(statement)
@@ -227,7 +239,9 @@ module Fig::Deparser
   end
 
   def environment_variable(statement, keyword)
-    raise NotImplementedError.new self
+    raise NotImplementedError.new(
+      "#{__callee__}() not implemented on #{self.class}."
+    )
   end
 
   def add_indent(indent_level = @indent_level)
