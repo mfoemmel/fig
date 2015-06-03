@@ -8,14 +8,16 @@ v1.25.1.beta.1 - 2015/xx/xx
 
   Miscellaneous:
 
-  - As previously announced, Fig now requires Ruby 2.0.0.
+  - As previously announced, Fig now requires Ruby v2.0.0.  You should probably
+    use something later than v2.0, though; the test suite on MRI v2.0.0 takes
+    almost twice as long to run as it does on MRI v2.2.0.
 
 v1.25.0 - 2015/05/11
 
   Announcement:
 
-  - This is the final version that will support Ruby 1.9.x.  The next version
-    will require Ruby 2.0.0.
+  - This is the final version that will support Ruby v1.9.x.  The next version
+    will require Ruby v2.0.0.
 
   Bug fixes:
 
