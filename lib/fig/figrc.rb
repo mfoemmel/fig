@@ -106,9 +106,16 @@ class Fig::FigRC
 
     begin
       configuration_text = File.open(repo_figrc_path).read
+      if configuration_text.empty?
+        raise Fig::ConfigFileError.new(
+          "Local copy (#{repo_figrc_path}) of #{figrc_url} is empty!",
+          figrc_url,
+        )
+      end
+
       configuration.push_dataset JSON.parse(configuration_text)
     rescue JSON::ParserError => exception
-      translate_parse_error(exception, figrc_url)
+      translate_parse_error(exception, repo_figrc_path)
     end
 
     return

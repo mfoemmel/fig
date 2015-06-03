@@ -84,7 +84,11 @@ class Fig::Protocol::SFTP
         # when the remote path does not exist.
         stat = connection.stat!(uri.path)
 
-        if ::File.exist?(path) && stat.mtime.to_f <= ::File.mtime(path).to_f
+        if (
+              ::File.exist?(path)                         \
+          &&  stat.mtime.to_f <= ::File.mtime(path).to_f  \
+          &&  stat.size != ::File.size(path)
+        )
           Fig::Logging.debug "#{path} is up to date."
           return false
         end

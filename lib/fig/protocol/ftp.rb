@@ -64,8 +64,13 @@ class Fig::Protocol::FTP
       ftp = Net::FTP.new(uri.host)
       ftp_login(ftp, uri.host, prompt_for_login)
 
-      if ::File.exist?(path) && ftp.mtime(uri.path) <= ::File.mtime(path)
+      if (
+            ::File.exist?(path)                       \
+        &&  ftp.mtime(uri.path) <= ::File.mtime(path) \
+        &&  ftp.size(uri.path) == ::File.size(path)
+      )
         Fig::Logging.debug "#{path} is up to date."
+
         return false
       else
         log_download(uri, path)

@@ -1,5 +1,11 @@
 v1.25.1.beta.1 - 2015/xx/xx
 
+  Bug fixes:
+
+  - Better checking of whether files are up-to-date in FTP and SFTP downloads
+    and better error message emitted when corrupt local copy of remote figrc is
+    found.
+
   Miscellaneous:
 
   - As previously announced, Fig now requires Ruby 2.0.0.
