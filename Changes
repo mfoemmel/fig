@@ -1,3 +1,10 @@
+v1.26.1.beta.1 - 2015/6/25
+
+  Bug fixes:
+
+  - Fix handling of assets when publishing locally and FIG_REMOTE_URL is unset.
+    Thanks to Shafeeq Shariff for finding this.
+
 v1.26.0 - 2015/6/22
 
   Bug fixes:

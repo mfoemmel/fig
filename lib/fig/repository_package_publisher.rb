@@ -524,8 +524,6 @@ class Fig::RepositoryPackagePublisher
 
   def publish_asset(asset_statement)
     asset_name = asset_statement.asset_name()
-    asset_remote =
-      Fig::URL.append_path_components @remote_directory_for_package, [asset_name]
 
     if Fig::URL.is_url? asset_statement.location
       asset_local = File.join(publish_temp_dir(), asset_name)
@@ -542,6 +540,10 @@ class Fig::RepositoryPackagePublisher
     end
 
     if not @local_only
+      asset_remote = Fig::URL.append_path_components(
+        @remote_directory_for_package, [asset_name],
+      )
+
       @operating_system.upload(asset_local, asset_remote)
     end
 

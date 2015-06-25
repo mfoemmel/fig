@@ -149,15 +149,18 @@ class Fig::Repository
     publisher.was_forced                   = was_forced
     publisher.base_temp_dir                = base_temp_dir
     publisher.runtime_for_package          = runtime_for_package(descriptor)
+    publisher.local_only                   = local_only
     publisher.local_directory_for_package  =
       local_directory_for_package(descriptor)
-    publisher.remote_directory_for_package =
-      remote_directory_for_package(descriptor)
-    publisher.local_only                   = local_only
     publisher.local_fig_file_for_package =
       local_fig_file_for_package(descriptor)
-    publisher.remote_fig_file_for_package =
-      remote_fig_file_for_package(descriptor)
+
+    if not local_only
+      publisher.remote_directory_for_package =
+        remote_directory_for_package(descriptor)
+      publisher.remote_fig_file_for_package =
+        remote_fig_file_for_package(descriptor)
+    end
 
     return publisher.publish_package()
   end
