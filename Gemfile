@@ -18,7 +18,7 @@ ruby RUBY_VERSION
 # All environments
 gem 'colorize',          '>= 0.5.8'
 gem 'highline',          '>= 1.6.19'
-gem 'json',              '>= 1.8'
+gem 'json',              '>= 2.0.1'
 gem 'libarchive-static', '>= 1.0.5'
 gem 'log4r',             '>= 1.1.5'
 gem 'net-netrc',         '>= 0.2.2'
