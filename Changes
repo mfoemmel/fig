@@ -1,3 +1,10 @@
+v1.27.1 - 2016/7/19
+
+  Miscellaneous:
+
+  - JSON and RDoc version requirements bumped to values compatible with Ruby
+    v2.3.1.
+
 v1.27.0 - 2015/7/9
 
   Bug fixes:
