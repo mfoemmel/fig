@@ -101,6 +101,8 @@ class Fig::Package
   end
 
   def <=>(other)
+    return if not other
+
     compared = compare_components(name, other.name)
     return compared if compared != 0
 

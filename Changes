@@ -1,5 +1,9 @@
 v1.27.1 - 2016/7/19
 
+  Bug fixes:
+
+  - Fixed comparison of packages due to changes in Ruby v2.3.x.
+
   Miscellaneous:
 
   - JSON and RDoc version requirements bumped to values compatible with Ruby
