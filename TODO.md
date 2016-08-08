@@ -1,5 +1,13 @@
 # Code changes
 
+* Detect
+
+    ```
+    config build
+        include :build
+    end
+    ```
+
 * Retrieve statements should validate their paths the same way that path statements do.
 * Fix bits of code that that work around pre-Ruby v2 versions.  (Run "`ack -Q 1.9.3`".)
 * Produce nice error messages when packages contain file names that Windows can't deal with.
