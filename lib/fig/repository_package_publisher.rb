@@ -152,6 +152,7 @@ class Fig::RepositoryPackagePublisher
 
     @text_assembler.add_header %Q<#     User: #{@publish_login}>
     @text_assembler.add_header %Q<#     Host: #{@publish_host}>
+    @text_assembler.add_header %Q<#     O/S:  #{derive_platform_description}>
 
     sanitized_argv = ARGV.map {|arg| arg.gsub "\n", '\\n'}
     @text_assembler.add_header %Q<#     Args: "#{sanitized_argv.join %q[", "]}">
@@ -201,6 +202,24 @@ class Fig::RepositoryPackagePublisher
     @text_assembler.add_header %q<#>
 
     return
+  end
+
+  def derive_platform_description
+    host_os = RbConfig::CONFIG['host_os']
+
+    return host_os if host_os !~ /linux|darwin/i
+
+    if host_os =~ /darwin/i
+      product_name = %x/sw_vers -productName/
+      product_version = %x/sw_vers -productVersion/
+      return product_name.strip + ' ' + product_version.strip
+    end
+
+    linux_distribution = %x/lsb_release --description --short/
+    linux_distribution.chomp!
+    linux_distribution.gsub!(/\A " (.*) " \z/x, '\1')
+
+    return linux_distribution
   end
 
   def add_environment_variables_to_package_metadata()
