@@ -1,7 +1,8 @@
-v1.27.2 - 2016/x/x
+v1.27.2 - 2016/10/20
 
   Miscellaneous:
 
+  - Log when a retrieval is removing a symlink or overwriting a file.
   - Include publishing operating system in package metadata.
 
 v1.27.1 - 2016/7/19

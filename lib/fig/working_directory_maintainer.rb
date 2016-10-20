@@ -210,6 +210,10 @@ class Fig::WorkingDirectoryMaintainer
       # preserve.
       preserve = File.exist?(source) && ! File.symlink?(source)
 
+      if File.exist?(target)
+        Fig::Logging.info("Overwriting #{target}.")
+      end
+
       FileUtils.copy_entry(
         source, target, preserve, false, :remove_destination
       )
@@ -229,7 +233,9 @@ class Fig::WorkingDirectoryMaintainer
         return false
       end
 
+      Fig::Logging.info("Removing symbolic link #{target}.")
       FileUtils.rm(target)
+
       return true
     end
 
