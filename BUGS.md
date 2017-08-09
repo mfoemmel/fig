@@ -5,4 +5,5 @@
   value of `FIG_REMOTE_URL` into account, meaning that, if you switch
   `FIG_REMOTE_URL` without also switching `FIG_HOME`, "fun" things can happen.
 - URLs with query parameters or involve redirects are untested.
+- NetRC is looked for as ".netrc" and not "\_netrc".
 - Repository locking doesn't happen on Windows.
