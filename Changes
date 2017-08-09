@@ -1,3 +1,10 @@
+v1.27.3 - xxxx/xx/xx
+
+  Bug fixes:
+
+  - Fix crash when attempting to use --source-package without also specifying
+    --update or --update-if-missing.  Thanks to Matt Godbolt for the report.
+
 v1.27.2 - 2016/10/20
 
   Miscellaneous:

@@ -49,14 +49,28 @@ class Fig::Command::Action::SourcePackage
       return EXIT_FAILURE
     end
     if File.directory? @file
-      $stderr.puts %Q<"#{@file}" is a directory. Fig does not keep track of directories.>
+      $stderr.puts(
+        %Q<"#{@file}" is a directory. Fig does not keep track of directories.>
+      )
+
       return EXIT_FAILURE
     end
 
     maintainer = @execution_context.working_directory_maintainer
+    if not maintainer
+      $stderr.puts(
+        %Q<Cannot answer what source packages are because retrieves are not active. Try again, but additionally specify --update or --update-if-missing.>
+      )
+
+      return EXIT_FAILURE
+    end
+
     package_version = maintainer.find_package_version_for_file @file
     if ! package_version
-      $stderr.puts %Q<Don't know anything about "#{@file}".>
+      $stderr.puts(
+        %Q<Don't know anything about "#{@file}". It is not in the list of files that resulted from a "retrieve".>
+      )
+
       return EXIT_FAILURE
     end
 
