@@ -56,18 +56,18 @@ describe 'Repository' do
   it 'cleans a package from the repository' do
     repository = create_local_repository
 
-    repository.list_packages.include?('foo/1.0.0').should be_false
+    repository.list_packages.include?('foo/1.0.0').should be false
 
     package_statements = generate_package_statements
 
     descriptor = Fig::PackageDescriptor.new('foo', '1.0.0', nil)
     repository.publish_package(package_statements, descriptor, false, nil, false)
 
-    repository.list_packages.include?('foo/1.0.0').should be_true
+    repository.list_packages.include?('foo/1.0.0').should be true
 
     repository.clean(descriptor)
 
-    repository.list_packages.include?('foo/1.0.0').should be_false
+    repository.list_packages.include?('foo/1.0.0').should be false
   end
 
   describe 'handles errors while installing packages' do

@@ -27,7 +27,7 @@ describe 'Fig' do
     end
 
     it %q<is not accepted if it isn't the first statement> do
-      pending 'user-friendly warning message not implemented yet' do
+      skip 'user-friendly warning message not implemented yet' do
         input = <<-END
           config default
           end

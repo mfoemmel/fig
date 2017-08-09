@@ -14,7 +14,7 @@ describe 'Command (in-process, instead of external program)' do
   it 'accepts post set-up action and ensures that it is invoked' do
     command = Fig::Command.new
 
-    action = mock('post set-up action')
+    action = double('post set-up action')
     action.should_receive(:set_up_finished)
 
     command.add_post_set_up_action(action)
@@ -27,7 +27,7 @@ describe 'Command (in-process, instead of external program)' do
   it 'accepts publish listener and ensures that it is invoked' do
     command = Fig::Command.new
 
-    listener = mock('publish listener')
+    listener = double('publish listener')
     listener.should_receive(:published).with(
       hash_including(
         :descriptor         => instance_of(Fig::PackageDescriptor),

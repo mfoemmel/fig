@@ -27,7 +27,7 @@ require 'fig/statement/resource'
         need_to_glob = ! tokenized_location.single_quoted?
 
         location.should       == original_location
-        need_to_glob.should   be_true
+        need_to_glob.should   be true
 
         return
       end
@@ -48,7 +48,7 @@ require 'fig/statement/resource'
 
         block_message.should  be_nil
         location.should       == original_location
-        need_to_glob.should   be_false
+        need_to_glob.should   be false
 
         return
       end
