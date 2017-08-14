@@ -5,6 +5,10 @@ v1.27.3 - xxxx/xx/xx
   - Fix crash when attempting to use --source-package without also specifying
     --update or --update-if-missing.  Thanks to Matt Godbolt for the report.
 
+  Miscellaneous:
+
+  - Line number is included in error messages when parsing local metadata.
+
 v1.27.2 - 2016/10/20
 
   Miscellaneous:
