@@ -107,25 +107,36 @@ class Fig::WorkingDirectoryMaintainer
   private
 
   def load_metadata()
-    File.open(@metadata_file).each_line do |line|
-      line.strip!()
-      if line =~ /^(.+)=(.+)\/(.+)$/
-        target          = $1
-        package_name    = $2
-        package_version = $3
+    file = nil
 
-        package_meta = @package_metadata_by_name[package_name]
-        if package_meta
-          if package_meta.current_version != package_version
-            raise "Version mismatch for #{package_meta.package_name} in #{@metadata_file}."
+    begin
+      file = File.open(@metadata_file)
+      file.each_line do
+        |line|
+
+        line.strip!()
+        if line =~ /^(.+)=(.+)\/(.+)$/
+          target          = $1
+          package_name    = $2
+          package_version = $3
+
+          package_meta = @package_metadata_by_name[package_name]
+          if package_meta
+            if package_meta.current_version != package_version
+              raise "Version mismatch for #{package_meta.package_name} in #{@metadata_file}."
+            end
+          else
+            package_meta =
+              reset_package_metadata_with_version(package_name, package_version)
           end
+          package_meta.add_file(target)
         else
-          package_meta =
-            reset_package_metadata_with_version(package_name, package_version)
+          raise "parse error in #{@metadata_file}: #{line}"
         end
-        package_meta.add_file(target)
-      else
-        raise "parse error in #{@metadata_file}: #{line}"
+      end
+    ensure
+      if not file.nil?
+        file.close
       end
     end
 
