@@ -58,7 +58,7 @@ class Fig::RuntimeEnvironment
     name = retrieve_statement.variable
     if @retrieves.has_key?(name)
       Fig::Logging.warn \
-        %q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name].path}" with "#{retrieve_statement.path}".>
+        %Q<About to overwrite "#{name}" retrieve path of "#{@retrieves[name].path}" with "#{retrieve_statement.path}".>
     end
 
     @retrieves[name] = retrieve_statement
