@@ -4,6 +4,8 @@ v1.27.3 - xxxx/xx/xx
 
   - Fix crash when attempting to use --source-package without also specifying
     --update or --update-if-missing.  Thanks to Matt Godbolt for the report.
+  - Fix for warning message emitted when a retrieve path gets changed.  Patch
+    by Gabriel Burca.
 
   Miscellaneous:
 
